@@ -15,7 +15,9 @@ Wildcoil is a macOS-first solo action game project. The concept direction is loc
 ## Repo Shape
 
 - Keep living planning artifacts in `docs/`.
-- When implementation starts, place runtime code in `src/` and automated checks in `tests/`.
+- Runtime code lives in `src/`.
+- Automated checks live in `tests/`.
+- The production Godot project root is `src/wildcoil`.
 
 ## Current Engine Path
 
@@ -25,14 +27,29 @@ Wildcoil is a macOS-first solo action game project. The concept direction is loc
 
 ## Current Build And Check Commands
 
-Use these commands as the current engine-level validation loop until the production scaffold replaces the spike path:
+Install requirements:
 
-- `godot --headless --path spikes/godot_wildcoil_spike --import`
-- `godot --path spikes/godot_wildcoil_spike --benchmark --quit-after-benchmark`
-- `godot --headless --path spikes/godot_wildcoil_spike --export-release "macOS" ../godot_artifacts/WildcoilGodotSpike.app`
-- `spikes/godot_artifacts/WildcoilGodotSpike.app/Contents/MacOS/Wildcoil\\ Godot\\ Spike --benchmark --quit-after-benchmark`
+- Godot 4.6.1 editor build with macOS export templates available on the machine
+- Python 3.11 or newer with `pytest` available as `python3 -m pytest`
 
-When `src/`, `tests/`, and the production Godot project land in Phase 1, update this section in the same commit so later tasks keep one repeatable import, test, and export gate.
+Run the production project:
+
+- `scripts/run_game.sh`
+
+Run the local validation gate:
+
+- `scripts/check.sh`
+
+Export the current macOS app:
+
+- `scripts/export_macos.sh`
+
+Direct equivalents if you want to run the pieces manually:
+
+- `godot --headless --path src/wildcoil --import`
+- `python3 -m pytest tests`
+- `godot --path src/wildcoil`
+- `godot --headless --path src/wildcoil --export-release "macOS" build/macos/Wildcoil.app`
 
 ## Current Milestone
 

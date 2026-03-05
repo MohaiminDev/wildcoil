@@ -206,6 +206,9 @@ spikes/**/.godot/
 spikes/**/build/
 spikes/**/*.import
 spikes/godot_artifacts/
+src/**/.godot/
+src/**/*.import
+src/**/*.uid
 
 # Marimo
 marimo/_static/

@@ -37,5 +37,7 @@ Treat this file as a living contributor memory. Update `AGENTS.md` whenever you 
 - `to-do.md` is the single public source of truth for status, backlog, validation, and milestone state; keep task buckets to `PENDING` and `DONE`.
 - Keep living planning artifacts in `docs/`; avoid adding new root-level planning files beyond `to-do.md`.
 - Do not start `src/` or `tests/` implementation work until Phase 0 direction lock is complete.
+- The production Godot project root lives at `src/wildcoil`; keep runtime assets and scenes there so the repo-level `src/` rule stays true.
+- Automated runtime checks should run from `pytest` in the repo `tests/` directory and drive the real Godot project headlessly rather than maintaining a separate fake gameplay implementation.
 - After any commit/push requested in this repo, include the exact commit message and a short description in the final response.
 - Complete one tracker task at a time; run that task's full validation before commit, then commit and push immediately once it is green.

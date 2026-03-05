@@ -20,14 +20,6 @@ The Phase 1 through release tasks below are the frozen MVP backlog. Only change 
 
 ## PENDING
 
-### [P1-01] Create the production scaffold
-- Outcome: Add the chosen engine project, `src/`, `tests/`, provenance logging updates, repeatable build/test commands, and CI or scripted validation hooks.
-- Validation:
-  - [ ] The repo contains runtime code in `src/` and automated tests in `tests/`.
-  - [ ] [`README.md`](/Users/himu/Desktop/career/personal_projects/wildcoil/README.md) documents install, run, and test commands.
-  - [ ] The initial automated test suite passes locally.
-- Dependencies: [P0-07]
-
 ### [P1-02] Implement player locomotion and input
 - Outcome: Ship the first playable controller layer with run, jump, dodge, controller hot-plug, keyboard fallback, and remapping-safe actions.
 - Validation:
@@ -157,6 +149,15 @@ The Phase 1 through release tasks below are the frozen MVP backlog. Only change 
 - Dependencies: [P3-05]
 
 ## DONE
+
+### [P1-01] Create the production scaffold
+- Outcome: Add the chosen engine project, `src/`, `tests/`, provenance logging updates, repeatable build/test commands, and CI or scripted validation hooks.
+- Validation:
+  - [x] The repo contains runtime code in `src/` and automated tests in `tests/`.
+  - [x] [`README.md`](/Users/himu/Desktop/career/personal_projects/wildcoil/README.md) documents install, run, and test commands.
+  - [x] The initial automated test suite passes locally.
+- Dependencies: [P0-07]
+- Completed: 2026-03-05
 
 ### [P0-07] Lock the initial engine path and freeze the backlog
 - Outcome: Score the three engines, choose the winner with the documented tie-break, update risks, and lock the production backlog.

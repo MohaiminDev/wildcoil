@@ -1,0 +1,23 @@
+; Engine configuration file.
+; Prefer editing from the editor and keeping this under version control.
+config_version=5
+
+[application]
+
+config/name="Wildcoil"
+run/main_scene="res://scenes/app_root.tscn"
+config/features=PackedStringArray("4.6")
+config/icon="res://icon.svg"
+
+[display]
+
+window/size/viewport_width=1600
+window/size/viewport_height=900
+window/stretch/mode="canvas_items"
+window/stretch/aspect="expand"
+
+[rendering]
+
+renderer/rendering_method="mobile"
+textures/vram_compression/import_s3tc_bptc=true
+textures/vram_compression/import_etc2_astc=true
