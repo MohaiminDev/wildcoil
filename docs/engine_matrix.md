@@ -44,6 +44,26 @@ Current official sources reviewed on 2026-03-05:
 Source caveat:
 - The Godot export page above is on the `latest` docs track and should be rechecked against the specific stable engine version if Godot wins.
 
+## Machine Audit on 2026-03-05
+
+Current machine state verified in the local shell:
+
+| Item | Local state | Evidence | Impact on the spikes |
+| --- | --- | --- | --- |
+| Godot | Installed and launchable via Homebrew cask | `godot` resolves to `/opt/homebrew/bin/godot`; version `4.6.1.stable.official.14d19694e`; app at `/Applications/Godot.app` | Ready for the Godot spike |
+| Unity Hub | Installed and Gatekeeper-valid | App at `/Applications/Unity Hub.app`; headless CLI is available; install path defaults to `/Applications/Unity/Hub/Editor` | Hub is ready, but no editor is installed yet |
+| Unity Editor | Not installed | `Unity Hub -- --headless editors --installed --json` returned `[]`; `/Applications/Unity/Hub/Editor` has no editor content yet | Unity spike is blocked until an editor is installed, which may require additional download time and interactive sign-in or licensing |
+| Epic Games Launcher | Installed and Gatekeeper-valid | App at `/Applications/Epic Games Launcher.app` | Launcher is present, but it is not the Unreal Editor |
+| Unreal Editor | Not installed | No `UnrealEditor.app` found under `/Applications` | Unreal spike is blocked until the editor is downloaded through Epic's tooling, which is likely to require interactive sign-in |
+| Xcode | Full app missing | `/Applications/Xcode.app` is absent; `xcodebuild -version` fails because `xcode-select` points at `/Library/Developer/CommandLineTools` | Full Xcode-dependent export workflows are blocked right now |
+| Packaging tools | Present in Command Line Tools | `xcrun notarytool` is available; `codesign`, `pkgbuild`, `productbuild`, and `spctl` resolve locally | Signing and packaging experiments are partly available even before full Xcode is installed |
+
+Machine-level conclusion:
+- Godot is the only engine that is immediately ready for a real local spike.
+- Unity is partially prepared because the Hub and headless CLI are installed, but the editor itself is still missing.
+- Unreal is only prepared at the launcher level, and the actual editor is still unavailable.
+- Full Xcode is still missing, so any workflow that depends on `xcodebuild` remains blocked until the app is installed and selected.
+
 ## Pre-Spike Evidence Notes
 
 These notes are not final scores. They only seed the experiment with what the official docs already imply.
@@ -85,32 +105,32 @@ Use the same checklist for every engine:
 
 ### Godot
 
-- Spike status: not started
+- Spike status: ready to start
 - Export result: TBD
 - Controller result: TBD
 - Performance result: TBD
-- Workflow notes: TBD
-- Packaging notes: TBD
+- Workflow notes: Godot 4.6.1 is installed locally and launchable from `/opt/homebrew/bin/godot`.
+- Packaging notes: CLT packaging tools exist locally; full Xcode is still missing for `xcodebuild`-dependent workflows.
 - Score summary: TBD
 
 ### Unity
 
-- Spike status: not started
+- Spike status: blocked on editor install
 - Export result: TBD
 - Controller result: TBD
 - Performance result: TBD
-- Workflow notes: TBD
-- Packaging notes: TBD
+- Workflow notes: Unity Hub 3.16.3 is installed locally and exposes the headless CLI, but no editor is installed yet.
+- Packaging notes: Expect additional install time plus possible sign-in or licensing steps before the spike can begin.
 - Score summary: TBD
 
 ### Unreal
 
-- Spike status: not started
+- Spike status: blocked on editor install
 - Export result: TBD
 - Controller result: TBD
 - Performance result: TBD
-- Workflow notes: TBD
-- Packaging notes: TBD
+- Workflow notes: Epic Games Launcher 19.2.0 is installed locally, but no Unreal Editor bundle is present.
+- Packaging notes: Expect interactive Epic login and a large editor download before the spike can begin.
 - Score summary: TBD
 
 ## Tie-Break Rule

@@ -17,14 +17,6 @@ Phase 0 - Engine Selection and Backlog Freeze
 
 ## PENDING
 
-### [P0-03] Verify the engine toolchain on this machine
-- Outcome: Confirm local availability or installation status for Godot, Unity, Unreal, Xcode, and the minimum macOS export prerequisites needed for the engine comparison.
-- Validation:
-  - [ ] Local commands or app locations are recorded for Godot, Unity, Unreal, `xcodebuild`, and package tooling.
-  - [ ] Any missing prerequisites or auth blockers are documented in [`docs/engine_matrix.md`](/Users/himu/Desktop/career/personal_projects/wildcoil/docs/engine_matrix.md).
-  - [ ] The machine-specific setup state is clear enough to start or explain each spike.
-- Dependencies: [P0-02]
-
 ### [P0-04] Build the Godot micro-spike
 - Outcome: Implement the fixed spike checklist in Godot with movement, dodge, combo, one enemy, controller input, keyboard fallback, and a macOS export artifact.
 - Validation:
@@ -211,6 +203,15 @@ Phase 0 - Engine Selection and Backlog Freeze
   - [x] [`README.md`](/Users/himu/Desktop/career/personal_projects/wildcoil/README.md) and this tracker reflect the approved direction and MVP target.
   - [x] [`docs/risk_register.md`](/Users/himu/Desktop/career/personal_projects/wildcoil/docs/risk_register.md) is updated for the locked concept direction.
 - Dependencies: [DOC-04]
+- Completed: 2026-03-05
+
+### [P0-03] Verify the engine toolchain on this machine
+- Outcome: Confirm local availability or installation status for Godot, Unity, Unreal, Xcode, and the minimum macOS export prerequisites needed for the engine comparison.
+- Validation:
+  - [x] Local commands or app locations are recorded for Godot, Unity, Unreal, `xcodebuild`, and package tooling.
+  - [x] Any missing prerequisites or auth blockers are documented in [`docs/engine_matrix.md`](/Users/himu/Desktop/career/personal_projects/wildcoil/docs/engine_matrix.md).
+  - [x] The machine-specific setup state is clear enough to start or explain each spike.
+- Dependencies: [P0-02]
 - Completed: 2026-03-05
 
 ### [P0-01] Draft the Schedule A-aligned living spec
