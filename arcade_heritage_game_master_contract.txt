@@ -1,0 +1,1149 @@
+MASTER DEVELOPMENT CONTRACT
+ORIGINAL MACOS ARCADE-HERITAGE ACTION GAME
+Revised Final Version
+
+1. CONTRACT PURPOSE
+
+This contract governs the research, concept definition, prototyping, technical planning, production workflow, validation, and future open-source preparation of a new original action game for macOS.
+
+The intended product is an original stage-based side-scrolling action game that captures the immediacy, spectacle, crowd control, co-op energy, and replay appeal that fans of classic arcade brawlers enjoy, while meeting modern expectations for responsiveness, visual quality, sound quality, readability, accessibility, and production discipline.
+
+This project is not a clone, not a fan remake, and not a nostalgia-only exercise.
+It must stand on its own as a commercially credible original game if executed well.
+It must also remain structurally safe for a later open-source release.
+
+2. STRATEGIC PRODUCT DEFINITION
+
+The team shall pursue an "arcade heritage, modern execution" product strategy.
+
+That means the game must be:
+- instantly readable
+- mechanically satisfying within the first session
+- smooth and responsive on macOS
+- visually distinctive in screenshots and trailers
+- original in world, cast, enemies, bosses, and lore
+- scoped to succeed without AAA staffing
+- architected so a future open-source release remains practical
+
+The project must appeal to two groups at the same time:
+- players who miss the energy and directness of classic side-scrolling arcade action games
+- newer players who will not forgive outdated pacing, muddy combat readability, weak feedback, or shallow content
+
+Nostalgia may help discovery, but it may not be used as an excuse for weak design.
+
+3. PRIMARY OBJECTIVE
+
+Before any larger business-case expansion, the project must first prove all of the following:
+
+- the combat feels immediately satisfying
+- player movement feels precise and smooth
+- the game has a visually memorable identity
+- stage flow keeps attention without dead air
+- macOS delivery is practical and stable
+- the codebase, assets, and dependencies are clean enough to support later open-source preparation
+- the concept is distinct enough to attract players without relying on any existing franchise
+
+4. NON-NEGOTIABLE OUTCOME STANDARDS
+
+The project shall be judged against these standards:
+
+4.1 Gameplay Feel
+- First combat interaction should occur quickly.
+- The first strong "wow" moment should happen early.
+- Inputs must feel immediate, deliberate, and dependable.
+- Hits must feel heavy, readable, and rewarding.
+- Enemies must communicate intent clearly enough that failures usually feel fair.
+- Character differences must be mechanical, not cosmetic only.
+
+4.2 Session Experience
+- A new player should understand the basic loop without needing long explanation.
+- The game must create forward momentum.
+- Quiet traversal is allowed only when it serves pacing, atmosphere, or anticipation.
+- Encounters must escalate, not merely repeat.
+
+4.3 Presentation
+- The game must look modern relative to its scope.
+- Animation, hit reactions, VFX, camera behavior, and sound design must work together to sell impact.
+- UI must be readable from normal desktop and couch distances.
+
+4.4 Platform Fit
+- macOS must be treated as a first-class target, not an afterthought.
+- Controller support must be considered mandatory.
+- Keyboard support must remain usable and well mapped.
+
+4.5 Originality
+- No protected IP may be copied, traced, renamed, lightly modified, or "homaged" so directly that players recognize a specific source property more than the new game itself.
+
+4.6 Open-Source Readiness
+- Repository structure, dependencies, asset provenance, and documentation must support a later clean open-source release path.
+- Anything that would block that path must be identified early.
+
+5. INSPIRATION BOUNDARY AND IP FIREWALL
+
+The team may study classic and modern reference games, but only to extract design principles, not reusable content.
+
+Mandatory rules:
+- Use genre DNA, not protected expression.
+- Do not copy copyrighted characters, enemy types, faction concepts, worlds, stage gimmicks, boss structures, logo language, music motifs, UI layouts, signature props, story beats, or recognizable visual compositions from any one title.
+- Do not create "close enough" stand-ins.
+- Do not keep placeholder names or art that are obviously derived from reference IP.
+- Maintain an Inspiration Risk Log for any reference that meaningfully shapes design.
+- Any element that feels too close must be redesigned before prototype lock.
+
+Allowed inspiration lane:
+A pulp action-adventure tone involving wild environments, strange creatures, machines, ruins, exaggerated action, and co-op chaos is acceptable as a starting lane, but only if it is transformed into a clearly original world bible, silhouette language, cast, enemy roster, lore, and audio-visual identity.
+
+6. PRODUCT DEFAULTS UNLESS RESEARCH PROVES OTHERWISE
+
+To reduce indecision and scope creep, the following defaults apply unless evidence shows a better path:
+
+- Game structure: stage-based action game with strong replay value
+- Camera: side-view or controlled 2.5D presentation, not free camera
+- Combat focus: melee-first with selective ranged or tool-based variety
+- Mode focus: solo-first and local co-op friendly
+- Online: deferred by default
+- Art direction: stylized, readable, premium-feeling, scope-aware
+- Narrative delivery: light, efficient, environment-led, with minimal interruption
+- Business model at prototype stage: prove fun first, monetize later
+- Open-source strategy: architect for future release, but do not let that weaken current production quality
+
+7. PLAYER ENGAGEMENT AND COMMERCIAL OPTIONALITY MANDATE
+
+The revised project must optimize not only for quality, but for attention, retention, and market clarity.
+
+The game must be designed to perform well on the following questions:
+- Can a short gameplay clip communicate the hook immediately?
+- Can a screenshot reveal readable action and a distinctive identity?
+- Can a one-sentence pitch make sense to both retro-action fans and modern players?
+- Does the game create a desire for "one more run" or "one more stage"?
+- Does co-op create memorable moments instead of visual clutter?
+- Is the first-session experience strong enough to support wishlisting, demo conversion, and word of mouth?
+
+Retention should come from:
+- mastery
+- character experimentation
+- score or rank chasing
+- route optimization
+- difficulty progression
+- boss learning
+- unlockable depth
+- co-op synergy
+- stage replayability
+
+Retention should not depend on manipulative or bloated systems that weaken the genre identity.
+
+8. QUALITY BAR FOR A MODERN HERITAGE BRAWLER
+
+The project must modernize what classic arcade games often lacked.
+
+Required modern expectations:
+- smoother controls
+- stronger animation transitions
+- clearer telegraphs
+- better checkpointing
+- fairer difficulty tuning
+- stronger onboarding
+- accessibility options
+- readable UI
+- satisfying sound layering
+- cleaner camera discipline
+- reduced cheap damage
+- better stage pacing
+- meaningful character differentiation
+- better save/progression handling where applicable
+
+The project must avoid:
+- floaty movement
+- unreadable enemy stacks
+- repetitive encounter spam
+- overly long recovery without tactical value
+- cutscenes that interrupt momentum
+- visual noise that hides gameplay
+- generic impact feedback
+- shallow clone design
+- feature bloat added before core feel is proven
+
+9. RECOMMENDED DELIVERY PHASES AND GATE REVIEWS
+
+The work shall be executed in distinct phases with explicit go/no-go gates.
+
+9.1 Phase 0 - Discovery and Direction Lock
+Purpose:
+Define the right game before building too much of the wrong game.
+
+Mandatory outputs:
+- player fantasy statement
+- target audience statement
+- reference breakdown
+- modernization principles
+- originality guardrails
+- concept shortlist
+- initial market positioning
+- engine comparison
+- art direction shortlist
+- audio direction shortlist
+- prototype backlog
+- risk register
+- initial to-do.md
+
+Exit gate:
+This phase is complete only when one concept direction, one prototype plan, one initial engine path, and one risk-prioritized milestone plan are approved.
+
+9.2 Phase 1 - Core Feel Prototype
+Purpose:
+Prove whether the game is fun at the hand-feel level.
+
+Minimum contents:
+- one playable character
+- one short stage or arena
+- several enemy archetypes
+- one elite or mini-boss interaction
+- placeholder UI
+- placeholder audio
+- controller support
+- keyboard support
+- performance measurements
+- capture footage for review
+
+Exit gate questions:
+- Is movement satisfying?
+- Are hits satisfying?
+- Is combat readable?
+- Does the concept feel original enough?
+- Is the macOS build stable?
+- Is the art direction promising enough to continue?
+- Do testers want to play again?
+
+9.3 Phase 2 - Vertical Slice
+Purpose:
+Prove the production target, not just the mechanics.
+
+Minimum contents:
+- near-target visual direction
+- near-target audio tone
+- representative stage pacing
+- representative boss encounter
+- representative UI
+- progression stub
+- save/load behavior if relevant
+- controller and local co-op validation if included
+- performance validation on target hardware
+- updated business-case notes
+- updated open-source readiness notes
+
+Exit gate:
+This phase is complete only when the team can credibly answer, "Can this become a full product without collapsing under scope, tech risk, art cost, or originality risk?"
+
+9.4 Phase 3 - MVP Production
+Purpose:
+Build the smallest version that is strong enough to test real market interest.
+
+Minimum contents:
+- multiple playable stages
+- a credible character roster for MVP
+- enough enemy variety to reveal depth
+- enough bosses to show escalation
+- a complete onboarding path
+- stable save/progression loop if applicable
+- polished game-feel fundamentals
+- macOS-ready distribution process
+- contributor-safe repo structure
+- documentation needed to continue development cleanly
+
+9.5 Phase 4 - Release Readiness and Open-Source Preparation
+Purpose:
+Prepare for external visibility, contributor onboarding, and later repository openness.
+
+Minimum contents:
+- asset provenance review
+- dependency license review
+- documentation pass
+- setup validation from a clean machine
+- packaging validation
+- performance pass
+- crash and error logging review
+- replacement plan for any restricted assets
+- contributor guidance
+
+10. TEAM ROLE AND EXECUTION AUTHORITY
+
+Act as a senior cross-functional product team including:
+- game design researchers
+- combat and gameplay designers
+- technical architects
+- gameplay engineers
+- rendering/graphics engineers
+- animation-minded implementers
+- audio and music direction researchers
+- production planners
+- QA-minded engineers
+- market and genre analysts
+- macOS delivery evaluators
+- open-source-conscious software engineers
+
+The team is authorized to use:
+- local computer testing
+- internet research
+- engine, SDK, and plugin evaluation
+- quick prototypes
+- frame-by-frame video review
+- controller/input testing
+- graphics and rendering tests
+- animation tests
+- UI readability checks
+- audio and music tests
+- performance captures
+- benchmark-style comparisons
+- repo inspection
+- documentation review
+- store page, review, and player sentiment research
+- mockups and paper design work
+- structured playtests
+
+The team shall use hands-on validation whenever it materially improves the decision.
+
+11. DECISION PRIORITIES
+
+When tradeoffs appear, prioritize in this order unless a documented exception is approved:
+
+- gameplay quality
+- responsiveness
+- visual clarity
+- originality
+- macOS feasibility
+- production realism
+- maintainability
+- open-source safety
+- scope control
+- optional feature expansion
+
+Prefer:
+- strong fundamentals over broad feature lists
+- excellent first-hour experience over oversized campaigns
+- distinct style over fake AAA ambition
+- proven fun over speculative complexity
+- readable combat over effect spam
+- clear pipeline over clever but brittle solutions
+
+12. GAMEPLAY FEEL REQUIREMENTS
+
+The contract requires explicit attention to feel, not just feature presence.
+
+The team must define and validate:
+- movement acceleration/deceleration intent
+- jump, dash, dodge, or evade rules if used
+- attack startup/recovery philosophy
+- hitstop and impact philosophy
+- cancel rules
+- invulnerability rules where applicable
+- knockback and crowd-control readability
+- enemy reaction consistency
+- camera shake discipline
+- screen-space readability during chaos
+- co-op readability if more than one player is supported
+
+Combat should feel:
+- immediate
+- legible
+- expressive
+- strategic enough to master
+- exciting even with placeholder art
+
+13. VISUAL, ANIMATION, AND AUDIO QUALITY MANDATE
+
+13.1 Visual Direction
+The visual direction must:
+- support readability first
+- be distinctive enough for store visibility
+- scale to team capacity
+- preserve silhouette clarity during heavy action
+- avoid over-detail that hides gameplay
+- support premium-feeling lighting, effects, and staging appropriate to scope
+
+13.2 Animation
+Animation must:
+- communicate intent clearly
+- support hit confirmation
+- avoid robotic stiffness
+- prioritize key poses, anticipation, recovery, and readability
+- improve feel, not just realism
+
+13.3 Audio
+Audio direction must be treated as a core gameplay pillar, not decoration.
+
+The project must define:
+- soundtrack identity
+- stage mood range
+- boss music treatment
+- impact SFX style
+- UI sound language
+- environmental audio plan
+- voice approach, if any
+
+A strike should sound satisfying.
+A boss should sound threatening.
+UI confirmation should sound intentional.
+Silence should be used deliberately, not because the sound plan is weak.
+
+14. SOLO, LOCAL CO-OP, AND ONLINE DECISION RULE
+
+The contract requires a deliberate mode strategy instead of automatic feature inflation.
+
+Default recommendation:
+- Prototype for solo play first.
+- Design systems so local co-op can be added cleanly.
+- Treat local co-op as the preferred multiplayer path for prototype and MVP if readability and performance remain strong.
+- Defer online co-op until the team has evidence that the value outweighs engineering, balancing, testing, support, and macOS complexity costs.
+
+Online co-op may not enter MVP merely because it seems marketable.
+It must justify itself through evidence.
+
+15. MACOS-SPECIFIC DEVELOPMENT REQUIREMENTS
+
+macOS shall be treated as a primary operational constraint.
+
+The team must:
+- evaluate engine and tooling through actual macOS use
+- validate controller behavior on macOS early
+- validate windowing, fullscreen, focus, audio-device, and input edge cases
+- validate performance on target macOS hardware early, not at the end
+- keep rendering choices compatible with a realistic macOS audience
+- avoid Windows-only assumptions in tools, middleware, or build steps
+- document external dependencies required for build and packaging
+- define a reliable packaging path for testers
+- validate the path to signed/notarized external distribution builds
+- treat Apple Silicon performance as a primary benchmark
+- decide consciously whether Intel compatibility remains necessary for the intended audience
+
+The project must not select technology that is attractive in theory but repeatedly painful on macOS in practice.
+
+16. ENGINE AND TECHNOLOGY EVALUATION RULES
+
+The team must compare realistic engine candidates and choose based on project fit, not brand perception.
+
+Minimum evaluation factors:
+- genre fit
+- prototype speed
+- production speed
+- art/animation workflow quality
+- controller workflow
+- macOS development experience
+- macOS build and packaging practicality
+- performance on target hardware
+- tooling maturity
+- plugin dependency risk
+- local co-op practicality
+- networking burden if online is considered
+- open-source readiness implications
+- team familiarity and ramp-up cost
+- long-term maintenance risk
+
+The engine recommendation must identify:
+- best engine for prototype
+- best engine for long-term development
+- best engine for macOS practicality
+- best engine for future open-source posture
+
+The team must not choose a technology stack only because it can make beautiful screenshots if it slows iteration or harms macOS delivery.
+
+17. OPEN-SOURCE SAFETY AND ASSET PROVENANCE
+
+Because this project is intended for later open-source release, the team must design for legal and structural cleanliness from the start.
+
+Mandatory rules:
+- Keep code and assets separable where practical.
+- Track every third-party dependency and its license.
+- Track the source of every non-trivial art, audio, font, plugin, and code import.
+- Mark temporary placeholder assets clearly.
+- Do not ingest ripped, scraped, unlicensed, or source-uncertain assets.
+- Do not let marketplace assets become permanent unless the future release path is explicitly compatible.
+- Do not rely on plugins that create distribution, signing, or licensing traps unless a replacement plan exists.
+- Keep secret keys, credentials, and machine-specific paths out of the repository.
+- Maintain a replacement plan for any asset that cannot survive the open-source transition.
+
+18. DOCUMENTATION REQUIREMENT
+
+Maintain lightweight but reliable documentation throughout development.
+
+Minimum required documents:
+- README
+- setup instructions
+- macOS build notes
+- architecture notes
+- prototype findings
+- key design decisions
+- testing instructions
+- controller support notes
+- performance notes
+- licensing/open-source notes
+- contributor onboarding notes
+- asset provenance register
+- replacement plan for restricted assets
+
+Documentation must be updated as work changes.
+Outdated documentation counts as project debt.
+
+19. WORKFLOW AND TASK MANAGEMENT CONTRACT
+
+The project must be run as a disciplined sequence of small, reviewable, testable tasks.
+
+The team must:
+- break large work into smaller tasks
+- define milestones
+- keep clear visibility of backlog, pending, in progress, blocked, validation needed, and done work
+- define acceptance criteria before finalizing major work
+- define test plans before finalizing major work
+- separate research tasks from implementation tasks
+- separate spikes from production-ready work
+- re-open tasks honestly if validation fails
+- continuously reprioritize based on findings
+- keep to-do.md current and truthful
+
+Large ambiguous work is prohibited.
+If a task cannot be reviewed cleanly, it is too large.
+
+20. TASK TRACKER REQUIREMENT
+
+Maintain a task tracker in to-do.md.
+
+Required sections:
+- Project Goal
+- Product Thesis
+- Current Milestone
+- Success Gate for Current Milestone
+- Backlog
+- Pending
+- In Progress
+- Blocked
+- Validation Needed
+- Done
+- Technical Debt
+- Risks / Assumptions
+- Later / Nice-to-Have
+
+Task rules:
+- each task must state purpose
+- each task must state expected outcome
+- each task should be testable
+- each task should name dependencies when relevant
+- each task should be small enough for clean implementation and review
+- discovered work must be added back to Backlog or Pending
+- blocked work must identify the blocker
+- completed work must move to Done only after validation
+- stale tasks must be rewritten or removed
+
+21. TESTING AND VALIDATION CONTRACT
+
+Important work may not be accepted without clear validation.
+
+Expected process:
+1. define expected behavior
+2. define acceptance criteria
+3. define automated and/or manual tests where practical
+4. implement the smallest useful slice
+5. run tests
+6. fix failures
+7. validate manually where needed
+8. record findings
+9. update documentation and to-do.md
+10. only then mark the task complete
+
+Use the correct mix of:
+- unit tests
+- integration tests
+- smoke tests
+- gameplay tests
+- combat feel tests
+- controller/input tests
+- UI readability tests
+- save/load tests if applicable
+- performance tests
+- macOS packaging tests
+- regression tests
+- manual acceptance tests
+- playtest observations
+
+Where automated tests are impractical, manual validation must still be explicit and repeatable.
+
+22. PLAYTESTING REQUIREMENT
+
+The game must be tested with real players early enough to prevent self-deception.
+
+Playtests should evaluate:
+- first-session understanding
+- combat satisfaction
+- readability
+- confusion points
+- fairness perception
+- character preference
+- co-op clarity if applicable
+- stage pacing
+- repeat-play desire
+- theme appeal
+- visual distinctiveness
+- audio satisfaction
+
+The team should capture:
+- notable confusion moments
+- death or failure hotspots
+- repeated negative comments
+- repeated positive comments
+- evidence of replay desire
+- evidence of originality or "too derivative" concerns
+
+23. DEFINITION OF DONE
+
+A task is done only when:
+- intended implementation scope is complete
+- relevant tests exist and pass as appropriate
+- manual validation is complete where needed
+- obvious issues found in validation are addressed
+- to-do.md is updated
+- related documentation is updated where needed
+- provenance, licensing, or dependency notes are updated if affected
+- the work is committed clearly
+- the work is pushed when the repository is in a valid state
+
+If the work is partial, experimental, or blocked, it must be labeled honestly.
+
+24. COMMIT, PUSH, AND REPOSITORY RULES
+
+When a task is completed and validated:
+- commit it
+- keep the commit focused
+- use clear professional commit messages
+- do not mix unrelated changes
+- push validated progress
+- keep the repository usable whenever practical
+- separate risky spikes from production-ready work
+- reference the relevant task in the commit message or body where practical
+
+Preferred loop:
+1. understand the goal
+2. break it into tasks
+3. update to-do.md
+4. define acceptance criteria
+5. define tests
+6. implement the smallest useful slice
+7. run tests
+8. fix issues
+9. validate manually
+10. update docs and tracker
+11. commit
+12. push
+13. choose next task
+
+25. SCOPE CONTROL RULES
+
+The project must actively resist uncontrolled expansion.
+
+The following may not be added to MVP without evidence:
+- online co-op
+- matchmaking
+- live-service systems
+- battle pass style progression
+- large narrative cinematics
+- multiple camera modes
+- procedural world generation
+- branching story architecture
+- large crafting systems
+- massive unlock trees
+- console porting work
+- platform-specific feature branches that do not improve the core game
+
+Any such feature must answer:
+- What concrete user value does it add?
+- What prototype evidence supports it?
+- What does it cost in engineering, art, QA, and schedule?
+- What simpler alternative exists?
+- What core-quality work would be delayed by adding it?
+
+26. ACCESSIBILITY AND USABILITY REQUIREMENT
+
+Modern quality includes usability.
+
+The team must evaluate:
+- remappable controls or a clearly documented reason if not yet implemented
+- subtitle strategy if voice exists
+- difficulty options or assist systems appropriate to genre
+- readable fonts and HUD
+- color/readability concerns
+- screen shake and VFX intensity options where practical
+- pause behavior
+- onboarding clarity
+- failure/retry clarity
+
+Accessibility work should be proportionate to scope, but it must not be ignored.
+
+27. RISK MANAGEMENT REQUIREMENT
+
+Maintain a living risk register covering:
+- design risk
+- originality risk
+- market risk
+- scope risk
+- engine/tool risk
+- animation production risk
+- performance risk
+- macOS packaging risk
+- controller/input risk
+- co-op readability risk
+- licensing risk
+- open-source transition risk
+- testing blind spots
+- team bandwidth risk
+
+Each major risk must state:
+- why it matters
+- likelihood
+- impact
+- early warning signs
+- mitigation
+- owner
+- resolution method
+
+Allowed resolution methods include:
+- online research
+- prototype experiment
+- benchmark
+- mockup
+- code spike
+- engine comparison
+- player testing
+- process change
+- scope reduction
+
+28. BUSINESS-CASE TIMING RULE
+
+Business evaluation is allowed, but it must follow evidence.
+
+The team may define market positioning, audience, wishlist appeal, and commercial hooks early.
+However, the team must not let monetization, long-tail content planning, or speculative platform expansion distract from proving the core experience.
+
+The correct sequence is:
+- prove fun
+- prove identity
+- prove production feasibility
+- then strengthen commercial planning
+
+29. FINAL DELIVERABLE REQUIREMENT
+
+The final work product must be strong enough to function as:
+- a research brief
+- a design brief
+- a technical planning brief
+- a workflow contract
+- a prototype plan
+- an MVP plan
+- a disciplined execution guide for the team
+
+It must be concrete enough to start work from, not merely discuss possibilities.
+
+30. SCHEDULE A - MANDATORY REPORT SECTIONS
+
+The final report/specification produced under this contract must contain all of the following sections.
+
+1. Executive Summary
+State the recommended game direction, target audience, product thesis, design pillars, macOS priorities, open-source priorities, prototype priorities, major risks, and the immediate next steps.
+
+2. Target Experience
+Define what the player should feel, what fantasy is being sold, how the action rhythm works, what the tone is, what the mastery curve is, what a normal session feels like, how difficulty should feel, and why the game is replayable.
+
+3. Reference DNA
+Break down what makes classic stage-based arcade action games work, what is outdated, what still works, what must be modernized, what should be avoided, and which emotional qualities are worth preserving.
+
+4. Similar Game Research
+Research classic and modern references across brawlers, side-scrolling action games, co-op action games, melee-heavy games, and visually strong action titles.
+For each reference, cover:
+- title
+- genre
+- platform
+- visual style
+- solo/multiplayer model
+- strengths
+- weaknesses
+- lessons worth borrowing
+- lessons to avoid
+- modern relevance
+- macOS relevance if any
+- originality risk if over-referenced
+
+5. Comparison Matrix
+Compare the strongest references on:
+- melee feel
+- movement feel
+- stage flow
+- boss design
+- character variety
+- visual quality
+- animation quality
+- sound/music quality
+- replayability
+- co-op value
+- modern fit
+- production complexity
+- inspiration value
+- originality risk
+
+Then identify best references by category and explain why.
+
+6. Design Pillars
+Propose the core pillars of the original game.
+For each pillar explain:
+- what it means
+- why it matters
+- how it affects implementation
+- what goes wrong if ignored
+- how it supports user engagement and market clarity
+
+7. Original Game Concepts
+Create 3 to 5 distinct original concept directions.
+For each include:
+- working title
+- one-line pitch
+- setting
+- tone
+- visual direction
+- music/sound direction
+- gameplay identity
+- character style
+- enemy style
+- boss style
+- progression style
+- solo/co-op recommendation
+- macOS suitability
+- commercial appeal
+- production complexity
+- major risks
+- differentiators
+- originality safeguards
+
+Then rank them and recommend one.
+
+8. Character System
+Recommend:
+- number of characters for prototype
+- number of characters for MVP
+- number of characters for full release
+- how different they should feel
+- how to avoid fake or superficial variation
+- how characters should support solo and co-op play
+
+Cover archetypes such as:
+- balanced
+- agile
+- heavy
+- technical
+- weapon-focused
+- crowd-control
+- glass cannon
+- support/synergy
+
+For each explain:
+- movement identity
+- combat identity
+- strengths
+- weaknesses
+- complexity
+- skill ceiling
+- co-op value
+- production cost implications
+
+9. Gameplay Systems
+Evaluate systems such as:
+- light/heavy attacks
+- combo structure
+- launcher/juggle logic
+- dodge/block/parry/roll decisions
+- grabs and throws
+- weapon pickups
+- environmental interactions
+- special meter
+- power states
+- enemy archetypes
+- elite enemies
+- boss phases
+- health/checkpoints
+- scoring
+- unlocks
+- difficulty scaling
+- replay systems
+- co-op interactions
+
+For each system state:
+- purpose
+- player value
+- implementation cost
+- production cost
+- risk
+- essential vs optional
+- whether it should be prototyped early
+- how it affects readability and engagement
+
+10. Stage and Campaign Flow
+Define onboarding, tutorial strategy, stage length, encounter pacing, environmental variety, mini-boss and boss usage, escalation curve, reward timing, checkpoint timing, and endgame payoff.
+
+Then propose:
+- MVP stage count
+- full game stage count
+- stage identity strategy
+- sample progression from first stage to final stage
+- how to keep scope controlled
+- how to avoid filler
+
+11. Success / Failure / Retention
+Define how players succeed, fail, retry, improve, and stay engaged.
+Cover:
+- fairness
+- punishment severity
+- accessibility
+- difficulty options
+- casual vs skilled balance
+- replay value
+- score chase or rank chase if relevant
+- unlock pacing
+- retention systems appropriate to the genre
+- what should not be used because it adds bloat
+
+12. Visual Direction
+Recommend concrete visual options:
+- 2D vs 2.5D vs stylized 3D
+- sprite vs hand-painted vs stylized 3D
+- camera framing
+- animation style
+- hit effects
+- lighting
+- silhouette readability
+- HUD/UI style
+- premium feel vs cost
+- what suits macOS performance
+- what best supports trailer and screenshot appeal
+
+13. Sound and Music Direction
+Define:
+- soundtrack identity
+- stage music mood
+- boss music treatment
+- combat SFX
+- weapon sounds
+- UI sounds
+- environmental audio
+- voice approach
+- what makes the game sound satisfying instead of generic
+- what audio work must happen early because it affects game feel
+
+14. Solo vs Multiplayer
+Evaluate:
+- solo only
+- solo + local co-op
+- solo + online co-op
+- multiplayer-first
+
+For each cover:
+- user value
+- engineering cost
+- balancing cost
+- testing cost
+- macOS implications
+- suitability for prototype
+- suitability for MVP
+- readability risk
+- support burden
+
+Then recommend the best path.
+
+15. macOS Considerations
+Explain:
+- engine suitability on macOS
+- controller support expectations
+- performance concerns
+- local co-op practicality
+- online concerns if relevant
+- distribution paths
+- design decisions that help or hurt macOS support
+- packaging constraints
+- signing/notarization implications
+- what must be validated through testing
+
+16. Technology and Engine Recommendation
+Compare likely engines such as Unity, Unreal, and Godot.
+For each cover:
+- genre fit
+- prototype speed
+- production speed
+- art/animation workflow fit
+- macOS support
+- controller workflow
+- networking suitability if needed
+- open-source friendliness
+- maintenance risk
+- plugin ecosystem risk
+- learning curve
+- long-term cost of ownership
+
+Then recommend:
+- best engine for prototype
+- best engine for long-term development
+- best engine for macOS practicality
+- best engine for future open-source posture
+
+17. Prototype Plan
+Define the first playable and vertical slice plan.
+Cover:
+- what to test first
+- what can remain placeholder
+- what must feel good immediately
+- success criteria
+- failure signals
+- prototype tasks
+- prototype tests
+- commit milestones
+- what evidence is required before moving forward
+
+18. MVP Scope
+Define a realistic MVP:
+- characters
+- enemy types
+- bosses
+- stages
+- must-have systems
+- cuttable systems
+- postponed systems
+- macOS expectations
+- open-source preparation needs
+- what qualifies as enough to test market interest
+- what would make MVP too big
+
+19. Workflow and Task Management
+Define the execution workflow in practical terms.
+Explain how the team should:
+- break down work
+- maintain to-do.md
+- separate research, implementation, and validation work
+- define acceptance criteria
+- define test plans
+- keep tasks small enough for clean commits
+- mark blocked work honestly
+- move completed work into Done
+- continuously reprioritize
+- prevent tracker drift
+
+20. Testing and Validation Contract
+Define how testing should work across the project.
+Include automated and manual validation as appropriate.
+State clearly that major work should not be accepted without evidence.
+
+21. Commit / Push / Repo Rules
+Define clean commit discipline, push expectations, scope control, branch hygiene, and the expected task-completion loop from task creation to validated push.
+
+22. Documentation and Open-Source Readiness
+Define what documents must exist during development and how to keep the project ready for future contributors and open-source release.
+
+23. Risks and Research Gaps
+List:
+- design risks
+- market risks
+- technical risks
+- animation risks
+- macOS risks
+- multiplayer risks
+- licensing risks
+- scope risks
+- testing risks
+- process risks
+
+Then say which should be resolved by:
+- online research
+- prototype experiment
+- benchmark
+- mockup
+- player testing
+- code spike
+- engine comparison
+- process improvement
+- scope reduction
+
+24. Market Positioning
+Explain how the game could become popular.
+Cover:
+- target audience
+- nostalgia vs new-player appeal
+- trailer and screenshot hook
+- streamer and clip appeal
+- visual hook
+- gameplay hook
+- wishlisting appeal
+- strongest differentiators
+- safest strategy
+- highest-upside strategy
+- what market expectations should be ignored
+
+25. Final Recommendation
+End with a concrete recommendation covering:
+- best concept direction
+- best engine
+- best solo/co-op strategy
+- best visual direction
+- best sound direction
+- best prototype scope
+- best MVP scope
+- best workflow approach
+- best testing discipline
+- biggest risks
+- biggest opportunities
+- next research steps
+- top 5 immediate tasks to add to to-do.md
+
+31. SCHEDULE B - MANDATORY PRINCIPLES
+
+Throughout the work, the team must follow these principles:
+- research before guessing
+- prototype before overcommitting
+- break big work into smaller tasks
+- keep to-do.md current
+- define tests before finalizing important work
+- do not mark work done until validated
+- commit only meaningful validated progress
+- push completed work
+- document important decisions
+- optimize for macOS feasibility
+- keep the game original
+- keep the project open-source-safe
+- prioritize a genuinely great modern game, not a weak imitation
+- protect commercial optionality without bloating the design
+- prioritize user engagement from the first session onward
+
+32. SCHEDULE C - MINIMUM ACCEPTANCE CHECKS FOR GATE REVIEWS
+
+For any phase gate, ask at least the following:
+
+Core Feel Check
+- Is it fun immediately?
+- Are movement and attacks satisfying?
+- Is failure usually understandable?
+- Is the combat readable under stress?
+- Does the game already feel distinct?
+
+Production Check
+- Can the current art/audio direction scale?
+- Is the current engine/tooling helping or hurting iteration?
+- Are macOS builds stable enough for continued development?
+- Is the pipeline honest about cost?
+
+Market Check
+- Can the hook be explained in one sentence?
+- Does the game look good in motion and in screenshots?
+- Would a player who never saw the inspirations still care?
+
+Open-Source Check
+- Are assets and dependencies traceable?
+- Is the repository getting cleaner, not dirtier?
+- Are temporary assets clearly marked?
+
+33. FINAL OUTPUT FORMAT REQUIREMENT
+
+The final answer delivered under this contract must be usable in two ways:
+- as clean plain text suitable for direct copy/paste
+- as a downloadable text document
+
+END OF REVISED FINAL CONTRACT
