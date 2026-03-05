@@ -125,13 +125,13 @@ Use the same checklist for every engine:
 
 ### Unreal
 
-- Spike status: blocked on editor install
-- Export result: TBD
-- Controller result: TBD
-- Performance result: TBD
-- Workflow notes: Epic Games Launcher 19.2.0 is installed locally, but no Unreal Editor bundle is present.
-- Packaging notes: Expect interactive Epic login and a large editor download before the spike can begin.
-- Score summary: TBD
+- Spike status: blocked on editor install and Epic sign-in
+- Export result: not reached. No Unreal Editor bundle is installed on this machine, so no project or macOS export could be created.
+- Controller result: not reached because no runnable Unreal project was created in this session.
+- Performance result: not reached because no runnable Unreal project was created in this session.
+- Workflow notes: Epic Games Launcher 19.2.1 launches locally on Apple M1; `~/Library/Application Support/Epic/UnrealEngineLauncher/LauncherInstalled.dat` currently contains an empty `InstallationList`; the launcher log records `Discovered 0 item files` and then routes to `epic-login`, which confirms an interactive Epic account step before editor download.
+- Packaging notes: The Unreal spike cannot begin until the editor is downloaded through Epic's distribution flow. That path is both larger and more account-gated than the Godot path on this machine.
+- Score summary: blocked. Unreal cannot be scored fairly for iteration, export, or performance until the editor is installed.
 
 ## Tie-Break Rule
 

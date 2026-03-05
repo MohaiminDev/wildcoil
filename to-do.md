@@ -17,14 +17,6 @@ Phase 0 - Engine Selection and Backlog Freeze
 
 ## PENDING
 
-### [P0-06] Build the Unreal micro-spike
-- Outcome: Implement the same fixed spike checklist in Unreal and capture export, workflow, and controller evidence.
-- Validation:
-  - [ ] Unreal spike project runs locally, or the exact machine/auth blocker is documented with evidence.
-  - [ ] macOS export result and packaging notes are logged in [`docs/engine_matrix.md`](/Users/himu/Desktop/career/personal_projects/wildcoil/docs/engine_matrix.md).
-  - [ ] FPS/frame-time notes and workflow observations are recorded.
-- Dependencies: [P0-03]
-
 ### [P0-07] Lock the initial engine path and freeze the backlog
 - Outcome: Score the three engines, choose the winner with the documented tie-break, update risks, and lock the production backlog.
 - Validation:
@@ -211,6 +203,15 @@ Phase 0 - Engine Selection and Backlog Freeze
 - Outcome: Implement the same fixed spike checklist in Unity and capture export, workflow, and controller evidence.
 - Validation:
   - [x] Unity spike project runs locally, or the exact machine/auth blocker is documented with evidence.
+  - [x] macOS export result and packaging notes are logged in [`docs/engine_matrix.md`](/Users/himu/Desktop/career/personal_projects/wildcoil/docs/engine_matrix.md).
+  - [x] FPS/frame-time notes and workflow observations are recorded.
+- Dependencies: [P0-03]
+- Completed: 2026-03-05
+
+### [P0-06] Build the Unreal micro-spike
+- Outcome: Implement the same fixed spike checklist in Unreal and capture export, workflow, and controller evidence.
+- Validation:
+  - [x] Unreal spike project runs locally, or the exact machine/auth blocker is documented with evidence.
   - [x] macOS export result and packaging notes are logged in [`docs/engine_matrix.md`](/Users/himu/Desktop/career/personal_projects/wildcoil/docs/engine_matrix.md).
   - [x] FPS/frame-time notes and workflow observations are recorded.
 - Dependencies: [P0-03]
