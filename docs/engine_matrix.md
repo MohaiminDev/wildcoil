@@ -101,17 +101,17 @@ Use the same checklist for every engine:
 7. Capture FPS/frame-time notes on Apple Silicon.
 8. Write what felt easy, slow, unclear, or brittle.
 
-## Evidence Log Template
+## Evidence Log
 
 ### Godot
 
-- Spike status: ready to start
-- Export result: TBD
-- Controller result: TBD
-- Performance result: TBD
-- Workflow notes: Godot 4.6.1 is installed locally and launchable from `/opt/homebrew/bin/godot`.
-- Packaging notes: CLT packaging tools exist locally; full Xcode is still missing for `xcodebuild`-dependent workflows.
-- Score summary: TBD
+- Spike status: completed locally on 2026-03-05
+- Export result: success. Unsigned macOS app exported to `spikes/godot_artifacts/WildcoilGodotSpike.app` at roughly 176 MB.
+- Controller result: keyboard fallback works in local runs; controller mappings were wired to left stick plus A/B/X/Y, but no physical controller was attached during this shell session for a live hardware check.
+- Performance result: `144.88` average FPS / `144.00` low FPS in the final headless autoplay benchmark; `60.00` average FPS in the editor-backed Metal autoplay benchmark; `59.83` average FPS / `58.00` low FPS in the final exported macOS app autoplay benchmark on Apple M1.
+- Workflow notes: the spike lives at `spikes/godot_wildcoil_spike`; the project was authored from text, imported cleanly after a few script fixes, and validated with both autoplay benchmarks and frame capture.
+- Packaging notes: successful export required enabling `rendering/textures/vram_compression/import_etc2_astc=true`, downloading the official `Godot_v4.6.1-stable_export_templates.tpz`, and extracting `templates/macos.zip` to `~/Library/Application Support/Godot/export_templates/4.6.1.stable/`. Full Xcode was not required for an unsigned local export.
+- Score summary: strong early signal on iteration speed, open-source posture, and unsigned macOS export practicality.
 
 ### Unity
 

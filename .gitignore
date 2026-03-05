@@ -201,6 +201,12 @@ cython_debug/
 .cursorignore
 .cursorindexingignore
 
+# Godot spike artifacts
+spikes/**/.godot/
+spikes/**/build/
+spikes/**/*.import
+spikes/godot_artifacts/
+
 # Marimo
 marimo/_static/
 marimo/_lsp/
