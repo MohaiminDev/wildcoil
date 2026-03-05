@@ -1,132 +1,233 @@
 # Wildcoil Task Tracker
 
 ## Project Goal
-Build an original macOS-first arcade-heritage action game that proves satisfying combat feel, clear readability, distinct identity, practical macOS delivery, and future open-source readiness before any larger MVP expansion.
+Build an original macOS-first arcade-heritage action game that proves satisfying combat feel, clear readability, distinct identity, practical macOS delivery, and future open-source readiness before expanding into a small solo-first MVP.
 
 ## Product Thesis
-Wildcoil should deliver a solo-first, controller-first, stage-based combat prototype with immediate melee satisfaction, strong spectacle in the first three minutes, readable enemy intent, and a strange wilderness-plus-machine-ruin identity that feels original rather than referential.
+Wildcoil should deliver a controller-first, stage-based action game with immediate melee satisfaction, strong spectacle in the first three minutes, readable enemy intent, and a strange wilderness-plus-machine-ruin identity that feels original rather than referential.
 
 ## Current Milestone
 Phase 0 - Discovery and Direction Lock
 
-## Success Gate for Current Milestone
-- One concept direction is approved.
-- One first-playable prototype plan is approved.
-- One initial engine path is approved after the same macOS micro-spike in Godot, Unity, and Unreal.
-- The risk register and milestone backlog are prioritized and actionable.
-- Approval includes written validation evidence in the docs set, not just verbal agreement.
+## Commit Gate
+- Complete one task at a time.
+- Run that task's full validation checklist before committing.
+- Commit and push immediately after the task is green.
+- Do not commit or push failing work.
 
-## Backlog
+## PENDING
 
-### [P1-01] Build the combat sandbox first playable
-- Purpose: Turn the locked concept and engine choice into a tester-ready solo combat prototype.
-- Expected outcome: One playable character, one short stage, three enemy archetypes, one elite/miniboss, placeholder UI/audio, and a macOS build path.
-- Validation: Core-feel gate checklist, controller and keyboard checks, Apple Silicon smoke run, and playtest evidence in [`docs/playtest_log.md`](/Users/himu/Desktop/career/personal_projects/wildcoil/docs/playtest_log.md).
-- Dependencies: Phase 0 gate pass.
+### [P0-02] Approve the Wildcoil concept direction
+- Outcome: Mark `Wildcoil` as the approved concept winner across the Phase 0 docs and keep MVP scope solo-first.
+- Validation:
+  - [ ] [`docs/game_spec.md`](/Users/himu/Desktop/career/personal_projects/wildcoil/docs/game_spec.md) explicitly says the concept is approved, not just recommended.
+  - [ ] [`README.md`](/Users/himu/Desktop/career/personal_projects/wildcoil/README.md) and this tracker reflect the approved direction and MVP target.
+  - [ ] [`docs/risk_register.md`](/Users/himu/Desktop/career/personal_projects/wildcoil/docs/risk_register.md) is updated for the locked concept direction.
+- Dependencies: [DOC-04]
 
-### [P1-02] Package a tester-ready macOS build
-- Purpose: Make external testing practical early instead of leaving platform risk until late.
-- Expected outcome: Repeatable packaging steps, controller checks, keyboard fallback, and a notarization checklist.
-- Validation: Manual acceptance matrix in [`docs/macos_build_and_distribution.md`](/Users/himu/Desktop/career/personal_projects/wildcoil/docs/macos_build_and_distribution.md).
-- Dependencies: Engine choice, first playable build.
+### [P0-03] Verify the engine toolchain on this machine
+- Outcome: Confirm local availability or installation status for Godot, Unity, Unreal, Xcode, and the minimum macOS export prerequisites needed for the engine comparison.
+- Validation:
+  - [ ] Local commands or app locations are recorded for Godot, Unity, Unreal, `xcodebuild`, and package tooling.
+  - [ ] Any missing prerequisites or auth blockers are documented in [`docs/engine_matrix.md`](/Users/himu/Desktop/career/personal_projects/wildcoil/docs/engine_matrix.md).
+  - [ ] The machine-specific setup state is clear enough to start or explain each spike.
+- Dependencies: [P0-02]
 
-### [P2-01] Define vertical slice promotion criteria
-- Purpose: Prevent MVP scope creep before the first playable proves itself.
-- Expected outcome: A Phase 2 promotion checklist tied to feel, readability, art feasibility, and production cost.
-- Validation: Updated spec, tracker, and risk register after Phase 1 results.
-- Dependencies: Phase 1 gate pass.
+### [P0-04] Build the Godot micro-spike
+- Outcome: Implement the fixed spike checklist in Godot with movement, dodge, combo, one enemy, controller input, keyboard fallback, and a macOS export artifact.
+- Validation:
+  - [ ] Godot spike project runs locally.
+  - [ ] macOS export result and packaging notes are logged in [`docs/engine_matrix.md`](/Users/himu/Desktop/career/personal_projects/wildcoil/docs/engine_matrix.md).
+  - [ ] FPS/frame-time notes and workflow observations are recorded.
+- Dependencies: [P0-03]
 
-## Pending
+### [P0-05] Build the Unity micro-spike
+- Outcome: Implement the same fixed spike checklist in Unity and capture export, workflow, and controller evidence.
+- Validation:
+  - [ ] Unity spike project runs locally, or the exact machine/auth blocker is documented with evidence.
+  - [ ] macOS export result and packaging notes are logged in [`docs/engine_matrix.md`](/Users/himu/Desktop/career/personal_projects/wildcoil/docs/engine_matrix.md).
+  - [ ] FPS/frame-time notes and workflow observations are recorded.
+- Dependencies: [P0-03]
 
-### [P0-02] Run the Godot micro-spike
-- Purpose: Measure prototype speed, controller reliability, macOS export friction, and frame stability in a real slice.
-- Expected outcome: Same spike features as the other engines with notes captured in [`docs/engine_matrix.md`](/Users/himu/Desktop/career/personal_projects/wildcoil/docs/engine_matrix.md).
-- Validation: Playable local spike, export artifact, and evidence notes for build friction and performance.
-- Dependencies: Spike checklist from the engine matrix.
+### [P0-06] Build the Unreal micro-spike
+- Outcome: Implement the same fixed spike checklist in Unreal and capture export, workflow, and controller evidence.
+- Validation:
+  - [ ] Unreal spike project runs locally, or the exact machine/auth blocker is documented with evidence.
+  - [ ] macOS export result and packaging notes are logged in [`docs/engine_matrix.md`](/Users/himu/Desktop/career/personal_projects/wildcoil/docs/engine_matrix.md).
+  - [ ] FPS/frame-time notes and workflow observations are recorded.
+- Dependencies: [P0-03]
 
-### [P0-03] Run the Unity micro-spike
-- Purpose: Compare Unity against the same prototype and packaging workload rather than reputation alone.
-- Expected outcome: Equivalent movement, combo, enemy, controller input, and macOS export evidence.
-- Validation: Same as [P0-02].
-- Dependencies: Spike checklist from the engine matrix.
+### [P0-07] Lock the initial engine path and freeze the backlog
+- Outcome: Score the three engines, choose the winner with the documented tie-break, update risks, and lock the production backlog.
+- Validation:
+  - [ ] Weighted totals are filled in [`docs/engine_matrix.md`](/Users/himu/Desktop/career/personal_projects/wildcoil/docs/engine_matrix.md).
+  - [ ] [`docs/game_spec.md`](/Users/himu/Desktop/career/personal_projects/wildcoil/docs/game_spec.md) names the chosen engine path.
+  - [ ] [`docs/risk_register.md`](/Users/himu/Desktop/career/personal_projects/wildcoil/docs/risk_register.md) and this tracker reflect the engine decision and frozen backlog.
+- Dependencies: [P0-04], [P0-05], [P0-06]
 
-### [P0-04] Run the Unreal micro-spike
-- Purpose: Confirm whether Unreal's visual upside is worth the iteration and macOS cost for this scope.
-- Expected outcome: Equivalent spike plus notes on editor friction, packaging, and Apple Silicon performance.
-- Validation: Same as [P0-02].
-- Dependencies: Spike checklist from the engine matrix.
+### [P1-01] Create the production scaffold
+- Outcome: Add the chosen engine project, `src/`, `tests/`, provenance logging updates, repeatable build/test commands, and CI or scripted validation hooks.
+- Validation:
+  - [ ] The repo contains runtime code in `src/` and automated tests in `tests/`.
+  - [ ] [`README.md`](/Users/himu/Desktop/career/personal_projects/wildcoil/README.md) documents install, run, and test commands.
+  - [ ] The initial automated test suite passes locally.
+- Dependencies: [P0-07]
 
-### [P0-05] Score engines and lock the initial engine path
-- Purpose: Convert evidence into a documented choice instead of leaving engine selection open-ended.
-- Expected outcome: Weighted scorecard, written recommendation, and rejected-option notes.
-- Validation: Completed score rows in [`docs/engine_matrix.md`](/Users/himu/Desktop/career/personal_projects/wildcoil/docs/engine_matrix.md) and a matching decision update in [`docs/game_spec.md`](/Users/himu/Desktop/career/personal_projects/wildcoil/docs/game_spec.md).
-- Dependencies: [P0-02], [P0-03], [P0-04].
+### [P1-02] Implement player locomotion and input
+- Outcome: Ship the first playable controller layer with run, jump, dodge, controller hot-plug, keyboard fallback, and remapping-safe actions.
+- Validation:
+  - [ ] Automated tests cover the deterministic movement and input-state rules that can be unit tested.
+  - [ ] Manual smoke checks confirm controller and keyboard input are both playable.
+  - [ ] The current test suite passes.
+- Dependencies: [P1-01]
 
-### [P0-06] Lock the milestone backlog for Phase 1
-- Purpose: Enter implementation with a small, reviewable, validation-first backlog.
-- Expected outcome: Ordered Phase 1 tasks, acceptance criteria, and a clear salvage-pass rule if the gate fails.
-- Validation: Tracker update plus a risk register review.
-- Dependencies: [P0-01], [VAL-01], [P0-05].
+### [P1-03] Implement the combat core
+- Outcome: Add light attacks, heavy finisher, launcher or sweep, crowd-control special, hitstop, damage, invulnerability windows, and checkpoint reset behavior.
+- Validation:
+  - [ ] Automated tests cover combat-state rules, damage resolution, and checkpoint reset behavior.
+  - [ ] Manual smoke checks confirm hits feel responsive and readable.
+  - [ ] The current test suite passes.
+- Dependencies: [P1-02]
 
-## In Progress
-- None currently. Start the engine spikes next; do not begin `src/` implementation work before the Phase 0 gate passes.
+### [P1-04] Implement enemy systems
+- Outcome: Add the shared enemy framework, three starter archetypes, and the elite/miniboss foundation.
+- Validation:
+  - [ ] Automated tests cover spawn/state/content validation rules that can be deterministic.
+  - [ ] Manual smoke checks confirm enemy telegraphs and reactions are readable.
+  - [ ] The current test suite passes.
+- Dependencies: [P1-03]
 
-## Blocked
-- None currently recorded.
+### [P1-05] Build Stage 1 first playable
+- Outcome: Deliver one short stage with a first fight inside 30 seconds, a spectacle beat inside 3 minutes, a checkpoint, HUD, pause or restart flow, and placeholder audio.
+- Validation:
+  - [ ] Manual playthrough confirms first combat and spectacle timing targets.
+  - [ ] HUD, pause, and restart flows work in windowed and fullscreen modes.
+  - [ ] The current test suite passes.
+- Dependencies: [P1-04]
 
-## Validation Needed
+### [P1-06] Export and verify the first macOS build
+- Outcome: Produce a tester-ready Apple Silicon build and record build evidence, smoke results, and known issues.
+- Validation:
+  - [ ] A macOS build artifact exists.
+  - [ ] Apple Silicon launch and packaging notes are recorded in [`docs/macos_build_and_distribution.md`](/Users/himu/Desktop/career/personal_projects/wildcoil/docs/macos_build_and_distribution.md).
+  - [ ] The current test suite passes.
+- Dependencies: [P1-05]
 
-### [VAL-01] Approve the recommended concept direction
-- Purpose: Confirm that the recommended winner is original, attractive, and small enough for a solo part-time prototype.
-- Expected outcome: Go/no-go call on the recommended concept in [`docs/game_spec.md`](/Users/himu/Desktop/career/personal_projects/wildcoil/docs/game_spec.md).
-- Validation: Review against originality safeguards, production complexity, and first-playable clarity.
-- Dependencies: Initial spec draft.
+### [P1-07] Run the Phase 1 playtest gate
+- Outcome: Capture 5 to 8 external playtests, fix repeated clarity or fairness issues, and document the gate result.
+- Validation:
+  - [ ] [`docs/playtest_log.md`](/Users/himu/Desktop/career/personal_projects/wildcoil/docs/playtest_log.md) contains 5 to 8 sessions or clearly documents the blocker if outside testers are unavailable.
+  - [ ] Repeated issues are reflected in [`docs/risk_register.md`](/Users/himu/Desktop/career/personal_projects/wildcoil/docs/risk_register.md) and resolved or accepted.
+  - [ ] The current test suite passes.
+- Dependencies: [P1-06]
 
-### [VAL-02] Convert pre-spike engine notes into measured scores
-- Purpose: Replace provisional engine assumptions with evidence from real macOS work.
-- Expected outcome: Final scores for gameplay iteration, macOS tooling/export, responsiveness/input workflow, art-animation workflow, open-source posture, and performance headroom.
-- Validation: Scorecard completion with export and packaging notes.
-- Dependencies: [P0-02], [P0-03], [P0-04].
+### [P2-01] Promote Stage 1 into a vertical slice
+- Outcome: Upgrade Stage 1 with target-leaning art/audio, cleaner camera and VFX discipline, and a full boss fight.
+- Validation:
+  - [ ] The slice is playable end-to-end with updated visuals and audio.
+  - [ ] Manual smoke checks confirm readability did not regress.
+  - [ ] The current test suite passes.
+- Dependencies: [P1-07]
 
-## Done
+### [P2-02] Implement progression and validation systems
+- Outcome: Add save/load, stage select, rank/time scoring, unlock tracking, and content validation checks.
+- Validation:
+  - [ ] Automated tests cover save/load, scoring, unlocks, and content validation.
+  - [ ] Manual smoke checks confirm saves persist and load safely.
+  - [ ] The current test suite passes.
+- Dependencies: [P2-01]
+
+### [P2-03] Harden the production pipeline
+- Outcome: Update provenance, dependency and license review, packaging notes, and automated build/test flow for ongoing production.
+- Validation:
+  - [ ] [`docs/asset_provenance_register.md`](/Users/himu/Desktop/career/personal_projects/wildcoil/docs/asset_provenance_register.md) is current for all committed dependencies and placeholder assets.
+  - [ ] [`docs/macos_build_and_distribution.md`](/Users/himu/Desktop/career/personal_projects/wildcoil/docs/macos_build_and_distribution.md) reflects the active build workflow.
+  - [ ] The current test suite passes.
+- Dependencies: [P2-02]
+
+### [P2-04] Run the vertical-slice test pass
+- Outcome: Playtest the vertical slice, fix blockers, and lock the MVP expansion target.
+- Validation:
+  - [ ] [`docs/playtest_log.md`](/Users/himu/Desktop/career/personal_projects/wildcoil/docs/playtest_log.md) records the slice test round.
+  - [ ] Blocking findings are fixed or explicitly accepted.
+  - [ ] The current test suite passes.
+- Dependencies: [P2-03]
+
+### [P3-01] Add the second playable character
+- Outcome: Introduce a second character with a meaningfully different mobility and combat profile.
+- Validation:
+  - [ ] Automated tests cover deterministic roster, unlock, and loadout behavior.
+  - [ ] Manual smoke checks confirm the second character changes play feel meaningfully.
+  - [ ] The current test suite passes.
+- Dependencies: [P2-04]
+
+### [P3-02] Build Stage 2
+- Outcome: Add the midgame stage, two new enemy archetypes, and one new hazard language.
+- Validation:
+  - [ ] Stage 2 is playable end-to-end.
+  - [ ] Content validation tests cover the new stage and enemy definitions.
+  - [ ] The current test suite passes.
+- Dependencies: [P3-01]
+
+### [P3-03] Build Stage 3 and finale
+- Outcome: Add the final stage, the last enemy archetype, the final boss, and the ending flow.
+- Validation:
+  - [ ] Stage 3 and the ending are playable end-to-end.
+  - [ ] Content validation tests cover the final stage and boss definitions.
+  - [ ] The current test suite passes.
+- Dependencies: [P3-02]
+
+### [P3-04] Add onboarding, progression, and accessibility polish
+- Outcome: Finalize onboarding prompts, progression flow, options, accessibility settings, save migration safety, and balance tuning.
+- Validation:
+  - [ ] Automated tests cover save migration and options persistence.
+  - [ ] Manual smoke checks confirm onboarding and accessibility flows work.
+  - [ ] The current test suite passes.
+- Dependencies: [P3-03]
+
+### [P3-05] Run the release-candidate regression pass
+- Outcome: Execute the full regression, performance, input, packaging, and release-candidate checks and fix release blockers only.
+- Validation:
+  - [ ] Regression, packaging, and performance notes are recorded in the docs set.
+  - [ ] No known release blocker remains open.
+  - [ ] The current test suite passes.
+- Dependencies: [P3-04]
+
+### [REL-01] Publish the tester release
+- Outcome: Push the final code, create a release tag, attach the macOS build, and publish release notes plus install or known-issues guidance.
+- Validation:
+  - [ ] The release tag and release notes exist.
+  - [ ] The macOS build artifact is attached or the exact publish blocker is documented.
+  - [ ] The current test suite passes.
+- Dependencies: [P3-05]
+
+## DONE
+
+### [DOC-04] Simplify the public task tracker
+- Outcome: Keep `to-do.md` focused on `PENDING` and `DONE` only, with task-by-task outcome, validation, and dependency fields.
+- Validation:
+  - [x] [`to-do.md`](/Users/himu/Desktop/career/personal_projects/wildcoil/to-do.md) uses `PENDING` and `DONE` as the only task buckets.
+  - [x] Every task entry includes outcome, validation, and dependency details.
+  - [x] The tracker documents the one-task-at-a-time green-test commit gate.
+- Dependencies: None
+- Completed: 2026-03-05
 
 ### [P0-01] Draft the Schedule A-aligned living spec
-- Purpose: Turn the contract and development roadmap into one working design and planning brief.
-- Expected outcome: [`docs/game_spec.md`](/Users/himu/Desktop/career/personal_projects/wildcoil/docs/game_spec.md) exists with all Schedule A section headings, ranked concepts, and a recommended winner.
+- Outcome: [`docs/game_spec.md`](/Users/himu/Desktop/career/personal_projects/wildcoil/docs/game_spec.md) exists with all Schedule A section headings, ranked concepts, and a recommended winner.
 - Validation: Section-by-section cross-check against Schedule A on 2026-03-05.
 - Dependencies: Contract review and development plan inputs.
 
 ### [DOC-01] Create the contract-aligned task tracker
-- Purpose: Establish one public source of truth for tasks, validation, and milestone status.
-- Expected outcome: `to-do.md` exists with the contract-required sections.
+- Outcome: `to-do.md` exists with the contract-required sections.
 - Validation: Cross-checked against Sections 19-21 and 30 of the contract on 2026-03-05.
 - Dependencies: Contract review.
 
 ### [DOC-02] Create the initial planning docs set
-- Purpose: Put the living spec, engine matrix, risk register, playtest log, asset provenance register, and macOS build note under `docs/`.
-- Expected outcome: The Phase 0 public planning scaffold is in place and internally consistent.
+- Outcome: The Phase 0 public planning scaffold is in place and internally consistent.
 - Validation: File set review and link check on 2026-03-05.
 - Dependencies: Contract review and development plan inputs.
 
 ### [DOC-03] Update contributor entry points
-- Purpose: Make the repo self-explanatory for future sessions and contributors.
-- Expected outcome: `README.md` points to the active docs and `AGENTS.md` records durable planning conventions.
+- Outcome: `README.md` points to the active docs and `AGENTS.md` records durable planning conventions.
 - Validation: Manual review of repo entry points on 2026-03-05.
-- Dependencies: [DOC-01], [DOC-02].
-
-## Technical Debt
-- The Schedule A spec is intentionally concise; expand the similar-game research with source-backed store/review notes during Phase 0.
-- The engine matrix currently contains pre-spike evidence and process notes, not final weighted scores.
-- The macOS build note describes the required path, but real signing and notarization friction cannot be trusted until the chosen engine is tested with an export artifact.
-
-## Risks / Assumptions
-- Assumption: solo developer, part-time pace, and about 12 weeks to reach the first playable after kickoff.
-- Assumption: solo-first, controller-first, local-co-op-ready architecture remains the safest prototype strategy.
-- Risk: concept originality can drift too close to genre references if silhouettes, factions, or stage beats are not reviewed early.
-- Risk: engine choice can look fine in theory but create painful macOS packaging or controller problems in practice.
-- Risk: feel and readability may fail even if the scope stays small.
-
-## Later / Nice-to-Have
-- Detailed market-comparison appendix with store-page screenshot and trailer notes.
-- Accessibility options matrix once the control scheme is more concrete.
-- Repo setup instructions once a real engine/toolchain is selected.
+- Dependencies: [DOC-01], [DOC-02]

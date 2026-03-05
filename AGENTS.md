@@ -34,7 +34,8 @@ Use `-` for bullets, not dots. Keep pull requests focused and include a summary,
 ## Agent-Specific Instructions
 Treat this file as a living contributor memory. Update `AGENTS.md` whenever you learn a stable user preference, working convention, or durable solution to a repeated issue so future sessions do not repeat the same back-and-forth. Record only concise, reusable guidance that is relevant to contributors in this repository.
 - `.codex/` is the hidden tracked planning area for Codex-only execution notes, active plan state, and plan-history records; keep contributor-facing docs in `docs/`.
-- `to-do.md` is the single public source of truth for status, backlog, validation, and milestone state; keep its section names aligned with the contract.
+- `to-do.md` is the single public source of truth for status, backlog, validation, and milestone state; keep task buckets to `PENDING` and `DONE`.
 - Keep living planning artifacts in `docs/`; avoid adding new root-level planning files beyond `to-do.md`.
 - Do not start `src/` or `tests/` implementation work until Phase 0 direction lock is complete.
 - After any commit/push requested in this repo, include the exact commit message and a short description in the final response.
+- Complete one tracker task at a time; run that task's full validation before commit, then commit and push immediately once it is green.
