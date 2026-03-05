@@ -37,3 +37,4 @@ Treat this file as a living contributor memory. Update `AGENTS.md` whenever you 
 - `to-do.md` is the single public source of truth for status, backlog, validation, and milestone state; keep its section names aligned with the contract.
 - Keep living planning artifacts in `docs/`; avoid adding new root-level planning files beyond `to-do.md`.
 - Do not start `src/` or `tests/` implementation work until Phase 0 direction lock is complete.
+- After any commit/push requested in this repo, include the exact commit message and a short description in the final response.
