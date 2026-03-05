@@ -1,10 +1,11 @@
 # Wildcoil Living Game Spec
 
-Schedule A-aligned working draft for Phase 0. The concept direction is now locked on `Wildcoil`, while the engine path and a few research-heavy items remain open until the required spike evidence exists.
+Schedule A-aligned working draft. The concept direction is locked on `Wildcoil`, and the initial production engine path is now locked to Godot 4.6.1 after the Phase 0 spike review on 2026-03-05.
 
 ## 1. Executive Summary
 
 - Approved game direction: `Wildcoil`, a solo-first action adventure about fighting through storm-fed wilds grown around dead machine-serpents and buried relay ruins.
+- Approved production engine: Godot 4.6.1 for the MVP path.
 - Target audience: players who want modern beat-'em-up immediacy, readable melee combat, and a distinctive pulp-tech wilderness identity without live-service bloat.
 - Product thesis: deliver a tight macOS-native first playable where movement, hits, and spectacle sell the game before content breadth does.
 - Core design pillars: immediate impact, readable chaos, strange wilderness identity, and ruthless scope discipline.
@@ -13,8 +14,8 @@ Schedule A-aligned working draft for Phase 0. The concept direction is now locke
 - Prototype priorities: first combat within 30 seconds, first wow moment within 3 minutes, one memorable miniboss encounter, and validation evidence for all gate calls.
 - Major risks: originality drift, engine/tool friction on macOS, solo-production art cost, and combat readability under enemy stacks.
 - Immediate next steps:
-  - run the same micro-spike in Godot, Unity, and Unreal
-  - lock the Phase 1 backlog only after the scorecard and risk review are updated
+  - scaffold the production Godot project with repeatable build and test commands
+  - build the first playable around movement, combat feel, enemy readability, and a tester-ready macOS export
 
 ## 2. Target Experience
 
@@ -319,7 +320,7 @@ Recommendation: ship the first playable as solo-only, keep data structures and i
 
 ## 16. Technology and Engine Recommendation
 
-Use the same micro-spike in Godot, Unity, and Unreal, then score them with fixed weights:
+Phase 0 used the same spike checklist and fixed weights across Godot, Unity, and Unreal:
 
 - gameplay iteration: 25
 - macOS tooling/export: 20
@@ -328,19 +329,19 @@ Use the same micro-spike in Godot, Unity, and Unreal, then score them with fixed
 - open-source posture: 15
 - performance headroom: 10
 
-Provisional read before spikes:
+Final Phase 0 read:
 
-| Engine | Provisional fit | Why | Risk to watch |
+| Engine | Final fit | Why | Risk to watch |
 | --- | --- | --- | --- |
-| Godot | Strong default | Best open-source posture, likely low packaging overhead, and favorable tie-break candidate | Animation and tooling may still lose if the spike feels slower than expected |
-| Unity | Strong challenger | Mature animation/content workflow and broad production familiarity | Proprietary engine posture and packaging friction must not erase its workflow benefits |
-| Unreal | Conditional option | Visual upside and tooling depth are real | Iteration, build size, and macOS overhead may be too costly for the target scope |
+| Godot | Approved path | Only engine that completed the local spike, exported a macOS app, and matched the project's openness goals | Preserve export and input reliability as production grows |
+| Unity | Deferred | Editor binaries are installed, but the project path is blocked by missing license activation | Revisit only if future art or tooling needs justify the extra proprietary friction |
+| Unreal | Deferred | No local editor install, and the launcher immediately routes to Epic login before download | Revisit only if the visual target proves unattainable elsewhere |
 
 Recommendation today:
-- best engine for prototype: `TBD after spike`, with Godot as the default tie-break winner if scores are close
-- best engine for long-term development: `TBD after spike`
-- best engine for macOS practicality: `TBD after spike`
-- best engine for future open-source posture: Godot by default, pending confirmation that the gameplay workflow is sufficient
+- best engine for prototype: Godot 4.6.1
+- best engine for long-term development: Godot unless later production evidence forces a re-evaluation
+- best engine for macOS practicality: Godot on current machine evidence
+- best engine for future open-source posture: Godot
 
 Override rule:
 - choose Unity only if it clearly wins gameplay iteration or art-animation throughput
@@ -395,15 +396,16 @@ Override rule:
 ## 18. MVP Scope
 
 - Characters: 2
-- Enemy types: 6 to 8
-- Bosses: 2
+- Enemy archetypes: 6
+- Boss encounters: 3
 - Stages: 3
-- Must-have systems: polished core melee kit, strong enemy variety, clear onboarding, stable save/progression stub, replay hooks, macOS distribution workflow
+- Must-have systems: polished core melee kit, strong enemy variety, clear onboarding, persistent save/progression, stage select or replay flow, rank/time hooks, and macOS distribution workflow
 - Cuttable systems: extra camera modes, multiple specials per character, advanced metaprogression, environmental destruction breadth
 - Postponed systems: online play, branching story, large unlock trees, procedural content
 - Open-source preparation needs: provenance hygiene, dependency review, contributor-safe layout, restricted-asset replacement plan
 - Enough to test market interest means: one clear hook, one clear visual identity, and a stable external build that makes players ask for more
 - Too big means: more than three stages, more than two prototype-quality characters, or any attempt to add online before the loop is proven
+- Save/profile contract: persist options, cleared stages, unlocked character state, and best rank/time per stage.
 
 ## 19. Workflow and Task Management
 
@@ -471,24 +473,24 @@ See [`docs/risk_register.md`](/Users/himu/Desktop/career/personal_projects/wildc
 ## 25. Final Recommendation
 
 - Approved concept direction: `Wildcoil`
-- Best engine: `TBD after spike`, with Godot as the default tie-break preference
+- Best engine: Godot 4.6.1
 - Best solo / co-op strategy: solo-only first playable, local-co-op-ready architecture, online deferred
 - Best visual direction: controlled 2.5D with stylized 3D or hybrid assets and strict silhouette discipline
 - Best sound direction: percussion plus failing-machine resonance with sharp, tactile combat layers
 - Best prototype scope: one character, one short stage, three enemies, one elite/miniboss, one spectacle beat
-- Best MVP scope: three stages, two characters, six to eight enemies, two bosses
+- Best MVP scope: three stages, two characters, six enemy archetypes, three boss encounters
 - Best workflow approach: validation-first with `to-do.md` as the public control plane
 - Best testing discipline: early hands-on macOS tests, explicit gate checklists, and external playtests before promotion
 - Biggest risks: engine friction, originality drift, and readability collapse under combat chaos
 - Biggest opportunities: a memorable visual lane and a macOS-native prototype that feels better than its content breadth suggests
 - Next research steps:
-  - run the three engine spikes
   - pressure-test the approved concept against the inspiration log
   - expand similar-game research with market-facing notes
-  - draft the Phase 1 combat sandbox backlog in more detail after the engine pick
-- Top 5 immediate tasks to add to `to-do.md`:
-  - run the Godot micro-spike
-  - run the Unity micro-spike
-  - run the Unreal micro-spike
-  - score engines and lock the path
-  - lock the Phase 1 backlog
+  - capture controller hardware notes once a physical pad is attached
+  - keep the macOS packaging notes current as the production app replaces the spike
+- Top 5 immediate tasks in the frozen backlog:
+  - create the production scaffold
+  - implement player locomotion and input
+  - implement the combat core
+  - implement enemy systems
+  - build Stage 1 first playable

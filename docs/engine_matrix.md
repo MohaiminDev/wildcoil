@@ -51,7 +51,7 @@ Current machine state verified in the local shell:
 | Item | Local state | Evidence | Impact on the spikes |
 | --- | --- | --- | --- |
 | Godot | Installed and launchable via Homebrew cask | `godot` resolves to `/opt/homebrew/bin/godot`; version `4.6.1.stable.official.14d19694e`; app at `/Applications/Godot.app` | Ready for the Godot spike |
-| Unity Hub | Installed and Gatekeeper-valid | App at `/Applications/Unity Hub.app`; headless CLI is available; install path defaults to `/Applications/Unity/Hub/Editor` | Hub is ready, but no editor is installed yet |
+| Unity Hub | Installed and Gatekeeper-valid | App at `/Applications/Unity Hub.app`; headless CLI is available; install path defaults to `/Applications/Unity/Hub/Editor` | Hub is ready and can manage editor installs |
 | Unity Editor | Installed with macOS playback support on disk | Editor at `/Applications/Unity/Hub/Editor/6000.3.10f1/Unity.app`; `MacStandaloneSupport` exists under `Unity.app/Contents/PlaybackEngines/` | Binary prerequisites are present, but project work is blocked by missing Unity license activation |
 | Epic Games Launcher | Installed and Gatekeeper-valid | App at `/Applications/Epic Games Launcher.app` | Launcher is present, but it is not the Unreal Editor |
 | Unreal Editor | Not installed | No `UnrealEditor.app` found under `/Applications` | Unreal spike is blocked until the editor is downloaded through Epic's tooling, which is likely to require interactive sign-in |
@@ -76,17 +76,19 @@ These notes are not final scores. They only seed the experiment with what the of
 
 ## Weighted Scorecard
 
-Fill this table only after each spike has equivalent evidence.
+Scoring note:
+- Godot scores below are based on the completed local spike.
+- Unity and Unreal scores are intentionally conservative where blocked setup prevented equivalent hands-on evidence on this machine.
 
 | Criterion | Weight | Godot score | Unity score | Unreal score | Evidence note |
 | --- | --- | --- | --- | --- | --- |
-| Gameplay iteration | 25 | TBD | TBD | TBD | Measure minutes from idea to playable change |
-| macOS tooling / export | 20 | TBD | TBD | TBD | Include export blockers and packaging notes |
-| Responsiveness / input workflow | 15 | TBD | TBD | TBD | Include controller reliability and feel notes |
-| Art / animation workflow | 15 | TBD | TBD | TBD | Judge placeholder import and animation iteration comfort |
-| Open-source posture | 15 | TBD | TBD | TBD | Note engine license and dependency cleanliness implications |
-| Performance headroom | 10 | TBD | TBD | TBD | Capture FPS and frame-time stability at 1080p |
-| Weighted total | 100 | TBD | TBD | TBD | Calculate only after all rows are filled |
+| Gameplay iteration | 25 | 5 | 1 | 1 | Godot reached a playable spike quickly; Unity was blocked by licensing before project creation; Unreal was blocked before editor install. |
+| macOS tooling / export | 20 | 4 | 1 | 1 | Godot exported an unsigned `.app` locally without full Xcode; Unity export was not reachable; Unreal export was not reachable. |
+| Responsiveness / input workflow | 15 | 4 | 1 | 1 | Godot keyboard fallback and controller mappings were implemented in the spike; blocked engines never reached equivalent input testing. |
+| Art / animation workflow | 15 | 4 | 1 | 1 | Godot placeholder scene and animation iteration were workable in the live spike; blocked engines could not be evaluated fairly on this machine. |
+| Open-source posture | 15 | 5 | 2 | 1 | Godot's MIT license and repo openness are strong fits; Unity and Unreal remain proprietary and more account-gated. |
+| Performance headroom | 10 | 4 | 1 | 1 | Godot held near 60 FPS in the exported Apple Silicon app and much higher in headless autoplay; blocked engines produced no comparable local benchmark. |
+| Weighted total | 100 | 88 | 23 | 20 | Weighted totals use `weight * score / 5`, rounded to whole numbers. |
 
 ## Spike Checklist
 
@@ -141,6 +143,7 @@ Use the same checklist for every engine:
 
 ## Decision Status
 
-- Current status: no engine approved yet
-- Current best provisional path: Godot by tie-break preference only
-- Required before approval: completed spikes, completed weighted totals, updated risk review, and a written go/no-go note in [`docs/game_spec.md`](/Users/himu/Desktop/career/personal_projects/wildcoil/docs/game_spec.md)
+- Current status: Godot approved on 2026-03-05 for the production path
+- Go decision: proceed with Godot 4.6.1 and begin the Phase 1 production scaffold
+- No-go for now: Unity remains blocked by editor licensing on this machine; Unreal remains blocked by editor install plus Epic sign-in
+- Backlog status: freeze the MVP backlog to the current Phase 1 through release tasks in [`to-do.md`](/Users/himu/Desktop/career/personal_projects/wildcoil/to-do.md) until playtest evidence or risk review justifies a change

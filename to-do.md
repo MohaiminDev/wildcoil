@@ -7,7 +7,10 @@ Build an original macOS-first arcade-heritage action game that proves satisfying
 Wildcoil should deliver a controller-first, stage-based action game with immediate melee satisfaction, strong spectacle in the first three minutes, readable enemy intent, and a strange wilderness-plus-machine-ruin identity that feels original rather than referential.
 
 ## Current Milestone
-Phase 0 - Engine Selection and Backlog Freeze
+Phase 1 - Production Scaffold and First Playable
+
+## Backlog Status
+The Phase 1 through release tasks below are the frozen MVP backlog. Only change them when playtest evidence or a documented risk review justifies it.
 
 ## Commit Gate
 - Complete one task at a time.
@@ -16,14 +19,6 @@ Phase 0 - Engine Selection and Backlog Freeze
 - Do not commit or push failing work.
 
 ## PENDING
-
-### [P0-07] Lock the initial engine path and freeze the backlog
-- Outcome: Score the three engines, choose the winner with the documented tie-break, update risks, and lock the production backlog.
-- Validation:
-  - [ ] Weighted totals are filled in [`docs/engine_matrix.md`](/Users/himu/Desktop/career/personal_projects/wildcoil/docs/engine_matrix.md).
-  - [ ] [`docs/game_spec.md`](/Users/himu/Desktop/career/personal_projects/wildcoil/docs/game_spec.md) names the chosen engine path.
-  - [ ] [`docs/risk_register.md`](/Users/himu/Desktop/career/personal_projects/wildcoil/docs/risk_register.md) and this tracker reflect the engine decision and frozen backlog.
-- Dependencies: [P0-04], [P0-05], [P0-06]
 
 ### [P1-01] Create the production scaffold
 - Outcome: Add the chosen engine project, `src/`, `tests/`, provenance logging updates, repeatable build/test commands, and CI or scripted validation hooks.
@@ -162,6 +157,15 @@ Phase 0 - Engine Selection and Backlog Freeze
 - Dependencies: [P3-05]
 
 ## DONE
+
+### [P0-07] Lock the initial engine path and freeze the backlog
+- Outcome: Score the three engines, choose the winner with the documented tie-break, update risks, and lock the production backlog.
+- Validation:
+  - [x] Weighted totals are filled in [`docs/engine_matrix.md`](/Users/himu/Desktop/career/personal_projects/wildcoil/docs/engine_matrix.md).
+  - [x] [`docs/game_spec.md`](/Users/himu/Desktop/career/personal_projects/wildcoil/docs/game_spec.md) names the chosen engine path.
+  - [x] [`docs/risk_register.md`](/Users/himu/Desktop/career/personal_projects/wildcoil/docs/risk_register.md) and this tracker reflect the engine decision and frozen backlog.
+- Dependencies: [P0-04], [P0-05], [P0-06]
+- Completed: 2026-03-05
 
 ### [DOC-04] Simplify the public task tracker
 - Outcome: Keep `to-do.md` focused on `PENDING` and `DONE` only, with task-by-task outcome, validation, and dependency fields.

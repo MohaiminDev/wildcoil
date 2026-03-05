@@ -5,7 +5,8 @@ This is the living risk register for the project. Update it whenever a decision,
 ## Current Decision State
 
 - `Wildcoil` is the approved concept direction as of 2026-03-05.
-- The remaining Phase 0 gate is engine selection plus backlog freeze.
+- Godot 4.6.1 is the approved production engine path as of 2026-03-05.
+- The MVP backlog is frozen to the current Phase 1 through release tasks in [`to-do.md`](/Users/himu/Desktop/career/personal_projects/wildcoil/to-do.md) until playtest evidence or a documented risk review changes it.
 - Originality risk remains open at the execution level: silhouettes, enemy factions, props, and pacing still need to stay distinct during implementation.
 
 ## Active Risks
@@ -15,7 +16,7 @@ This is the living risk register for the project. Update it whenever a decision,
 | R-01 | Design | Combat feels technically correct but not satisfying | Phase 1 fails if hits and movement are soft | Medium | High | Testers stop after one run, vague “feels off” comments | Prioritize feel before content breadth; review hitstop, recovery, enemy reactions early | Solo developer | Prototype experiment + playtest | Open |
 | R-02 | Originality | World, enemies, props, or pacing drift too close to familiar genre references during execution | Violates the contract and weakens market clarity even after concept lock | Medium | High | Testers name another game first when describing Wildcoil | Maintain inspiration log, review silhouettes and faction logic before prototype lock, and recheck enemy or prop designs at each milestone | Solo developer | Concept review + scope change | Open |
 | R-03 | Scope | Solo part-time schedule cannot absorb feature creep | Timeline collapses before first playable ships | High | High | “Just one more system” thinking, stage count inflation | Freeze prototype scope and defer co-op/online/progression extras | Solo developer | Scope reduction | Open |
-| R-04 | Engine / tool | Chosen engine creates disproportionate macOS or workflow pain | Lost weeks and weak prototype quality | Medium | High | Export blockers, long iteration loop, brittle input setup | Run identical spikes and score them before committing | Solo developer | Engine comparison | Open |
+| R-04 | Engine / tool | The Godot production path diverges from the successful spike and starts creating disproportionate macOS or workflow pain | Lost weeks and weak prototype quality even after a good Phase 0 decision | Low-medium | High | Export regressions, long iteration loop, brittle input setup, or controller hot-plug failures in the production project | Keep the spike evidence as the baseline, document build commands in README, and re-run export/input checks at each phase gate | Solo developer | Repeated build and input validation | Mitigating |
 | R-05 | Animation production | Target presentation needs too much bespoke animation polish too early | Prototype stalls waiting on art quality | Medium | Medium-high | Graybox combat reads poorly without expensive polish | Use strong poses and reactions first; defer complex flourishes | Solo developer | Mockup + prototype experiment | Open |
 | R-06 | Performance | Effects, lighting, or scene complexity hurt Apple Silicon frame stability | Fails the macOS gate and damages feel | Medium | High | Frame drops during early spectacle moments | Budget VFX early, capture frame-time notes in every spike | Solo developer | Benchmark + optimization pass | Open |
 | R-07 | Packaging | Packaging, codesign, or notarization blocks external testing | Playtests slip and macOS-first promise weakens | Medium | High | “Works locally only” build situation | Dry-run export path early and keep notes current | Solo developer | Packaging experiment | Open |
@@ -39,6 +40,7 @@ Use this table to keep reference influence visible and safe.
 
 ## Review Cadence
 
-- Review after every engine spike.
+- Phase 0 engine review closed on 2026-03-05 with Godot selected.
+- Review after every major build or export milestone.
 - Review after every external playtest round.
 - Review before any phase gate.
