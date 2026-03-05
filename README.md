@@ -1,6 +1,6 @@
 # Wildcoil
 
-Wildcoil is a documentation-first solo action game project for macOS. The current goal is to lock Phase 0 direction and ship a Phase 1 first playable within 12 weeks of kickoff, following the rules in [`arcade_heritage_game_master_contract.txt`](/Users/himu/Desktop/career/personal_projects/wildcoil/arcade_heritage_game_master_contract.txt).
+Wildcoil is a documentation-first solo action game project for macOS. The concept direction is now locked on `Wildcoil`; the current goal is to complete Phase 0 engine selection and ship a Phase 1 first playable within 12 weeks of kickoff, following the rules in [`arcade_heritage_game_master_contract.txt`](/Users/himu/Desktop/career/personal_projects/wildcoil/arcade_heritage_game_master_contract.txt).
 
 ## Current Working Docs
 
@@ -20,4 +20,4 @@ Wildcoil is a documentation-first solo action game project for macOS. The curren
 
 ## Current Milestone
 
-Phase 0: choose one original concept direction, one prototype plan, one initial engine path, and one risk-prioritized milestone backlog backed by validation evidence.
+Phase 0: `Wildcoil` is the approved concept direction. The remaining gate is to choose one prototype plan, one initial engine path, and one risk-prioritized milestone backlog backed by validation evidence.

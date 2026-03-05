@@ -2,12 +2,18 @@
 
 This is the living risk register for the project. Update it whenever a decision, spike, or playtest changes the actual risk picture.
 
+## Current Decision State
+
+- `Wildcoil` is the approved concept direction as of 2026-03-05.
+- The remaining Phase 0 gate is engine selection plus backlog freeze.
+- Originality risk remains open at the execution level: silhouettes, enemy factions, props, and pacing still need to stay distinct during implementation.
+
 ## Active Risks
 
 | ID | Category | Risk | Why it matters | Likelihood | Impact | Early warning signs | Mitigation | Owner | Resolution method | Status |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | R-01 | Design | Combat feels technically correct but not satisfying | Phase 1 fails if hits and movement are soft | Medium | High | Testers stop after one run, vague “feels off” comments | Prioritize feel before content breadth; review hitstop, recovery, enemy reactions early | Solo developer | Prototype experiment + playtest | Open |
-| R-02 | Originality | World, enemies, or pacing drift too close to familiar genre references | Violates the contract and weakens market clarity | Medium | High | Testers name another game first when describing Wildcoil | Maintain inspiration log, review silhouettes and faction logic before prototype lock | Solo developer | Concept review + scope change | Open |
+| R-02 | Originality | World, enemies, props, or pacing drift too close to familiar genre references during execution | Violates the contract and weakens market clarity even after concept lock | Medium | High | Testers name another game first when describing Wildcoil | Maintain inspiration log, review silhouettes and faction logic before prototype lock, and recheck enemy or prop designs at each milestone | Solo developer | Concept review + scope change | Open |
 | R-03 | Scope | Solo part-time schedule cannot absorb feature creep | Timeline collapses before first playable ships | High | High | “Just one more system” thinking, stage count inflation | Freeze prototype scope and defer co-op/online/progression extras | Solo developer | Scope reduction | Open |
 | R-04 | Engine / tool | Chosen engine creates disproportionate macOS or workflow pain | Lost weeks and weak prototype quality | Medium | High | Export blockers, long iteration loop, brittle input setup | Run identical spikes and score them before committing | Solo developer | Engine comparison | Open |
 | R-05 | Animation production | Target presentation needs too much bespoke animation polish too early | Prototype stalls waiting on art quality | Medium | Medium-high | Graybox combat reads poorly without expensive polish | Use strong poses and reactions first; defer complex flourishes | Solo developer | Mockup + prototype experiment | Open |

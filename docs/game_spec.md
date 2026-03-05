@@ -1,10 +1,10 @@
 # Wildcoil Living Game Spec
 
-Schedule A-aligned working draft for Phase 0. This document is meant to stay current as decisions harden. It is intentionally concrete enough to start work from, while leaving engine choice and a few research-heavy items open until the required spike evidence exists.
+Schedule A-aligned working draft for Phase 0. The concept direction is now locked on `Wildcoil`, while the engine path and a few research-heavy items remain open until the required spike evidence exists.
 
 ## 1. Executive Summary
 
-- Recommended game direction: `Wildcoil`, a solo-first action adventure about fighting through storm-fed wilds grown around dead machine-serpents and buried relay ruins.
+- Approved game direction: `Wildcoil`, a solo-first action adventure about fighting through storm-fed wilds grown around dead machine-serpents and buried relay ruins.
 - Target audience: players who want modern beat-'em-up immediacy, readable melee combat, and a distinctive pulp-tech wilderness identity without live-service bloat.
 - Product thesis: deliver a tight macOS-native first playable where movement, hits, and spectacle sell the game before content breadth does.
 - Core design pillars: immediate impact, readable chaos, strange wilderness identity, and ruthless scope discipline.
@@ -13,7 +13,6 @@ Schedule A-aligned working draft for Phase 0. This document is meant to stay cur
 - Prototype priorities: first combat within 30 seconds, first wow moment within 3 minutes, one memorable miniboss encounter, and validation evidence for all gate calls.
 - Major risks: originality drift, engine/tool friction on macOS, solo-production art cost, and combat readability under enemy stacks.
 - Immediate next steps:
-  - approve or replace the recommended concept winner
   - run the same micro-spike in Godot, Unity, and Unreal
   - lock the Phase 1 backlog only after the scorecard and risk review are updated
 
@@ -189,9 +188,9 @@ Emotional qualities worth preserving: directness, swagger, forward momentum, and
 | 4 | Emberfen Wardens | Mood is strong, but the hook is slower and heavier than the target first session |
 | 5 | Skyshard Salvage | Visually attractive, but verticality threatens scope and stage readability |
 
-Recommended winner: `Wildcoil`.
+Approved concept: `Wildcoil`.
 
-Why it wins now:
+Why it is locked now:
 - strongest visual and pitch coherence with the repository identity
 - easiest path to a compelling first three minutes without overbuilding traversal
 - good fit for melee-first crowd control and a spectacle-forward miniboss
@@ -471,7 +470,7 @@ See [`docs/risk_register.md`](/Users/himu/Desktop/career/personal_projects/wildc
 
 ## 25. Final Recommendation
 
-- Best concept direction: `Wildcoil`
+- Approved concept direction: `Wildcoil`
 - Best engine: `TBD after spike`, with Godot as the default tie-break preference
 - Best solo / co-op strategy: solo-only first playable, local-co-op-ready architecture, online deferred
 - Best visual direction: controlled 2.5D with stylized 3D or hybrid assets and strict silhouette discipline
@@ -484,7 +483,7 @@ See [`docs/risk_register.md`](/Users/himu/Desktop/career/personal_projects/wildc
 - Biggest opportunities: a memorable visual lane and a macOS-native prototype that feels better than its content breadth suggests
 - Next research steps:
   - run the three engine spikes
-  - pressure-test the concept winner against the inspiration log
+  - pressure-test the approved concept against the inspiration log
   - expand similar-game research with market-facing notes
   - draft the Phase 1 combat sandbox backlog in more detail after the engine pick
 - Top 5 immediate tasks to add to `to-do.md`:
@@ -492,4 +491,4 @@ See [`docs/risk_register.md`](/Users/himu/Desktop/career/personal_projects/wildc
   - run the Unity micro-spike
   - run the Unreal micro-spike
   - score engines and lock the path
-  - approve the concept direction and Phase 1 backlog
+  - lock the Phase 1 backlog

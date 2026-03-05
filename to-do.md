@@ -7,7 +7,7 @@ Build an original macOS-first arcade-heritage action game that proves satisfying
 Wildcoil should deliver a controller-first, stage-based action game with immediate melee satisfaction, strong spectacle in the first three minutes, readable enemy intent, and a strange wilderness-plus-machine-ruin identity that feels original rather than referential.
 
 ## Current Milestone
-Phase 0 - Discovery and Direction Lock
+Phase 0 - Engine Selection and Backlog Freeze
 
 ## Commit Gate
 - Complete one task at a time.
@@ -16,14 +16,6 @@ Phase 0 - Discovery and Direction Lock
 - Do not commit or push failing work.
 
 ## PENDING
-
-### [P0-02] Approve the Wildcoil concept direction
-- Outcome: Mark `Wildcoil` as the approved concept winner across the Phase 0 docs and keep MVP scope solo-first.
-- Validation:
-  - [ ] [`docs/game_spec.md`](/Users/himu/Desktop/career/personal_projects/wildcoil/docs/game_spec.md) explicitly says the concept is approved, not just recommended.
-  - [ ] [`README.md`](/Users/himu/Desktop/career/personal_projects/wildcoil/README.md) and this tracker reflect the approved direction and MVP target.
-  - [ ] [`docs/risk_register.md`](/Users/himu/Desktop/career/personal_projects/wildcoil/docs/risk_register.md) is updated for the locked concept direction.
-- Dependencies: [DOC-04]
 
 ### [P0-03] Verify the engine toolchain on this machine
 - Outcome: Confirm local availability or installation status for Godot, Unity, Unreal, Xcode, and the minimum macOS export prerequisites needed for the engine comparison.
@@ -210,6 +202,15 @@ Phase 0 - Discovery and Direction Lock
   - [x] Every task entry includes outcome, validation, and dependency details.
   - [x] The tracker documents the one-task-at-a-time green-test commit gate.
 - Dependencies: None
+- Completed: 2026-03-05
+
+### [P0-02] Approve the Wildcoil concept direction
+- Outcome: Mark `Wildcoil` as the approved concept winner across the Phase 0 docs and keep MVP scope solo-first.
+- Validation:
+  - [x] [`docs/game_spec.md`](/Users/himu/Desktop/career/personal_projects/wildcoil/docs/game_spec.md) explicitly says the concept is approved, not just recommended.
+  - [x] [`README.md`](/Users/himu/Desktop/career/personal_projects/wildcoil/README.md) and this tracker reflect the approved direction and MVP target.
+  - [x] [`docs/risk_register.md`](/Users/himu/Desktop/career/personal_projects/wildcoil/docs/risk_register.md) is updated for the locked concept direction.
+- Dependencies: [DOC-04]
 - Completed: 2026-03-05
 
 ### [P0-01] Draft the Schedule A-aligned living spec
