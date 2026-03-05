@@ -52,7 +52,7 @@ Current machine state verified in the local shell:
 | --- | --- | --- | --- |
 | Godot | Installed and launchable via Homebrew cask | `godot` resolves to `/opt/homebrew/bin/godot`; version `4.6.1.stable.official.14d19694e`; app at `/Applications/Godot.app` | Ready for the Godot spike |
 | Unity Hub | Installed and Gatekeeper-valid | App at `/Applications/Unity Hub.app`; headless CLI is available; install path defaults to `/Applications/Unity/Hub/Editor` | Hub is ready, but no editor is installed yet |
-| Unity Editor | Not installed | `Unity Hub -- --headless editors --installed --json` returned `[]`; `/Applications/Unity/Hub/Editor` has no editor content yet | Unity spike is blocked until an editor is installed, which may require additional download time and interactive sign-in or licensing |
+| Unity Editor | Installed with macOS playback support on disk | Editor at `/Applications/Unity/Hub/Editor/6000.3.10f1/Unity.app`; `MacStandaloneSupport` exists under `Unity.app/Contents/PlaybackEngines/` | Binary prerequisites are present, but project work is blocked by missing Unity license activation |
 | Epic Games Launcher | Installed and Gatekeeper-valid | App at `/Applications/Epic Games Launcher.app` | Launcher is present, but it is not the Unreal Editor |
 | Unreal Editor | Not installed | No `UnrealEditor.app` found under `/Applications` | Unreal spike is blocked until the editor is downloaded through Epic's tooling, which is likely to require interactive sign-in |
 | Xcode | Full app missing | `/Applications/Xcode.app` is absent; `xcodebuild -version` fails because `xcode-select` points at `/Library/Developer/CommandLineTools` | Full Xcode-dependent export workflows are blocked right now |
@@ -60,7 +60,7 @@ Current machine state verified in the local shell:
 
 Machine-level conclusion:
 - Godot is the only engine that is immediately ready for a real local spike.
-- Unity is partially prepared because the Hub and headless CLI are installed, but the editor itself is still missing.
+- Unity is installed far enough to launch the editor and verify that macOS playback support files exist, but project work is blocked by editor licensing.
 - Unreal is only prepared at the launcher level, and the actual editor is still unavailable.
 - Full Xcode is still missing, so any workflow that depends on `xcodebuild` remains blocked until the app is installed and selected.
 
@@ -115,13 +115,13 @@ Use the same checklist for every engine:
 
 ### Unity
 
-- Spike status: blocked on editor install
-- Export result: TBD
-- Controller result: TBD
-- Performance result: TBD
-- Workflow notes: Unity Hub 3.16.3 is installed locally and exposes the headless CLI, but no editor is installed yet.
-- Packaging notes: Expect additional install time plus possible sign-in or licensing steps before the spike can begin.
-- Score summary: TBD
+- Spike status: blocked on license activation before project creation
+- Export result: not reached. The editor exits before project creation or build steps because no valid Unity Editor license is active on this machine.
+- Controller result: not reached because no runnable Unity project was created in this session.
+- Performance result: not reached because no runnable Unity project was created in this session.
+- Workflow notes: Unity Hub 3.16.3 successfully listed Apple Silicon releases; Unity 6000.3.10f1 installed to `/Applications/Unity/Hub/Editor/6000.3.10f1/Unity.app`; Rosetta 2 was installed; batchmode launch then failed with `No valid Unity Editor license found. Please activate your license.`
+- Packaging notes: `MacStandaloneSupport` exists under `Unity.app/Contents/PlaybackEngines/`, so the macOS payload appears present even though the Hub reported a failed module install. The real blocker is licensing, not the editor download.
+- Score summary: blocked. The editor cannot be scored fairly for iteration or export until a valid license is activated on this machine.
 
 ### Unreal
 
