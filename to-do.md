@@ -20,14 +20,6 @@ The Phase 1 through release tasks below are the frozen MVP backlog. Only change 
 
 ## PENDING
 
-### [P2-04] Run the vertical-slice test pass
-- Outcome: Playtest the vertical slice, fix blockers, and lock the MVP expansion target.
-- Validation:
-  - [ ] [`docs/playtest_log.md`](/Users/himu/Desktop/career/personal_projects/wildcoil/docs/playtest_log.md) records the slice test round.
-  - [ ] Blocking findings are fixed or explicitly accepted.
-  - [ ] The current test suite passes.
-- Dependencies: [P2-03]
-
 ### [P3-01] Add the second playable character
 - Outcome: Introduce a second character with a meaningfully different mobility and combat profile.
 - Validation:
@@ -94,7 +86,16 @@ The Phase 1 through release tasks below are the frozen MVP backlog. Only change 
   - [x] [`docs/macos_build_and_distribution.md`](/Users/himu/Desktop/career/personal_projects/wildcoil/docs/macos_build_and_distribution.md) reflects the active build workflow.
   - [x] The current test suite passes.
 - Dependencies: [P2-02]
-- Completed: 2026-03-05 (`1fd8d7f`)
+- Completed: 2026-03-05 (`07a95ed`)
+
+### [P2-04] Run the vertical-slice test pass
+- Outcome: Playtest the vertical slice, fix blockers, and lock the MVP expansion target.
+- Validation:
+  - [x] [`docs/playtest_log.md`](/Users/himu/Desktop/career/personal_projects/wildcoil/docs/playtest_log.md) records the slice test round.
+  - [x] Blocking findings are fixed or explicitly accepted.
+  - [x] The current test suite passes.
+- Dependencies: [P2-03]
+- Completed: 2026-03-05 (`e771dff`)
 
 ### [P2-01] Promote Stage 1 into a vertical slice
 - Outcome: Upgrade Stage 1 with target-leaning art/audio, cleaner camera and VFX discipline, and a full boss fight.

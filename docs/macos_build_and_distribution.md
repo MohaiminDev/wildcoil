@@ -152,14 +152,14 @@ Current Phase 2 packaging workflow:
 - Export target: `build/macos/Wildcoil.app`
 - Packaging format: `.app` bundle plus `build/macos/Wildcoil-phase2-progression-macos.zip`
 - Artifact size: `.app` is `176M`; ZIP is `59M`
-- ZIP SHA-256: `652c492de217ed8fc5033f3855b03d72ba6189b4d6be43e0318257ec3bfdff7f`
-- Checksum path: `/tmp/wildcoil_p203_build/Wildcoil-phase2-progression-macos.zip.sha256`
+- ZIP SHA-256: `3f8555a91f4e1d31870bec0163e1370c8de79e6875ecb9cec4fc492870c66874`
+- Checksum path: `build/macos/Wildcoil-phase2-progression-macos.zip.sha256`
 - Binary architecture: universal Mach-O (`x86_64` and `arm64`)
 - Signing status: ad hoc / linker-signed only; `spctl --assess -vv build/macos/Wildcoil.app` reports `source=no usable signature`
 - Notarization status: not attempted in this phase
 - Controller devices tested: none attached during this pass
 - Keyboard fallback tested: yes; live smoke entered the mission board and stage runtime successfully
-- Save persistence tested: yes; a seeded profile reloaded into the mission board and the saved best record rendered correctly before stage launch
+- Save persistence tested: yes; the exported app saved borderless fullscreen to an isolated profile and relaunched back into that saved view state
 - Validation gate: `./scripts/check.sh`, `./scripts/package_macos.sh`, and live local smoke using a saved profile override
-- Issues found: focus-loss/resume, audio-device change, and controller-device coverage still need dedicated release-candidate validation
+- Issues found: focus-loss/resume, audio-device change, and controller-device coverage still need dedicated release-candidate validation; the export preset excludes the local `storm_warden_boss` experiments so untracked test files do not leak into packaged artifacts
 - Follow-up action: repeat the smoke pass against the packaged app with a physical controller attached, then cover focus-loss/resume and audio-device changes during the release-candidate gate

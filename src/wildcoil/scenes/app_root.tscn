@@ -15,20 +15,25 @@ offset_right = 720.0
 offset_bottom = 260.0
 
 [node name="Panel" type="PanelContainer" parent="HUD/Margin"]
+custom_minimum_size = Vector2(700, 250)
 
 [node name="VBox" type="VBoxContainer" parent="HUD/Margin/Panel"]
+theme_override_constants/separation = 8
 
 [node name="Status" type="Label" parent="HUD/Margin/Panel/VBox"]
 text = "Booting Wildcoil first playable..."
 autowrap_mode = 3
+theme_override_font_sizes/font_size = 18
 
 [node name="Objective" type="Label" parent="HUD/Margin/Panel/VBox"]
 text = "Objective: Booting objective..."
 autowrap_mode = 3
+theme_override_font_sizes/font_size = 18
 
 [node name="BossLabel" type="Label" parent="HUD/Margin/Panel/VBox"]
 text = "Boss offline"
 visible = false
+theme_override_font_sizes/font_size = 18
 
 [node name="BossBar" type="ProgressBar" parent="HUD/Margin/Panel/VBox"]
 visible = false
@@ -38,6 +43,7 @@ value = 100.0
 [node name="Controls" type="Label" parent="HUD/Margin/Panel/VBox"]
 text = "Controls loading..."
 autowrap_mode = 3
+theme_override_font_sizes/font_size = 16
 
 [node name="PauseOverlay" type="CanvasLayer" parent="."]
 layer = 2
@@ -60,15 +66,18 @@ offset_bottom = 900.0
 custom_minimum_size = Vector2(620, 220)
 
 [node name="VBox" type="VBoxContainer" parent="PauseOverlay/Center/Panel"]
+theme_override_constants/separation = 10
 
 [node name="Title" type="Label" parent="PauseOverlay/Center/Panel/VBox"]
 text = "Paused"
 horizontal_alignment = 1
+theme_override_font_sizes/font_size = 24
 
 [node name="Body" type="Label" parent="PauseOverlay/Center/Panel/VBox"]
 text = "Esc resume"
 horizontal_alignment = 1
 autowrap_mode = 3
+theme_override_font_sizes/font_size = 18
 
 [node name="MissionOverlay" type="CanvasLayer" parent="."]
 layer = 3
@@ -80,22 +89,26 @@ offset_right = 1600.0
 offset_bottom = 900.0
 
 [node name="Panel" type="PanelContainer" parent="MissionOverlay/Center"]
-custom_minimum_size = Vector2(760, 320)
+custom_minimum_size = Vector2(860, 380)
 
 [node name="VBox" type="VBoxContainer" parent="MissionOverlay/Center/Panel"]
+theme_override_constants/separation = 14
 
 [node name="Title" type="Label" parent="MissionOverlay/Center/Panel/VBox"]
 text = "Mission Board"
 horizontal_alignment = 1
+theme_override_font_sizes/font_size = 30
 
 [node name="Body" type="Label" parent="MissionOverlay/Center/Panel/VBox"]
 text = "Loading mission board..."
 autowrap_mode = 3
+theme_override_font_sizes/font_size = 20
 
 [node name="Footer" type="Label" parent="MissionOverlay/Center/Panel/VBox"]
 text = "Enter deploy"
 horizontal_alignment = 1
 autowrap_mode = 3
+theme_override_font_sizes/font_size = 18
 
 [node name="Audio" type="Node" parent="."]
 
