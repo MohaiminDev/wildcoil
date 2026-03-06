@@ -11,6 +11,7 @@ Wildcoil is a macOS-first solo action game project. The concept direction is loc
 - [`docs/playtest_log.md`](/Users/himu/Desktop/career/personal_projects/wildcoil/docs/playtest_log.md): playtest capture template and gate checklist
 - [`docs/asset_provenance_register.md`](/Users/himu/Desktop/career/personal_projects/wildcoil/docs/asset_provenance_register.md): asset and dependency provenance tracker
 - [`docs/macos_build_and_distribution.md`](/Users/himu/Desktop/career/personal_projects/wildcoil/docs/macos_build_and_distribution.md): tester build, packaging, and notarization planning notes
+- [`docs/tester_feedback_intake.md`](/Users/himu/Desktop/career/personal_projects/wildcoil/docs/tester_feedback_intake.md): outside-tester collection flow and triage rules
 
 ## Repo Shape
 
@@ -59,6 +60,12 @@ CI mirror:
 
 - [`.github/workflows/macos-check.yml`](/Users/himu/Desktop/career/personal_projects/wildcoil/.github/workflows/macos-check.yml) runs the same validation gate on a hosted macOS runner
 
+## Live Tester Release
+
+- GitHub prerelease: [`v0.1.0-tester`](https://github.com/MohaiminDev/wildcoil/releases/tag/v0.1.0-tester)
+- Hosted assets: `Wildcoil-phase3-finale-macos.zip` and `Wildcoil-phase3-finale-macos.zip.sha256`
+- Feedback path: open the GitHub `Tester Feedback` issue form or summarize sessions into [`docs/playtest_log.md`](/Users/himu/Desktop/career/personal_projects/wildcoil/docs/playtest_log.md) using [`docs/tester_feedback_intake.md`](/Users/himu/Desktop/career/personal_projects/wildcoil/docs/tester_feedback_intake.md)
+
 ## Current Milestone
 
-Phase 2: progression systems, mission-board shell, and vertical-slice hardening on the locked Godot path.
+Post-release follow-up: collect outside-tester feedback, close the physical-controller coverage gap, and decide the first post-tester patch set from real play data.

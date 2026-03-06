@@ -1,0 +1,100 @@
+name: Tester Feedback
+description: Capture outside feedback for the live Wildcoil tester release.
+title: "[Tester Feedback]: "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for trying Wildcoil. Please focus on what felt strong, what felt confusing, and anything that blocked play on macOS.
+
+  - type: input
+    id: release_tag
+    attributes:
+      label: Release tag or build
+      description: For example `v0.1.0-tester`
+      placeholder: v0.1.0-tester
+    validations:
+      required: true
+
+  - type: input
+    id: mac_setup
+    attributes:
+      label: Mac model and macOS version
+      placeholder: MacBook Air M1, macOS 26.3
+    validations:
+      required: true
+
+  - type: dropdown
+    id: input_method
+    attributes:
+      label: Input method
+      options:
+        - Keyboard
+        - Controller
+        - Both
+    validations:
+      required: true
+
+  - type: input
+    id: controller_details
+    attributes:
+      label: Controller details
+      description: If you used a controller, note the model and whether it was wired or wireless.
+      placeholder: DualSense wireless
+
+  - type: dropdown
+    id: install_experience
+    attributes:
+      label: Install and launch experience
+      options:
+        - Smooth
+        - Minor friction
+        - Blocking problem
+    validations:
+      required: true
+
+  - type: textarea
+    id: first_impression
+    attributes:
+      label: What clicked immediately
+      description: Combat feel, art direction, stage flow, readability, or anything else that felt strong.
+    validations:
+      required: true
+
+  - type: textarea
+    id: confusion_points
+    attributes:
+      label: What felt confusing or unfair
+      description: Include cheap damage, unreadable telegraphs, menu confusion, or controller issues.
+    validations:
+      required: true
+
+  - type: textarea
+    id: performance_audio
+    attributes:
+      label: Performance, audio, or windowing issues
+      description: FPS drops, hitching, focus-loss problems, fullscreen issues, or device-switching issues.
+
+  - type: dropdown
+    id: replay_desire
+    attributes:
+      label: Would you play another run or stage?
+      options:
+        - Yes
+        - Maybe
+        - No
+    validations:
+      required: true
+
+  - type: input
+    id: comparison
+    attributes:
+      label: What game did Wildcoil remind you of first?
+      description: This helps track originality risk.
+      placeholder: Streets of Rage 4
+
+  - type: textarea
+    id: final_notes
+    attributes:
+      label: Final notes or screenshots
+      description: Add any extra notes, reproduction steps, or links to screenshots or clips.
