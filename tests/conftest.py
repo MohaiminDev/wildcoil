@@ -4,6 +4,7 @@ import json
 import os
 import subprocess
 from pathlib import Path
+from typing import Mapping, Optional
 
 import pytest
 
@@ -14,14 +15,20 @@ GODOT_BIN = os.environ.get("GODOT_BIN", "godot")
 RESULT_MARKER = "WILDCOIL_TEST_RESULTS "
 
 
-def run_godot(*args: str) -> subprocess.CompletedProcess[str]:
+def run_godot(
+    *args: str, env: Optional[Mapping[str, str]] = None
+) -> subprocess.CompletedProcess[str]:
     command = [GODOT_BIN, *args]
+    runtime_env = os.environ.copy()
+    if env:
+        runtime_env.update(env)
     return subprocess.run(
         command,
         cwd=ROOT,
         capture_output=True,
         text=True,
         check=False,
+        env=runtime_env,
     )
 
 

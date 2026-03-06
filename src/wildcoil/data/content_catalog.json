@@ -1,11 +1,12 @@
 {
-  "build_label": "phase2-vertical-slice",
+  "build_label": "phase2-progression",
   "characters": [
     {
       "id": "mira_coil",
       "name": "Mira Coil",
       "playstyle": "balanced_striker",
-      "locked": false
+      "locked": false,
+      "summary": "Balanced storm-runner tuned for clean reads and steady pressure."
     }
   ],
   "stages": [
@@ -15,7 +16,14 @@
       "scene": "res://scenes/stages/relay_clearing.tscn",
       "order": 1,
       "biome": "storm_basin_edge",
-      "spectacle_target_seconds": 180
+      "spectacle_target_seconds": 180,
+      "locked": false,
+      "summary": "Stabilize the relay heart before the storm warden buries the clearing.",
+      "opening_objective": "Push into the relay clearing",
+      "mid_objective": "Reach the relay heart",
+      "boss_intro_objective": "Brace for the relay warden",
+      "boss_objective": "Break the relay warden",
+      "clear_objective": "Relay heart stabilized. Stage clear."
     }
   ]
 }

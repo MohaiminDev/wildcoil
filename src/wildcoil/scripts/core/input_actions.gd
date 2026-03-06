@@ -12,6 +12,12 @@ const SPECIAL_ATTACK: StringName = &"special_attack"
 const RESTART_CHECKPOINT: StringName = &"restart_checkpoint"
 const PAUSE: StringName = &"pause"
 const FULLSCREEN: StringName = &"fullscreen"
+const MENU_LEFT: StringName = &"menu_left"
+const MENU_RIGHT: StringName = &"menu_right"
+const MENU_UP: StringName = &"menu_up"
+const MENU_DOWN: StringName = &"menu_down"
+const MENU_CONFIRM: StringName = &"menu_confirm"
+const MENU_BACK: StringName = &"menu_back"
 
 
 static func ensure_default_actions() -> void:
@@ -26,6 +32,12 @@ static func ensure_default_actions() -> void:
 	ensure_action(RESTART_CHECKPOINT)
 	ensure_action(PAUSE)
 	ensure_action(FULLSCREEN)
+	ensure_action(MENU_LEFT)
+	ensure_action(MENU_RIGHT)
+	ensure_action(MENU_UP)
+	ensure_action(MENU_DOWN)
+	ensure_action(MENU_CONFIRM)
+	ensure_action(MENU_BACK)
 
 	add_key(MOVE_LEFT, KEY_A)
 	add_key(MOVE_LEFT, KEY_LEFT)
@@ -47,6 +59,19 @@ static func ensure_default_actions() -> void:
 	add_key(PAUSE, KEY_ESCAPE)
 	add_key(FULLSCREEN, KEY_F11)
 	add_key(FULLSCREEN, KEY_F)
+	add_key(MENU_LEFT, KEY_A)
+	add_key(MENU_LEFT, KEY_LEFT)
+	add_key(MENU_RIGHT, KEY_D)
+	add_key(MENU_RIGHT, KEY_RIGHT)
+	add_key(MENU_UP, KEY_W)
+	add_key(MENU_UP, KEY_UP)
+	add_key(MENU_DOWN, KEY_S)
+	add_key(MENU_DOWN, KEY_DOWN)
+	add_key(MENU_CONFIRM, KEY_ENTER)
+	add_key(MENU_CONFIRM, KEY_KP_ENTER)
+	add_key(MENU_CONFIRM, KEY_SPACE)
+	add_key(MENU_BACK, KEY_ESCAPE)
+	add_key(MENU_BACK, KEY_BACKSPACE)
 
 	add_joy_motion(MOVE_LEFT, JOY_AXIS_LEFT_X, -1.0)
 	add_joy_motion(MOVE_RIGHT, JOY_AXIS_LEFT_X, 1.0)
@@ -57,6 +82,12 @@ static func ensure_default_actions() -> void:
 	add_joy_button(LAUNCH_ATTACK, JOY_BUTTON_RIGHT_SHOULDER)
 	add_joy_button(SPECIAL_ATTACK, JOY_BUTTON_LEFT_SHOULDER)
 	add_joy_button(PAUSE, JOY_BUTTON_START)
+	add_joy_button(MENU_LEFT, JOY_BUTTON_DPAD_LEFT)
+	add_joy_button(MENU_RIGHT, JOY_BUTTON_DPAD_RIGHT)
+	add_joy_button(MENU_UP, JOY_BUTTON_DPAD_UP)
+	add_joy_button(MENU_DOWN, JOY_BUTTON_DPAD_DOWN)
+	add_joy_button(MENU_CONFIRM, JOY_BUTTON_A)
+	add_joy_button(MENU_BACK, JOY_BUTTON_B)
 
 
 static func ensure_action(action_name: StringName) -> void:

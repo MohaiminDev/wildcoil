@@ -7,7 +7,7 @@ Build an original macOS-first arcade-heritage action game that proves satisfying
 Wildcoil should deliver a controller-first, stage-based action game with immediate melee satisfaction, strong spectacle in the first three minutes, readable enemy intent, and a strange wilderness-plus-machine-ruin identity that feels original rather than referential.
 
 ## Current Milestone
-Phase 1 - Production Scaffold and First Playable
+Phase 2 - Progression and Slice Hardening
 
 ## Backlog Status
 The Phase 1 through release tasks below are the frozen MVP backlog. Only change them when playtest evidence or a documented risk review justifies it.
@@ -19,14 +19,6 @@ The Phase 1 through release tasks below are the frozen MVP backlog. Only change 
 - Do not commit or push failing work.
 
 ## PENDING
-
-### [P2-02] Implement progression and validation systems
-- Outcome: Add save/load, stage select, rank/time scoring, unlock tracking, and content validation checks.
-- Validation:
-  - [ ] Automated tests cover save/load, scoring, unlocks, and content validation.
-  - [ ] Manual smoke checks confirm saves persist and load safely.
-  - [ ] The current test suite passes.
-- Dependencies: [P2-01]
 
 ### [P2-03] Harden the production pipeline
 - Outcome: Update provenance, dependency and license review, packaging notes, and automated build/test flow for ongoing production.
@@ -93,6 +85,15 @@ The Phase 1 through release tasks below are the frozen MVP backlog. Only change 
 - Dependencies: [P3-05]
 
 ## DONE
+
+### [P2-02] Implement progression and validation systems
+- Outcome: Add save/load, stage select, rank/time scoring, unlock tracking, and content validation checks.
+- Validation:
+  - [x] Automated tests cover save/load, scoring, unlocks, and content validation.
+  - [x] Manual smoke checks confirm saves persist and load safely.
+  - [x] The current test suite passes.
+- Dependencies: [P2-01]
+- Completed: 2026-03-05 (`affbe72`)
 
 ### [P2-01] Promote Stage 1 into a vertical slice
 - Outcome: Upgrade Stage 1 with target-leaning art/audio, cleaner camera and VFX discipline, and a full boss fight.

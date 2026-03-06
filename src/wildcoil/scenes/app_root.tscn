@@ -70,6 +70,33 @@ text = "Esc resume"
 horizontal_alignment = 1
 autowrap_mode = 3
 
+[node name="MissionOverlay" type="CanvasLayer" parent="."]
+layer = 3
+
+[node name="Center" type="CenterContainer" parent="MissionOverlay"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_right = 1600.0
+offset_bottom = 900.0
+
+[node name="Panel" type="PanelContainer" parent="MissionOverlay/Center"]
+custom_minimum_size = Vector2(760, 320)
+
+[node name="VBox" type="VBoxContainer" parent="MissionOverlay/Center/Panel"]
+
+[node name="Title" type="Label" parent="MissionOverlay/Center/Panel/VBox"]
+text = "Mission Board"
+horizontal_alignment = 1
+
+[node name="Body" type="Label" parent="MissionOverlay/Center/Panel/VBox"]
+text = "Loading mission board..."
+autowrap_mode = 3
+
+[node name="Footer" type="Label" parent="MissionOverlay/Center/Panel/VBox"]
+text = "Enter deploy"
+horizontal_alignment = 1
+autowrap_mode = 3
+
 [node name="Audio" type="Node" parent="."]
 
 [node name="ExploreLoop" type="AudioStreamPlayer" parent="Audio"]

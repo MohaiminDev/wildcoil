@@ -15,6 +15,7 @@ var movement_model := PlayerMotorModel.new()
 var combat_model := PlayerCombatModel.new()
 var movement_state: Dictionary = {}
 var combat_state: Dictionary = {}
+var character_definition: Dictionary = {}
 
 @onready var camera: Camera2D = $Camera2D
 
@@ -77,7 +78,8 @@ func get_debug_status() -> String:
 		movement_name = "dodging"
 	elif not bool(movement_state.get("on_floor", true)):
 		movement_name = "airborne"
-	return "Player HP: %d  Combat: %s  Move: %s  Pos: (%.0f, %.0f)  Vel: (%.0f, %.0f)" % [
+	return "%s  HP: %d  Combat: %s  Move: %s  Pos: (%.0f, %.0f)  Vel: (%.0f, %.0f)" % [
+		str(character_definition.get("name", "Operator")),
 		get_health(),
 		combat_model.get_state_name(combat_state),
 		movement_name,
@@ -127,6 +129,10 @@ func reset_to_checkpoint(checkpoint_position: Vector2) -> void:
 	velocity = Vector2.ZERO
 	movement_state = movement_model.make_default_state()
 	combat_state = combat_model.reset_for_checkpoint(combat_state)
+
+
+func apply_character_definition(new_character_definition: Dictionary) -> void:
+	character_definition = new_character_definition.duplicate(true)
 
 
 func get_stage_bounds() -> Vector2:

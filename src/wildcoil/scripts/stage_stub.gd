@@ -33,6 +33,8 @@ const COIL_COLOR := Color("75e4bc")
 const SPARK_COLOR := Color("f2c86f")
 const RELAY_COLOR := Color("dffff3")
 
+@export var stage_id := "relay_clearing"
+
 var checkpoint_reset_count := 0
 var hitstop_timer := 0.0
 var elapsed_time := 0.0
@@ -47,6 +49,8 @@ var boss_intro_timer := 0.0
 var boss_seen := false
 var stage_complete := false
 var screen_flash_timer := 0.0
+var run_context: Dictionary = {}
+var stage_definition: Dictionary = {}
 
 
 func _ready() -> void:
@@ -60,6 +64,18 @@ func _ready() -> void:
 		boss_actor.stage = self
 	reset_to_checkpoint()
 	queue_redraw()
+
+
+func configure_run(new_run_context: Dictionary) -> void:
+	run_context = new_run_context.duplicate(true)
+	if typeof(run_context.get("stage_definition", {})) == TYPE_DICTIONARY:
+		stage_definition = run_context.get("stage_definition", {}).duplicate(true)
+		stage_id = str(stage_definition.get("id", stage_id))
+	if stage_phase == "approach":
+		stage_objective = get_opening_objective()
+	var player_ref := get_player()
+	if player_ref != null and player_ref.has_method("apply_character_definition"):
+		player_ref.call("apply_character_definition", run_context.get("character_definition", {}))
 
 
 func _physics_process(delta: float) -> void:
@@ -86,7 +102,7 @@ func advance_stage_flow(delta: float) -> void:
 		spectacle_progress = 1.0 - spectacle_timer / SPECTACLE_DURATION
 		if spectacle_timer <= 0.0:
 			stage_phase = "advance"
-			stage_objective = "Reach the relay heart"
+			stage_objective = get_mid_stage_objective()
 			spectacle_progress = 1.0
 	elif spectacle_time >= 0.0:
 		spectacle_progress = 1.0
@@ -353,7 +369,7 @@ func start_boss_intro() -> void:
 		return
 	boss_seen = true
 	stage_phase = "boss_intro"
-	stage_objective = "Brace for the relay warden"
+	stage_objective = get_boss_intro_objective()
 	boss_intro_timer = BOSS_INTRO_DURATION
 	screen_flash_timer = 0.8
 	var boss_actor := get_boss_actor()
@@ -363,7 +379,7 @@ func start_boss_intro() -> void:
 
 func start_boss_fight() -> void:
 	stage_phase = "boss"
-	stage_objective = "Break the relay warden"
+	stage_objective = get_boss_objective()
 	var boss_actor := get_boss_actor()
 	if boss_actor != null:
 		boss_actor.activate()
@@ -375,7 +391,7 @@ func complete_stage() -> void:
 	stage_complete = true
 	finish_time = elapsed_time
 	stage_phase = "clear"
-	stage_objective = "Relay heart stabilized. Stage clear."
+	stage_objective = get_clear_objective()
 	screen_flash_timer = 0.9
 
 
@@ -400,7 +416,7 @@ func reset_to_checkpoint() -> void:
 	hitstop_timer = 0.0
 	elapsed_time = 0.0
 	stage_phase = "approach"
-	stage_objective = "Push into the relay clearing"
+	stage_objective = get_opening_objective()
 	first_combat_time = -1.0
 	spectacle_time = -1.0
 	finish_time = -1.0
@@ -446,6 +462,8 @@ func get_stage_summary() -> Dictionary:
 		boss_state = boss_actor.get_state_name()
 		boss_health_ratio = boss_actor.get_health_ratio()
 	return {
+		"stage_id": stage_id,
+		"stage_name": get_stage_name(),
 		"phase": stage_phase,
 		"objective": stage_objective,
 		"elapsed_seconds": elapsed_time,
@@ -497,3 +515,27 @@ func format_optional_seconds(value: float) -> String:
 	if value < 0.0:
 		return "--"
 	return "%.1fs" % value
+
+
+func get_stage_name() -> String:
+	return str(stage_definition.get("name", "Relay Clearing"))
+
+
+func get_opening_objective() -> String:
+	return str(stage_definition.get("opening_objective", "Push into the relay clearing"))
+
+
+func get_mid_stage_objective() -> String:
+	return str(stage_definition.get("mid_objective", "Reach the relay heart"))
+
+
+func get_boss_intro_objective() -> String:
+	return str(stage_definition.get("boss_intro_objective", "Brace for the relay warden"))
+
+
+func get_boss_objective() -> String:
+	return str(stage_definition.get("boss_objective", "Break the relay warden"))
+
+
+func get_clear_objective() -> String:
+	return str(stage_definition.get("clear_objective", "Relay heart stabilized. Stage clear."))
