@@ -97,6 +97,7 @@ Current Phase 2 packaging workflow:
 - Local packaging: `./scripts/package_macos.sh`
 - Packaging guardrail: `scripts/package_macos.sh` reruns `./scripts/check.sh` unless `SKIP_CHECK=1` is set intentionally for a local iteration-only pass
 - Hosted CI mirror: [`.github/workflows/macos-check.yml`](/Users/himu/Desktop/career/personal_projects/wildcoil/.github/workflows/macos-check.yml)
+- Hosted tester release: [`v0.1.0-tester`](https://github.com/MohaiminDev/wildcoil/releases/tag/v0.1.0-tester)
 - CI scope: installs Godot on a macOS runner, installs `pytest`, and executes the same local validation gate used before task commits
 - Export hygiene: the macOS export preset excludes local experimental `storm_warden_boss` scene/script files so untracked scratch assets do not leak into tester builds
 
@@ -175,7 +176,7 @@ Current Phase 2 packaging workflow:
 - Export target: `build/macos/Wildcoil.app`
 - Packaging format: `.app` bundle plus `build/macos/Wildcoil-phase3-finale-macos.zip`
 - Artifact size: `.app` is `176M`; ZIP is `58M`
-- ZIP SHA-256: `9ac87a38a56238b459cffda985c8fbecd4f6817da90c82342d750120853c2e64`
+- ZIP SHA-256: `55654b35b797b1cd3afada0c2c0a84b4262eef7c8ed68cd6c000c6eabccca623`
 - Checksum path: `build/macos/Wildcoil-phase3-finale-macos.zip.sha256`
 - Binary architecture: universal Mach-O (`x86_64` and `arm64`)
 - Signing status: ad hoc / linker-signed only; `spctl --assess -vv build/macos/Wildcoil.app` reports `source=no usable signature`
@@ -188,4 +189,27 @@ Current Phase 2 packaging workflow:
 - Performance sample: `godot --path src/wildcoil --script res://tools/runtime_test_runner.gd -- --suite performance_sample` reported `60.13 FPS` average with a `59 FPS` 5th-percentile floor at `960x540` points on a `2.0` scale display, which is a 1080p-equivalent sample on this Retina panel
 - Validation gate: `./scripts/check.sh`, `./scripts/package_macos.sh`, packaged-app live smoke, `SwitchAudioSource` output swap, and the performance sample suite
 - Issues found: physical controller hardware is still unavailable on this machine, and the app remains unsigned and unnotarized
-- Follow-up action: publish the internal tester release with keyboard-first install notes, then use the release itself to gather physical-controller and outside-tester feedback
+- Follow-up action: GitHub tester release published at [`v0.1.0-tester`](https://github.com/MohaiminDev/wildcoil/releases/tag/v0.1.0-tester); next follow-up is outside-tester and physical-controller feedback
+
+### 2026-03-05 - Public Tester Release Verification
+
+- Date: 2026-03-05
+- Build label: `v0.1.0-tester`
+- Engine: Godot
+- Engine version: 4.6.1.stable.official.14d19694e
+- Xcode version: full Xcode not installed on this machine; unsigned export path used
+- Release URL: [`v0.1.0-tester`](https://github.com/MohaiminDev/wildcoil/releases/tag/v0.1.0-tester)
+- Export target: hosted ZIP download unpacked to a fresh temp directory
+- Packaging format: GitHub Release asset pair `Wildcoil-phase3-finale-macos.zip` plus `Wildcoil-phase3-finale-macos.zip.sha256`
+- Artifact size: hosted ZIP is `58.4 MB`; hosted checksum sidecar is `165 bytes`
+- ZIP SHA-256: `55654b35b797b1cd3afada0c2c0a84b4262eef7c8ed68cd6c000c6eabccca623`
+- Checksum path: downloaded `Wildcoil-phase3-finale-macos.zip.sha256` validated successfully with `shasum -a 256 -c`
+- Binary architecture: universal Mach-O (`x86_64` and `arm64`)
+- Signing status: unsigned / ad hoc bundle inside the hosted ZIP
+- Notarization status: not attempted; no Developer ID identity configured on this machine
+- Controller devices tested: none attached during the hosted-release smoke
+- Keyboard fallback tested: not exercised in gameplay during this shorter hosted-artifact pass
+- Save persistence tested: yes; first launch from the downloaded app wrote a fresh version-2 profile with the default unlocked state
+- Validation gate: hosted asset page check, direct ZIP download, checksum verification, unzip, and first-launch smoke using `WILDCOIL_SAVE_PATH` against an isolated profile
+- Issues found: the hosted build remains unsigned and unnotarized, and the physical-controller gap is still open
+- Follow-up action: route the live release to outside testers and add controller-specific findings once hardware is available

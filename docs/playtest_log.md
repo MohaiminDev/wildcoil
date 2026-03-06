@@ -14,6 +14,7 @@ Use this log for all external tests and any internal hands-on checks that materi
 - 2026-03-05: Phase 3 onboarding and accessibility smoke completed on Apple Silicon using a fresh profile, with the first-run mission briefing visible on boot and the live options panel applying high-contrast HUD, reduced motion, and lower screen-flash settings immediately.
 - 2026-03-05: Release-candidate smoke completed on the packaged macOS app, with live deploy, focus-loss auto-pause, audio-output switching, and a 1080p-equivalent performance sample all passing locally.
 - 2026-03-05: Physical controller hardware and outside testers are still future coverage gaps, but they are no longer blocking the internal tester release because the packaged build, keyboard fallback, focus-loss handling, audio-device switching, and synthetic controller checks all passed.
+- 2026-03-05: GitHub tester release `v0.1.0-tester` is live, and a public-download smoke verified the hosted ZIP checksum, unzip flow, and fresh profile creation from the downloaded app on Apple Silicon.
 
 ## Phase 1 Gate Targets
 
@@ -36,6 +37,7 @@ Use this log for all external tests and any internal hands-on checks that materi
 | 2026-03-05 | `phase3-finale` | Codex (internal finale smoke) | Apple M1, editor runtime with a seeded unlocked profile for Storm Crown and the finale notice flow | Keyboard | `242.6s` from direct Stage 3 deploy in the live smoke | Deterministic finale suite covered the clear and ending notice; live smoke focused on mission-board launch, pause or resume, HID keyboard input, and first-contact combat in Storm Crown | Yes | AppleScript text keystrokes were not enough for gameplay movement on macOS, so the smoke switched to HID-posted key events for the live input check; physical controller coverage is still missing | None repeated in local smoke | Storm Crown loaded from the real shell, the HUD showed Mira move from `(-620, 140)` to `(141, 140)` under live keyboard input, health dropped to `84` on the first combat beat, and the objective shifted to `Break the crown wardens`, which made the finale route feel like a real escalation instead of a shell-only proof | Carry the HID-style smoke workflow into the release-candidate pass, and keep physical-controller coverage open until hardware is available |
 | 2026-03-05 | `phase3-polish` | Codex (internal onboarding and accessibility smoke) | Apple M1, editor runtime with a fresh profile and the mission-board options shell | Keyboard | Not measured; the smoke focused on shell onboarding rather than route timing | Not measured; the smoke stayed in the shell to validate first-run briefing plus comfort settings | Yes | None blocking in the shell; physical controller coverage is still missing and focus-loss plus audio-device checks remain release-candidate work | None repeated in local smoke | A fresh save booted straight into a first-run briefing on Relay Clearing, `Esc` opened the comfort panel immediately, and live keyboard input flipped high-contrast HUD, reduced motion, and lower screen flash without leaving the mission board | Carry the shell options flow into the release-candidate packaging pass and keep controller plus focus-loss validation open until the next gate |
 | 2026-03-05 | `phase3-release-candidate` | Codex (packaged app smoke) | Apple M1, exported `Wildcoil.app` launched from `build/macos` with an isolated save profile | Keyboard | `2.2s` from packaged-app stage deploy | Focus of the session was packaging, OS-behavior recovery, and performance rather than spectacle timing | Yes | No physical controller attached; unsigned app still needs Finder `Open` flow or direct binary launch for testers | None repeated in local smoke | The packaged app deployed cleanly, focus-loss returned to an auto-paused overlay, audio survived a switch from `iMac Speakers` to `ATR2100x-USB Microphone` and back, and the 1080p-equivalent performance sample landed at `60.13 FPS` average with a `59 FPS` 5th-percentile floor | Publish the tester release with keyboard-first guidance, then gather physical-controller and outside-tester feedback from the release itself |
+| 2026-03-05 | `v0.1.0-tester` | Codex (public release smoke) | Apple M1, hosted GitHub release ZIP downloaded to a fresh temp directory and launched with an isolated save profile | Launch smoke from downloaded build | Not measured; the smoke verified release delivery rather than route timing | Not measured; the smoke focused on hosted artifact integrity and first boot | Not measured | No controller attached and no full gameplay loop was attempted; the smoke was intentionally limited to checksum, unzip, and first-launch verification | None observed in the short launch smoke | The hosted ZIP checksum matched the published `.sha256` file, the downloaded app unpacked cleanly, and first launch wrote a fresh version-2 profile with Relay Clearing and Mira selected by default | Hand the live release to outside testers and add physical-controller feedback when hardware is available |
 
 ## Session Notes
 
@@ -142,6 +144,21 @@ Use this log for all external tests and any internal hands-on checks that materi
 - When the tester smiled, laughed, or verbally reacted: the strongest positive reaction came from seeing the packaged app keep running through an actual output-device swap and then watching the performance sample report a stable near-60 result
 - Whether the tester asked to play again: yes
 - Highest-priority fix: put the unsigned-launch guidance and known controller-coverage gap directly into the release notes so tester expectations stay clear
+
+### Session ID: `2026-03-05-public-release-smoke`
+
+- Build identifier: `v0.1.0-tester`
+- Engine / branch: Godot 4.6.1 / `codex/wildcoil-mvp`
+- Tester familiarity with brawlers: high
+- Hardware: Apple M1 Mac
+- Controller type: none connected
+- Session length: short hosted-artifact verification focused on download, checksum, unzip, and first launch
+- What clicked immediately: the public GitHub release path behaved like a real tester handoff instead of a local-only export, and the downloaded app booted cleanly enough to create a fresh save profile immediately
+- What confused the tester: no gameplay confusion surfaced because the smoke intentionally stopped at delivery and first-boot validation; unsigned-launch guidance is still required for broader tester distribution
+- Where the tester took damage unfairly: no combat took place in this smoke
+- When the tester smiled, laughed, or verbally reacted: the strongest positive reaction came from seeing the hosted ZIP checksum match the local sidecar and then confirming the downloaded app created a version-2 profile on first boot
+- Whether the tester asked to play again: not measured
+- Highest-priority fix: collect real outside-tester and physical-controller feedback now that the hosted release path itself is verified
 
 ## Session Notes Template
 

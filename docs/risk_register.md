@@ -11,6 +11,7 @@ This is the living risk register for the project. Update it whenever a decision,
 - 2026-03-05 local Phase 1 smoke found first combat comfortably under the 30-second target and the exported macOS build stable.
 - 2026-03-05 internal Phase 2 slice review confirmed the new mission-board shell and save loop are working, and the repeated readability blocker was reduced with a typography and panel-size pass in [`src/wildcoil/scenes/app_root.tscn`](/Users/himu/Desktop/career/personal_projects/wildcoil/src/wildcoil/scenes/app_root.tscn).
 - 2026-03-05 packaged release-candidate smoke verified focus-loss auto-pause, audio-device switching, and a 1080p-equivalent performance sample at `60.13 FPS` average / `59 FPS` 5th percentile in the local environment.
+- 2026-03-05 GitHub tester release `v0.1.0-tester` published successfully, and a public-download smoke verified the hosted ZIP checksum plus fresh-profile creation from the downloaded app.
 
 ## Active Risks
 
@@ -26,7 +27,7 @@ This is the living risk register for the project. Update it whenever a decision,
 | R-08 | Input | Controller behavior is unreliable on macOS | Core platform-fit requirement fails | Medium | High | Hot-plug issues, bad prompts, deadzone complaints | Test at least two controllers plus keyboard early | Solo developer | Input testing | Mitigating - keyboard, focus-loss, packaged-app input, and synthetic controller checks passed; physical controller hardware is still unverified locally |
 | R-09 | Readability | Enemy stacks, HUD density, or effects create cheap damage or slow comprehension | Players lose trust and stop replaying | Medium | High | Repeated “I couldn't tell what hit me” or “I can't read this quickly” comments | Limit overlap, simplify silhouettes, enlarge typography where needed, and restrain VFX plus camera shake | Solo developer | Playtest + design iteration | Mitigating - Phase 2 UI readability pass landed, combat readability still needs external confirmation |
 | R-10 | Open-source transition | Placeholder assets or plugins become long-term traps | Future repo release becomes legally or structurally messy | Medium | Medium-high | Unclear provenance, marketplace dependence, undocumented imports | Track every dependency and placeholder from day one | Solo developer | Process change + provenance review | Open |
-| R-11 | Testing blind spots | Self-testing misses clarity, fairness, or pacing failures | Bad decisions survive too long | High | High | Feedback surprises after external playtests | Schedule 5 to 8 outside sessions for Phase 1 | Solo developer | Player testing | Open - GitHub tester release is the next coverage step |
+| R-11 | Testing blind spots | Self-testing misses clarity, fairness, or pacing failures | Bad decisions survive too long | High | High | Feedback surprises after external playtests | Schedule 5 to 8 outside sessions for Phase 1 | Solo developer | Player testing | Mitigating - GitHub tester release published on 2026-03-05; outside-tester and physical-controller feedback are now the remaining gap |
 | R-12 | Market clarity | The hook feels too familiar or too vague to pitch quickly | Harder to earn attention even if the combat is decent | Medium | Medium-high | One-sentence pitch needs too much explanation | Keep concept, art, and audio language tightly aligned | Solo developer | Concept refinement | Open |
 
 ## Inspiration Risk Log
@@ -46,6 +47,7 @@ Use this table to keep reference influence visible and safe.
 - Phase 0 engine review closed on 2026-03-05 with Godot selected.
 - Phase 1 local gate evidence captured on 2026-03-05; exported macOS build is stable, but outside-tester validation is still pending.
 - Release-candidate local gate evidence captured on 2026-03-05; packaged app, focus-loss recovery, audio-device switching, and the 1080p-equivalent performance sample all passed locally.
+- Public tester release published on 2026-03-05; hosted asset verification and fresh-download launch smoke passed locally, but outside-tester validation is still pending.
 - Review after every major build or export milestone.
 - Review after every external playtest round.
 - Review before any phase gate.
