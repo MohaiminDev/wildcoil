@@ -3,7 +3,7 @@ from __future__ import annotations
 from conftest import PROJECT_DIR, parse_result_line, run_godot
 
 
-def test_runtime_smoke_suite_passes() -> None:
+def test_movement_model_suite_passes() -> None:
     result = run_godot(
         "--headless",
         "--path",
@@ -12,19 +12,20 @@ def test_runtime_smoke_suite_passes() -> None:
         "res://tools/runtime_test_runner.gd",
         "--",
         "--suite",
-        "smoke",
+        "movement_model",
     )
     combined_output = result.stdout + result.stderr
     assert result.returncode == 0, combined_output
 
     payload = parse_result_line(combined_output)
     assert payload["passed"] is True
-    assert payload["build_label"] == "phase1-scaffold"
-    assert payload["stage_ids"] == ["relay_clearing"]
-    assert payload["character_count"] == 1
+    assert payload["move_velocity_x"] > 0.0
+    assert payload["jump_velocity_y"] < 0.0
+    assert payload["dodge_velocity_x"] < 0.0
+    assert payload["dodge_timer"] > 0.0
 
 
-def test_default_stage_scene_instantiates() -> None:
+def test_input_device_suite_passes() -> None:
     result = run_godot(
         "--headless",
         "--path",
@@ -33,11 +34,13 @@ def test_default_stage_scene_instantiates() -> None:
         "res://tools/runtime_test_runner.gd",
         "--",
         "--suite",
-        "stage_scene",
+        "input_device",
     )
     combined_output = result.stdout + result.stderr
     assert result.returncode == 0, combined_output
 
     payload = parse_result_line(combined_output)
     assert payload["passed"] is True
-    assert payload["stage_root_name"] == "RelayClearing"
+    assert payload["actions_present"] is True
+    assert payload["active_scheme"] == "keyboard"
+    assert payload["connected_pad_count"] == 0
