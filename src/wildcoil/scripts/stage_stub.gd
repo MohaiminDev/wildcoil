@@ -8,6 +8,10 @@ const ENEMY_SPAWNS := {
 	"SporeSlinger": Vector2(320.0, 140.0),
 	"CoilBrute": Vector2(560.0, 140.0),
 }
+const FIRST_FIGHT_TRIGGER_X := -120.0
+const EXIT_TRIGGER_X := 720.0
+const SPECTACLE_DURATION := 3.6
+const SPECTACLE_TARGET_SECONDS := 180.0
 
 @onready var player: PlayerController = $Player
 @onready var enemies_root: Node2D = $Enemies
@@ -18,9 +22,20 @@ const MIST_COLOR := Color("183342")
 const GROUND_COLOR := Color("2e4a39")
 const COIL_COLOR := Color("6ee0b5")
 const SPARK_COLOR := Color("ffc65c")
+const RELAY_COLOR := Color("dffff3")
 
 var checkpoint_reset_count := 0
 var hitstop_timer := 0.0
+var elapsed_time := 0.0
+var stage_phase := "approach"
+var stage_objective := "Push into the relay clearing"
+var first_combat_time := -1.0
+var spectacle_time := -1.0
+var finish_time := -1.0
+var spectacle_timer := 0.0
+var spectacle_progress := 0.0
+var stage_complete := false
+var screen_flash_timer := 0.0
 
 
 func _ready() -> void:
@@ -35,6 +50,35 @@ func _ready() -> void:
 
 func _physics_process(delta: float) -> void:
 	hitstop_timer = maxf(hitstop_timer - delta, 0.0)
+	advance_stage_flow(delta)
+	queue_redraw()
+
+
+func advance_stage_flow(delta: float) -> void:
+	elapsed_time += delta
+	screen_flash_timer = maxf(screen_flash_timer - delta, 0.0)
+	var player_ref := get_player()
+	if player_ref == null:
+		return
+
+	if stage_phase == "approach" and player_ref.global_position.x >= FIRST_FIGHT_TRIGGER_X:
+		start_first_fight()
+
+	if stage_phase == "combat" and get_live_enemy_count() == 0:
+		trigger_spectacle()
+
+	if stage_phase == "spectacle":
+		spectacle_timer = maxf(spectacle_timer - delta, 0.0)
+		spectacle_progress = 1.0 - spectacle_timer / SPECTACLE_DURATION
+		if spectacle_timer <= 0.0:
+			stage_phase = "advance"
+			stage_objective = "Reach the energized relay beacon"
+			spectacle_progress = 1.0
+	elif spectacle_time >= 0.0:
+		spectacle_progress = 1.0
+
+	if stage_phase == "advance" and player_ref.global_position.x >= EXIT_TRIGGER_X:
+		complete_stage()
 
 
 func _draw() -> void:
@@ -52,6 +96,59 @@ func _draw() -> void:
 	draw_line(Vector2(160.0, 30.0), Vector2(280.0, -82.0), Color("ffc65c"), 4.0)
 	draw_rect(Rect2(CHECKPOINT_POSITION + Vector2(-18.0, -110.0), Vector2(10.0, 110.0)), Color("f9db8a"), true)
 	draw_rect(Rect2(CHECKPOINT_POSITION + Vector2(-32.0, -110.0), Vector2(38.0, 12.0)), Color("fff0b7"), true)
+
+	draw_goal_beacon()
+	draw_phase_marker()
+	if stage_phase == "combat":
+		draw_combat_barrier()
+	if spectacle_time >= 0.0:
+		draw_spectacle_event()
+	if screen_flash_timer > 0.0:
+		draw_rect(Rect2(-960.0, -540.0, 1920.0, 1080.0), Color(1.0, 0.97, 0.83, minf(screen_flash_timer * 0.32, 0.32)), true)
+
+
+func draw_goal_beacon() -> void:
+	var beacon_color := Color("5a7f72")
+	if stage_phase == "advance" or stage_complete:
+		beacon_color = Color("dffff3")
+	draw_rect(Rect2(Vector2(EXIT_TRIGGER_X - 14.0, -90.0), Vector2(18.0, 230.0)), beacon_color, true)
+	draw_rect(Rect2(Vector2(EXIT_TRIGGER_X - 36.0, -98.0), Vector2(54.0, 16.0)), Color("fff4ba"), true)
+	if stage_phase == "advance" or stage_complete:
+		draw_circle(Vector2(EXIT_TRIGGER_X - 4.0, -112.0), 24.0 + 6.0 * sin(elapsed_time * 4.0), Color(0.88, 1.0, 0.95, 0.25))
+
+
+func draw_phase_marker() -> void:
+	var marker_x := FIRST_FIGHT_TRIGGER_X
+	var marker_color := Color("9de7cb")
+	if stage_phase == "advance" or stage_complete or spectacle_time >= 0.0:
+		marker_x = EXIT_TRIGGER_X
+		marker_color = RELAY_COLOR
+	draw_line(Vector2(marker_x, -210.0), Vector2(marker_x, -150.0), marker_color, 5.0)
+	draw_circle(Vector2(marker_x, -224.0), 10.0, marker_color)
+
+
+func draw_combat_barrier() -> void:
+	var barrier_alpha := 0.18 + 0.10 * absf(sin(elapsed_time * 5.0))
+	var barrier_color := Color(0.47, 0.94, 0.78, barrier_alpha)
+	draw_rect(Rect2(Vector2(EXIT_TRIGGER_X - 36.0, -260.0), Vector2(18.0, 420.0)), barrier_color, true)
+	draw_rect(Rect2(Vector2(EXIT_TRIGGER_X - 20.0, -260.0), Vector2(14.0, 420.0)), Color(0.85, 1.0, 0.95, barrier_alpha + 0.06), true)
+
+
+func draw_spectacle_event() -> void:
+	var progress := spectacle_progress
+	if progress < 1.0:
+		progress = clampf(progress, 0.0, 1.0)
+	var head_position := Vector2(lerpf(-860.0, 900.0, progress), -250.0 - sin(progress * PI) * 120.0)
+	for segment_index in range(7):
+		var segment_progress := progress - float(segment_index) * 0.06
+		if segment_progress < 0.0:
+			continue
+		var segment_position := Vector2(lerpf(-900.0, 860.0, segment_progress), -220.0 - sin(segment_progress * PI) * (110.0 - 8.0 * float(segment_index)))
+		draw_circle(segment_position, 58.0 - float(segment_index) * 5.5, Color(0.51, 0.98, 0.82, 0.20 + float(segment_index) * 0.03))
+	draw_circle(head_position, 46.0, Color("fff0b7"))
+	draw_line(head_position + Vector2(-40.0, -10.0), head_position + Vector2(44.0, 14.0), Color("103e34"), 4.0)
+	draw_line(head_position + Vector2(50.0, 18.0), Vector2(EXIT_TRIGGER_X - 12.0, -100.0), Color(0.97, 0.87, 0.38, 0.72), 5.0)
+	draw_line(Vector2(EXIT_TRIGGER_X - 12.0, -100.0), Vector2(280.0, 24.0), Color(0.95, 0.99, 0.87, 0.54), 4.0)
 
 
 func get_player() -> CharacterBody2D:
@@ -103,11 +200,15 @@ func resolve_player_attack(profile: Dictionary, attacker_position: Vector2, faci
 			if not bool(profile.get("is_radial", false)):
 				break
 	if hit_any:
+		if stage_phase == "approach":
+			start_first_fight()
 		apply_hitstop(float(profile.get("hitstop", 0.04)))
 	return hit_any
 
 
 func resolve_enemy_attack(profile: Dictionary, attacker_position: Vector2, facing: float) -> bool:
+	if stage_phase == "approach":
+		start_first_fight()
 	var player_ref := get_player()
 	if player_ref != null and player_ref.apply_enemy_attack(profile, facing, attacker_position):
 		apply_hitstop(float(profile.get("hitstop", 0.05)))
@@ -136,6 +237,34 @@ func spawn_enemy_projectile(enemy: EnemyActor, profile: Dictionary) -> void:
 	projectile_root.add_child(projectile)
 
 
+func start_first_fight() -> void:
+	if first_combat_time >= 0.0:
+		return
+	first_combat_time = elapsed_time
+	stage_phase = "combat"
+	stage_objective = "Clear the scavenger pack"
+
+
+func trigger_spectacle() -> void:
+	if spectacle_time >= 0.0:
+		return
+	spectacle_time = elapsed_time
+	spectacle_timer = SPECTACLE_DURATION
+	spectacle_progress = 0.0
+	stage_phase = "spectacle"
+	stage_objective = "The relay wakes up. Push through the surge."
+	screen_flash_timer = 1.0
+
+
+func complete_stage() -> void:
+	if stage_complete:
+		return
+	stage_complete = true
+	finish_time = elapsed_time
+	stage_phase = "clear"
+	stage_objective = "Stage clear. Press R to rerun the checkpoint."
+
+
 func reset_to_checkpoint() -> void:
 	checkpoint_reset_count += 1
 	var player_ref := get_player()
@@ -151,6 +280,16 @@ func reset_to_checkpoint() -> void:
 		for projectile in projectile_container.get_children():
 			projectile.queue_free()
 	hitstop_timer = 0.0
+	elapsed_time = 0.0
+	stage_phase = "approach"
+	stage_objective = "Push into the relay clearing"
+	first_combat_time = -1.0
+	spectacle_time = -1.0
+	finish_time = -1.0
+	spectacle_timer = 0.0
+	spectacle_progress = 0.0
+	stage_complete = false
+	screen_flash_timer = 0.0
 
 
 func is_hitstop_active() -> bool:
@@ -161,20 +300,59 @@ func apply_hitstop(duration: float) -> void:
 	hitstop_timer = maxf(hitstop_timer, duration)
 
 
+func get_audio_state() -> String:
+	match stage_phase:
+		"combat":
+			return "combat"
+		"spectacle":
+			return "spectacle"
+		"advance", "clear":
+			return "victory"
+		_:
+			return "explore"
+
+
+func get_stage_summary() -> Dictionary:
+	return {
+		"phase": stage_phase,
+		"objective": stage_objective,
+		"elapsed_seconds": elapsed_time,
+		"first_combat_seconds": first_combat_time,
+		"spectacle_seconds": spectacle_time,
+		"finish_seconds": finish_time,
+		"stage_complete": stage_complete,
+		"spectacle_target_seconds": SPECTACLE_TARGET_SECONDS,
+		"checkpoint_resets": checkpoint_reset_count - 1,
+		"live_enemy_count": get_live_enemy_count(),
+		"audio_state": get_audio_state(),
+		"rank": get_rank_label(),
+	}
+
+
+func get_rank_label() -> String:
+	if finish_time < 0.0:
+		return "--"
+	if finish_time <= 80.0:
+		return "S"
+	if finish_time <= 110.0:
+		return "A"
+	if finish_time <= 150.0:
+		return "B"
+	return "C"
+
+
 func get_debug_stage_status() -> String:
-	var elite_enemy := get_elite_enemy()
-	var elite_state := "none"
-	var projectile_count := 0
-	var projectile_container := projectile_root
-	if projectile_container == null:
-		projectile_container = get_node_or_null("Projectiles")
-	if projectile_container != null:
-		projectile_count = projectile_container.get_child_count()
-	if elite_enemy != null:
-		elite_state = elite_enemy.get_state_name()
-	return "Enemies up: %d/3  Elite: %s  Projectiles: %d  Checkpoint resets: %d" % [
+	return "Phase: %s  Objective: %s  Enemies: %d/3  Combat: %s  Spectacle: %s  Resets: %d" % [
+		stage_phase,
+		stage_objective,
 		get_live_enemy_count(),
-		elite_state,
-		projectile_count,
+		format_optional_seconds(first_combat_time),
+		format_optional_seconds(spectacle_time),
 		checkpoint_reset_count - 1,
 	]
+
+
+func format_optional_seconds(value: float) -> String:
+	if value < 0.0:
+		return "--"
+	return "%.1fs" % value

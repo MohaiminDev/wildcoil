@@ -9,10 +9,64 @@ script = ExtResource("1")
 layer = 1
 
 [node name="Margin" type="MarginContainer" parent="HUD"]
-offset_left = 28.0
-offset_top = 24.0
-offset_right = 680.0
-offset_bottom = 220.0
+offset_left = 24.0
+offset_top = 22.0
+offset_right = 720.0
+offset_bottom = 260.0
 
-[node name="Status" type="Label" parent="HUD/Margin"]
-text = "Booting Wildcoil scaffold..."
+[node name="Panel" type="PanelContainer" parent="HUD/Margin"]
+
+[node name="VBox" type="VBoxContainer" parent="HUD/Margin/Panel"]
+
+[node name="Status" type="Label" parent="HUD/Margin/Panel/VBox"]
+text = "Booting Wildcoil first playable..."
+autowrap_mode = 3
+
+[node name="Objective" type="Label" parent="HUD/Margin/Panel/VBox"]
+text = "Objective: Booting objective..."
+autowrap_mode = 3
+
+[node name="Controls" type="Label" parent="HUD/Margin/Panel/VBox"]
+text = "Controls loading..."
+autowrap_mode = 3
+
+[node name="PauseOverlay" type="CanvasLayer" parent="."]
+layer = 2
+visible = false
+
+[node name="Shade" type="ColorRect" parent="PauseOverlay"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_right = 1600.0
+offset_bottom = 900.0
+color = Color(0, 0, 0, 0.72)
+
+[node name="Center" type="CenterContainer" parent="PauseOverlay"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_right = 1600.0
+offset_bottom = 900.0
+
+[node name="Panel" type="PanelContainer" parent="PauseOverlay/Center"]
+custom_minimum_size = Vector2(620, 220)
+
+[node name="VBox" type="VBoxContainer" parent="PauseOverlay/Center/Panel"]
+
+[node name="Title" type="Label" parent="PauseOverlay/Center/Panel/VBox"]
+text = "Paused"
+horizontal_alignment = 1
+
+[node name="Body" type="Label" parent="PauseOverlay/Center/Panel/VBox"]
+text = "Esc resume"
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="Audio" type="Node" parent="."]
+
+[node name="ExploreLoop" type="AudioStreamPlayer" parent="Audio"]
+
+[node name="CombatLoop" type="AudioStreamPlayer" parent="Audio"]
+
+[node name="ClearLoop" type="AudioStreamPlayer" parent="Audio"]
+
+[node name="SpectacleStinger" type="AudioStreamPlayer" parent="Audio"]

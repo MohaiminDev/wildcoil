@@ -20,14 +20,6 @@ The Phase 1 through release tasks below are the frozen MVP backlog. Only change 
 
 ## PENDING
 
-### [P1-05] Build Stage 1 first playable
-- Outcome: Deliver one short stage with a first fight inside 30 seconds, a spectacle beat inside 3 minutes, a checkpoint, HUD, pause or restart flow, and placeholder audio.
-- Validation:
-  - [ ] Manual playthrough confirms first combat and spectacle timing targets.
-  - [ ] HUD, pause, and restart flows work in windowed and fullscreen modes.
-  - [ ] The current test suite passes.
-- Dependencies: [P1-04]
-
 ### [P1-06] Export and verify the first macOS build
 - Outcome: Produce a tester-ready Apple Silicon build and record build evidence, smoke results, and known issues.
 - Validation:
@@ -125,6 +117,15 @@ The Phase 1 through release tasks below are the frozen MVP backlog. Only change 
 - Dependencies: [P3-05]
 
 ## DONE
+
+### [P1-05] Build Stage 1 first playable
+- Outcome: Deliver one short stage with a first fight inside 30 seconds, a spectacle beat inside 3 minutes, a checkpoint, HUD, pause or restart flow, and placeholder audio.
+- Validation:
+  - [x] Manual playthrough confirms first combat and spectacle timing targets.
+  - [x] HUD, pause, and restart flows work in windowed and fullscreen modes.
+  - [x] The current test suite passes.
+- Dependencies: [P1-04]
+- Completed: 2026-03-05
 
 ### [P1-04] Implement enemy systems
 - Outcome: Add the shared enemy framework, three starter archetypes, and the elite/miniboss foundation.

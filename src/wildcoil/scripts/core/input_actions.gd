@@ -11,6 +11,7 @@ const LAUNCH_ATTACK: StringName = &"launch_attack"
 const SPECIAL_ATTACK: StringName = &"special_attack"
 const RESTART_CHECKPOINT: StringName = &"restart_checkpoint"
 const PAUSE: StringName = &"pause"
+const FULLSCREEN: StringName = &"fullscreen"
 
 
 static func ensure_default_actions() -> void:
@@ -24,6 +25,7 @@ static func ensure_default_actions() -> void:
 	ensure_action(SPECIAL_ATTACK)
 	ensure_action(RESTART_CHECKPOINT)
 	ensure_action(PAUSE)
+	ensure_action(FULLSCREEN)
 
 	add_key(MOVE_LEFT, KEY_A)
 	add_key(MOVE_LEFT, KEY_LEFT)
@@ -43,6 +45,8 @@ static func ensure_default_actions() -> void:
 	add_key(SPECIAL_ATTACK, KEY_B)
 	add_key(RESTART_CHECKPOINT, KEY_R)
 	add_key(PAUSE, KEY_ESCAPE)
+	add_key(FULLSCREEN, KEY_F11)
+	add_key(FULLSCREEN, KEY_F)
 
 	add_joy_motion(MOVE_LEFT, JOY_AXIS_LEFT_X, -1.0)
 	add_joy_motion(MOVE_RIGHT, JOY_AXIS_LEFT_X, 1.0)
