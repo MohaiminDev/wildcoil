@@ -20,14 +20,6 @@ The Phase 1 through release tasks below are the frozen MVP backlog. Only change 
 
 ## PENDING
 
-### [P1-07] Run the Phase 1 playtest gate
-- Outcome: Capture 5 to 8 external playtests, fix repeated clarity or fairness issues, and document the gate result.
-- Validation:
-  - [ ] [`docs/playtest_log.md`](/Users/himu/Desktop/career/personal_projects/wildcoil/docs/playtest_log.md) contains 5 to 8 sessions or clearly documents the blocker if outside testers are unavailable.
-  - [ ] Repeated issues are reflected in [`docs/risk_register.md`](/Users/himu/Desktop/career/personal_projects/wildcoil/docs/risk_register.md) and resolved or accepted.
-  - [ ] The current test suite passes.
-- Dependencies: [P1-06]
-
 ### [P2-01] Promote Stage 1 into a vertical slice
 - Outcome: Upgrade Stage 1 with target-leaning art/audio, cleaner camera and VFX discipline, and a full boss fight.
 - Validation:
@@ -109,6 +101,15 @@ The Phase 1 through release tasks below are the frozen MVP backlog. Only change 
 - Dependencies: [P3-05]
 
 ## DONE
+
+### [P1-07] Run the Phase 1 playtest gate
+- Outcome: Capture 5 to 8 external playtests, fix repeated clarity or fairness issues, and document the gate result.
+- Validation:
+  - [x] [`docs/playtest_log.md`](/Users/himu/Desktop/career/personal_projects/wildcoil/docs/playtest_log.md) contains 5 to 8 sessions or clearly documents the blocker if outside testers are unavailable.
+  - [x] Repeated issues are reflected in [`docs/risk_register.md`](/Users/himu/Desktop/career/personal_projects/wildcoil/docs/risk_register.md) and resolved or accepted.
+  - [x] The current test suite passes.
+- Dependencies: [P1-06]
+- Completed: 2026-03-05
 
 ### [P1-06] Export and verify the first macOS build
 - Outcome: Produce a tester-ready Apple Silicon build and record build evidence, smoke results, and known issues.
