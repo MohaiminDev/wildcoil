@@ -20,14 +20,6 @@ The Phase 1 through release tasks below are the frozen MVP backlog. Only change 
 
 ## PENDING
 
-### [P3-04] Add onboarding, progression, and accessibility polish
-- Outcome: Finalize onboarding prompts, progression flow, options, accessibility settings, save migration safety, and balance tuning.
-- Validation:
-  - [ ] Automated tests cover save migration and options persistence.
-  - [ ] Manual smoke checks confirm onboarding and accessibility flows work.
-  - [ ] The current test suite passes.
-- Dependencies: [P3-03]
-
 ### [P3-05] Run the release-candidate regression pass
 - Outcome: Execute the full regression, performance, input, packaging, and release-candidate checks and fix release blockers only.
 - Validation:
@@ -45,6 +37,15 @@ The Phase 1 through release tasks below are the frozen MVP backlog. Only change 
 - Dependencies: [P3-05]
 
 ## DONE
+
+### [P3-04] Add onboarding, progression, and accessibility polish
+- Outcome: Finalize onboarding prompts, progression flow, options, accessibility settings, save migration safety, and balance tuning.
+- Validation:
+  - [x] Automated tests cover save migration and options persistence.
+  - [x] Manual smoke checks confirm onboarding and accessibility flows work.
+  - [x] The current test suite passes.
+- Dependencies: [P3-03]
+- Completed: 2026-03-05
 
 ### [P3-03] Build Stage 3 and finale
 - Outcome: Add the final stage, the last enemy archetype, the final boss, and the ending flow.

@@ -82,6 +82,12 @@ func _initialize() -> void:
 	if suite == "progression" and errors.is_empty():
 		payload.merge(run_progression_suite(catalog, save_path), true)
 
+	if suite == "save_migration" and errors.is_empty():
+		payload.merge(run_save_migration_suite(catalog, save_path), true)
+
+	if suite == "options_accessibility" and errors.is_empty():
+		payload.merge(run_options_accessibility_suite(catalog, save_path), true)
+
 	if suite == "character_roster" and errors.is_empty():
 		payload.merge(run_character_roster_suite(catalog), true)
 
@@ -621,6 +627,97 @@ func run_progression_suite(catalog: ContentCatalog, save_path: String) -> Dictio
 		delete_path_if_present("%s%s" % [working_save_path, ProgressionProfile.BACKUP_SUFFIX])
 	delete_path_if_present(corrupt_save_path)
 	delete_path_if_present("%s%s" % [corrupt_save_path, ProgressionProfile.BACKUP_SUFFIX])
+	return payload
+
+
+func run_save_migration_suite(catalog: ContentCatalog, save_path: String) -> Dictionary:
+	var working_save_path := save_path if not save_path.is_empty() else "user://wildcoil_save_migration_test.json"
+	var preserve_save := not save_path.is_empty()
+	delete_path_if_present(working_save_path)
+	delete_path_if_present("%s%s" % [working_save_path, ProgressionProfile.BACKUP_SUFFIX])
+	write_text_file(working_save_path, JSON.stringify({
+		"version": 1,
+		"selected_stage_id": "coil_depths",
+		"selected_character_id": "zeph_rush",
+		"unlocked_stage_ids": ["relay_clearing", "coil_depths", "storm_crown"],
+		"unlocked_character_ids": ["mira_coil", "zeph_rush"],
+		"cleared_stage_ids": ["relay_clearing", "coil_depths"],
+		"best_stage_results": {
+			"relay_clearing": {
+				"best_rank": "A",
+				"best_time_seconds": 121.0,
+			},
+		},
+		"tutorial_stage_ids": ["relay_clearing"],
+		"high_contrast_hud": true,
+		"screen_flash_strength": 0.4,
+		"auto_pause_on_focus_loss": false,
+	}, "\t"))
+
+	var migrated_profile := ProgressionProfile.load_or_create(working_save_path, catalog)
+	var passed: bool = int(migrated_profile.data.get("version", 0)) == ProgressionProfile.SAVE_VERSION and migrated_profile.get_selected_stage_id() == "coil_depths" and migrated_profile.get_selected_character_id() == "zeph_rush" and migrated_profile.has_seen_stage_briefing("relay_clearing") and bool(migrated_profile.get_option_value("high_contrast_hud", false)) and is_equal_approx(float(migrated_profile.get_option_value("screen_flash_strength", 1.0)), 0.4) and not bool(migrated_profile.get_option_value("auto_pause_on_focus_loss", true))
+	var payload := {
+		"version": int(migrated_profile.data.get("version", 0)),
+		"selected_stage_id": migrated_profile.get_selected_stage_id(),
+		"selected_character_id": migrated_profile.get_selected_character_id(),
+		"seen_stage_briefing_ids": migrated_profile.get_seen_stage_briefing_ids(),
+		"high_contrast_hud": bool(migrated_profile.get_option_value("high_contrast_hud", false)),
+		"screen_flash_strength": float(migrated_profile.get_option_value("screen_flash_strength", 1.0)),
+		"auto_pause_on_focus_loss": bool(migrated_profile.get_option_value("auto_pause_on_focus_loss", true)),
+		"passed": passed,
+		"errors": [] if passed else ["legacy save data did not migrate into the current profile contract safely"],
+	}
+	if not preserve_save:
+		delete_path_if_present(working_save_path)
+		delete_path_if_present("%s%s" % [working_save_path, ProgressionProfile.BACKUP_SUFFIX])
+	return payload
+
+
+func run_options_accessibility_suite(catalog: ContentCatalog, save_path: String) -> Dictionary:
+	var working_save_path := save_path if not save_path.is_empty() else "user://wildcoil_options_accessibility_test.json"
+	var preserve_save := not save_path.is_empty()
+	delete_path_if_present(working_save_path)
+	delete_path_if_present("%s%s" % [working_save_path, ProgressionProfile.BACKUP_SUFFIX])
+
+	var app_scene := load("res://scenes/app_root.tscn") as PackedScene
+	if app_scene == null:
+		return {
+			"passed": false,
+			"errors": ["app root scene failed to load for options accessibility suite"],
+		}
+
+	OS.set_environment("WILDCOIL_PROFILE_PATH", ProjectSettings.globalize_path(working_save_path) if working_save_path.begins_with("user://") else working_save_path)
+	var app_root := app_scene.instantiate()
+	get_root().add_child(app_root)
+	var initial_summary := app_root.call("get_frontend_summary") as Dictionary
+	app_root.call("debug_open_options_menu")
+	app_root.call("debug_set_option_value", "high_contrast_hud", true)
+	app_root.call("debug_set_option_value", "reduced_motion", true)
+	app_root.call("debug_set_option_value", "screen_flash_strength", 0.0)
+	app_root.call("debug_set_option_value", "auto_pause_on_focus_loss", false)
+	app_root.call("debug_set_option_value", "music_volume_db", -6.0)
+	var options_menu_summary := app_root.call("get_frontend_summary") as Dictionary
+	app_root.call("debug_start_selected_stage")
+	var stage_summary := app_root.call("debug_get_stage_accessibility") as Dictionary
+	var runtime_summary := app_root.call("get_frontend_summary") as Dictionary
+	app_root.free()
+	OS.set_environment("WILDCOIL_PROFILE_PATH", "")
+
+	var reloaded_profile := ProgressionProfile.load_or_create(working_save_path, catalog)
+	var passed: bool = str(initial_summary.get("menu_panel_mode", "")) == "board" and str(options_menu_summary.get("menu_panel_mode", "")) == "options" and bool(reloaded_profile.get_option_value("high_contrast_hud", false)) and bool(reloaded_profile.get_option_value("reduced_motion", false)) and is_equal_approx(float(reloaded_profile.get_option_value("screen_flash_strength", 1.0)), 0.0) and not bool(reloaded_profile.get_option_value("auto_pause_on_focus_loss", true)) and is_equal_approx(float(reloaded_profile.get_option_value("music_volume_db", 0.0)), -6.0) and bool(reloaded_profile.has_seen_stage_briefing("relay_clearing")) and bool(stage_summary.get("reduced_motion", false)) and is_equal_approx(float(stage_summary.get("screen_flash_strength", 1.0)), 0.0) and bool(runtime_summary.get("stage_active", false))
+	var payload := {
+		"menu_panel_mode": str(options_menu_summary.get("menu_panel_mode", "")),
+		"saved_options": options_menu_summary.get("options", {}),
+		"stage_reduced_motion": bool(stage_summary.get("reduced_motion", false)),
+		"stage_screen_flash_strength": float(stage_summary.get("screen_flash_strength", 1.0)),
+		"runtime_stage_active": bool(runtime_summary.get("stage_active", false)),
+		"seen_stage_briefing_ids": reloaded_profile.get_seen_stage_briefing_ids(),
+		"passed": passed,
+		"errors": [] if passed else ["options did not persist, stage accessibility did not update, or stage briefing state was not recorded"],
+	}
+	if not preserve_save:
+		delete_path_if_present(working_save_path)
+		delete_path_if_present("%s%s" % [working_save_path, ProgressionProfile.BACKUP_SUFFIX])
 	return payload
 
 

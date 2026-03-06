@@ -1,7 +1,7 @@
 class_name ProgressionProfile
 extends RefCounted
 
-const SAVE_VERSION := 1
+const SAVE_VERSION := 2
 const DEFAULT_SAVE_PATH := "user://wildcoil_profile.json"
 const BACKUP_SUFFIX := ".bak"
 const TEMP_SUFFIX := ".tmp"
@@ -48,6 +48,7 @@ static func load_or_create(path: String, catalog: ContentCatalog) -> Progression
 
 
 func save() -> void:
+	data["version"] = SAVE_VERSION
 	_ensure_parent_directory(save_path)
 	var temp_path := "%s%s" % [save_path, TEMP_SUFFIX]
 	var handle := FileAccess.open(temp_path, FileAccess.WRITE)
@@ -159,6 +160,23 @@ func set_option_value(option_id: String, option_value: Variant) -> void:
 	data["options"] = options
 
 
+func get_seen_stage_briefing_ids() -> Array[String]:
+	return _to_string_array(data.get("seen_stage_briefing_ids", []))
+
+
+func has_seen_stage_briefing(stage_id: String) -> bool:
+	return get_seen_stage_briefing_ids().has(stage_id)
+
+
+func mark_stage_briefing_seen(stage_id: String) -> bool:
+	if stage_id.is_empty() or has_seen_stage_briefing(stage_id):
+		return false
+	var seen_stage_briefing_ids := get_seen_stage_briefing_ids()
+	seen_stage_briefing_ids.append(stage_id)
+	data["seen_stage_briefing_ids"] = seen_stage_briefing_ids
+	return true
+
+
 func record_stage_clear(stage_id: String, rank: String, finish_seconds: float, catalog: ContentCatalog) -> Dictionary:
 	var result_summary := {
 		"first_clear": false,
@@ -246,6 +264,7 @@ func _build_normalized_data(raw_variant: Variant, catalog: ContentCatalog) -> Di
 		"unlocked_character_ids": default_unlocked_character_ids.duplicate(),
 		"cleared_stage_ids": [],
 		"best_stage_results": {},
+		"seen_stage_briefing_ids": [],
 		"options": {
 			"faux_fullscreen": false,
 			"master_volume_db": 0.0,
@@ -261,6 +280,7 @@ func _build_normalized_data(raw_variant: Variant, catalog: ContentCatalog) -> Di
 		return normalized
 
 	var raw: Dictionary = raw_variant
+	var raw_version := int(raw.get("version", 0))
 	var valid_stage_ids := catalog.get_stage_ids()
 	var valid_character_ids := catalog.get_character_ids()
 
@@ -274,6 +294,10 @@ func _build_normalized_data(raw_variant: Variant, catalog: ContentCatalog) -> Di
 	normalized["unlocked_stage_ids"] = unlocked_stage_ids
 	normalized["unlocked_character_ids"] = unlocked_character_ids
 	normalized["cleared_stage_ids"] = _filter_ids(raw.get("cleared_stage_ids", []), valid_stage_ids)
+	normalized["seen_stage_briefing_ids"] = _filter_ids(
+		raw.get("seen_stage_briefing_ids", raw.get("tutorial_stage_ids", [])),
+		valid_stage_ids
+	)
 
 	var raw_results: Variant = raw.get("best_stage_results", {})
 	if typeof(raw_results) == TYPE_DICTIONARY:
@@ -298,6 +322,10 @@ func _build_normalized_data(raw_variant: Variant, catalog: ContentCatalog) -> Di
 		for option_key in (raw_options as Dictionary).keys():
 			if options.has(option_key):
 				options[option_key] = (raw_options as Dictionary)[option_key]
+	if raw_version < SAVE_VERSION:
+		for option_key in options.keys():
+			if raw.has(option_key):
+				options[option_key] = raw[option_key]
 	normalized["options"] = options
 
 	var selected_stage_id := str(raw.get("selected_stage_id", default_stage_id))
@@ -309,6 +337,7 @@ func _build_normalized_data(raw_variant: Variant, catalog: ContentCatalog) -> Di
 	if not unlocked_character_ids.has(selected_character_id):
 		selected_character_id = unlocked_character_ids[0] if not unlocked_character_ids.is_empty() else default_character_id
 	normalized["selected_character_id"] = selected_character_id
+	normalized["version"] = SAVE_VERSION
 	return normalized
 
 

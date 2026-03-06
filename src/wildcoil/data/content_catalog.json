@@ -6,14 +6,16 @@
       "name": "Mira Coil",
       "playstyle": "balanced_striker",
       "locked": false,
-      "summary": "Balanced storm-runner tuned for clean reads and steady pressure."
+      "summary": "Balanced storm-runner tuned for clean reads and steady pressure.",
+      "onboarding_tip": "Mira is the clean onboarding pick: dodge through the first telegraph, then use light-light-heavy to stabilize space."
     },
     {
       "id": "zeph_rush",
       "name": "Zeph Rush",
       "playstyle": "agile_disruptor",
       "locked": true,
-      "summary": "High-speed disruptor with faster movement, lighter armor, and tighter cooldowns."
+      "summary": "High-speed disruptor with faster movement, lighter armor, and tighter cooldowns.",
+      "onboarding_tip": "Zeph trades survivability for tempo, so weave short strings and dodge early instead of holding ground."
     }
   ],
   "stages": [
@@ -26,6 +28,7 @@
       "spectacle_target_seconds": 180,
       "locked": false,
       "summary": "Stabilize the relay heart before the storm warden buries the clearing.",
+      "briefing": "Open with patient footwork, let the first telegraph show itself, and treat this route as the clean read-and-react onboarding lane.",
       "reward_character_id": "zeph_rush",
       "opening_objective": "Push into the relay clearing",
       "mid_objective": "Reach the relay heart",
@@ -42,6 +45,7 @@
       "spectacle_target_seconds": 210,
       "locked": true,
       "summary": "Descend through the vent conduits and stabilize the depth core before the overload collapses the shaft.",
+      "briefing": "Watch the vent telegraphs before you commit, then use the launcher or special to keep the conduit pack from surrounding you.",
       "opening_objective": "Descend into the coil depths",
       "mid_objective": "Read the surge vents and push for the depth core",
       "boss_intro_objective": "Brace for the colossus in the depth core",
@@ -57,6 +61,7 @@
       "spectacle_target_seconds": 240,
       "locked": true,
       "summary": "Climb into the storm crown, break the engine at its heart, and finally quiet the route.",
+      "briefing": "The finale asks for discipline: push until the wardens commit, dodge through the first hit, and only overextend once the rails are readable.",
       "opening_objective": "Climb into the storm crown",
       "mid_objective": "Read the storm rails and push for the crown engine",
       "boss_intro_objective": "Brace for the Crown Engine",

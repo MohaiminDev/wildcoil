@@ -65,6 +65,66 @@ def test_frontend_shell_suite_transitions_modes(tmp_path: Path) -> None:
     assert payload["reset_mode"] == "menu"
 
 
+def test_save_migration_suite_preserves_progression_and_new_defaults(tmp_path: Path) -> None:
+    save_path = tmp_path / "wildcoil_save_migration_profile.json"
+
+    result = run_godot(
+        "--headless",
+        "--path",
+        str(PROJECT_DIR),
+        "--script",
+        "res://tools/runtime_test_runner.gd",
+        "--",
+        "--suite",
+        "save_migration",
+        "--save-path",
+        str(save_path),
+    )
+    combined_output = result.stdout + result.stderr
+    assert result.returncode == 0, combined_output
+
+    payload = parse_result_line(combined_output)
+    assert payload["passed"] is True
+    assert payload["version"] == 2
+    assert payload["selected_stage_id"] == "coil_depths"
+    assert payload["selected_character_id"] == "zeph_rush"
+    assert payload["seen_stage_briefing_ids"] == ["relay_clearing"]
+    assert payload["high_contrast_hud"] is True
+    assert payload["screen_flash_strength"] == pytest.approx(0.4)
+    assert payload["auto_pause_on_focus_loss"] is False
+
+
+def test_options_accessibility_suite_persists_runtime_settings(tmp_path: Path) -> None:
+    save_path = tmp_path / "wildcoil_options_accessibility_profile.json"
+
+    result = run_godot(
+        "--headless",
+        "--path",
+        str(PROJECT_DIR),
+        "--script",
+        "res://tools/runtime_test_runner.gd",
+        "--",
+        "--suite",
+        "options_accessibility",
+        "--save-path",
+        str(save_path),
+    )
+    combined_output = result.stdout + result.stderr
+    assert result.returncode == 0, combined_output
+
+    payload = parse_result_line(combined_output)
+    assert payload["passed"] is True
+    assert payload["menu_panel_mode"] == "options"
+    assert payload["saved_options"]["high_contrast_hud"] is True
+    assert payload["saved_options"]["reduced_motion"] is True
+    assert payload["saved_options"]["screen_flash_strength"] == pytest.approx(0.0)
+    assert payload["saved_options"]["auto_pause_on_focus_loss"] is False
+    assert payload["stage_reduced_motion"] is True
+    assert payload["stage_screen_flash_strength"] == pytest.approx(0.0)
+    assert payload["runtime_stage_active"] is True
+    assert payload["seen_stage_briefing_ids"] == ["relay_clearing"]
+
+
 def test_content_validation_suite_checks_live_and_invalid_catalogs() -> None:
     result = run_godot(
         "--headless",

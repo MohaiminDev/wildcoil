@@ -6,14 +6,18 @@ const InputDeviceState = preload("res://scripts/core/input_device_state.gd")
 const PlaceholderAudioLibrary = preload("res://scripts/core/placeholder_audio_library.gd")
 const ProgressionProfile = preload("res://scripts/core/progression_profile.gd")
 
+@onready var hud_panel: PanelContainer = $HUD/Margin/Panel
 @onready var status_label: Label = $HUD/Margin/Panel/VBox/Status
 @onready var objective_label: Label = $HUD/Margin/Panel/VBox/Objective
 @onready var boss_label: Label = $HUD/Margin/Panel/VBox/BossLabel
 @onready var boss_bar: ProgressBar = $HUD/Margin/Panel/VBox/BossBar
 @onready var controls_label: Label = $HUD/Margin/Panel/VBox/Controls
 @onready var pause_overlay: CanvasLayer = $PauseOverlay
+@onready var pause_shade: ColorRect = $PauseOverlay/Shade
+@onready var pause_panel: PanelContainer = $PauseOverlay/Center/Panel
 @onready var pause_body: Label = $PauseOverlay/Center/Panel/VBox/Body
 @onready var mission_overlay: CanvasLayer = $MissionOverlay
+@onready var mission_panel: PanelContainer = $MissionOverlay/Center/Panel
 @onready var mission_title: Label = $MissionOverlay/Center/Panel/VBox/Title
 @onready var mission_body: Label = $MissionOverlay/Center/Panel/VBox/Body
 @onready var mission_footer: Label = $MissionOverlay/Center/Panel/VBox/Footer
@@ -22,6 +26,18 @@ const ProgressionProfile = preload("res://scripts/core/progression_profile.gd")
 @onready var clear_loop: AudioStreamPlayer = $Audio/ClearLoop
 @onready var boss_loop: AudioStreamPlayer = $Audio/BossLoop
 @onready var spectacle_stinger: AudioStreamPlayer = $Audio/SpectacleStinger
+
+const MUSIC_BASE_VOLUMES := {
+	"explore": -18.0,
+	"combat": -16.0,
+	"clear": -18.0,
+	"boss": -14.0,
+}
+const SFX_BASE_VOLUMES := {
+	"spectacle": -13.0,
+}
+const SCREEN_FLASH_LEVELS := [1.0, 0.4, 0.0]
+const AUDIO_LEVELS := [0.0, -6.0, -12.0]
 
 var catalog: ContentCatalog
 var profile: ProgressionProfile
@@ -33,6 +49,8 @@ var faux_fullscreen := false
 var windowed_size := Vector2i(1600, 900)
 var windowed_position := Vector2i(120, 80)
 var frontend_mode := "menu"
+var menu_panel_mode := "board"
+var selected_option_index := 0
 var stage_result_recorded := false
 var frontend_notice := ""
 var active_stage_id := ""
@@ -49,6 +67,7 @@ func _ready() -> void:
 	if not bootstrap_runtime():
 		return
 
+	apply_profile_options()
 	update_status_label()
 	update_pause_overlay()
 	update_frontend_overlay()
@@ -91,15 +110,15 @@ func _process(_delta: float) -> void:
 
 func configure_audio_players() -> void:
 	explore_loop.stream = PlaceholderAudioLibrary.make_explore_loop()
-	explore_loop.volume_db = -18.0
+	explore_loop.volume_db = MUSIC_BASE_VOLUMES["explore"]
 	combat_loop.stream = PlaceholderAudioLibrary.make_combat_loop()
-	combat_loop.volume_db = -16.0
+	combat_loop.volume_db = MUSIC_BASE_VOLUMES["combat"]
 	clear_loop.stream = PlaceholderAudioLibrary.make_clear_loop()
-	clear_loop.volume_db = -18.0
+	clear_loop.volume_db = MUSIC_BASE_VOLUMES["clear"]
 	boss_loop.stream = PlaceholderAudioLibrary.make_boss_loop()
-	boss_loop.volume_db = -14.0
+	boss_loop.volume_db = MUSIC_BASE_VOLUMES["boss"]
 	spectacle_stinger.stream = PlaceholderAudioLibrary.make_spectacle_stinger()
-	spectacle_stinger.volume_db = -13.0
+	spectacle_stinger.volume_db = SFX_BASE_VOLUMES["spectacle"]
 
 
 func bootstrap_runtime() -> bool:
@@ -124,6 +143,7 @@ func bootstrap_runtime() -> bool:
 		windowed_position = window.position
 	set_faux_fullscreen(bool(profile.get_option_value("faux_fullscreen", false)), false)
 	did_bootstrap = true
+	apply_profile_options()
 	return true
 
 
@@ -131,6 +151,26 @@ func handle_frontend_input(event: InputEvent) -> void:
 	if frontend_mode == "results" and event.is_action_pressed(InputActions.MENU_BACK):
 		return_to_mission_board()
 		get_viewport().set_input_as_handled()
+		return
+
+	if frontend_mode == "menu" and event.is_action_pressed(InputActions.MENU_BACK):
+		toggle_options_menu()
+		get_viewport().set_input_as_handled()
+		return
+
+	if frontend_mode == "menu" and menu_panel_mode == "options":
+		if event.is_action_pressed(InputActions.MENU_UP):
+			cycle_option_selection(-1)
+			get_viewport().set_input_as_handled()
+		elif event.is_action_pressed(InputActions.MENU_DOWN):
+			cycle_option_selection(1)
+			get_viewport().set_input_as_handled()
+		elif event.is_action_pressed(InputActions.MENU_LEFT):
+			adjust_selected_option(-1)
+			get_viewport().set_input_as_handled()
+		elif event.is_action_pressed(InputActions.MENU_RIGHT) or event.is_action_pressed(InputActions.MENU_CONFIRM):
+			adjust_selected_option(1)
+			get_viewport().set_input_as_handled()
 		return
 
 	if event.is_action_pressed(InputActions.MENU_CONFIRM):
@@ -223,6 +263,8 @@ func start_selected_stage() -> void:
 
 	profile.set_selected_stage_id(active_stage_id, catalog)
 	profile.set_selected_character_id(active_character_id, catalog)
+	if profile.mark_stage_briefing_seen(active_stage_id):
+		frontend_notice = "Briefing logged for %s." % str(stage_definition.get("name", active_stage_id))
 	profile.save()
 
 	teardown_stage()
@@ -239,8 +281,10 @@ func start_selected_stage() -> void:
 		})
 	elif player_controller != null and player_controller.has_method("apply_character_definition"):
 		player_controller.call("apply_character_definition", character_definition)
+	apply_stage_accessibility_options()
 	stage_result_recorded = false
 	frontend_mode = "playing"
+	menu_panel_mode = "board"
 	active_audio_state = ""
 	frontend_notice = "Deployed to %s with %s." % [
 		str(stage_definition.get("name", "Unknown Stage")),
@@ -295,6 +339,7 @@ func build_completion_notice(stage_id: String, rank: String, finish_seconds: flo
 func return_to_mission_board() -> void:
 	teardown_stage()
 	frontend_mode = "menu"
+	menu_panel_mode = "board"
 	stage_result_recorded = false
 	set_tree_paused_state(false)
 	active_audio_state = ""
@@ -358,6 +403,289 @@ func set_faux_fullscreen(should_enable: bool, persist_setting: bool) -> void:
 		frontend_notice = profile.last_status_message
 
 
+func toggle_options_menu() -> void:
+	if frontend_mode != "menu":
+		return
+	if menu_panel_mode == "options":
+		menu_panel_mode = "board"
+		frontend_notice = "Mission board ready."
+	else:
+		menu_panel_mode = "options"
+		selected_option_index = 0
+		frontend_notice = "Opened comfort and accessibility options."
+
+
+func cycle_option_selection(step: int) -> void:
+	var option_entries := get_option_entries()
+	if option_entries.is_empty():
+		return
+	selected_option_index = wrapi(selected_option_index + step, 0, option_entries.size())
+	frontend_notice = "Option focus: %s." % str(option_entries[selected_option_index].get("label", "Setting"))
+
+
+func adjust_selected_option(step: int) -> void:
+	var option_entries := get_option_entries()
+	if option_entries.is_empty():
+		return
+	selected_option_index = clampi(selected_option_index, 0, option_entries.size() - 1)
+	var entry: Dictionary = option_entries[selected_option_index]
+	var option_id := str(entry.get("id", ""))
+	match option_id:
+		"high_contrast_hud", "reduced_motion", "auto_pause_on_focus_loss":
+			set_named_option(option_id, not bool(profile.get_option_value(option_id, false)))
+		"screen_flash_strength":
+			cycle_named_option(option_id, SCREEN_FLASH_LEVELS, step)
+		"music_volume_db", "sfx_volume_db":
+			cycle_named_option(option_id, AUDIO_LEVELS, step)
+		"faux_fullscreen":
+			set_faux_fullscreen(not faux_fullscreen, true)
+			apply_profile_options()
+			frontend_notice = "View mode: %s." % ("borderless fullscreen" if faux_fullscreen else "windowed")
+		"close":
+			toggle_options_menu()
+
+
+func set_named_option(option_id: String, option_value: Variant) -> void:
+	if profile == null:
+		return
+	profile.set_option_value(option_id, option_value)
+	profile.save()
+	apply_profile_options()
+	frontend_notice = "%s: %s." % [describe_option_label(option_id), describe_option_value(option_id, option_value)]
+
+
+func cycle_named_option(option_id: String, levels: Array, step: int) -> void:
+	if profile == null:
+		return
+	var current_value: Variant = profile.get_option_value(option_id, levels[0])
+	var current_index := levels.find(current_value)
+	if current_index < 0:
+		current_index = 0
+	var next_index := wrapi(current_index + step, 0, levels.size())
+	set_named_option(option_id, levels[next_index])
+
+
+func get_option_entries() -> Array[Dictionary]:
+	var options := get_profile_option_snapshot()
+	return [
+		{
+			"id": "high_contrast_hud",
+			"label": "High-contrast HUD",
+			"value": describe_option_value("high_contrast_hud", options.get("high_contrast_hud", false)),
+		},
+		{
+			"id": "reduced_motion",
+			"label": "Reduced motion",
+			"value": describe_option_value("reduced_motion", options.get("reduced_motion", false)),
+		},
+		{
+			"id": "screen_flash_strength",
+			"label": "Screen flash",
+			"value": describe_option_value("screen_flash_strength", options.get("screen_flash_strength", 1.0)),
+		},
+		{
+			"id": "auto_pause_on_focus_loss",
+			"label": "Auto-pause on focus loss",
+			"value": describe_option_value("auto_pause_on_focus_loss", options.get("auto_pause_on_focus_loss", true)),
+		},
+		{
+			"id": "music_volume_db",
+			"label": "Music mix",
+			"value": describe_option_value("music_volume_db", options.get("music_volume_db", 0.0)),
+		},
+		{
+			"id": "sfx_volume_db",
+			"label": "SFX mix",
+			"value": describe_option_value("sfx_volume_db", options.get("sfx_volume_db", 0.0)),
+		},
+		{
+			"id": "faux_fullscreen",
+			"label": "View mode",
+			"value": describe_option_value("faux_fullscreen", options.get("faux_fullscreen", false)),
+		},
+		{
+			"id": "close",
+			"label": "Back to mission board",
+			"value": "Close",
+		},
+	]
+
+
+func get_profile_option_snapshot() -> Dictionary:
+	if profile == null:
+		return {
+			"faux_fullscreen": faux_fullscreen,
+			"music_volume_db": 0.0,
+			"sfx_volume_db": 0.0,
+			"high_contrast_hud": false,
+			"reduced_motion": false,
+			"screen_flash_strength": 1.0,
+			"auto_pause_on_focus_loss": true,
+		}
+	return {
+		"faux_fullscreen": faux_fullscreen,
+		"music_volume_db": float(profile.get_option_value("music_volume_db", 0.0)),
+		"sfx_volume_db": float(profile.get_option_value("sfx_volume_db", 0.0)),
+		"high_contrast_hud": bool(profile.get_option_value("high_contrast_hud", false)),
+		"reduced_motion": bool(profile.get_option_value("reduced_motion", false)),
+		"screen_flash_strength": clampf(float(profile.get_option_value("screen_flash_strength", 1.0)), 0.0, 1.0),
+		"auto_pause_on_focus_loss": bool(profile.get_option_value("auto_pause_on_focus_loss", true)),
+	}
+
+
+func describe_option_label(option_id: String) -> String:
+	for entry in get_option_entries():
+		if str(entry.get("id", "")) == option_id:
+			return str(entry.get("label", option_id))
+	return option_id
+
+
+func describe_option_value(option_id: String, option_value: Variant) -> String:
+	match option_id:
+		"high_contrast_hud", "reduced_motion", "auto_pause_on_focus_loss":
+			return "On" if bool(option_value) else "Off"
+		"faux_fullscreen":
+			return "Borderless fullscreen" if bool(option_value) else "Windowed"
+		"screen_flash_strength":
+			var flash_value := clampf(float(option_value), 0.0, 1.0)
+			if flash_value <= 0.05:
+				return "Off"
+			if flash_value <= 0.45:
+				return "Low"
+			return "Full"
+		"music_volume_db", "sfx_volume_db":
+			var volume_value := float(option_value)
+			if is_equal_approx(volume_value, 0.0):
+				return "Full"
+			if is_equal_approx(volume_value, -6.0):
+				return "Reduced"
+			return "Low"
+		_:
+			return str(option_value)
+
+
+func apply_profile_options() -> void:
+	apply_hud_theme()
+	apply_audio_mix()
+	apply_stage_accessibility_options()
+
+
+func apply_hud_theme() -> void:
+	if hud_panel == null or pause_panel == null or mission_panel == null:
+		return
+	var high_contrast := bool(get_profile_option_snapshot().get("high_contrast_hud", false))
+	var panel_tint := Color("fff9f1") if not high_contrast else Color("f3f0a6")
+	var font_color := Color("f7f5ef") if not high_contrast else Color("16120f")
+	var accent_color := Color("f0d0a8") if not high_contrast else Color("16120f")
+	hud_panel.self_modulate = panel_tint
+	pause_panel.self_modulate = panel_tint
+	mission_panel.self_modulate = panel_tint
+	pause_shade.color = Color(0, 0, 0, 0.72 if not high_contrast else 0.82)
+	for label in [status_label, objective_label, boss_label, controls_label, pause_body, mission_title, mission_body, mission_footer]:
+		label.add_theme_color_override("font_color", font_color)
+	status_label.add_theme_font_size_override("font_size", 18 if not high_contrast else 22)
+	objective_label.add_theme_font_size_override("font_size", 18 if not high_contrast else 22)
+	boss_label.add_theme_font_size_override("font_size", 18 if not high_contrast else 20)
+	controls_label.add_theme_font_size_override("font_size", 16 if not high_contrast else 18)
+	pause_body.add_theme_font_size_override("font_size", 18 if not high_contrast else 20)
+	mission_title.add_theme_font_size_override("font_size", 30 if not high_contrast else 34)
+	mission_body.add_theme_font_size_override("font_size", 20 if not high_contrast else 22)
+	mission_footer.add_theme_font_size_override("font_size", 18 if not high_contrast else 20)
+	boss_bar.self_modulate = accent_color
+	hud_panel.custom_minimum_size = Vector2(700, 250) if not high_contrast else Vector2(760, 286)
+	mission_panel.custom_minimum_size = Vector2(860, 380) if not high_contrast else Vector2(940, 430)
+	pause_panel.custom_minimum_size = Vector2(620, 220) if not high_contrast else Vector2(680, 250)
+
+
+func apply_audio_mix() -> void:
+	if explore_loop == null or combat_loop == null or clear_loop == null or boss_loop == null or spectacle_stinger == null:
+		return
+	var options := get_profile_option_snapshot()
+	var master_shift := float(profile.get_option_value("master_volume_db", 0.0)) if profile != null else 0.0
+	var music_shift := float(options.get("music_volume_db", 0.0)) + master_shift
+	var sfx_shift := float(options.get("sfx_volume_db", 0.0)) + master_shift
+	explore_loop.volume_db = MUSIC_BASE_VOLUMES["explore"] + music_shift
+	combat_loop.volume_db = MUSIC_BASE_VOLUMES["combat"] + music_shift
+	clear_loop.volume_db = MUSIC_BASE_VOLUMES["clear"] + music_shift
+	boss_loop.volume_db = MUSIC_BASE_VOLUMES["boss"] + music_shift
+	spectacle_stinger.volume_db = SFX_BASE_VOLUMES["spectacle"] + sfx_shift
+
+
+func apply_stage_accessibility_options() -> void:
+	if stage_root == null or not stage_root.has_method("apply_accessibility_options"):
+		return
+	var options := get_profile_option_snapshot()
+	stage_root.call("apply_accessibility_options", {
+		"reduced_motion": bool(options.get("reduced_motion", false)),
+		"screen_flash_strength": float(options.get("screen_flash_strength", 1.0)),
+	})
+
+
+func build_progress_text() -> String:
+	return "Cleared stages: %d/%d  Unlocked missions: %d/%d  Unlocked hunters: %d/%d" % [
+		profile.get_cleared_stage_ids().size() if profile != null else 0,
+		catalog.get_stage_ids().size() if catalog != null else 0,
+		profile.get_unlocked_stage_ids().size() if profile != null else 0,
+		catalog.get_stage_ids().size() if catalog != null else 0,
+		profile.get_unlocked_character_ids().size() if profile != null else 0,
+		catalog.get_character_ids().size() if catalog != null else 0,
+	]
+
+
+func build_progression_hint(stage_definition: Dictionary) -> String:
+	if profile == null or catalog == null:
+		return "Profile booting."
+	var stage_id := str(stage_definition.get("id", ""))
+	if not profile.get_cleared_stage_ids().has(stage_id):
+		var next_unlocks: Array[String] = []
+		var reward_character_id := str(stage_definition.get("reward_character_id", ""))
+		if not reward_character_id.is_empty() and not profile.is_character_unlocked(reward_character_id):
+			next_unlocks.append("hunter %s" % str(catalog.get_character_by_id(reward_character_id).get("name", reward_character_id)))
+		var next_stage_id := catalog.get_next_stage_id(stage_id)
+		if not next_stage_id.is_empty() and not profile.is_stage_unlocked(next_stage_id):
+			next_unlocks.append("mission %s" % str(catalog.get_stage_by_id(next_stage_id).get("name", next_stage_id)))
+		if next_unlocks.is_empty():
+			return "Clear this mission to lock in a better rank and time."
+		return "Clear this mission to unlock %s." % " and ".join(next_unlocks)
+	var next_stage_id := catalog.get_next_stage_id(stage_id)
+	if not next_stage_id.is_empty():
+		return "Next target: %s." % str(catalog.get_stage_by_id(next_stage_id).get("name", next_stage_id))
+	return "Final route cleared. Chase a better rank or time."
+
+
+func build_stage_briefing_text(stage_definition: Dictionary, character_definition: Dictionary) -> String:
+	var stage_id := str(stage_definition.get("id", ""))
+	var briefing_intro := "Mission briefing"
+	if profile != null and not profile.has_seen_stage_briefing(stage_id):
+		briefing_intro = "First-run briefing"
+	var stage_briefing := str(stage_definition.get("briefing", stage_definition.get("summary", "No mission briefing available.")))
+	var hunter_tip := str(character_definition.get("onboarding_tip", character_definition.get("summary", "No hunter notes available.")))
+	return "%s: %s\nHunter note: %s\nProgression: %s" % [
+		briefing_intro,
+		stage_briefing,
+		hunter_tip,
+		build_progression_hint(stage_definition),
+	]
+
+
+func build_options_body() -> String:
+	var lines := [
+		"Comfort options stay in the pilot profile and apply immediately.",
+		"Use Up/Down to focus a setting and Left/Right or Enter to change it.",
+	]
+	var option_entries := get_option_entries()
+	selected_option_index = clampi(selected_option_index, 0, max(option_entries.size() - 1, 0))
+	for index in range(option_entries.size()):
+		var entry: Dictionary = option_entries[index]
+		var prefix := ">" if index == selected_option_index else " "
+		lines.append("%s %s: %s" % [
+			prefix,
+			str(entry.get("label", "Setting")),
+			str(entry.get("value", "")),
+		])
+	return "\n".join(lines)
+
+
 func update_status_label() -> void:
 	var stage_name := str(get_selected_stage_definition().get("name", "Unknown Stage"))
 	var movement_text := "Mission board ready"
@@ -383,6 +711,9 @@ func update_status_label() -> void:
 			str(stage_summary.get("rank", "--")),
 		]
 	else:
+		var briefing_status := "reviewed"
+		if profile != null and not profile.has_seen_stage_briefing(active_stage_id):
+			briefing_status = "pending"
 		objective_label.text = "Selected route: %s\nSelected hunter: %s\nCleared stages: %d/%d  Unlocked hunters: %d/%d\nBest record: %s" % [
 			stage_name,
 			str(get_selected_character_definition().get("name", "Unknown Hunter")),
@@ -390,7 +721,10 @@ func update_status_label() -> void:
 			catalog.get_stage_ids().size() if catalog != null else 0,
 			profile.get_unlocked_character_ids().size() if profile != null else 0,
 			catalog.get_character_ids().size() if catalog != null else 0,
-			profile.describe_stage_result(active_stage_id) if profile != null else "No profile loaded",
+			"%s  Briefing %s" % [
+				profile.describe_stage_result(active_stage_id) if profile != null else "No profile loaded",
+				briefing_status,
+			],
 		]
 
 	var boss_active := bool(stage_summary.get("boss_active", false))
@@ -403,7 +737,7 @@ func update_status_label() -> void:
 		]
 		boss_bar.value = clampf(float(stage_summary.get("boss_health_ratio", 0.0)) * 100.0, 0.0, 100.0)
 
-	controls_label.text = "Menu: A/D or Left/Right mission  W/S or Up/Down hunter  Enter deploy\nController: D-pad browse  A deploy  B back  Start pause  F or F11 fullscreen\nStage: A/D move  Space/W jump  Shift/C dodge  J/K/L/; attacks  R restart"
+	controls_label.text = "Menu: A/D or Left/Right mission  W/S or Up/Down hunter  Enter deploy  Esc options\nController: D-pad browse  A deploy  B options or back  Start pause  F or F11 fullscreen\nStage: A/D move  Space/W jump  Shift/C dodge  J/K/L/; attacks  R restart"
 
 
 func update_pause_overlay() -> void:
@@ -431,33 +765,35 @@ func update_frontend_overlay() -> void:
 	var character_name := str(character_definition.get("name", "Unknown Hunter"))
 	var view_label := "Borderless fullscreen" if faux_fullscreen else "Windowed"
 	var ending_summary := str(stage_definition.get("ending_summary", ""))
-	var progress_text := "Cleared stages: %d/%d  Unlocked missions: %d/%d  Unlocked hunters: %d/%d" % [
-		profile.get_cleared_stage_ids().size() if profile != null else 0,
-		catalog.get_stage_ids().size() if catalog != null else 0,
-		profile.get_unlocked_stage_ids().size() if profile != null else 0,
-		catalog.get_stage_ids().size() if catalog != null else 0,
-		profile.get_unlocked_character_ids().size() if profile != null else 0,
-		catalog.get_character_ids().size() if catalog != null else 0,
-	]
+	var progress_text := build_progress_text()
 	var note_text := "" if frontend_notice.is_empty() else "\nNotice: %s" % frontend_notice
 
 	if frontend_mode == "results":
 		mission_title.text = str(stage_definition.get("ending_title", "Stage Clear"))
 		var ending_text := "" if ending_summary.is_empty() else "\nEnding: %s" % ending_summary
-		mission_body.text = "Mission: %s\nHunter: %s\nView: %s\n%s\nBest record: %s\nSave path: %s%s%s" % [
+		mission_body.text = "Mission: %s\nHunter: %s\nView: %s\n%s\nBest record: %s\nNext step: %s\nSave path: %s%s%s" % [
 			stage_name,
 			character_name,
 			view_label,
 			progress_text,
 			profile.describe_stage_result(active_stage_id) if profile != null else "--",
+			build_progression_hint(stage_definition),
 			profile.get_absolute_save_path() if profile != null else "--",
 			note_text,
 			ending_text,
 		]
 		mission_footer.text = "Enter or B to return to the mission board"
+	elif menu_panel_mode == "options":
+		mission_title.text = "Comfort and Accessibility"
+		mission_body.text = "%s\nSave path: %s%s" % [
+			build_options_body(),
+			profile.get_absolute_save_path() if profile != null else "--",
+			note_text,
+		]
+		mission_footer.text = "Up or Down focus  Left or Right or Enter change  Esc or B close"
 	else:
 		mission_title.text = "Mission Board"
-		mission_body.text = "Mission: %s\nBiome: %s  Stage order: %d/%d\nHunter: %s (%s)\nProfile: %s\nView: %s\n%s\nBest record: %s\nSave path: %s%s" % [
+		mission_body.text = "Mission: %s\nBiome: %s  Stage order: %d/%d\nHunter: %s (%s)\nProfile: %s\nView: %s\n%s\n%s\nBest record: %s\nSave path: %s%s" % [
 			stage_name,
 			str(stage_definition.get("biome", "unknown_biome")),
 			int(stage_definition.get("order", 1)),
@@ -467,11 +803,12 @@ func update_frontend_overlay() -> void:
 			str(character_definition.get("summary", "No hunter summary available.")),
 			view_label,
 			progress_text,
+			build_stage_briefing_text(stage_definition, character_definition),
 			profile.describe_stage_result(active_stage_id) if profile != null else "--",
 			profile.get_absolute_save_path() if profile != null else "--",
 			note_text,
 		]
-		mission_footer.text = "A/D or Left/Right switch mission  W/S or Up/Down switch hunter  Enter or A deploy"
+		mission_footer.text = "A/D or Left/Right switch mission  W/S or Up/Down switch hunter  Enter or A deploy  Esc or B options"
 
 
 func update_audio_state() -> void:
@@ -562,13 +899,17 @@ func get_frontend_summary() -> Dictionary:
 	bootstrap_runtime()
 	return {
 		"mode": frontend_mode,
+		"menu_panel_mode": menu_panel_mode,
 		"selected_stage_id": active_stage_id,
 		"selected_character_id": active_character_id,
 		"stage_active": stage_root != null,
 		"unlocked_stage_ids": profile.get_unlocked_stage_ids() if profile != null else [],
 		"unlocked_character_ids": profile.get_unlocked_character_ids() if profile != null else [],
 		"cleared_stage_ids": profile.get_cleared_stage_ids() if profile != null else [],
+		"seen_stage_briefing_ids": profile.get_seen_stage_briefing_ids() if profile != null else [],
 		"best_stage_result": profile.get_stage_result(active_stage_id) if profile != null else {},
+		"options": get_profile_option_snapshot(),
+		"briefing_pending": profile != null and not profile.has_seen_stage_briefing(active_stage_id),
 		"save_path": profile.get_absolute_save_path() if profile != null else "",
 		"notice": frontend_notice,
 	}
@@ -587,6 +928,29 @@ func debug_complete_selected_stage(rank: String, finish_seconds: float) -> void:
 	})
 
 
+func debug_open_options_menu() -> void:
+	if not bootstrap_runtime():
+		return
+	if menu_panel_mode != "options":
+		toggle_options_menu()
+
+
+func debug_set_option_value(option_id: String, option_value: Variant) -> void:
+	if not bootstrap_runtime():
+		return
+	if option_id == "faux_fullscreen":
+		set_faux_fullscreen(bool(option_value), true)
+		apply_profile_options()
+		return
+	set_named_option(option_id, option_value)
+
+
+func debug_get_stage_accessibility() -> Dictionary:
+	if stage_root != null and stage_root.has_method("get_stage_summary"):
+		return stage_root.call("get_stage_summary")
+	return {}
+
+
 func debug_reset_profile() -> void:
 	if not bootstrap_runtime():
 		return
@@ -596,7 +960,9 @@ func debug_reset_profile() -> void:
 	frontend_notice = profile.last_status_message
 	teardown_stage()
 	frontend_mode = "menu"
+	menu_panel_mode = "board"
 	sync_selection_from_profile()
+	apply_profile_options()
 
 
 func get_build_label() -> String:
@@ -613,6 +979,13 @@ func format_optional_seconds(value: float) -> String:
 	if value < 0.0:
 		return "--"
 	return format_seconds(value)
+
+
+func _notification(what: int) -> void:
+	if what in [NOTIFICATION_APPLICATION_FOCUS_OUT, NOTIFICATION_WM_WINDOW_FOCUS_OUT]:
+		if frontend_mode == "playing" and profile != null and bool(profile.get_option_value("auto_pause_on_focus_loss", true)):
+			set_game_paused(true)
+			frontend_notice = "Auto-paused after focus loss."
 
 
 func _on_joy_connection_changed(device: int, connected: bool) -> void:

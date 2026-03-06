@@ -20,11 +20,13 @@ def test_content_catalog_matches_scaffold_contract() -> None:
     assert first_character["id"] == "mira_coil"
     assert first_character["playstyle"] == "balanced_striker"
     assert first_character["locked"] is False
+    assert "onboarding_tip" in first_character
 
     second_character = data["characters"][1]
     assert second_character["id"] == "zeph_rush"
     assert second_character["playstyle"] == "agile_disruptor"
     assert second_character["locked"] is True
+    assert "onboarding_tip" in second_character
 
     first_stage = data["stages"][0]
     assert first_stage["id"] == "relay_clearing"
@@ -32,18 +34,21 @@ def test_content_catalog_matches_scaffold_contract() -> None:
     assert first_stage["spectacle_target_seconds"] == 180
     assert first_stage["boss_objective"] == "Break the relay warden"
     assert first_stage["reward_character_id"] == "zeph_rush"
+    assert "briefing" in first_stage
 
     second_stage = data["stages"][1]
     assert second_stage["id"] == "coil_depths"
     assert second_stage["order"] == 2
     assert second_stage["locked"] is True
     assert second_stage["boss_objective"] == "Break the Rift Colossus"
+    assert "briefing" in second_stage
 
     third_stage = data["stages"][2]
     assert third_stage["id"] == "storm_crown"
     assert third_stage["order"] == 3
     assert third_stage["locked"] is True
     assert third_stage["ending_title"] == "Ending: Crown Quieted"
+    assert "briefing" in third_stage
 
 
 def test_catalog_scene_paths_exist() -> None:

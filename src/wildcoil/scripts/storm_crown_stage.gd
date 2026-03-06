@@ -55,6 +55,8 @@ var boss_intro_timer := 0.0
 var boss_seen := false
 var stage_complete := false
 var screen_flash_timer := 0.0
+var reduced_motion := false
+var screen_flash_strength := 1.0
 var run_context: Dictionary = {}
 var stage_definition: Dictionary = {}
 var hazard_state := "idle"
@@ -151,7 +153,7 @@ func _draw() -> void:
 	if stage_phase == "boss_intro" or stage_phase == "boss":
 		draw_boss_barrier()
 	if screen_flash_timer > 0.0:
-		draw_rect(Rect2(-1200.0, -540.0, 3600.0, 1080.0), Color(1.0, 0.97, 0.83, minf(screen_flash_timer * 0.34, 0.34)), true)
+		draw_rect(Rect2(-1200.0, -540.0, 3600.0, 1080.0), Color(1.0, 0.97, 0.83, minf(screen_flash_timer * 0.34 * screen_flash_strength, 0.34 * screen_flash_strength)), true)
 
 
 func draw_background_props() -> void:
@@ -193,7 +195,7 @@ func draw_phase_marker(marker_x: float, marker_color: Color) -> void:
 
 
 func draw_opening_barrier() -> void:
-	var barrier_alpha := 0.22 + 0.10 * absf(sin(elapsed_time * 6.0))
+	var barrier_alpha := get_pulse_alpha(0.22, 0.10, 6.0)
 	var barrier_color := Color(1.0, 0.78, 0.52, barrier_alpha)
 	draw_rect(Rect2(Vector2(1120.0, -280.0), Vector2(24.0, 440.0)), barrier_color, true)
 	draw_rect(Rect2(Vector2(1138.0, -280.0), Vector2(16.0, 440.0)), Color(1.0, 0.94, 0.78, barrier_alpha + 0.08), true)
@@ -223,7 +225,7 @@ func draw_relay_arena() -> void:
 
 
 func draw_boss_barrier() -> void:
-	var barrier_alpha := 0.20 + 0.10 * absf(sin(elapsed_time * 7.0))
+	var barrier_alpha := get_pulse_alpha(0.20, 0.10, 7.0)
 	draw_rect(Rect2(Vector2(BOSS_ARENA_BOUNDS.x - 14.0, -300.0), Vector2(18.0, 470.0)), Color(1.0, 0.79, 0.54, barrier_alpha), true)
 	draw_rect(Rect2(Vector2(BOSS_ARENA_BOUNDS.y + 6.0, -300.0), Vector2(18.0, 470.0)), Color(1.0, 0.79, 0.54, barrier_alpha), true)
 
@@ -479,6 +481,17 @@ func get_audio_state() -> String:
 			return "explore"
 
 
+func apply_accessibility_options(options: Dictionary) -> void:
+	reduced_motion = bool(options.get("reduced_motion", false))
+	screen_flash_strength = clampf(float(options.get("screen_flash_strength", 1.0)), 0.0, 1.0)
+	queue_redraw()
+
+
+func get_pulse_alpha(base_value: float, pulse_amount: float, pulse_speed: float) -> float:
+	var pulse_scale := 0.25 if reduced_motion else 1.0
+	return base_value + pulse_amount * pulse_scale * absf(sin(elapsed_time * pulse_speed))
+
+
 func update_hazard_cycle(delta: float) -> void:
 	if not (stage_phase == "advance" or stage_phase == "boss_intro" or stage_phase == "boss"):
 		hazard_state = "idle"
@@ -571,12 +584,14 @@ func get_stage_summary() -> Dictionary:
 		"rank": get_rank_label(),
 		"boss_active": boss_active,
 		"boss_name": boss_name,
-			"boss_state": boss_state,
-			"boss_health_ratio": boss_health_ratio,
-			"boss_seen": boss_seen,
-			"hazard_state": hazard_state,
-			"hazard_cycle_count": hazard_cycle_count,
-		}
+		"boss_state": boss_state,
+		"boss_health_ratio": boss_health_ratio,
+		"boss_seen": boss_seen,
+		"hazard_state": hazard_state,
+		"hazard_cycle_count": hazard_cycle_count,
+		"reduced_motion": reduced_motion,
+		"screen_flash_strength": screen_flash_strength,
+	}
 
 
 func get_rank_label() -> String:

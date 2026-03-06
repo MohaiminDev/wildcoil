@@ -12,6 +12,7 @@ Use this log for all external tests and any internal hands-on checks that materi
 - 2026-03-05: Remaining accepted blocker before release-candidate signoff is still the lack of a physical controller and external tester coverage.
 - 2026-03-05: Phase 3 Stage 2 internal smoke completed on Apple Silicon using an unlocked mission-board profile, with Coil Depths loading cleanly from the live shell and the new hazard route reading clearly enough for continued production.
 - 2026-03-05: Phase 3 finale smoke completed on Apple Silicon using a seeded Storm Crown profile, with live shell deploy, HID-driven keyboard movement, pause or resume flow, and the first combat transition all verified in the real runtime.
+- 2026-03-05: Phase 3 onboarding and accessibility smoke completed on Apple Silicon using a fresh profile, with the first-run mission briefing visible on boot and the live options panel applying high-contrast HUD, reduced motion, and lower screen-flash settings immediately.
 
 ## Phase 1 Gate Targets
 
@@ -32,6 +33,7 @@ Use this log for all external tests and any internal hands-on checks that materi
 | 2026-03-05 | `phase3-second-playable` | Codex (internal loadout smoke) | Apple M1, editor runtime with a seeded unlocked profile for Zeph Rush | Keyboard | `1.5s` from stage launch after menu confirm | Focus of the session was loadout differentiation rather than spectacle timing | Yes | No selection blocker after using an unlocked profile; physical controller still unavailable | None repeated in local smoke | Zeph Rush loaded with `86 HP`, a faster live run velocity, and a clearly lighter silhouette plus palette than Mira, which made the second character feel meaningfully different even inside the same stage shell | Preserve the mobility and survivability contrast while Stage 2 and Stage 3 content are added |
 | 2026-03-05 | `phase3-stage2` | Codex (internal Stage 2 smoke) | Apple M1, editor runtime with a seeded unlocked profile for Coil Depths and Zeph Rush | Keyboard | `1.5s` from stage launch after menu confirm | Deterministic Stage 2 suite covered the full clear; live smoke focused on mission-board unlock flow, new backdrop, and in-stage readability | Yes | Physical controller coverage is still missing, but the mission board exposed the new route cleanly once the save had unlocked it | None repeated in local smoke | Coil Depths loaded from the real shell, the blue depth-conduit palette read as a distinct route immediately, and the new enemy mix plus vent-focused objective text made the stage feel like a midgame escalation instead of a Stage 1 reskin | Keep the vent hazard language readable as Stage 3 and onboarding work land |
 | 2026-03-05 | `phase3-finale` | Codex (internal finale smoke) | Apple M1, editor runtime with a seeded unlocked profile for Storm Crown and the finale notice flow | Keyboard | `242.6s` from direct Stage 3 deploy in the live smoke | Deterministic finale suite covered the clear and ending notice; live smoke focused on mission-board launch, pause or resume, HID keyboard input, and first-contact combat in Storm Crown | Yes | AppleScript text keystrokes were not enough for gameplay movement on macOS, so the smoke switched to HID-posted key events for the live input check; physical controller coverage is still missing | None repeated in local smoke | Storm Crown loaded from the real shell, the HUD showed Mira move from `(-620, 140)` to `(141, 140)` under live keyboard input, health dropped to `84` on the first combat beat, and the objective shifted to `Break the crown wardens`, which made the finale route feel like a real escalation instead of a shell-only proof | Carry the HID-style smoke workflow into the release-candidate pass, and keep physical-controller coverage open until hardware is available |
+| 2026-03-05 | `phase3-polish` | Codex (internal onboarding and accessibility smoke) | Apple M1, editor runtime with a fresh profile and the mission-board options shell | Keyboard | Not measured; the smoke focused on shell onboarding rather than route timing | Not measured; the smoke stayed in the shell to validate first-run briefing plus comfort settings | Yes | None blocking in the shell; physical controller coverage is still missing and focus-loss plus audio-device checks remain release-candidate work | None repeated in local smoke | A fresh save booted straight into a first-run briefing on Relay Clearing, `Esc` opened the comfort panel immediately, and live keyboard input flipped high-contrast HUD, reduced motion, and lower screen flash without leaving the mission board | Carry the shell options flow into the release-candidate packaging pass and keep controller plus focus-loss validation open until the next gate |
 
 ## Session Notes
 
@@ -109,6 +111,21 @@ Use this log for all external tests and any internal hands-on checks that materi
 - When the tester smiled, laughed, or verbally reacted: the strongest positive reaction came from watching the HUD prove the player had physically moved from `(-620, 140)` to `(141, 140)` and then seeing the route rename its objective to `Break the crown wardens`
 - Whether the tester asked to play again: yes
 - Highest-priority fix: keep physical-controller coverage open for the release-candidate pass, because keyboard is now verified live but controller behavior is still only covered by deterministic tests
+
+### Session ID: `2026-03-05-polish-smoke`
+
+- Build identifier: `phase3-polish`
+- Engine / branch: Godot 4.6.1 / `codex/wildcoil-mvp`
+- Tester familiarity with brawlers: high
+- Hardware: Apple M1 Mac
+- Controller type: none connected
+- Session length: short manual smoke focused on the first-run mission board, onboarding copy, and live comfort-setting toggles
+- What clicked immediately: the fresh profile exposed a real first-run briefing instead of a blank menu, and the in-shell options panel made the build feel more like a shippable game than a debug shell
+- What confused the tester: no blocking confusion in the mission board, but the release candidate still owes physical-controller, focus-loss, and audio-device validation outside this shorter shell-focused pass
+- Where the tester took damage unfairly: no combat took place in this smoke because the session intentionally stayed in the shell and options flow
+- When the tester smiled, laughed, or verbally reacted: the strongest positive reaction came from seeing high-contrast HUD and reduced motion apply instantly after a couple of live key presses, without restarting the game
+- Whether the tester asked to play again: yes
+- Highest-priority fix: preserve the shell clarity and options responsiveness while the release-candidate pass covers controller hardware, focus-loss behavior, and packaged-build validation
 
 ## Session Notes Template
 
