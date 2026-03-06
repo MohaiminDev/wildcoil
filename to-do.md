@@ -20,15 +20,16 @@ The Phase 1 through release tasks below are the frozen MVP backlog. Only change 
 
 ## PENDING
 
+## DONE
+
 ### [REL-01] Publish the tester release
 - Outcome: Push the final code, create a release tag, attach the macOS build, and publish release notes plus install or known-issues guidance.
 - Validation:
-  - [ ] The release tag and release notes exist.
-  - [ ] The macOS build artifact is attached or the exact publish blocker is documented.
-  - [ ] The current test suite passes.
+  - [x] The release tag and release notes exist.
+  - [x] The macOS build artifact is attached or the exact publish blocker is documented.
+  - [x] The current test suite passes.
 - Dependencies: [P3-05]
-
-## DONE
+- Completed: 2026-03-05
 
 ### [P3-05] Run the release-candidate regression pass
 - Outcome: Execute the full regression, performance, input, packaging, and release-candidate checks and fix release blockers only.
