@@ -65,6 +65,9 @@ func _initialize() -> void:
 	if suite == "first_playable" and errors.is_empty():
 		payload.merge(run_first_playable_suite(catalog), true)
 
+	if suite == "vertical_slice" and errors.is_empty():
+		payload.merge(run_vertical_slice_suite(catalog), true)
+
 	print("WILDCOIL_TEST_RESULTS %s" % JSON.stringify(payload))
 	quit(0 if payload["passed"] else 1)
 
@@ -301,20 +304,62 @@ func run_first_playable_suite(catalog: ContentCatalog) -> Dictionary:
 	stage_instance.call("advance_stage_flow", 0.1)
 	var spectacle_summary: Dictionary = stage_instance.call("get_stage_summary")
 	stage_instance.call("advance_stage_flow", 4.0)
-	player.global_position.x = 740.0
-	stage_instance.call("advance_stage_flow", 0.1)
 	var final_summary: Dictionary = stage_instance.call("get_stage_summary")
 
-	var passed: bool = str(initial_summary.get("phase", "")) == "approach" and float(combat_summary.get("first_combat_seconds", -1.0)) >= 0.0 and float(spectacle_summary.get("spectacle_seconds", -1.0)) >= 0.0 and str(spectacle_summary.get("audio_state", "")) == "spectacle" and bool(final_summary.get("stage_complete", false)) and str(final_summary.get("rank", "--")) != "--"
+	var passed: bool = str(initial_summary.get("phase", "")) == "approach" and float(combat_summary.get("first_combat_seconds", -1.0)) >= 0.0 and float(spectacle_summary.get("spectacle_seconds", -1.0)) >= 0.0 and str(spectacle_summary.get("audio_state", "")) == "spectacle" and str(final_summary.get("phase", "")) == "advance"
 	var payload := {
 		"initial_phase": str(initial_summary.get("phase", "")),
 		"first_combat_seconds": float(combat_summary.get("first_combat_seconds", -1.0)),
 		"spectacle_seconds": float(spectacle_summary.get("spectacle_seconds", -1.0)),
 		"final_phase": str(final_summary.get("phase", "")),
 		"stage_complete": bool(final_summary.get("stage_complete", false)),
+		"passed": passed,
+		"errors": [] if passed else ["first playable stage flow did not reach encounter, spectacle, and boss-approach states"],
+	}
+	stage_instance.free()
+	return payload
+
+
+func run_vertical_slice_suite(catalog: ContentCatalog) -> Dictionary:
+	var stage_definition := catalog.get_first_stage()
+	var packed_scene := load(str(stage_definition.get("scene", ""))) as PackedScene
+	if packed_scene == null:
+		return {
+			"passed": false,
+			"errors": ["default stage scene failed to load for vertical slice suite"],
+		}
+
+	var stage_instance := packed_scene.instantiate()
+	get_root().add_child(stage_instance)
+	var player := stage_instance.call("get_player") as PlayerController
+	var boss_actor := stage_instance.call("get_boss_actor") as BossActor
+	if player == null or boss_actor == null:
+		stage_instance.free()
+		return {
+			"passed": false,
+			"errors": ["stage did not expose player and boss actors for vertical slice suite"],
+		}
+
+	player.global_position.x = -80.0
+	stage_instance.call("advance_stage_flow", 0.1)
+	for enemy in stage_instance.call("get_enemy_nodes"):
+		if enemy is EnemyActor:
+			enemy.health = 0
+	stage_instance.call("advance_stage_flow", 4.0)
+	player.global_position.x = 980.0
+	stage_instance.call("advance_stage_flow", 0.1)
+	stage_instance.call("advance_stage_flow", 2.0)
+	boss_actor.health = 0
+	stage_instance.call("advance_stage_flow", 0.1)
+	var final_summary: Dictionary = stage_instance.call("get_stage_summary")
+	var passed: bool = bool(final_summary.get("boss_seen", false)) and bool(final_summary.get("stage_complete", false)) and str(final_summary.get("rank", "--")) != "--"
+	var payload := {
+		"boss_seen": bool(final_summary.get("boss_seen", false)),
+		"boss_state": str(final_summary.get("boss_state", "")),
+		"stage_complete": bool(final_summary.get("stage_complete", false)),
 		"rank": str(final_summary.get("rank", "--")),
 		"passed": passed,
-		"errors": [] if passed else ["first playable stage flow did not reach encounter, spectacle, and clear states"],
+		"errors": [] if passed else ["vertical slice did not reach boss and clear states"],
 	}
 	stage_instance.free()
 	return payload

@@ -59,6 +59,28 @@ const PROFILES := {
 		"accent": "ffd5a1",
 		"is_elite": true,
 	},
+	"storm_warden": {
+		"id": "storm_warden",
+		"display_name": "Storm Warden",
+		"archetype": "boss",
+		"health": 240,
+		"walk_speed": 96.0,
+		"engage_range": 520.0,
+		"attack_range": 150.0,
+		"attack_windup": 0.44,
+		"damage": 20,
+		"knockback_x": 320.0,
+		"knockback_y": -240.0,
+		"stun": 0.22,
+		"hitstop": 0.08,
+		"projectile_speed": 320.0,
+		"projectile_range": 520.0,
+		"dash_speed": 540.0,
+		"color": "e0b45e",
+		"accent": "fff4ba",
+		"is_elite": true,
+		"is_boss": true,
+	},
 }
 
 

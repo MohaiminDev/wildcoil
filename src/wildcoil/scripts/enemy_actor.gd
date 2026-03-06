@@ -5,8 +5,7 @@ const EnemyProfileLibrary = preload("res://scripts/core/enemy_profile_library.gd
 
 const GROUND_Y := 140.0
 const GRAVITY := 1600.0
-const STAGE_MIN_X := -760.0
-const STAGE_MAX_X := 760.0
+const DEFAULT_STAGE_BOUNDS := Vector2(-760.0, 760.0)
 
 @export var enemy_id := "needle_hound"
 
@@ -56,7 +55,8 @@ func _physics_process(delta: float) -> void:
 	if global_position.y > GROUND_Y:
 		global_position.y = GROUND_Y
 		velocity.y = 0.0
-	global_position.x = clampf(global_position.x, STAGE_MIN_X, STAGE_MAX_X)
+	var stage_bounds := get_stage_bounds()
+	global_position.x = clampf(global_position.x, stage_bounds.x, stage_bounds.y)
 	velocity.x = move_toward(velocity.x, 0.0, 1200.0 * delta)
 	queue_redraw()
 
@@ -134,6 +134,12 @@ func get_player() -> Node2D:
 	if stage != null and stage.has_method("get_player"):
 		return stage.call("get_player")
 	return null
+
+
+func get_stage_bounds() -> Vector2:
+	if stage != null and stage.has_method("get_stage_bounds"):
+		return stage.call("get_stage_bounds")
+	return DEFAULT_STAGE_BOUNDS
 
 
 func reset_to_spawn(new_position: Vector2) -> void:

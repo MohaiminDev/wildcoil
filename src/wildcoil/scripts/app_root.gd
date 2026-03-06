@@ -7,12 +7,15 @@ const PlaceholderAudioLibrary = preload("res://scripts/core/placeholder_audio_li
 
 @onready var status_label: Label = $HUD/Margin/Panel/VBox/Status
 @onready var objective_label: Label = $HUD/Margin/Panel/VBox/Objective
+@onready var boss_label: Label = $HUD/Margin/Panel/VBox/BossLabel
+@onready var boss_bar: ProgressBar = $HUD/Margin/Panel/VBox/BossBar
 @onready var controls_label: Label = $HUD/Margin/Panel/VBox/Controls
 @onready var pause_overlay: CanvasLayer = $PauseOverlay
 @onready var pause_body: Label = $PauseOverlay/Center/Panel/VBox/Body
 @onready var explore_loop: AudioStreamPlayer = $Audio/ExploreLoop
 @onready var combat_loop: AudioStreamPlayer = $Audio/CombatLoop
 @onready var clear_loop: AudioStreamPlayer = $Audio/ClearLoop
+@onready var boss_loop: AudioStreamPlayer = $Audio/BossLoop
 @onready var spectacle_stinger: AudioStreamPlayer = $Audio/SpectacleStinger
 
 var catalog: ContentCatalog
@@ -93,13 +96,15 @@ func configure_audio_players() -> void:
 	combat_loop.volume_db = -16.0
 	clear_loop.stream = PlaceholderAudioLibrary.make_clear_loop()
 	clear_loop.volume_db = -18.0
+	boss_loop.stream = PlaceholderAudioLibrary.make_boss_loop()
+	boss_loop.volume_db = -14.0
 	spectacle_stinger.stream = PlaceholderAudioLibrary.make_spectacle_stinger()
 	spectacle_stinger.volume_db = -13.0
 
 
 func set_game_paused(should_pause: bool) -> void:
 	get_tree().paused = should_pause
-	for player in [explore_loop, combat_loop, clear_loop, spectacle_stinger]:
+	for player in [explore_loop, combat_loop, clear_loop, boss_loop, spectacle_stinger]:
 		player.stream_paused = should_pause
 	update_pause_overlay()
 
@@ -159,6 +164,15 @@ func update_status_label() -> void:
 		format_optional_seconds(float(stage_summary.get("spectacle_seconds", -1.0))),
 		str(stage_summary.get("rank", "--")),
 	]
+	var boss_active := bool(stage_summary.get("boss_active", false))
+	boss_label.visible = boss_active
+	boss_bar.visible = boss_active
+	if boss_active:
+		boss_label.text = "%s  %s" % [
+			str(stage_summary.get("boss_name", "Boss")),
+			str(stage_summary.get("boss_state", "idle")),
+		]
+		boss_bar.value = clampf(float(stage_summary.get("boss_health_ratio", 0.0)) * 100.0, 0.0, 100.0)
 	controls_label.text = "Esc pause  F or F11 fullscreen  R restart\nMove: A/D or arrows  Jump: Space/W  Dodge: Shift/C\nLight: J/Z  Heavy: K/X  Launch: L/V  Pulse: ;/B"
 
 
@@ -192,20 +206,29 @@ func update_audio_state() -> void:
 			play_loop(combat_loop)
 			stop_player(explore_loop)
 			stop_player(clear_loop)
+			stop_player(boss_loop)
 		"spectacle":
 			stop_player(explore_loop)
 			stop_player(combat_loop)
 			stop_player(clear_loop)
+			stop_player(boss_loop)
 			if not spectacle_stinger.playing:
 				spectacle_stinger.play()
+		"boss":
+			play_loop(boss_loop)
+			stop_player(explore_loop)
+			stop_player(combat_loop)
+			stop_player(clear_loop)
 		"victory":
 			play_loop(clear_loop)
 			stop_player(explore_loop)
 			stop_player(combat_loop)
+			stop_player(boss_loop)
 		_:
 			play_loop(explore_loop)
 			stop_player(combat_loop)
 			stop_player(clear_loop)
+			stop_player(boss_loop)
 
 
 func play_loop(player: AudioStreamPlayer) -> void:

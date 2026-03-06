@@ -20,14 +20,6 @@ The Phase 1 through release tasks below are the frozen MVP backlog. Only change 
 
 ## PENDING
 
-### [P2-01] Promote Stage 1 into a vertical slice
-- Outcome: Upgrade Stage 1 with target-leaning art/audio, cleaner camera and VFX discipline, and a full boss fight.
-- Validation:
-  - [ ] The slice is playable end-to-end with updated visuals and audio.
-  - [ ] Manual smoke checks confirm readability did not regress.
-  - [ ] The current test suite passes.
-- Dependencies: [P1-07]
-
 ### [P2-02] Implement progression and validation systems
 - Outcome: Add save/load, stage select, rank/time scoring, unlock tracking, and content validation checks.
 - Validation:
@@ -101,6 +93,15 @@ The Phase 1 through release tasks below are the frozen MVP backlog. Only change 
 - Dependencies: [P3-05]
 
 ## DONE
+
+### [P2-01] Promote Stage 1 into a vertical slice
+- Outcome: Upgrade Stage 1 with target-leaning art/audio, cleaner camera and VFX discipline, and a full boss fight.
+- Validation:
+  - [x] The slice is playable end-to-end with updated visuals and audio.
+  - [x] Manual smoke checks confirm readability did not regress.
+  - [x] The current test suite passes.
+- Dependencies: [P1-07]
+- Completed: 2026-03-05 (`1e9dc83`)
 
 ### [P1-07] Run the Phase 1 playtest gate
 - Outcome: Capture 5 to 8 external playtests, fix repeated clarity or fairness issues, and document the gate result.

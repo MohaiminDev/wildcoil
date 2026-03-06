@@ -5,15 +5,18 @@ const InputActions = preload("res://scripts/core/input_actions.gd")
 const PlayerCombatModel = preload("res://scripts/core/player_combat_model.gd")
 const PlayerMotorModel = preload("res://scripts/core/player_motor_model.gd")
 
-const STAGE_MIN_X := -760.0
-const STAGE_MAX_X := 760.0
+const DEFAULT_STAGE_BOUNDS := Vector2(-760.0, 760.0)
 const RESPAWN_FLOOR_Y := 140.0
+const CAMERA_LIMIT_TOP := -320
+const CAMERA_LIMIT_BOTTOM := 220
 
 var stage: Node
 var movement_model := PlayerMotorModel.new()
 var combat_model := PlayerCombatModel.new()
 var movement_state: Dictionary = {}
 var combat_state: Dictionary = {}
+
+@onready var camera: Camera2D = $Camera2D
 
 
 func _ready() -> void:
@@ -59,7 +62,9 @@ func _physics_process(delta: float) -> void:
 		stage.call("resolve_player_attack", attack_event, global_position, get_facing())
 		combat_state["attack_event"] = {}
 
-	global_position.x = clampf(global_position.x, STAGE_MIN_X, STAGE_MAX_X)
+	var stage_bounds := get_stage_bounds()
+	global_position.x = clampf(global_position.x, stage_bounds.x, stage_bounds.y)
+	update_camera_bounds(stage_bounds)
 	if global_position.y > 520.0:
 		reset_to_checkpoint(Vector2(global_position.x, RESPAWN_FLOOR_Y))
 
@@ -122,6 +127,21 @@ func reset_to_checkpoint(checkpoint_position: Vector2) -> void:
 	velocity = Vector2.ZERO
 	movement_state = movement_model.make_default_state()
 	combat_state = combat_model.reset_for_checkpoint(combat_state)
+
+
+func get_stage_bounds() -> Vector2:
+	if stage != null and stage.has_method("get_stage_bounds"):
+		return stage.call("get_stage_bounds")
+	return DEFAULT_STAGE_BOUNDS
+
+
+func update_camera_bounds(stage_bounds: Vector2) -> void:
+	if camera == null:
+		return
+	camera.limit_left = int(stage_bounds.x)
+	camera.limit_right = int(stage_bounds.y)
+	camera.limit_top = CAMERA_LIMIT_TOP
+	camera.limit_bottom = CAMERA_LIMIT_BOTTOM
 
 
 func _draw() -> void:

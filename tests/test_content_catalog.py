@@ -12,7 +12,7 @@ CATALOG_PATH = PROJECT_DIR / "data" / "content_catalog.json"
 def test_content_catalog_matches_scaffold_contract() -> None:
     data = json.loads(CATALOG_PATH.read_text())
 
-    assert data["build_label"] == "phase1-first-playable"
+    assert data["build_label"] == "phase2-vertical-slice"
     assert len(data["characters"]) == 1
     assert len(data["stages"]) == 1
 

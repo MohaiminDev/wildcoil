@@ -16,6 +16,10 @@ static func make_clear_loop() -> AudioStreamWAV:
 	return build_loop([164.0, 220.0, 246.0], 1.6, 0.16, 0.08, 0.08)
 
 
+static func make_boss_loop() -> AudioStreamWAV:
+	return build_loop([73.0, 110.0, 147.0, 220.0], 1.3, 0.24, 0.62, 0.12)
+
+
 static func make_spectacle_stinger() -> AudioStreamWAV:
 	return build_sweep(120.0, 420.0, 1.4, 0.32)
 
