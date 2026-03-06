@@ -1,6 +1,7 @@
 extends SceneTree
 
 const ContentCatalog = preload("res://scripts/core/content_catalog.gd")
+const CharacterProfileLibrary = preload("res://scripts/core/character_profile_library.gd")
 const EnemyProfileLibrary = preload("res://scripts/core/enemy_profile_library.gd")
 const InputActions = preload("res://scripts/core/input_actions.gd")
 const InputDeviceState = preload("res://scripts/core/input_device_state.gd")
@@ -75,11 +76,17 @@ func _initialize() -> void:
 	if suite == "progression" and errors.is_empty():
 		payload.merge(run_progression_suite(catalog, save_path), true)
 
+	if suite == "character_roster" and errors.is_empty():
+		payload.merge(run_character_roster_suite(catalog), true)
+
 	if suite == "frontend_shell" and errors.is_empty():
 		payload.merge(run_frontend_shell_suite(), true)
 
 	if suite == "content_validation":
 		payload.merge(run_content_validation_suite(catalog), true)
+
+	if suite == "character_loadout" and errors.is_empty():
+		payload.merge(run_character_loadout_suite(catalog, save_path), true)
 
 	print("WILDCOIL_TEST_RESULTS %s" % JSON.stringify(payload))
 	quit(0 if payload["passed"] else 1)
@@ -425,7 +432,9 @@ func run_progression_suite(catalog: ContentCatalog, save_path: String) -> Dictio
 	var preserve_save := not save_path.is_empty()
 	var corrupt_save_path := "%s.corrupt-source.json" % working_save_path.get_basename()
 	delete_path_if_present(working_save_path)
+	delete_path_if_present("%s%s" % [working_save_path, ProgressionProfile.BACKUP_SUFFIX])
 	delete_path_if_present(corrupt_save_path)
+	delete_path_if_present("%s%s" % [corrupt_save_path, ProgressionProfile.BACKUP_SUFFIX])
 	delete_corrupt_backups(working_save_path)
 	delete_corrupt_backups(corrupt_save_path)
 
@@ -461,7 +470,9 @@ func run_progression_suite(catalog: ContentCatalog, save_path: String) -> Dictio
 	}
 	if not preserve_save:
 		delete_path_if_present(working_save_path)
+		delete_path_if_present("%s%s" % [working_save_path, ProgressionProfile.BACKUP_SUFFIX])
 	delete_path_if_present(corrupt_save_path)
+	delete_path_if_present("%s%s" % [corrupt_save_path, ProgressionProfile.BACKUP_SUFFIX])
 	return payload
 
 
@@ -487,16 +498,60 @@ func run_frontend_shell_suite() -> Dictionary:
 	app_root.free()
 
 	var best_stage_result: Dictionary = results_summary.get("best_stage_result", {})
-	var passed: bool = str(initial_summary.get("mode", "")) == "menu" and bool(started_summary.get("stage_active", false)) and str(results_summary.get("mode", "")) == "results" and str(best_stage_result.get("best_rank", "")) == "S" and int((reset_summary.get("cleared_stage_ids", []) as Array).size()) == 0
+	var passed: bool = str(initial_summary.get("mode", "")) == "menu" and bool(started_summary.get("stage_active", false)) and str(results_summary.get("mode", "")) == "results" and str(best_stage_result.get("best_rank", "")) == "S" and (results_summary.get("unlocked_character_ids", []) as Array).has("zeph_rush") and int((reset_summary.get("cleared_stage_ids", []) as Array).size()) == 0
 	return {
 		"initial_mode": str(initial_summary.get("mode", "")),
 		"started_stage_active": bool(started_summary.get("stage_active", false)),
 		"results_mode": str(results_summary.get("mode", "")),
 		"reset_mode": str(reset_summary.get("mode", "")),
 		"best_rank": str(best_stage_result.get("best_rank", "")),
+		"unlocked_character_ids": results_summary.get("unlocked_character_ids", []),
 		"passed": passed,
 		"errors": [] if passed else ["frontend shell did not transition through menu, active stage, result, and reset flows"],
 	}
+
+
+func run_character_roster_suite(catalog: ContentCatalog) -> Dictionary:
+	var working_save_path := "user://wildcoil_character_roster_test.json"
+	delete_path_if_present(working_save_path)
+	delete_path_if_present("%s%s" % [working_save_path, ProgressionProfile.BACKUP_SUFFIX])
+	var profile := ProgressionProfile.load_or_create(working_save_path, catalog)
+	var initial_unlocked_character_ids := profile.get_unlocked_character_ids()
+	var mira_definition := CharacterProfileLibrary.merge_character_definition(catalog.get_character_by_id("mira_coil"))
+	var zeph_definition := CharacterProfileLibrary.merge_character_definition(catalog.get_character_by_id("zeph_rush"))
+
+	var mira_motor := PlayerMotorModel.new()
+	mira_motor.set_tuning(mira_definition.get("motor", {}))
+	var zeph_motor := PlayerMotorModel.new()
+	zeph_motor.set_tuning(zeph_definition.get("motor", {}))
+	var mira_move := mira_motor.advance(mira_motor.make_default_state(), {"move": 1.0}, 1.0 / 60.0)
+	var zeph_move := zeph_motor.advance(zeph_motor.make_default_state(), {"move": 1.0}, 1.0 / 60.0)
+
+	var mira_combat := PlayerCombatModel.new()
+	mira_combat.set_tuning(mira_definition.get("combat", {}))
+	var zeph_combat := PlayerCombatModel.new()
+	zeph_combat.set_tuning(zeph_definition.get("combat", {}))
+
+	profile.record_stage_clear("relay_clearing", "A", 118.4, catalog)
+	var unlocked_character_ids := profile.get_unlocked_character_ids()
+	var set_selected_ok := profile.set_selected_character_id("zeph_rush", catalog)
+	profile.save()
+	var reloaded_profile := ProgressionProfile.load_or_create(working_save_path, catalog)
+	var passed: bool = CharacterProfileLibrary.validate_profiles().is_empty() and initial_unlocked_character_ids == ["mira_coil"] and unlocked_character_ids == ["mira_coil", "zeph_rush"] and set_selected_ok and reloaded_profile.get_selected_character_id() == "zeph_rush" and float((zeph_move.get("velocity", Vector2.ZERO) as Vector2).x) > float((mira_move.get("velocity", Vector2.ZERO) as Vector2).x) and zeph_combat.get_max_health() < mira_combat.get_max_health()
+	var payload := {
+		"initial_unlocked_character_ids": initial_unlocked_character_ids,
+		"unlocked_character_ids": unlocked_character_ids,
+		"selected_character_id": reloaded_profile.get_selected_character_id(),
+		"mira_move_speed": float(mira_motor.get_tuning_snapshot().get("move_speed", 0.0)),
+		"zeph_move_speed": float(zeph_motor.get_tuning_snapshot().get("move_speed", 0.0)),
+		"mira_max_health": mira_combat.get_max_health(),
+		"zeph_max_health": zeph_combat.get_max_health(),
+		"passed": passed,
+		"errors": [] if passed else ["character roster did not unlock, persist selection, or differentiate the second loadout"],
+	}
+	delete_path_if_present(working_save_path)
+	delete_path_if_present("%s%s" % [working_save_path, ProgressionProfile.BACKUP_SUFFIX])
+	return payload
 
 
 func run_content_validation_suite(catalog: ContentCatalog) -> Dictionary:
@@ -537,6 +592,53 @@ func run_content_validation_suite(catalog: ContentCatalog) -> Dictionary:
 		"passed": passed,
 		"errors": [] if passed else ["content validation did not accept the live catalog or reject the invalid fixture"],
 	}
+
+
+func run_character_loadout_suite(catalog: ContentCatalog, save_path: String) -> Dictionary:
+	var working_save_path := save_path if not save_path.is_empty() else "user://wildcoil_character_loadout_test.json"
+	delete_path_if_present(working_save_path)
+	delete_path_if_present("%s%s" % [working_save_path, ProgressionProfile.BACKUP_SUFFIX])
+
+	var profile := ProgressionProfile.load_or_create(working_save_path, catalog)
+	var mira_definition := catalog.get_character_by_id("mira_coil")
+	var zeph_definition := catalog.get_character_by_id("zeph_rush")
+	var player_scene := load("res://scenes/player.tscn") as PackedScene
+	if player_scene == null:
+		return {
+			"passed": false,
+			"errors": ["player scene failed to load for character loadout suite"],
+		}
+
+	var mira_player := player_scene.instantiate() as PlayerController
+	mira_player.apply_character_definition(mira_definition)
+	var mira_snapshot := mira_player.get_loadout_snapshot()
+	mira_player.free()
+
+	var unlocked_before := profile.get_unlocked_character_ids()
+	profile.record_stage_clear(catalog.get_first_stage_id(), "A", 126.5, catalog)
+	var unlocked_after_clear := profile.get_unlocked_character_ids()
+	var selected_zeph := profile.set_selected_character_id("zeph_rush", catalog)
+	profile.save()
+	var reloaded_profile := ProgressionProfile.load_or_create(working_save_path, catalog)
+
+	var zeph_player := player_scene.instantiate() as PlayerController
+	zeph_player.apply_character_definition(zeph_definition)
+	var zeph_snapshot := zeph_player.get_loadout_snapshot()
+	zeph_player.free()
+
+	var passed: bool = unlocked_before == ["mira_coil"] and unlocked_after_clear == ["mira_coil", "zeph_rush"] and selected_zeph and reloaded_profile.get_selected_character_id() == "zeph_rush" and float(zeph_snapshot.get("move_speed", 0.0)) > float(mira_snapshot.get("move_speed", 0.0)) and int(zeph_snapshot.get("max_health", 0)) < int(mira_snapshot.get("max_health", 0)) and float(zeph_snapshot.get("special_cooldown", 0.0)) < float(mira_snapshot.get("special_cooldown", 0.0)) and int(zeph_snapshot.get("heavy_damage", 0)) < int(mira_snapshot.get("heavy_damage", 0))
+	var payload := {
+		"unlocked_before": unlocked_before,
+		"unlocked_after_clear": unlocked_after_clear,
+		"selected_character_id": reloaded_profile.get_selected_character_id(),
+		"mira_snapshot": mira_snapshot,
+		"zeph_snapshot": zeph_snapshot,
+		"passed": passed,
+		"errors": [] if passed else ["second-character unlock or loadout tuning did not diverge from the baseline character as expected"],
+	}
+	delete_path_if_present(working_save_path)
+	delete_path_if_present("%s%s" % [working_save_path, ProgressionProfile.BACKUP_SUFFIX])
+	return payload
 
 
 func delete_path_if_present(path: String) -> void:

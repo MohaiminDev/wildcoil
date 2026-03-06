@@ -12,8 +12,8 @@ CATALOG_PATH = PROJECT_DIR / "data" / "content_catalog.json"
 def test_content_catalog_matches_scaffold_contract() -> None:
     data = json.loads(CATALOG_PATH.read_text())
 
-    assert data["build_label"] == "phase2-progression"
-    assert len(data["characters"]) == 1
+    assert data["build_label"] == "phase3-second-playable"
+    assert len(data["characters"]) == 2
     assert len(data["stages"]) == 1
 
     first_character = data["characters"][0]
@@ -21,11 +21,17 @@ def test_content_catalog_matches_scaffold_contract() -> None:
     assert first_character["playstyle"] == "balanced_striker"
     assert first_character["locked"] is False
 
+    second_character = data["characters"][1]
+    assert second_character["id"] == "zeph_rush"
+    assert second_character["playstyle"] == "agile_disruptor"
+    assert second_character["locked"] is True
+
     first_stage = data["stages"][0]
     assert first_stage["id"] == "relay_clearing"
     assert first_stage["order"] == 1
     assert first_stage["spectacle_target_seconds"] == 180
     assert first_stage["boss_objective"] == "Break the relay warden"
+    assert first_stage["reward_character_id"] == "zeph_rush"
 
 
 def test_catalog_scene_paths_exist() -> None:

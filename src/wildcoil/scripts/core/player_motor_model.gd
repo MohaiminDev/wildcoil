@@ -1,14 +1,18 @@
 class_name PlayerMotorModel
 extends RefCounted
 
-const MOVE_SPEED := 340.0
-const ACCELERATION := 2600.0
-const FRICTION := 3000.0
-const GRAVITY := 1680.0
-const JUMP_VELOCITY := -690.0
-const DODGE_SPEED := 680.0
-const DODGE_TIME := 0.18
-const DODGE_COOLDOWN := 0.42
+const DEFAULT_TUNING := {
+	"move_speed": 340.0,
+	"acceleration": 2600.0,
+	"friction": 3000.0,
+	"gravity": 1680.0,
+	"jump_velocity": -690.0,
+	"dodge_speed": 680.0,
+	"dodge_time": 0.18,
+	"dodge_cooldown": 0.42,
+}
+
+var tuning := DEFAULT_TUNING.duplicate(true)
 
 
 func make_default_state() -> Dictionary:
@@ -19,6 +23,17 @@ func make_default_state() -> Dictionary:
 		"dodge_timer": 0.0,
 		"dodge_cooldown": 0.0,
 	}
+
+
+func set_tuning(new_tuning: Dictionary) -> void:
+	tuning = DEFAULT_TUNING.duplicate(true)
+	for key in new_tuning.keys():
+		if tuning.has(key):
+			tuning[key] = new_tuning[key]
+
+
+func get_tuning_snapshot() -> Dictionary:
+	return tuning.duplicate(true)
 
 
 func advance(state: Dictionary, input_state: Dictionary, delta: float) -> Dictionary:
@@ -37,31 +52,31 @@ func advance(state: Dictionary, input_state: Dictionary, delta: float) -> Dictio
 	if on_floor and velocity.y > 0.0:
 		velocity.y = 0.0
 	elif not on_floor:
-		velocity.y += GRAVITY * delta
+		velocity.y += float(tuning["gravity"]) * delta
 
 	if dodge_pressed and on_floor and dodge_timer <= 0.0 and dodge_cooldown <= 0.0:
 		if absf(move_input) > 0.12:
 			next_state["facing"] = sign(move_input)
-		next_state["dodge_timer"] = DODGE_TIME
-		next_state["dodge_cooldown"] = DODGE_COOLDOWN
-		velocity.x = float(next_state["facing"]) * DODGE_SPEED
+		next_state["dodge_timer"] = float(tuning["dodge_time"])
+		next_state["dodge_cooldown"] = float(tuning["dodge_cooldown"])
+		velocity.x = float(next_state["facing"]) * float(tuning["dodge_speed"])
 		velocity.y = minf(velocity.y, 0.0)
 		next_state["velocity"] = velocity
 		return next_state
 
 	if float(next_state["dodge_timer"]) > 0.0:
-		velocity.x = float(next_state["facing"]) * DODGE_SPEED
+		velocity.x = float(next_state["facing"]) * float(tuning["dodge_speed"])
 		next_state["velocity"] = velocity
 		return next_state
 
 	if absf(move_input) > 0.12:
 		next_state["facing"] = sign(move_input)
-		velocity.x = move_toward(velocity.x, move_input * MOVE_SPEED, ACCELERATION * delta)
+		velocity.x = move_toward(velocity.x, move_input * float(tuning["move_speed"]), float(tuning["acceleration"]) * delta)
 	else:
-		velocity.x = move_toward(velocity.x, 0.0, FRICTION * delta)
+		velocity.x = move_toward(velocity.x, 0.0, float(tuning["friction"]) * delta)
 
 	if jump_pressed and on_floor:
-		velocity.y = JUMP_VELOCITY
+		velocity.y = float(tuning["jump_velocity"])
 		next_state["on_floor"] = false
 
 	next_state["velocity"] = velocity

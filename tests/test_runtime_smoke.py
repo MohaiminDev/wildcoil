@@ -19,9 +19,9 @@ def test_runtime_smoke_suite_passes() -> None:
 
     payload = parse_result_line(combined_output)
     assert payload["passed"] is True
-    assert payload["build_label"] == "phase2-progression"
+    assert payload["build_label"] == "phase3-second-playable"
     assert payload["stage_ids"] == ["relay_clearing"]
-    assert payload["character_count"] == 1
+    assert payload["character_count"] == 2
 
 
 def test_default_stage_scene_instantiates() -> None:

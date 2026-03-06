@@ -7,7 +7,7 @@ Build an original macOS-first arcade-heritage action game that proves satisfying
 Wildcoil should deliver a controller-first, stage-based action game with immediate melee satisfaction, strong spectacle in the first three minutes, readable enemy intent, and a strange wilderness-plus-machine-ruin identity that feels original rather than referential.
 
 ## Current Milestone
-Phase 2 - Progression and Slice Hardening
+Phase 3 - MVP Expansion
 
 ## Backlog Status
 The Phase 1 through release tasks below are the frozen MVP backlog. Only change them when playtest evidence or a documented risk review justifies it.
@@ -19,14 +19,6 @@ The Phase 1 through release tasks below are the frozen MVP backlog. Only change 
 - Do not commit or push failing work.
 
 ## PENDING
-
-### [P3-01] Add the second playable character
-- Outcome: Introduce a second character with a meaningfully different mobility and combat profile.
-- Validation:
-  - [ ] Automated tests cover deterministic roster, unlock, and loadout behavior.
-  - [ ] Manual smoke checks confirm the second character changes play feel meaningfully.
-  - [ ] The current test suite passes.
-- Dependencies: [P2-04]
 
 ### [P3-02] Build Stage 2
 - Outcome: Add the midgame stage, two new enemy archetypes, and one new hazard language.
@@ -96,6 +88,15 @@ The Phase 1 through release tasks below are the frozen MVP backlog. Only change 
   - [x] The current test suite passes.
 - Dependencies: [P2-03]
 - Completed: 2026-03-05 (`e771dff`)
+
+### [P3-01] Add the second playable character
+- Outcome: Introduce a second character with a meaningfully different mobility and combat profile.
+- Validation:
+  - [x] Automated tests cover deterministic roster, unlock, and loadout behavior.
+  - [x] Manual smoke checks confirm the second character changes play feel meaningfully.
+  - [x] The current test suite passes.
+- Dependencies: [P2-04]
+- Completed: 2026-03-05 (`7ae767d`)
 
 ### [P2-01] Promote Stage 1 into a vertical slice
 - Outcome: Upgrade Stage 1 with target-leaning art/audio, cleaner camera and VFX discipline, and a full boss fight.

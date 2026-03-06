@@ -85,10 +85,31 @@ const SPECIAL_PROFILE := {
 	"is_radial": true,
 }
 
+const DEFAULT_TUNING := {
+	"max_health": MAX_HEALTH,
+	"damage_invulnerability": DAMAGE_INVULNERABILITY,
+	"hitstun_duration": HITSTUN_DURATION,
+	"special_cooldown": SPECIAL_COOLDOWN,
+	"damage_scale": 1.0,
+	"light_damage_scale": 1.0,
+	"heavy_damage_scale": 1.0,
+	"launcher_damage_scale": 1.0,
+	"special_damage_scale": 1.0,
+	"reach_scale": 1.0,
+	"attack_time_scale": 1.0,
+	"knockback_scale": 1.0,
+	"light_chain": LIGHT_CHAIN,
+	"heavy_profile": HEAVY_PROFILE,
+	"launcher_profile": LAUNCHER_PROFILE,
+	"special_profile": SPECIAL_PROFILE,
+}
+
+var tuning := DEFAULT_TUNING.duplicate(true)
+
 
 func make_default_state() -> Dictionary:
 	return {
-		"health": MAX_HEALTH,
+		"health": get_max_health(),
 		"attack_kind": "",
 		"attack_timer": 0.0,
 		"attack_hit_timer": 0.0,
@@ -103,6 +124,21 @@ func make_default_state() -> Dictionary:
 		"requested_checkpoint_reset": false,
 		"took_damage": false,
 	}
+
+
+func set_tuning(new_tuning: Dictionary) -> void:
+	tuning = DEFAULT_TUNING.duplicate(true)
+	for key in new_tuning.keys():
+		if tuning.has(key):
+			tuning[key] = new_tuning[key]
+
+
+func get_tuning_snapshot() -> Dictionary:
+	return tuning.duplicate(true)
+
+
+func get_max_health() -> int:
+	return int(tuning.get("max_health", MAX_HEALTH))
 
 
 func advance(state: Dictionary, input_state: Dictionary, delta: float) -> Dictionary:
@@ -123,12 +159,12 @@ func advance(state: Dictionary, input_state: Dictionary, delta: float) -> Dictio
 	if bool(input_state.get("light_pressed", false)):
 		return start_light(next_state, 0)
 	if bool(input_state.get("heavy_pressed", false)):
-		return start_attack(next_state, HEAVY_PROFILE, "heavy", -1)
+		return start_attack(next_state, get_heavy_profile(), "heavy", -1)
 	if bool(input_state.get("launcher_pressed", false)):
-		return start_attack(next_state, LAUNCHER_PROFILE, "launcher", -1)
+		return start_attack(next_state, get_launcher_profile(), "launcher", -1)
 	if bool(input_state.get("special_pressed", false)) and float(next_state["special_cooldown"]) <= 0.0:
-		next_state["special_cooldown"] = SPECIAL_COOLDOWN
-		return start_attack(next_state, SPECIAL_PROFILE, "special", -1)
+		next_state["special_cooldown"] = float(tuning["special_cooldown"])
+		return start_attack(next_state, get_special_profile(), "special", -1)
 
 	return next_state
 
@@ -139,9 +175,9 @@ func apply_damage(state: Dictionary, damage: int, stun_duration: float = HITSTUN
 	if float(next_state.get("invulnerable_timer", 0.0)) > 0.0:
 		return next_state
 
-	next_state["health"] = maxi(int(next_state.get("health", MAX_HEALTH)) - damage, 0)
-	next_state["invulnerable_timer"] = DAMAGE_INVULNERABILITY
-	next_state["hitstun_timer"] = stun_duration
+	next_state["health"] = maxi(int(next_state.get("health", get_max_health())) - damage, 0)
+	next_state["invulnerable_timer"] = float(tuning["damage_invulnerability"])
+	next_state["hitstun_timer"] = stun_duration if stun_duration > 0.0 else float(tuning["hitstun_duration"])
 	next_state["took_damage"] = true
 	clear_attack_state(next_state)
 	return next_state
@@ -170,13 +206,26 @@ func get_state_name(state: Dictionary) -> String:
 
 
 func start_light(state: Dictionary, combo_index: int) -> Dictionary:
-	var profile: Dictionary = LIGHT_CHAIN[combo_index]
+	var light_chain: Array = tuning.get("light_chain", LIGHT_CHAIN)
+	var profile: Dictionary = light_chain[combo_index]
 	return start_attack(state, profile, "light", combo_index)
+
+
+func get_heavy_profile() -> Dictionary:
+	return (tuning.get("heavy_profile", HEAVY_PROFILE) as Dictionary).duplicate(true)
+
+
+func get_launcher_profile() -> Dictionary:
+	return (tuning.get("launcher_profile", LAUNCHER_PROFILE) as Dictionary).duplicate(true)
+
+
+func get_special_profile() -> Dictionary:
+	return (tuning.get("special_profile", SPECIAL_PROFILE) as Dictionary).duplicate(true)
 
 
 func start_attack(state: Dictionary, profile: Dictionary, attack_kind: String, combo_index: int) -> Dictionary:
 	var next_state := state.duplicate(true)
-	var attack_profile: Dictionary = profile.duplicate(true)
+	var attack_profile := build_attack_profile(profile, attack_kind)
 	next_state["attack_kind"] = attack_kind
 	next_state["attack_profile"] = attack_profile
 	next_state["attack_timer"] = float(attack_profile["duration"])
@@ -187,9 +236,31 @@ func start_attack(state: Dictionary, profile: Dictionary, attack_kind: String, c
 	return next_state
 
 
+func build_attack_profile(base_profile: Dictionary, attack_kind: String) -> Dictionary:
+	var attack_profile: Dictionary = base_profile.duplicate(true)
+	var damage_scale := float(tuning["damage_scale"])
+	match attack_kind:
+		"light":
+			damage_scale *= float(tuning["light_damage_scale"])
+		"heavy":
+			damage_scale *= float(tuning["heavy_damage_scale"])
+		"launcher":
+			damage_scale *= float(tuning["launcher_damage_scale"])
+		"special":
+			damage_scale *= float(tuning["special_damage_scale"])
+	attack_profile["damage"] = maxi(int(round(float(attack_profile.get("damage", 0.0)) * damage_scale)), 1)
+	attack_profile["reach"] = float(attack_profile.get("reach", 0.0)) * float(tuning["reach_scale"])
+	attack_profile["duration"] = float(attack_profile.get("duration", 0.0)) * float(tuning["attack_time_scale"])
+	attack_profile["hit_time"] = float(attack_profile.get("hit_time", 0.0)) * float(tuning["attack_time_scale"])
+	attack_profile["knockback_x"] = float(attack_profile.get("knockback_x", 0.0)) * float(tuning["knockback_scale"])
+	attack_profile["knockback_y"] = float(attack_profile.get("knockback_y", 0.0)) * float(tuning["knockback_scale"])
+	return attack_profile
+
+
 func advance_attack(state: Dictionary, input_state: Dictionary, delta: float) -> Dictionary:
 	var next_state := state.duplicate(true)
-	if str(next_state.get("attack_kind", "")) == "light" and bool(input_state.get("light_pressed", false)) and int(next_state.get("combo_index", -1)) < LIGHT_CHAIN.size() - 1:
+	var light_chain: Array = tuning.get("light_chain", LIGHT_CHAIN)
+	if str(next_state.get("attack_kind", "")) == "light" and bool(input_state.get("light_pressed", false)) and int(next_state.get("combo_index", -1)) < light_chain.size() - 1:
 		next_state["queued_light"] = true
 
 	next_state["attack_timer"] = maxf(float(next_state.get("attack_timer", 0.0)) - delta, 0.0)
@@ -201,7 +272,7 @@ func advance_attack(state: Dictionary, input_state: Dictionary, delta: float) ->
 		next_state["attack_event"] = attack_profile.duplicate(true)
 
 	if float(next_state.get("attack_timer", 0.0)) <= 0.0:
-		if str(next_state.get("attack_kind", "")) == "light" and bool(next_state.get("queued_light", false)) and int(next_state.get("combo_index", -1)) < LIGHT_CHAIN.size() - 1:
+		if str(next_state.get("attack_kind", "")) == "light" and bool(next_state.get("queued_light", false)) and int(next_state.get("combo_index", -1)) < light_chain.size() - 1:
 			clear_attack_state(next_state)
 			return start_light(next_state, int(next_state.get("combo_index", -1)) + 1)
 		clear_attack_state(next_state)

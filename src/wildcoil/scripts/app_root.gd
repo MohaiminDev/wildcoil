@@ -447,13 +447,14 @@ func update_frontend_overlay() -> void:
 		mission_footer.text = "Enter or B to return to the mission board"
 	else:
 		mission_title.text = "Mission Board"
-		mission_body.text = "Mission: %s\nBiome: %s  Stage order: %d/%d\nHunter: %s (%s)\nView: %s\n%s\nBest record: %s\nSave path: %s%s" % [
+		mission_body.text = "Mission: %s\nBiome: %s  Stage order: %d/%d\nHunter: %s (%s)\nProfile: %s\nView: %s\n%s\nBest record: %s\nSave path: %s%s" % [
 			stage_name,
 			str(stage_definition.get("biome", "unknown_biome")),
 			int(stage_definition.get("order", 1)),
 			catalog.get_stage_ids().size() if catalog != null else 1,
 			character_name,
 			str(character_definition.get("playstyle", "unknown")),
+			str(character_definition.get("summary", "No hunter summary available.")),
 			view_label,
 			progress_text,
 			profile.describe_stage_result(active_stage_id) if profile != null else "--",

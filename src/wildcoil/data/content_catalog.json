@@ -1,5 +1,5 @@
 {
-  "build_label": "phase2-progression",
+  "build_label": "phase3-second-playable",
   "characters": [
     {
       "id": "mira_coil",
@@ -7,6 +7,13 @@
       "playstyle": "balanced_striker",
       "locked": false,
       "summary": "Balanced storm-runner tuned for clean reads and steady pressure."
+    },
+    {
+      "id": "zeph_rush",
+      "name": "Zeph Rush",
+      "playstyle": "agile_disruptor",
+      "locked": true,
+      "summary": "High-speed disruptor with faster movement, lighter armor, and tighter cooldowns."
     }
   ],
   "stages": [
@@ -19,6 +26,7 @@
       "spectacle_target_seconds": 180,
       "locked": false,
       "summary": "Stabilize the relay heart before the storm warden buries the clearing.",
+      "reward_character_id": "zeph_rush",
       "opening_objective": "Push into the relay clearing",
       "mid_objective": "Reach the relay heart",
       "boss_intro_objective": "Brace for the relay warden",

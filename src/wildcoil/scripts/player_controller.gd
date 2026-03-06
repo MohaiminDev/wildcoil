@@ -2,6 +2,7 @@ class_name PlayerController
 extends CharacterBody2D
 
 const InputActions = preload("res://scripts/core/input_actions.gd")
+const CharacterProfileLibrary = preload("res://scripts/core/character_profile_library.gd")
 const PlayerCombatModel = preload("res://scripts/core/player_combat_model.gd")
 const PlayerMotorModel = preload("res://scripts/core/player_motor_model.gd")
 
@@ -22,6 +23,7 @@ var character_definition: Dictionary = {}
 
 func _ready() -> void:
 	InputActions.ensure_default_actions()
+	apply_character_definition(character_definition)
 	movement_state = movement_model.make_default_state()
 	combat_state = combat_model.make_default_state()
 	queue_redraw()
@@ -91,7 +93,7 @@ func get_debug_status() -> String:
 
 
 func get_health() -> int:
-	return int(combat_state.get("health", PlayerCombatModel.MAX_HEALTH))
+	return int(combat_state.get("health", combat_model.get_max_health()))
 
 
 func get_facing() -> float:
@@ -132,7 +134,35 @@ func reset_to_checkpoint(checkpoint_position: Vector2) -> void:
 
 
 func apply_character_definition(new_character_definition: Dictionary) -> void:
-	character_definition = new_character_definition.duplicate(true)
+	character_definition = CharacterProfileLibrary.merge_character_definition(new_character_definition)
+	movement_model.set_tuning(character_definition.get("motor", {}))
+	combat_model.set_tuning(character_definition.get("combat", {}))
+	movement_state = movement_model.make_default_state()
+	combat_state = combat_model.make_default_state()
+	velocity = Vector2.ZERO
+	queue_redraw()
+
+
+func get_loadout_snapshot() -> Dictionary:
+	var motor_tuning := movement_model.get_tuning_snapshot()
+	var combat_tuning := combat_model.get_tuning_snapshot()
+	var light_state := combat_model.start_light(combat_model.make_default_state(), 0)
+	var heavy_state := combat_model.start_attack(combat_model.make_default_state(), combat_model.get_heavy_profile(), "heavy", -1)
+	var special_state := combat_model.start_attack(combat_model.make_default_state(), combat_model.get_special_profile(), "special", -1)
+	return {
+		"id": str(character_definition.get("id", "")),
+		"name": str(character_definition.get("name", "Operator")),
+		"playstyle": str(character_definition.get("playstyle", "unknown")),
+		"move_speed": float(motor_tuning.get("move_speed", 0.0)),
+		"jump_velocity": float(motor_tuning.get("jump_velocity", 0.0)),
+		"dodge_speed": float(motor_tuning.get("dodge_speed", 0.0)),
+		"dodge_time": float(motor_tuning.get("dodge_time", 0.0)),
+		"max_health": combat_model.get_max_health(),
+		"special_cooldown": float(combat_tuning.get("special_cooldown", 0.0)),
+		"light_damage": int((light_state.get("attack_profile", {}) as Dictionary).get("damage", 0)),
+		"heavy_damage": int((heavy_state.get("attack_profile", {}) as Dictionary).get("damage", 0)),
+		"special_damage": int((special_state.get("attack_profile", {}) as Dictionary).get("damage", 0)),
+	}
 
 
 func get_stage_bounds() -> Vector2:
@@ -151,24 +181,26 @@ func update_camera_bounds(stage_bounds: Vector2) -> void:
 
 
 func _draw() -> void:
-	var body_color := Color("2fe4b6")
+	var palette: Dictionary = character_definition.get("palette", {})
+	var body_color := Color(str(palette.get("body", "2fe4b6")))
 	if float(combat_state.get("hitstun_timer", 0.0)) > 0.0:
-		body_color = Color("ff8d73")
+		body_color = Color(str(palette.get("hurt", "ff8d73")))
 	elif float(movement_state.get("dodge_timer", 0.0)) > 0.0:
-		body_color = Color("8dc8ff")
+		body_color = Color(str(palette.get("dodge", "8dc8ff")))
 	elif not bool(movement_state.get("on_floor", true)):
-		body_color = Color("ffc65c")
+		body_color = Color(str(palette.get("air", "ffc65c")))
 	elif combat_model.is_attack_active(combat_state):
-		body_color = Color("ffe18c")
+		body_color = Color(str(palette.get("attack", "ffe18c")))
 
 	var facing := get_facing()
-	draw_rect(Rect2(Vector2(-17.0, -78.0), Vector2(34.0, 78.0)), body_color)
-	draw_rect(Rect2(Vector2(-7.0, -98.0), Vector2(14.0, 18.0)), Color("f5f7fb"))
+	var body_size: Vector2 = character_definition.get("body_size", Vector2(34.0, 78.0))
+	draw_rect(Rect2(Vector2(-body_size.x * 0.5, -body_size.y), body_size), body_color)
+	draw_rect(Rect2(Vector2(-7.0, -body_size.y - 20.0), Vector2(14.0, 18.0)), Color(str(palette.get("head", "f5f7fb"))))
 	draw_line(Vector2(-10.0 * facing, -30.0), Vector2(22.0 * facing, -10.0), Color("ffe6a6"), 5.0)
 	if float(movement_state.get("dodge_timer", 0.0)) > 0.0:
-		draw_rect(Rect2(Vector2(-30.0, -82.0), Vector2(60.0, 82.0)), Color(0.55, 0.82, 1.0, 0.2))
+		draw_rect(Rect2(Vector2(-body_size.x, -body_size.y - 4.0), Vector2(body_size.x * 2.0, body_size.y + 4.0)), Color(0.55, 0.82, 1.0, 0.2))
 	if combat_model.is_attack_active(combat_state):
 		var attack_profile: Dictionary = combat_state.get("attack_profile", {})
 		var reach := float(attack_profile.get("reach", 72.0))
-		var left := 18.0 if facing > 0.0 else 18.0 - reach
-		draw_rect(Rect2(Vector2(left, -74.0), Vector2(reach, 42.0)), Color(1.0, 0.88, 0.60, 0.22))
+		var left := body_size.x * 0.5 + 2.0 if facing > 0.0 else body_size.x * 0.5 + 2.0 - reach
+		draw_rect(Rect2(Vector2(left, -body_size.y + 4.0), Vector2(reach, 42.0)), Color(1.0, 0.88, 0.60, 0.22))
