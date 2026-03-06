@@ -10,6 +10,7 @@ Use this log for all external tests and any internal hands-on checks that materi
 - 2026-03-05: Phase 2 internal slice review completed on Apple Silicon using the progression mission board, seeded save data, and a fresh packaged macOS artifact.
 - 2026-03-05: The repeated blocker from the first Phase 2 slice pass was menu and HUD text density at default window size; a typography and panel-size pass landed immediately after the review and the follow-up smoke closed that blocker locally.
 - 2026-03-05: Remaining accepted blocker before release-candidate signoff is still the lack of a physical controller and external tester coverage.
+- 2026-03-05: Phase 3 Stage 2 internal smoke completed on Apple Silicon using an unlocked mission-board profile, with Coil Depths loading cleanly from the live shell and the new hazard route reading clearly enough for continued production.
 
 ## Phase 1 Gate Targets
 
@@ -28,6 +29,7 @@ Use this log for all external tests and any internal hands-on checks that materi
 | 2026-03-05 | `phase1-first-playable` | Codex (internal smoke) | Apple M1, editor runtime and exported macOS bundle | Keyboard | `1.5s` | Deterministic stage suite confirms spectacle trigger before `180s`; live blind-input smoke did not cleanly clear the pack | Yes | No controller attached; outside testers unavailable; pause overlay presentation could be stronger | None repeated in local smoke | First combat appears almost immediately, pause and fullscreen work in the exported app, and the first playable reads clearly in motion | Recruit 5 to 8 outside testers, attach a real controller, and repeat on a second machine if available |
 | 2026-03-05 | `phase2-progression` | Codex (internal slice review) | Apple M1, editor runtime with a seeded save profile and the mission-board shell | Keyboard | `1.5s` from stage launch after menu confirm | Boss clear still lands inside the deterministic slice suite; live smoke focused on profile load plus route launch | Yes | Mission board and HUD text felt too dense at the default window size before the typography pass; no physical controller available | None repeated in local smoke | Saved best rank and time reloaded correctly on the mission board, stage launch remained instant, and the typography pass made the shell materially easier to scan in the follow-up smoke | Keep controller coverage listed as an accepted blocker, and re-run the packaged build before the release-candidate gate |
 | 2026-03-05 | `phase3-second-playable` | Codex (internal loadout smoke) | Apple M1, editor runtime with a seeded unlocked profile for Zeph Rush | Keyboard | `1.5s` from stage launch after menu confirm | Focus of the session was loadout differentiation rather than spectacle timing | Yes | No selection blocker after using an unlocked profile; physical controller still unavailable | None repeated in local smoke | Zeph Rush loaded with `86 HP`, a faster live run velocity, and a clearly lighter silhouette plus palette than Mira, which made the second character feel meaningfully different even inside the same stage shell | Preserve the mobility and survivability contrast while Stage 2 and Stage 3 content are added |
+| 2026-03-05 | `phase3-stage2` | Codex (internal Stage 2 smoke) | Apple M1, editor runtime with a seeded unlocked profile for Coil Depths and Zeph Rush | Keyboard | `1.5s` from stage launch after menu confirm | Deterministic Stage 2 suite covered the full clear; live smoke focused on mission-board unlock flow, new backdrop, and in-stage readability | Yes | Physical controller coverage is still missing, but the mission board exposed the new route cleanly once the save had unlocked it | None repeated in local smoke | Coil Depths loaded from the real shell, the blue depth-conduit palette read as a distinct route immediately, and the new enemy mix plus vent-focused objective text made the stage feel like a midgame escalation instead of a Stage 1 reskin | Keep the vent hazard language readable as Stage 3 and onboarding work land |
 
 ## Session Notes
 
@@ -75,6 +77,21 @@ Use this log for all external tests and any internal hands-on checks that materi
 - When the tester smiled, laughed, or verbally reacted: the biggest positive reaction was seeing the mission board reload straight into Zeph and then watching the live HUD show the faster, lighter loadout
 - Whether the tester asked to play again: yes
 - Highest-priority fix: keep the distinct mobility and survivability contrast intact as later stages and bosses are added
+
+### Session ID: `2026-03-05-stage2-smoke`
+
+- Build identifier: `phase3-stage2`
+- Engine / branch: Godot 4.6.1 / `codex/wildcoil-mvp`
+- Tester familiarity with brawlers: high
+- Hardware: Apple M1 Mac
+- Controller type: none connected
+- Session length: short manual smoke focused on mission-board unlock flow, Stage 2 launch, and first-contact readability in Coil Depths
+- What clicked immediately: the mission board exposed Coil Depths as a real second route, and the colder depth-conduit palette plus the new enemy lineup made the stage feel different immediately
+- What confused the tester: no blocking confusion in the shell, but the hazard language was validated mostly through the deterministic suite rather than a long manual run because the smoke stayed intentionally short
+- Where the tester took damage unfairly: no repeatable cheap-damage pattern surfaced in the short smoke
+- When the tester smiled, laughed, or verbally reacted: the strongest positive reaction came from seeing the second route unlock in the live shell and then landing in a scene that did not read like a palette swap of Relay Clearing
+- Whether the tester asked to play again: yes
+- Highest-priority fix: preserve the vent-hazard readability and route identity while Stage 3 and onboarding layers are added
 
 ## Session Notes Template
 

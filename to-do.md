@@ -20,14 +20,6 @@ The Phase 1 through release tasks below are the frozen MVP backlog. Only change 
 
 ## PENDING
 
-### [P3-02] Build Stage 2
-- Outcome: Add the midgame stage, two new enemy archetypes, and one new hazard language.
-- Validation:
-  - [ ] Stage 2 is playable end-to-end.
-  - [ ] Content validation tests cover the new stage and enemy definitions.
-  - [ ] The current test suite passes.
-- Dependencies: [P3-01]
-
 ### [P3-03] Build Stage 3 and finale
 - Outcome: Add the final stage, the last enemy archetype, the final boss, and the ending flow.
 - Validation:
@@ -61,6 +53,15 @@ The Phase 1 through release tasks below are the frozen MVP backlog. Only change 
 - Dependencies: [P3-05]
 
 ## DONE
+
+### [P3-02] Build Stage 2
+- Outcome: Add the midgame stage, two new enemy archetypes, and one new hazard language.
+- Validation:
+  - [x] Stage 2 is playable end-to-end.
+  - [x] Content validation tests cover the new stage and enemy definitions.
+  - [x] The current test suite passes.
+- Dependencies: [P3-01]
+- Completed: 2026-03-05
 
 ### [P2-02] Implement progression and validation systems
 - Outcome: Add save/load, stage select, rank/time scoring, unlock tracking, and content validation checks.

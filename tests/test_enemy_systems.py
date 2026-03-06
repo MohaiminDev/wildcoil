@@ -19,7 +19,9 @@ def test_enemy_profiles_suite_passes() -> None:
 
     payload = parse_result_line(combined_output)
     assert payload["passed"] is True
-    assert len(payload["profile_ids"]) >= 3
+    assert len(payload["profile_ids"]) >= 6
+    assert "arc_seeder" in payload["profile_ids"]
+    assert "rail_lancer" in payload["profile_ids"]
     assert payload["elite_count"] >= 1
 
 

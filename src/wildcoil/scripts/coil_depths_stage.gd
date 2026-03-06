@@ -2,38 +2,44 @@ extends Node2D
 
 const ENEMY_PROJECTILE_SCENE = preload("res://scenes/enemy_projectile.tscn")
 
-const CHECKPOINT_POSITION := Vector2(-500.0, 140.0)
+const CHECKPOINT_POSITION := Vector2(-560.0, 140.0)
 const ENEMY_SPAWNS := {
-	"NeedleHound": Vector2(60.0, 140.0),
-	"SporeSlinger": Vector2(320.0, 140.0),
-	"CoilBrute": Vector2(560.0, 140.0),
+	"RailLancer": Vector2(80.0, 140.0),
+	"ArcSeeder": Vector2(340.0, 140.0),
+	"NeedleHound": Vector2(620.0, 140.0),
+	"CoilBrute": Vector2(860.0, 140.0),
 }
-const WORLD_BOUNDS := Vector2(-760.0, 1480.0)
-const OPENING_BOUNDS := Vector2(-760.0, 760.0)
-const BOSS_ARENA_BOUNDS := Vector2(820.0, 1480.0)
-const FIRST_FIGHT_TRIGGER_X := -120.0
-const BOSS_TRIGGER_X := 930.0
-const RELAY_CORE_X := 1180.0
-const BOSS_SPAWN_POSITION := Vector2(1180.0, 140.0)
-const SPECTACLE_DURATION := 3.6
-const BOSS_INTRO_DURATION := 1.6
-const SPECTACLE_TARGET_SECONDS := 180.0
+const WORLD_BOUNDS := Vector2(-900.0, 1840.0)
+const OPENING_BOUNDS := Vector2(-900.0, 980.0)
+const BOSS_ARENA_BOUNDS := Vector2(1020.0, 1840.0)
+const FIRST_FIGHT_TRIGGER_X := -180.0
+const BOSS_TRIGGER_X := 1180.0
+const RELAY_CORE_X := 1460.0
+const BOSS_SPAWN_POSITION := Vector2(1460.0, 140.0)
+const SPECTACLE_DURATION := 4.2
+const BOSS_INTRO_DURATION := 1.8
+const SPECTACLE_TARGET_SECONDS := 210.0
+const HAZARD_LANES := [220.0, 520.0, 820.0, 1180.0, 1480.0]
+const HAZARD_TELEGRAPH_DURATION := 0.9
+const HAZARD_ACTIVE_DURATION := 0.55
+const HAZARD_COOLDOWN_DURATION := 0.8
+const HAZARD_RADIUS := 54.0
 
 @onready var player: PlayerController = $Player
 @onready var enemies_root: Node2D = $Enemies
 @onready var projectile_root: Node2D = $Projectiles
 @onready var boss: BossActor = $Boss
 
-const SKY_COLOR := Color("08131c")
-const HAZE_COLOR := Color("102434")
-const MIST_COLOR := Color("183342")
-const GROUND_COLOR := Color("294535")
-const BRUSH_COLOR := Color("315242")
-const COIL_COLOR := Color("75e4bc")
-const SPARK_COLOR := Color("f2c86f")
-const RELAY_COLOR := Color("dffff3")
+const SKY_COLOR := Color("061017")
+const HAZE_COLOR := Color("10202b")
+const MIST_COLOR := Color("18313e")
+const GROUND_COLOR := Color("223942")
+const BRUSH_COLOR := Color("315666")
+const COIL_COLOR := Color("7fd6ff")
+const SPARK_COLOR := Color("ffc971")
+const RELAY_COLOR := Color("eef9ff")
 
-@export var stage_id := "relay_clearing"
+@export var stage_id := "coil_depths"
 
 var checkpoint_reset_count := 0
 var hitstop_timer := 0.0
@@ -51,6 +57,10 @@ var stage_complete := false
 var screen_flash_timer := 0.0
 var run_context: Dictionary = {}
 var stage_definition: Dictionary = {}
+var hazard_state := "idle"
+var hazard_timer := 0.0
+var hazard_lane_index := -1
+var hazard_cycle_count := 0
 
 
 func _ready() -> void:
@@ -107,6 +117,8 @@ func advance_stage_flow(delta: float) -> void:
 	elif spectacle_time >= 0.0:
 		spectacle_progress = 1.0
 
+	update_hazard_cycle(delta)
+
 	if stage_phase == "advance" and player_ref.global_position.x >= BOSS_TRIGGER_X:
 		start_boss_intro()
 
@@ -132,6 +144,8 @@ func _draw() -> void:
 		draw_opening_barrier()
 	if stage_phase == "spectacle" or spectacle_time >= 0.0:
 		draw_spectacle_event()
+	if stage_phase == "advance" or stage_phase == "boss_intro" or stage_phase == "boss":
+		draw_vent_hazards()
 	if stage_phase == "boss_intro" or stage_phase == "boss" or stage_complete:
 		draw_relay_arena()
 	if stage_phase == "boss_intro" or stage_phase == "boss":
@@ -141,32 +155,32 @@ func _draw() -> void:
 
 
 func draw_background_props() -> void:
-	draw_circle(Vector2(-420.0, -60.0), 170.0, COIL_COLOR)
-	draw_circle(Vector2(260.0, -120.0), 110.0, SPARK_COLOR)
-	draw_circle(Vector2(1040.0, -180.0), 180.0, Color("112b30"))
-	draw_rect(Rect2(900.0, -40.0, 360.0, 30.0), Color("4f7f72"), true)
-	draw_rect(Rect2(1200.0, -60.0, 420.0, 28.0), Color("4f7f72"), true)
-	draw_line(Vector2(-470.0, -130.0), Vector2(360.0, 24.0), Color("d7fff0"), 9.0)
-	draw_line(Vector2(-440.0, -178.0), Vector2(760.0, 40.0), Color("4bdca7"), 4.0)
-	draw_line(Vector2(160.0, 30.0), Vector2(280.0, -82.0), Color("ffc65c"), 4.0)
-	draw_line(Vector2(820.0, -120.0), Vector2(1180.0, -180.0), Color(0.41, 0.88, 0.80, 0.45), 3.0)
+	draw_circle(Vector2(-520.0, -120.0), 150.0, Color("0e2430"))
+	draw_circle(Vector2(320.0, -180.0), 130.0, COIL_COLOR)
+	draw_circle(Vector2(1360.0, -220.0), 220.0, Color("122535"))
+	draw_rect(Rect2(760.0, -30.0, 520.0, 24.0), Color("5f86a3"), true)
+	draw_rect(Rect2(1140.0, -90.0, 560.0, 22.0), Color("3b5d74"), true)
+	draw_line(Vector2(-620.0, -200.0), Vector2(220.0, 20.0), Color(0.84, 0.96, 1.0, 0.42), 7.0)
+	draw_line(Vector2(-200.0, -180.0), Vector2(1080.0, 12.0), Color(0.54, 0.87, 1.0, 0.30), 4.0)
+	draw_line(Vector2(920.0, -200.0), Vector2(RELAY_CORE_X, -120.0), Color(1.0, 0.79, 0.42, 0.46), 4.0)
 
 
 func draw_foreground_props() -> void:
-	draw_rect(Rect2(-520.0, 112.0, 2280.0, 20.0), Color("8fdac0"), true)
-	draw_rect(Rect2(-620.0, 132.0, 44.0, 168.0), Color("264634"), true)
-	draw_rect(Rect2(300.0, 132.0, 44.0, 168.0), Color("264634"), true)
-	draw_rect(Rect2(980.0, 132.0, 44.0, 210.0), Color("264634"), true)
-	draw_rect(Rect2(1320.0, 132.0, 44.0, 230.0), Color("264634"), true)
+	draw_rect(Rect2(-620.0, 112.0, 2700.0, 20.0), Color("a6d9f2"), true)
+	draw_rect(Rect2(-700.0, 132.0, 48.0, 186.0), Color("244654"), true)
+	draw_rect(Rect2(60.0, 132.0, 48.0, 164.0), Color("244654"), true)
+	draw_rect(Rect2(760.0, 132.0, 48.0, 220.0), Color("244654"), true)
+	draw_rect(Rect2(1300.0, 132.0, 48.0, 252.0), Color("244654"), true)
 	draw_rect(Rect2(CHECKPOINT_POSITION + Vector2(-18.0, -110.0), Vector2(10.0, 110.0)), Color("f9db8a"), true)
 	draw_rect(Rect2(CHECKPOINT_POSITION + Vector2(-32.0, -110.0), Vector2(38.0, 12.0)), Color("fff0b7"), true)
-	draw_rect(Rect2(720.0, 132.0, 80.0, 190.0), BRUSH_COLOR, true)
-	draw_rect(Rect2(1480.0, 132.0, 110.0, 250.0), BRUSH_COLOR, true)
+	draw_rect(Rect2(260.0, 132.0, 96.0, 180.0), BRUSH_COLOR, true)
+	draw_rect(Rect2(1040.0, 132.0, 120.0, 240.0), BRUSH_COLOR, true)
+	draw_rect(Rect2(1620.0, 132.0, 132.0, 280.0), BRUSH_COLOR, true)
 
 
 func draw_goal_beacon() -> void:
 	if stage_phase == "approach" or stage_phase == "combat" or stage_phase == "spectacle":
-		draw_phase_marker(FIRST_FIGHT_TRIGGER_X, Color("9de7cb"))
+		draw_phase_marker(FIRST_FIGHT_TRIGGER_X, Color("93e0ff"))
 	else:
 		draw_phase_marker(BOSS_TRIGGER_X, RELAY_COLOR)
 		draw_rect(Rect2(Vector2(BOSS_TRIGGER_X - 18.0, -90.0), Vector2(18.0, 230.0)), RELAY_COLOR, true)
@@ -179,41 +193,51 @@ func draw_phase_marker(marker_x: float, marker_color: Color) -> void:
 
 
 func draw_opening_barrier() -> void:
-	var barrier_alpha := 0.18 + 0.10 * absf(sin(elapsed_time * 5.0))
-	var barrier_color := Color(0.47, 0.94, 0.78, barrier_alpha)
-	draw_rect(Rect2(Vector2(760.0, -260.0), Vector2(22.0, 420.0)), barrier_color, true)
-	draw_rect(Rect2(Vector2(778.0, -260.0), Vector2(14.0, 420.0)), Color(0.85, 1.0, 0.95, barrier_alpha + 0.06), true)
+	var barrier_alpha := 0.20 + 0.10 * absf(sin(elapsed_time * 5.8))
+	var barrier_color := Color(0.51, 0.84, 1.0, barrier_alpha)
+	draw_rect(Rect2(Vector2(980.0, -280.0), Vector2(24.0, 440.0)), barrier_color, true)
+	draw_rect(Rect2(Vector2(998.0, -280.0), Vector2(16.0, 440.0)), Color(0.89, 0.98, 1.0, barrier_alpha + 0.08), true)
 
 
 func draw_spectacle_event() -> void:
 	var progress := clampf(spectacle_progress, 0.0, 1.0)
-	var head_position := Vector2(lerpf(-860.0, 1200.0, progress), -250.0 - sin(progress * PI) * 120.0)
-	for segment_index in range(7):
-		var segment_progress := progress - float(segment_index) * 0.06
-		if segment_progress < 0.0:
+	for lane_x in HAZARD_LANES:
+		var wave_progress := clampf(progress - absf(lane_x - RELAY_CORE_X) / 2200.0, 0.0, 1.0)
+		if wave_progress <= 0.0:
 			continue
-		var segment_position := Vector2(lerpf(-900.0, 1160.0, segment_progress), -220.0 - sin(segment_progress * PI) * (110.0 - 8.0 * float(segment_index)))
-		draw_circle(segment_position, 58.0 - float(segment_index) * 5.5, Color(0.51, 0.98, 0.82, 0.20 + float(segment_index) * 0.03))
-	draw_circle(head_position, 46.0, Color("fff0b7"))
-	draw_line(head_position + Vector2(-40.0, -10.0), head_position + Vector2(44.0, 14.0), Color("103e34"), 4.0)
-	draw_line(head_position + Vector2(50.0, 18.0), Vector2(RELAY_CORE_X, -160.0), Color(0.97, 0.87, 0.38, 0.72), 5.0)
-	draw_line(Vector2(RELAY_CORE_X, -160.0), Vector2(280.0, 24.0), Color(0.95, 0.99, 0.87, 0.54), 4.0)
+		var wave_height := 90.0 + 210.0 * wave_progress
+		draw_rect(Rect2(Vector2(lane_x - 16.0, 140.0 - wave_height), Vector2(32.0, wave_height)), Color(0.78, 0.93, 1.0, 0.10 + 0.20 * wave_progress), true)
+	draw_circle(Vector2(RELAY_CORE_X, -160.0), 48.0 + 34.0 * progress, Color(1.0, 0.83, 0.54, 0.30))
+	draw_line(Vector2(RELAY_CORE_X, -160.0), Vector2(1080.0, 18.0), Color(0.98, 0.90, 0.64, 0.62), 5.0)
+	draw_line(Vector2(RELAY_CORE_X, -160.0), Vector2(420.0, 16.0), Color(0.84, 0.96, 1.0, 0.48), 4.0)
 
 
 func draw_relay_arena() -> void:
-	draw_circle(Vector2(RELAY_CORE_X, -140.0), 72.0, Color(0.87, 0.98, 0.93, 0.20))
-	draw_circle(Vector2(RELAY_CORE_X, -140.0), 40.0, Color(0.98, 0.92, 0.62, 0.34))
+	draw_circle(Vector2(RELAY_CORE_X, -140.0), 82.0, Color(0.88, 0.96, 1.0, 0.18))
+	draw_circle(Vector2(RELAY_CORE_X, -140.0), 44.0, Color(1.0, 0.90, 0.62, 0.34))
 	draw_rect(Rect2(Vector2(RELAY_CORE_X - 8.0, -80.0), Vector2(16.0, 220.0)), RELAY_COLOR, true)
-	draw_rect(Rect2(Vector2(1040.0, 40.0), Vector2(260.0, 18.0)), Color("7cbca2"), true)
-	draw_rect(Rect2(Vector2(1280.0, -8.0), Vector2(180.0, 18.0)), Color("7cbca2"), true)
+	draw_rect(Rect2(Vector2(1180.0, 40.0), Vector2(320.0, 18.0)), Color("7cb0ca"), true)
+	draw_rect(Rect2(Vector2(1460.0, -8.0), Vector2(220.0, 18.0)), Color("7cb0ca"), true)
 	if boss_seen:
-		draw_line(Vector2(820.0, -60.0), Vector2(1480.0, -60.0), Color(0.45, 0.92, 0.84, 0.18), 3.0)
+		draw_line(Vector2(1040.0, -60.0), Vector2(1820.0, -60.0), Color(0.55, 0.86, 1.0, 0.20), 3.0)
 
 
 func draw_boss_barrier() -> void:
-	var barrier_alpha := 0.16 + 0.10 * absf(sin(elapsed_time * 6.2))
-	draw_rect(Rect2(Vector2(BOSS_ARENA_BOUNDS.x - 14.0, -300.0), Vector2(18.0, 470.0)), Color(0.54, 0.95, 0.81, barrier_alpha), true)
-	draw_rect(Rect2(Vector2(BOSS_ARENA_BOUNDS.y + 6.0, -300.0), Vector2(18.0, 470.0)), Color(0.54, 0.95, 0.81, barrier_alpha), true)
+	var barrier_alpha := 0.18 + 0.10 * absf(sin(elapsed_time * 6.8))
+	draw_rect(Rect2(Vector2(BOSS_ARENA_BOUNDS.x - 14.0, -300.0), Vector2(18.0, 470.0)), Color(0.60, 0.86, 1.0, barrier_alpha), true)
+	draw_rect(Rect2(Vector2(BOSS_ARENA_BOUNDS.y + 6.0, -300.0), Vector2(18.0, 470.0)), Color(0.60, 0.86, 1.0, barrier_alpha), true)
+
+
+func draw_vent_hazards() -> void:
+	for lane_x in get_hazard_lane_positions():
+		if hazard_state == "telegraph":
+			draw_rect(Rect2(Vector2(lane_x - 22.0, 108.0), Vector2(44.0, 32.0)), Color(0.98, 0.86, 0.54, 0.26), true)
+			draw_rect(Rect2(Vector2(lane_x - 6.0, -120.0), Vector2(12.0, 260.0)), Color(0.70, 0.88, 1.0, 0.12), true)
+		elif hazard_state == "active":
+			draw_rect(Rect2(Vector2(lane_x - 18.0, -260.0), Vector2(36.0, 400.0)), Color(0.82, 0.96, 1.0, 0.26), true)
+			draw_rect(Rect2(Vector2(lane_x - 30.0, 98.0), Vector2(60.0, 42.0)), Color(1.0, 0.89, 0.54, 0.42), true)
+		elif hazard_state == "cooldown":
+			draw_rect(Rect2(Vector2(lane_x - 20.0, 110.0), Vector2(40.0, 24.0)), Color(0.69, 0.90, 1.0, 0.10), true)
 
 
 func get_player() -> CharacterBody2D:
@@ -351,7 +375,7 @@ func start_first_fight() -> void:
 		return
 	first_combat_time = elapsed_time
 	stage_phase = "combat"
-	stage_objective = "Clear the scavenger pack"
+	stage_objective = "Break the ventguard ambush"
 
 
 func trigger_spectacle() -> void:
@@ -361,7 +385,7 @@ func trigger_spectacle() -> void:
 	spectacle_timer = SPECTACLE_DURATION
 	spectacle_progress = 0.0
 	stage_phase = "spectacle"
-	stage_objective = "The relay wakes up. Push through the surge."
+	stage_objective = "The depth coils overload. Read the vents and push through."
 	screen_flash_timer = 1.0
 
 
@@ -427,6 +451,10 @@ func reset_to_checkpoint() -> void:
 	boss_seen = false
 	stage_complete = false
 	screen_flash_timer = 0.0
+	hazard_state = "idle"
+	hazard_timer = 0.0
+	hazard_lane_index = -1
+	hazard_cycle_count = 0
 
 
 func is_hitstop_active() -> bool:
@@ -449,6 +477,70 @@ func get_audio_state() -> String:
 			return "victory"
 		_:
 			return "explore"
+
+
+func update_hazard_cycle(delta: float) -> void:
+	if not (stage_phase == "advance" or stage_phase == "boss_intro" or stage_phase == "boss"):
+		hazard_state = "idle"
+		hazard_timer = 0.0
+		return
+	hazard_timer = maxf(hazard_timer - delta, 0.0)
+	match hazard_state:
+		"idle":
+			start_hazard_telegraph()
+		"telegraph":
+			if hazard_timer <= 0.0:
+				hazard_state = "active"
+				hazard_timer = HAZARD_ACTIVE_DURATION
+				screen_flash_timer = maxf(screen_flash_timer, 0.22)
+		"active":
+			apply_hazard_damage()
+			if hazard_timer <= 0.0:
+				hazard_state = "cooldown"
+				hazard_timer = HAZARD_COOLDOWN_DURATION
+		"cooldown":
+			if hazard_timer <= 0.0:
+				start_hazard_telegraph()
+
+
+func start_hazard_telegraph() -> void:
+	hazard_lane_index = wrapi(hazard_lane_index + 1, 0, HAZARD_LANES.size())
+	hazard_state = "telegraph"
+	hazard_timer = HAZARD_TELEGRAPH_DURATION
+	hazard_cycle_count += 1
+
+
+func get_hazard_lane_positions() -> Array[float]:
+	if hazard_lane_index < 0:
+		return []
+	var active_lanes: Array[float] = [HAZARD_LANES[hazard_lane_index]]
+	if stage_phase == "boss":
+		active_lanes.append(HAZARD_LANES[(hazard_lane_index + 2) % HAZARD_LANES.size()])
+	return active_lanes
+
+
+func apply_hazard_damage() -> void:
+	var player_ref := get_player()
+	if player_ref == null:
+		return
+	for lane_x in get_hazard_lane_positions():
+		if absf(player_ref.global_position.x - lane_x) > HAZARD_RADIUS:
+			continue
+		var facing := 1.0 if player_ref.global_position.x >= lane_x else -1.0
+		var hit: bool = player_ref.apply_enemy_attack({
+			"id": "depth_vent_burst",
+			"damage": 14,
+			"reach": HAZARD_RADIUS,
+			"knockback_x": 240.0,
+			"knockback_y": -190.0,
+			"stun": 0.18,
+			"hitstop": 0.03,
+		}, facing, Vector2(lane_x, player_ref.global_position.y))
+		if hit:
+			apply_hitstop(0.03)
+			if player_ref.get_health() <= 0:
+				reset_to_checkpoint()
+			return
 
 
 func get_stage_summary() -> Dictionary:
@@ -479,20 +571,22 @@ func get_stage_summary() -> Dictionary:
 		"rank": get_rank_label(),
 		"boss_active": boss_active,
 		"boss_name": boss_name,
-		"boss_state": boss_state,
-		"boss_health_ratio": boss_health_ratio,
-		"boss_seen": boss_seen,
-	}
+			"boss_state": boss_state,
+			"boss_health_ratio": boss_health_ratio,
+			"boss_seen": boss_seen,
+			"hazard_state": hazard_state,
+			"hazard_cycle_count": hazard_cycle_count,
+		}
 
 
 func get_rank_label() -> String:
 	if finish_time < 0.0:
 		return "--"
-	if finish_time <= 120.0:
+	if finish_time <= 140.0:
 		return "S"
-	if finish_time <= 160.0:
+	if finish_time <= 185.0:
 		return "A"
-	if finish_time <= 210.0:
+	if finish_time <= 240.0:
 		return "B"
 	return "C"
 
@@ -502,11 +596,12 @@ func get_debug_stage_status() -> String:
 	var boss_state := "hidden"
 	if boss_actor != null:
 		boss_state = boss_actor.get_state_name()
-	return "Phase: %s  Objective: %s  Enemies: %d/3  Boss: %s  Combat: %s  Spectacle: %s" % [
+	return "Phase: %s  Objective: %s  Enemies: %d/4  Boss: %s  Hazard: %s  Combat: %s  Spectacle: %s" % [
 		stage_phase,
 		stage_objective,
 		get_live_enemy_count(),
 		boss_state,
+		hazard_state,
 		format_optional_seconds(first_combat_time),
 		format_optional_seconds(spectacle_time),
 	]
@@ -519,24 +614,24 @@ func format_optional_seconds(value: float) -> String:
 
 
 func get_stage_name() -> String:
-	return str(stage_definition.get("name", "Relay Clearing"))
+	return str(stage_definition.get("name", "Coil Depths"))
 
 
 func get_opening_objective() -> String:
-	return str(stage_definition.get("opening_objective", "Push into the relay clearing"))
+	return str(stage_definition.get("opening_objective", "Descend into the coil depths"))
 
 
 func get_mid_stage_objective() -> String:
-	return str(stage_definition.get("mid_objective", "Reach the relay heart"))
+	return str(stage_definition.get("mid_objective", "Read the surge vents and push for the depth core"))
 
 
 func get_boss_intro_objective() -> String:
-	return str(stage_definition.get("boss_intro_objective", "Brace for the relay warden"))
+	return str(stage_definition.get("boss_intro_objective", "Brace for the colossus in the depth core"))
 
 
 func get_boss_objective() -> String:
-	return str(stage_definition.get("boss_objective", "Break the relay warden"))
+	return str(stage_definition.get("boss_objective", "Break the Rift Colossus"))
 
 
 func get_clear_objective() -> String:
-	return str(stage_definition.get("clear_objective", "Relay heart stabilized. Stage clear."))
+	return str(stage_definition.get("clear_objective", "Depth core stabilized. Stage clear."))

@@ -81,7 +81,7 @@ def test_content_validation_suite_checks_live_and_invalid_catalogs() -> None:
 
     payload = parse_result_line(combined_output)
     assert payload["passed"] is True
-    assert payload["live_catalog_stage_ids"] == ["relay_clearing"]
+    assert payload["live_catalog_stage_ids"] == ["relay_clearing", "coil_depths"]
     assert payload["live_catalog_character_ids"] == ["mira_coil", "zeph_rush"]
     assert payload["invalid_error_count"] >= 2
 

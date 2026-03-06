@@ -1,5 +1,5 @@
 {
-  "build_label": "phase3-second-playable",
+  "build_label": "phase3-stage2",
   "characters": [
     {
       "id": "mira_coil",
@@ -32,6 +32,21 @@
       "boss_intro_objective": "Brace for the relay warden",
       "boss_objective": "Break the relay warden",
       "clear_objective": "Relay heart stabilized. Stage clear."
+    },
+    {
+      "id": "coil_depths",
+      "name": "Coil Depths",
+      "scene": "res://scenes/stages/coil_depths.tscn",
+      "order": 2,
+      "biome": "depth_vent_conduit",
+      "spectacle_target_seconds": 210,
+      "locked": true,
+      "summary": "Descend through the vent conduits and stabilize the depth core before the overload collapses the shaft.",
+      "opening_objective": "Descend into the coil depths",
+      "mid_objective": "Read the surge vents and push for the depth core",
+      "boss_intro_objective": "Brace for the colossus in the depth core",
+      "boss_objective": "Break the Rift Colossus",
+      "clear_objective": "Depth core stabilized. Stage clear."
     }
   ]
 }

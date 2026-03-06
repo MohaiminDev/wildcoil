@@ -19,8 +19,8 @@ def test_runtime_smoke_suite_passes() -> None:
 
     payload = parse_result_line(combined_output)
     assert payload["passed"] is True
-    assert payload["build_label"] == "phase3-second-playable"
-    assert payload["stage_ids"] == ["relay_clearing"]
+    assert payload["build_label"] == "phase3-stage2"
+    assert payload["stage_ids"] == ["relay_clearing", "coil_depths"]
     assert payload["character_count"] == 2
 
 

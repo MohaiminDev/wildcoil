@@ -40,12 +40,16 @@ func _physics_process(delta: float) -> void:
 		attack_windup = maxf(attack_windup - delta, 0.0)
 		if attack_windup <= 0.0 and attack_pending and stage != null:
 			attack_pending = false
-			if str(profile.get("archetype", "")) == "ranged":
+			var archetype := str(profile.get("archetype", ""))
+			if archetype == "ranged" or archetype == "artillery":
 				stage.call("spawn_enemy_projectile", self, get_attack_profile())
-				attack_cooldown = 1.6
+				attack_cooldown = 1.8 if archetype == "artillery" else 1.6
 			else:
 				stage.call("resolve_enemy_attack", get_attack_profile(), global_position, facing)
-				attack_cooldown = 1.2 if not bool(profile.get("is_elite", false)) else 1.6
+				if archetype == "skirmisher":
+					attack_cooldown = 0.82
+				else:
+					attack_cooldown = 1.2 if not bool(profile.get("is_elite", false)) else 1.6
 
 	if health > 0:
 		update_behavior(delta)
@@ -76,11 +80,16 @@ func update_behavior(delta: float) -> void:
 	var preferred_range := float(profile.get("preferred_range", profile.get("attack_range", 90.0)))
 	var walk_speed := float(profile.get("walk_speed", 72.0))
 	var engage_range := float(profile.get("engage_range", 240.0))
-	if archetype == "ranged":
+	if archetype == "ranged" or archetype == "artillery":
 		if absf(distance) < preferred_range - 30.0:
 			velocity.x = move_toward(velocity.x, -sign(distance) * walk_speed, 600.0 * delta)
 		elif absf(distance) > preferred_range + 30.0 and absf(distance) < engage_range + 120.0:
 			velocity.x = move_toward(velocity.x, sign(distance) * walk_speed, 600.0 * delta)
+	elif archetype == "skirmisher":
+		if absf(distance) < float(profile.get("attack_range", 90.0)) * 0.55:
+			velocity.x = move_toward(velocity.x, -sign(distance) * walk_speed * 0.82, 900.0 * delta)
+		elif absf(distance) <= engage_range + 80.0:
+			velocity.x = move_toward(velocity.x, sign(distance) * walk_speed * 1.08, 980.0 * delta)
 	elif absf(distance) <= engage_range:
 		velocity.x = move_toward(velocity.x, sign(distance) * walk_speed, 600.0 * delta)
 
@@ -127,6 +136,7 @@ func get_attack_profile() -> Dictionary:
 		"hitstop": float(profile.get("hitstop", 0.04)),
 		"projectile_speed": float(profile.get("projectile_speed", 0.0)),
 		"projectile_range": float(profile.get("projectile_range", 0.0)),
+		"projectile_radius": float(profile.get("projectile_radius", 20.0)),
 	}
 
 

@@ -73,6 +73,9 @@ func _initialize() -> void:
 	if suite == "vertical_slice" and errors.is_empty():
 		payload.merge(run_vertical_slice_suite(catalog), true)
 
+	if suite == "stage2_playable" and errors.is_empty():
+		payload.merge(run_stage2_playable_suite(catalog), true)
+
 	if suite == "progression" and errors.is_empty():
 		payload.merge(run_progression_suite(catalog, save_path), true)
 
@@ -386,6 +389,72 @@ func run_vertical_slice_suite(catalog: ContentCatalog) -> Dictionary:
 		"rank": str(final_summary.get("rank", "--")),
 		"passed": passed,
 		"errors": [] if passed else ["vertical slice did not reach boss and clear states"],
+	}
+	stage_instance.free()
+	return payload
+
+
+func run_stage2_playable_suite(catalog: ContentCatalog) -> Dictionary:
+	var stage_definition := catalog.get_stage_by_id("coil_depths")
+	var packed_scene := load(str(stage_definition.get("scene", ""))) as PackedScene
+	if packed_scene == null:
+		return {
+			"passed": false,
+			"errors": ["Stage 2 scene failed to load for the midgame suite"],
+		}
+
+	var stage_instance := packed_scene.instantiate()
+	get_root().add_child(stage_instance)
+	var character_definition := catalog.get_character_by_id("zeph_rush")
+	if stage_instance.has_method("configure_run"):
+		stage_instance.call("configure_run", {
+			"stage_definition": stage_definition,
+			"character_definition": character_definition,
+		})
+
+	var player := stage_instance.call("get_player") as PlayerController
+	var boss_actor := stage_instance.call("get_boss_actor") as BossActor
+	if player == null or boss_actor == null:
+		stage_instance.free()
+		return {
+			"passed": false,
+			"errors": ["Stage 2 did not expose player and boss actors"],
+		}
+
+	var enemy_ids: Array[String] = []
+	for enemy in stage_instance.call("get_enemy_nodes"):
+		if enemy is EnemyActor:
+			enemy_ids.append(str(enemy.enemy_id))
+	enemy_ids.sort()
+
+	player.global_position.x = -120.0
+	stage_instance.call("advance_stage_flow", 0.1)
+	for enemy in stage_instance.call("get_enemy_nodes"):
+		if enemy is EnemyActor:
+			enemy.health = 0
+	stage_instance.call("advance_stage_flow", 0.1)
+	stage_instance.call("advance_stage_flow", 4.5)
+	var advance_summary: Dictionary = stage_instance.call("get_stage_summary")
+	stage_instance.call("advance_stage_flow", 1.2)
+	var hazard_summary: Dictionary = stage_instance.call("get_stage_summary")
+	player.global_position.x = 1240.0
+	stage_instance.call("advance_stage_flow", 0.1)
+	stage_instance.call("advance_stage_flow", 2.0)
+	boss_actor.health = 0
+	stage_instance.call("advance_stage_flow", 0.1)
+	var final_summary: Dictionary = stage_instance.call("get_stage_summary")
+
+	var passed: bool = enemy_ids.has("rail_lancer") and enemy_ids.has("arc_seeder") and str(advance_summary.get("phase", "")) == "advance" and int(hazard_summary.get("hazard_cycle_count", 0)) >= 1 and str(hazard_summary.get("hazard_state", "")) != "idle" and str(final_summary.get("boss_name", "")) == "Rift Colossus" and bool(final_summary.get("stage_complete", false))
+	var payload := {
+		"enemy_ids": enemy_ids,
+		"advance_phase": str(advance_summary.get("phase", "")),
+		"hazard_state": str(hazard_summary.get("hazard_state", "")),
+		"hazard_cycle_count": int(hazard_summary.get("hazard_cycle_count", 0)),
+		"boss_name": str(final_summary.get("boss_name", "")),
+		"stage_complete": bool(final_summary.get("stage_complete", false)),
+		"rank": str(final_summary.get("rank", "--")),
+		"passed": passed,
+		"errors": [] if passed else ["Stage 2 did not expose the new enemy mix, vent hazards, and full clear flow"],
 	}
 	stage_instance.free()
 	return payload
