@@ -386,7 +386,14 @@ func _read_profile_payload(path: String) -> Dictionary:
 			"ok": false,
 			"reason": "empty file",
 		}
-	var parsed: Variant = JSON.parse_string(raw_text)
+	var json := JSON.new()
+	var parse_error := json.parse(raw_text)
+	if parse_error != OK:
+		return {
+			"ok": false,
+			"reason": "invalid json",
+		}
+	var parsed: Variant = json.data
 	if typeof(parsed) != TYPE_DICTIONARY:
 		return {
 			"ok": false,

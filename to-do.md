@@ -93,7 +93,7 @@ The Phase 1 through release tasks below are the frozen MVP backlog. Only change 
   - [x] Manual smoke checks confirm saves persist and load safely.
   - [x] The current test suite passes.
 - Dependencies: [P2-01]
-- Completed: 2026-03-05 (`affbe72`)
+- Completed: 2026-03-05 (`e66be2c`)
 
 ### [P2-01] Promote Stage 1 into a vertical slice
 - Outcome: Upgrade Stage 1 with target-leaning art/audio, cleaner camera and VFX discipline, and a full boss fight.
@@ -102,7 +102,7 @@ The Phase 1 through release tasks below are the frozen MVP backlog. Only change 
   - [x] Manual smoke checks confirm readability did not regress.
   - [x] The current test suite passes.
 - Dependencies: [P1-07]
-- Completed: 2026-03-05 (`1e9dc83`)
+- Completed: 2026-03-05 (`3a28ad6`)
 
 ### [P1-07] Run the Phase 1 playtest gate
 - Outcome: Capture 5 to 8 external playtests, fix repeated clarity or fairness issues, and document the gate result.
