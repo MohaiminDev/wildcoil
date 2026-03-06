@@ -35,6 +35,7 @@ Install requirements:
 Run the production project:
 
 - `scripts/run_game.sh`
+- `WILDCOIL_SAVE_PATH=/absolute/path/to/profile.json scripts/run_game.sh` if you want to smoke-test a specific save file
 
 Run the local validation gate:
 
@@ -43,7 +44,7 @@ Run the local validation gate:
 Export the current macOS app:
 
 - `scripts/export_macos.sh`
-- `ditto -c -k --sequesterRsrc --keepParent build/macos/Wildcoil.app build/macos/Wildcoil-phase1-first-playable-macos.zip`
+- `scripts/package_macos.sh` (runs `scripts/check.sh` first unless `SKIP_CHECK=1`)
 - `build/macos/Wildcoil.app/Contents/MacOS/Wildcoil`
 
 Direct equivalents if you want to run the pieces manually:
@@ -52,8 +53,12 @@ Direct equivalents if you want to run the pieces manually:
 - `python3 -m pytest tests`
 - `godot --path src/wildcoil`
 - `godot --headless --path src/wildcoil --export-release "macOS" build/macos/Wildcoil.app`
-- `ditto -c -k --sequesterRsrc --keepParent build/macos/Wildcoil.app build/macos/Wildcoil-phase1-first-playable-macos.zip`
+- `ditto -c -k --sequesterRsrc --keepParent build/macos/Wildcoil.app build/macos/Wildcoil-<build_label>-macos.zip`
+
+CI mirror:
+
+- [`.github/workflows/macos-check.yml`](/Users/himu/Desktop/career/personal_projects/wildcoil/.github/workflows/macos-check.yml) runs the same validation gate on a hosted macOS runner
 
 ## Current Milestone
 
-Phase 1: production scaffold and first playable development on the locked Godot path.
+Phase 2: progression systems, mission-board shell, and vertical-slice hardening on the locked Godot path.

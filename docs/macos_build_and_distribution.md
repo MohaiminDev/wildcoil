@@ -4,11 +4,15 @@ This document defines the minimum tester-build path for the prototype and the va
 
 ## Build Goal
 
-Ship a tester-ready Apple Silicon build for the Phase 1 first playable with:
+Ship a tester-ready Apple Silicon build for the current progression-enabled vertical slice with:
 
 - controller support
 - keyboard fallback
+- persistent save/profile support
+- stage-select mission board shell
 - repeatable packaging steps
+- repeatable checksum output
+- mirrored local and hosted validation steps
 - clear signing / notarization checklist
 - explicit manual acceptance checks
 
@@ -53,7 +57,7 @@ Unsigned or unnotarized prototype builds may still be useful internally, but the
 - Epic's current macOS requirements guidance emphasizes recent Apple Silicon, macOS, and Xcode baselines and notes that some rendering features vary by hardware generation.
 - If Unreal wins, treat build size, feature toggles, and Apple Silicon frame stability as immediate risks rather than later polish concerns.
 
-## Phase 1 Acceptance Matrix
+## Acceptance Matrix
 
 Run these checks before calling the prototype tester-ready:
 
@@ -73,36 +77,53 @@ Run these checks before calling the prototype tester-ready:
 
 ## Packaging Workflow Template
 
-Current Phase 1 first-playable workflow:
+Current Phase 2 packaging workflow:
 
-1. Run `./scripts/export_macos.sh` from the repo root.
-2. Verify the bundle exists at `build/macos/Wildcoil.app`.
-3. Package the tester ZIP with `ditto -c -k --sequesterRsrc --keepParent build/macos/Wildcoil.app build/macos/Wildcoil-phase1-first-playable-macos.zip`.
-4. Launch the exported binary directly with `build/macos/Wildcoil.app/Contents/MacOS/Wildcoil`.
-5. Smoke-check keyboard input, pause, and fullscreen in the exported app.
-6. If distributing externally, sign the bundle with the active Developer ID setup and notarize it.
-7. On unsigned internal builds, tell testers to use Finder's `Open` flow or remove quarantine manually.
+1. Run `./scripts/check.sh` from the repo root and stop if any test fails.
+2. Run `./scripts/package_macos.sh`.
+3. Verify the bundle exists at `build/macos/Wildcoil.app`.
+4. Verify the ZIP exists at `build/macos/Wildcoil-<build_label>-macos.zip`.
+5. Verify the checksum file exists at `build/macos/Wildcoil-<build_label>-macos.zip.sha256`.
+6. Launch the exported binary directly with `build/macos/Wildcoil.app/Contents/MacOS/Wildcoil`.
+7. Smoke-check keyboard input, pause, fullscreen, and mission-board save data in the exported app.
+8. If you need a deterministic local profile for smoke tests, launch with `WILDCOIL_SAVE_PATH=/absolute/path/to/profile.json build/macos/Wildcoil.app/Contents/MacOS/Wildcoil`.
+9. If distributing externally, sign the bundle with the active Developer ID setup and notarize it.
+10. On unsigned internal builds, tell testers to use Finder's `Open` flow or remove quarantine manually.
+
+## Validation Automation
+
+- Local gate: `./scripts/check.sh`
+- Local packaging: `./scripts/package_macos.sh`
+- Packaging guardrail: `scripts/package_macos.sh` reruns `./scripts/check.sh` unless `SKIP_CHECK=1` is set intentionally for a local iteration-only pass
+- Hosted CI mirror: [`.github/workflows/macos-check.yml`](/Users/himu/Desktop/career/personal_projects/wildcoil/.github/workflows/macos-check.yml)
+- CI scope: installs Godot on a macOS runner, installs `pytest`, and executes the same local validation gate used before task commits
+- Export hygiene: the macOS export preset excludes local experimental `storm_warden_boss` scene/script files so untracked scratch assets do not leak into tester builds
 
 ## Build Notes Log
 
 ### Entry Template
 
 - Date:
+- Build label:
 - Engine:
 - Engine version:
 - Xcode version:
 - Export target:
 - Packaging format:
+- Checksum path:
 - Signing status:
 - Notarization status:
 - Controller devices tested:
 - Keyboard fallback tested:
+- Save persistence tested:
+- Validation gate:
 - Issues found:
 - Follow-up action:
 
 ### 2026-03-05 - Phase 1 First Playable
 
 - Date: 2026-03-05
+- Build label: `phase1-first-playable`
 - Engine: Godot
 - Engine version: 4.6.1.stable.official.14d19694e
 - Xcode version: full Xcode not installed on this machine; unsigned export path used
@@ -110,10 +131,35 @@ Current Phase 1 first-playable workflow:
 - Packaging format: `.app` bundle plus `build/macos/Wildcoil-phase1-first-playable-macos.zip`
 - Artifact size: `.app` is `176M`; ZIP is `58M`
 - ZIP SHA-256: `24de506ffa92db57469db7037be0be7a85c0cbab5a5af0c52707c629fc0c4837`
+- Checksum path: manual terminal output only; no `.sha256` sidecar yet
 - Binary architecture: universal Mach-O (`x86_64` and `arm64`)
 - Signing status: ad hoc / linker-signed only; `spctl --assess -vv build/macos/Wildcoil.app` reports `source=no usable signature`
 - Notarization status: not attempted; no Developer ID identity configured on this machine
 - Controller devices tested: none attached during this pass; HUD reported `Connected pads: 0 [none]`
 - Keyboard fallback tested: yes; exported app launched, moved into combat, paused with `Esc`, and toggled borderless fullscreen with `F`
+- Save persistence tested: no; this build predates the progression shell
+- Validation gate: local runtime and exported app smoke only
 - Issues found: native AppKit fullscreen transitions were unstable under active screen capture, so the build now uses an in-game borderless fullscreen toggle instead of calling the macOS fullscreen transition directly
 - Follow-up action: smoke-test a real controller, focus-loss/resume, and audio-device changes before external tester distribution
+
+### 2026-03-05 - Phase 2 Progression Mission Board
+
+- Date: 2026-03-05
+- Build label: `phase2-progression`
+- Engine: Godot
+- Engine version: 4.6.1.stable.official.14d19694e
+- Xcode version: full Xcode not installed on this machine; unsigned export path used
+- Export target: `build/macos/Wildcoil.app`
+- Packaging format: `.app` bundle plus `build/macos/Wildcoil-phase2-progression-macos.zip`
+- Artifact size: `.app` is `176M`; ZIP is `59M`
+- ZIP SHA-256: `652c492de217ed8fc5033f3855b03d72ba6189b4d6be43e0318257ec3bfdff7f`
+- Checksum path: `/tmp/wildcoil_p203_build/Wildcoil-phase2-progression-macos.zip.sha256`
+- Binary architecture: universal Mach-O (`x86_64` and `arm64`)
+- Signing status: ad hoc / linker-signed only; `spctl --assess -vv build/macos/Wildcoil.app` reports `source=no usable signature`
+- Notarization status: not attempted in this phase
+- Controller devices tested: none attached during this pass
+- Keyboard fallback tested: yes; live smoke entered the mission board and stage runtime successfully
+- Save persistence tested: yes; a seeded profile reloaded into the mission board and the saved best record rendered correctly before stage launch
+- Validation gate: `./scripts/check.sh`, `./scripts/package_macos.sh`, and live local smoke using a saved profile override
+- Issues found: focus-loss/resume, audio-device change, and controller-device coverage still need dedicated release-candidate validation
+- Follow-up action: repeat the smoke pass against the packaged app with a physical controller attached, then cover focus-loss/resume and audio-device changes during the release-candidate gate

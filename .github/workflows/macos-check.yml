@@ -1,0 +1,32 @@
+name: macOS Check
+
+on:
+  push:
+    branches:
+      - main
+      - master
+      - codex/**
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  validate:
+    runs-on: macos-14
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Godot
+        run: brew install --cask godot
+
+      - name: Install Python test deps
+        run: python3 -m pip install --upgrade pip pytest
+
+      - name: Run local validation gate
+        run: ./scripts/check.sh

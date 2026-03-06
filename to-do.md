@@ -20,14 +20,6 @@ The Phase 1 through release tasks below are the frozen MVP backlog. Only change 
 
 ## PENDING
 
-### [P2-03] Harden the production pipeline
-- Outcome: Update provenance, dependency and license review, packaging notes, and automated build/test flow for ongoing production.
-- Validation:
-  - [ ] [`docs/asset_provenance_register.md`](/Users/himu/Desktop/career/personal_projects/wildcoil/docs/asset_provenance_register.md) is current for all committed dependencies and placeholder assets.
-  - [ ] [`docs/macos_build_and_distribution.md`](/Users/himu/Desktop/career/personal_projects/wildcoil/docs/macos_build_and_distribution.md) reflects the active build workflow.
-  - [ ] The current test suite passes.
-- Dependencies: [P2-02]
-
 ### [P2-04] Run the vertical-slice test pass
 - Outcome: Playtest the vertical slice, fix blockers, and lock the MVP expansion target.
 - Validation:
@@ -94,6 +86,15 @@ The Phase 1 through release tasks below are the frozen MVP backlog. Only change 
   - [x] The current test suite passes.
 - Dependencies: [P2-01]
 - Completed: 2026-03-05 (`e66be2c`)
+
+### [P2-03] Harden the production pipeline
+- Outcome: Update provenance, dependency and license review, packaging notes, and automated build/test flow for ongoing production.
+- Validation:
+  - [x] [`docs/asset_provenance_register.md`](/Users/himu/Desktop/career/personal_projects/wildcoil/docs/asset_provenance_register.md) is current for all committed dependencies and placeholder assets.
+  - [x] [`docs/macos_build_and_distribution.md`](/Users/himu/Desktop/career/personal_projects/wildcoil/docs/macos_build_and_distribution.md) reflects the active build workflow.
+  - [x] The current test suite passes.
+- Dependencies: [P2-02]
+- Completed: 2026-03-05 (`1fd8d7f`)
 
 ### [P2-01] Promote Stage 1 into a vertical slice
 - Outcome: Upgrade Stage 1 with target-leaning art/audio, cleaner camera and VFX discipline, and a full boss fight.
