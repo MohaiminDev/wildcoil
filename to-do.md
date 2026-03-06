@@ -20,14 +20,6 @@ The Phase 1 through release tasks below are the frozen MVP backlog. Only change 
 
 ## PENDING
 
-### [P3-03] Build Stage 3 and finale
-- Outcome: Add the final stage, the last enemy archetype, the final boss, and the ending flow.
-- Validation:
-  - [ ] Stage 3 and the ending are playable end-to-end.
-  - [ ] Content validation tests cover the final stage and boss definitions.
-  - [ ] The current test suite passes.
-- Dependencies: [P3-02]
-
 ### [P3-04] Add onboarding, progression, and accessibility polish
 - Outcome: Finalize onboarding prompts, progression flow, options, accessibility settings, save migration safety, and balance tuning.
 - Validation:
@@ -53,6 +45,15 @@ The Phase 1 through release tasks below are the frozen MVP backlog. Only change 
 - Dependencies: [P3-05]
 
 ## DONE
+
+### [P3-03] Build Stage 3 and finale
+- Outcome: Add the final stage, the last enemy archetype, the final boss, and the ending flow.
+- Validation:
+  - [x] Stage 3 and the ending are playable end-to-end.
+  - [x] Content validation tests cover the final stage and boss definitions.
+  - [x] The current test suite passes.
+- Dependencies: [P3-02]
+- Completed: 2026-03-05
 
 ### [P3-02] Build Stage 2
 - Outcome: Add the midgame stage, two new enemy archetypes, and one new hazard language.

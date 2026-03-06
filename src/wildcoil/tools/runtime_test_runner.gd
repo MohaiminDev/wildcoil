@@ -76,6 +76,9 @@ func _initialize() -> void:
 	if suite == "stage2_playable" and errors.is_empty():
 		payload.merge(run_stage2_playable_suite(catalog), true)
 
+	if suite == "stage3_finale" and errors.is_empty():
+		payload.merge(run_stage3_finale_suite(catalog), true)
+
 	if suite == "progression" and errors.is_empty():
 		payload.merge(run_progression_suite(catalog, save_path), true)
 
@@ -84,6 +87,9 @@ func _initialize() -> void:
 
 	if suite == "frontend_shell" and errors.is_empty():
 		payload.merge(run_frontend_shell_suite(), true)
+
+	if suite == "finale_notice" and errors.is_empty():
+		payload.merge(run_finale_notice_suite(), true)
 
 	if suite == "content_validation":
 		payload.merge(run_content_validation_suite(catalog), true)
@@ -460,9 +466,72 @@ func run_stage2_playable_suite(catalog: ContentCatalog) -> Dictionary:
 	return payload
 
 
+func run_stage3_finale_suite(catalog: ContentCatalog) -> Dictionary:
+	var stage_definition := catalog.get_stage_by_id("storm_crown")
+	var packed_scene := load(str(stage_definition.get("scene", ""))) as PackedScene
+	if packed_scene == null:
+		return {
+			"passed": false,
+			"errors": ["Stage 3 scene failed to load for the finale suite"],
+		}
+
+	var stage_instance := packed_scene.instantiate()
+	get_root().add_child(stage_instance)
+	var character_definition := catalog.get_character_by_id("mira_coil")
+	if stage_instance.has_method("configure_run"):
+		stage_instance.call("configure_run", {
+			"stage_definition": stage_definition,
+			"character_definition": character_definition,
+		})
+
+	var player := stage_instance.call("get_player") as PlayerController
+	var boss_actor := stage_instance.call("get_boss_actor") as BossActor
+	if player == null or boss_actor == null:
+		stage_instance.free()
+		return {
+			"passed": false,
+			"errors": ["Stage 3 did not expose player and boss actors"],
+		}
+
+	var enemy_ids: Array[String] = []
+	for enemy in stage_instance.call("get_enemy_nodes"):
+		if enemy is EnemyActor:
+			enemy_ids.append(str(enemy.enemy_id))
+	enemy_ids.sort()
+
+	player.global_position.x = -160.0
+	stage_instance.call("advance_stage_flow", 0.1)
+	for enemy in stage_instance.call("get_enemy_nodes"):
+		if enemy is EnemyActor:
+			enemy.health = 0
+	stage_instance.call("advance_stage_flow", 0.1)
+	stage_instance.call("advance_stage_flow", 4.9)
+	var hazard_summary: Dictionary = stage_instance.call("get_stage_summary")
+	player.global_position.x = 1420.0
+	stage_instance.call("advance_stage_flow", 0.1)
+	stage_instance.call("advance_stage_flow", 2.2)
+	boss_actor.health = 0
+	stage_instance.call("advance_stage_flow", 0.1)
+	var final_summary: Dictionary = stage_instance.call("get_stage_summary")
+
+	var passed: bool = enemy_ids.has("ward_mason") and str(hazard_summary.get("hazard_state", "")) != "idle" and int(hazard_summary.get("hazard_cycle_count", 0)) >= 1 and str(final_summary.get("boss_name", "")) == "Crown Engine" and bool(final_summary.get("stage_complete", false))
+	var payload := {
+		"enemy_ids": enemy_ids,
+		"hazard_state": str(hazard_summary.get("hazard_state", "")),
+		"hazard_cycle_count": int(hazard_summary.get("hazard_cycle_count", 0)),
+		"boss_name": str(final_summary.get("boss_name", "")),
+		"stage_complete": bool(final_summary.get("stage_complete", false)),
+		"rank": str(final_summary.get("rank", "--")),
+		"passed": passed,
+		"errors": [] if passed else ["Stage 3 did not expose the finale enemy mix, hazard escalation, and final boss clear flow"],
+	}
+	stage_instance.free()
+	return payload
+
+
 func run_progression_suite(catalog: ContentCatalog, save_path: String) -> Dictionary:
 	var fixture_catalog := ContentCatalog.from_dictionary({
-		"build_label": "phase2-progression-fixture",
+		"build_label": "phase3-finale-fixture",
 		"characters": [
 			{
 				"id": "mira_coil",
@@ -494,6 +563,16 @@ func run_progression_suite(catalog: ContentCatalog, save_path: String) -> Dictio
 				"order": 2,
 				"biome": "coil_depths",
 				"spectacle_target_seconds": 180,
+				"locked": true,
+			},
+			{
+				"id": "storm_crown",
+				"name": "Storm Crown",
+				"scene": "res://scenes/stages/relay_clearing.tscn",
+				"order": 3,
+				"biome": "storm_crown",
+				"spectacle_target_seconds": 180,
+				"locked": true,
 			},
 		],
 	})
@@ -555,8 +634,6 @@ func run_frontend_shell_suite() -> Dictionary:
 
 	var app_root := app_scene.instantiate()
 	get_root().add_child(app_root)
-	if app_root.get("catalog") == null:
-		app_root.call("_ready")
 	var initial_summary: Dictionary = app_root.call("get_frontend_summary")
 	app_root.call("debug_start_selected_stage")
 	var started_summary: Dictionary = app_root.call("get_frontend_summary")
@@ -578,6 +655,49 @@ func run_frontend_shell_suite() -> Dictionary:
 		"passed": passed,
 		"errors": [] if passed else ["frontend shell did not transition through menu, active stage, result, and reset flows"],
 	}
+
+
+func run_finale_notice_suite() -> Dictionary:
+	var app_scene := load("res://scenes/app_root.tscn") as PackedScene
+	if app_scene == null:
+		return {
+			"passed": false,
+			"errors": ["app root scene failed to load for finale notice suite"],
+		}
+
+	var app_root := app_scene.instantiate()
+	get_root().add_child(app_root)
+	if not bool(app_root.call("bootstrap_runtime")):
+		app_root.free()
+		return {
+			"passed": false,
+			"errors": ["app root failed to bootstrap for finale notice suite"],
+		}
+	var catalog := app_root.get("catalog") as ContentCatalog
+	var profile := app_root.get("profile") as ProgressionProfile
+	if catalog == null or profile == null:
+		app_root.free()
+		return {
+			"passed": false,
+			"errors": ["app root did not expose catalog and profile for finale notice suite"],
+		}
+
+	profile.record_stage_clear("relay_clearing", "A", 128.0, catalog)
+	profile.record_stage_clear("coil_depths", "A", 166.0, catalog)
+	profile.set_selected_stage_id("storm_crown", catalog)
+	app_root.set("active_stage_id", "storm_crown")
+	app_root.call("debug_complete_selected_stage", "S", 194.2)
+	var summary := app_root.call("get_frontend_summary") as Dictionary
+	var notice := str(summary.get("notice", ""))
+	var passed: bool = str(summary.get("mode", "")) == "results" and notice.find("Crown Quieted") >= 0 and notice.find("crown engine falls silent") >= 0
+	var payload := {
+		"mode": str(summary.get("mode", "")),
+		"notice": notice,
+		"passed": passed,
+		"errors": [] if passed else ["finale clear notice did not expose the ending flow through the shell"],
+	}
+	app_root.free()
+	return payload
 
 
 func run_character_roster_suite(catalog: ContentCatalog) -> Dictionary:

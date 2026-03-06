@@ -71,9 +71,9 @@ func _input(event: InputEvent) -> void:
 		return
 
 	if event.is_action_pressed(InputActions.PAUSE):
-		set_game_paused(not get_tree().paused)
+		set_game_paused(not is_tree_paused())
 		get_viewport().set_input_as_handled()
-	elif get_tree().paused and event.is_action_pressed(InputActions.RESTART_CHECKPOINT):
+	elif is_tree_paused() and event.is_action_pressed(InputActions.RESTART_CHECKPOINT):
 		restart_checkpoint()
 		get_viewport().set_input_as_handled()
 
@@ -246,7 +246,7 @@ func start_selected_stage() -> void:
 		str(stage_definition.get("name", "Unknown Stage")),
 		str(character_definition.get("name", "Unknown Hunter")),
 	]
-	get_tree().paused = false
+	set_tree_paused_state(false)
 
 
 func record_stage_completion(stage_summary: Dictionary) -> void:
@@ -260,13 +260,14 @@ func record_stage_completion(stage_summary: Dictionary) -> void:
 	frontend_mode = "results"
 	sync_selection_from_profile()
 	frontend_notice = build_completion_notice(stage_id, rank, finish_seconds, progression_summary)
-	get_tree().paused = false
+	set_tree_paused_state(false)
 
 
 func build_completion_notice(stage_id: String, rank: String, finish_seconds: float, progression_summary: Dictionary) -> String:
+	var stage_definition := catalog.get_stage_by_id(stage_id)
 	var notice_lines := [
 		"%s cleared with rank %s in %s." % [
-			str(catalog.get_stage_by_id(stage_id).get("name", stage_id)),
+			str(stage_definition.get("name", stage_id)),
 			rank,
 			format_optional_seconds(finish_seconds),
 		]
@@ -281,6 +282,12 @@ func build_completion_notice(stage_id: String, rank: String, finish_seconds: flo
 	var unlocked_character_id := str(progression_summary.get("unlocked_character_id", ""))
 	if not unlocked_character_id.is_empty():
 		notice_lines.append("Unlocked hunter: %s." % str(catalog.get_character_by_id(unlocked_character_id).get("name", unlocked_character_id)))
+	var ending_title := str(stage_definition.get("ending_title", ""))
+	var ending_summary := str(stage_definition.get("ending_summary", ""))
+	if not ending_title.is_empty():
+		notice_lines.append(ending_title)
+	if not ending_summary.is_empty():
+		notice_lines.append(ending_summary)
 	notice_lines.append("Profile saved to %s." % profile.get_absolute_save_path())
 	return "\n".join(notice_lines)
 
@@ -289,7 +296,7 @@ func return_to_mission_board() -> void:
 	teardown_stage()
 	frontend_mode = "menu"
 	stage_result_recorded = false
-	get_tree().paused = false
+	set_tree_paused_state(false)
 	active_audio_state = ""
 	frontend_notice = "Mission board ready."
 
@@ -306,7 +313,7 @@ func teardown_stage() -> void:
 func set_game_paused(should_pause: bool) -> void:
 	if frontend_mode != "playing":
 		should_pause = false
-	get_tree().paused = should_pause
+	set_tree_paused_state(should_pause)
 	for player in [explore_loop, combat_loop, clear_loop, boss_loop, spectacle_stinger]:
 		player.stream_paused = should_pause
 	update_pause_overlay()
@@ -400,7 +407,7 @@ func update_status_label() -> void:
 
 
 func update_pause_overlay() -> void:
-	pause_overlay.visible = frontend_mode == "playing" and get_tree().paused
+	pause_overlay.visible = frontend_mode == "playing" and is_tree_paused()
 	if not pause_overlay.visible:
 		return
 	var stage_summary := get_stage_summary()
@@ -423,6 +430,7 @@ func update_frontend_overlay() -> void:
 	var stage_name := str(stage_definition.get("name", "Unknown Stage"))
 	var character_name := str(character_definition.get("name", "Unknown Hunter"))
 	var view_label := "Borderless fullscreen" if faux_fullscreen else "Windowed"
+	var ending_summary := str(stage_definition.get("ending_summary", ""))
 	var progress_text := "Cleared stages: %d/%d  Unlocked missions: %d/%d  Unlocked hunters: %d/%d" % [
 		profile.get_cleared_stage_ids().size() if profile != null else 0,
 		catalog.get_stage_ids().size() if catalog != null else 0,
@@ -434,8 +442,9 @@ func update_frontend_overlay() -> void:
 	var note_text := "" if frontend_notice.is_empty() else "\nNotice: %s" % frontend_notice
 
 	if frontend_mode == "results":
-		mission_title.text = "Stage Clear"
-		mission_body.text = "Mission: %s\nHunter: %s\nView: %s\n%s\nBest record: %s\nSave path: %s%s" % [
+		mission_title.text = str(stage_definition.get("ending_title", "Stage Clear"))
+		var ending_text := "" if ending_summary.is_empty() else "\nEnding: %s" % ending_summary
+		mission_body.text = "Mission: %s\nHunter: %s\nView: %s\n%s\nBest record: %s\nSave path: %s%s%s" % [
 			stage_name,
 			character_name,
 			view_label,
@@ -443,6 +452,7 @@ func update_frontend_overlay() -> void:
 			profile.describe_stage_result(active_stage_id) if profile != null else "--",
 			profile.get_absolute_save_path() if profile != null else "--",
 			note_text,
+			ending_text,
 		]
 		mission_footer.text = "Enter or B to return to the mission board"
 	else:
@@ -508,6 +518,8 @@ func update_audio_state() -> void:
 
 func play_loop(player: AudioStreamPlayer) -> void:
 	if player.stream == null:
+		return
+	if not player.is_inside_tree():
 		return
 	if not player.playing:
 		player.play()
@@ -605,3 +617,18 @@ func format_optional_seconds(value: float) -> String:
 
 func _on_joy_connection_changed(device: int, connected: bool) -> void:
 	input_device_state.handle_connection_change(device, connected)
+
+
+func set_tree_paused_state(should_pause: bool) -> void:
+	if not is_inside_tree():
+		return
+	var tree := get_tree()
+	if tree != null:
+		tree.paused = should_pause
+
+
+func is_tree_paused() -> bool:
+	if not is_inside_tree():
+		return false
+	var tree := get_tree()
+	return tree != null and tree.paused

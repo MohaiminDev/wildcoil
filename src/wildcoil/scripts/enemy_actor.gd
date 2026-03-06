@@ -90,6 +90,11 @@ func update_behavior(delta: float) -> void:
 			velocity.x = move_toward(velocity.x, -sign(distance) * walk_speed * 0.82, 900.0 * delta)
 		elif absf(distance) <= engage_range + 80.0:
 			velocity.x = move_toward(velocity.x, sign(distance) * walk_speed * 1.08, 980.0 * delta)
+	elif archetype == "sentinel":
+		if absf(distance) > float(profile.get("attack_range", 90.0)) * 1.05 and absf(distance) <= engage_range:
+			velocity.x = move_toward(velocity.x, sign(distance) * walk_speed, 520.0 * delta)
+		elif absf(distance) < float(profile.get("attack_range", 90.0)) * 0.68:
+			velocity.x = move_toward(velocity.x, -sign(distance) * walk_speed * 0.42, 480.0 * delta)
 	elif absf(distance) <= engage_range:
 		velocity.x = move_toward(velocity.x, sign(distance) * walk_speed, 600.0 * delta)
 

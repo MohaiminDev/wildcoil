@@ -1,5 +1,5 @@
 {
-  "build_label": "phase3-stage2",
+  "build_label": "phase3-finale",
   "characters": [
     {
       "id": "mira_coil",
@@ -47,6 +47,23 @@
       "boss_intro_objective": "Brace for the colossus in the depth core",
       "boss_objective": "Break the Rift Colossus",
       "clear_objective": "Depth core stabilized. Stage clear."
+    },
+    {
+      "id": "storm_crown",
+      "name": "Storm Crown",
+      "scene": "res://scenes/stages/storm_crown.tscn",
+      "order": 3,
+      "biome": "crown_lightning_spire",
+      "spectacle_target_seconds": 240,
+      "locked": true,
+      "summary": "Climb into the storm crown, break the engine at its heart, and finally quiet the route.",
+      "opening_objective": "Climb into the storm crown",
+      "mid_objective": "Read the storm rails and push for the crown engine",
+      "boss_intro_objective": "Brace for the Crown Engine",
+      "boss_objective": "Break the Crown Engine",
+      "clear_objective": "Storm crown stabilized. Stage clear.",
+      "ending_title": "Ending: Crown Quieted",
+      "ending_summary": "The crown engine falls silent, the route steadies, and Wildcoil finally gets to stand down from the storm line."
     }
   ]
 }
