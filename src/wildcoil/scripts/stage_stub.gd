@@ -1,10 +1,17 @@
 extends Node2D
 
+const ENEMY_PROJECTILE_SCENE = preload("res://scenes/enemy_projectile.tscn")
+
 const CHECKPOINT_POSITION := Vector2(-500.0, 140.0)
-const DUMMY_POSITION := Vector2(140.0, 140.0)
+const ENEMY_SPAWNS := {
+	"NeedleHound": Vector2(60.0, 140.0),
+	"SporeSlinger": Vector2(320.0, 140.0),
+	"CoilBrute": Vector2(560.0, 140.0),
+}
 
 @onready var player: PlayerController = $Player
-@onready var combat_dummy: CombatDummy = $CombatDummy
+@onready var enemies_root: Node2D = $Enemies
+@onready var projectile_root: Node2D = $Projectiles
 
 const SKY_COLOR := Color("0b1720")
 const MIST_COLOR := Color("183342")
@@ -18,11 +25,10 @@ var hitstop_timer := 0.0
 
 func _ready() -> void:
 	var player_ref := get_player()
-	var dummy_ref := get_combat_dummy()
 	if player_ref != null:
 		player_ref.stage = self
-	if dummy_ref != null:
-		dummy_ref.stage = self
+	for enemy in get_enemy_nodes():
+		enemy.stage = self
 	reset_to_checkpoint()
 	queue_redraw()
 
@@ -54,21 +60,54 @@ func get_player() -> CharacterBody2D:
 	return player
 
 
-func get_combat_dummy() -> CombatDummy:
-	if combat_dummy == null:
-		return get_node_or_null("CombatDummy")
-	return combat_dummy
+func get_enemy_nodes() -> Array[EnemyActor]:
+	var enemies: Array[EnemyActor] = []
+	var root := enemies_root
+	if root == null:
+		root = get_node_or_null("Enemies")
+	if root == null:
+		return enemies
+	for child in root.get_children():
+		if child is EnemyActor:
+			enemies.append(child)
+	return enemies
+
+
+func get_combat_dummy() -> EnemyActor:
+	var enemies := get_enemy_nodes()
+	if enemies.is_empty():
+		return null
+	return enemies[0]
+
+
+func get_live_enemy_count() -> int:
+	var count := 0
+	for enemy in get_enemy_nodes():
+		if enemy.health > 0:
+			count += 1
+	return count
+
+
+func get_elite_enemy() -> EnemyActor:
+	for enemy in get_enemy_nodes():
+		if enemy.is_elite():
+			return enemy
+	return null
 
 
 func resolve_player_attack(profile: Dictionary, attacker_position: Vector2, facing: float) -> bool:
-	var dummy_ref := get_combat_dummy()
-	if dummy_ref != null and dummy_ref.take_hit(profile, facing, attacker_position):
+	var hit_any := false
+	for enemy in get_enemy_nodes():
+		if enemy.take_hit(profile, facing, attacker_position):
+			hit_any = true
+			if not bool(profile.get("is_radial", false)):
+				break
+	if hit_any:
 		apply_hitstop(float(profile.get("hitstop", 0.04)))
-		return true
-	return false
+	return hit_any
 
 
-func resolve_dummy_attack(profile: Dictionary, attacker_position: Vector2, facing: float) -> bool:
+func resolve_enemy_attack(profile: Dictionary, attacker_position: Vector2, facing: float) -> bool:
 	var player_ref := get_player()
 	if player_ref != null and player_ref.apply_enemy_attack(profile, facing, attacker_position):
 		apply_hitstop(float(profile.get("hitstop", 0.05)))
@@ -78,15 +117,39 @@ func resolve_dummy_attack(profile: Dictionary, attacker_position: Vector2, facin
 	return false
 
 
+func spawn_enemy_projectile(enemy: EnemyActor, profile: Dictionary) -> void:
+	var projectile := ENEMY_PROJECTILE_SCENE.instantiate() as EnemyProjectile
+	projectile.stage = self
+	projectile.direction = enemy.facing
+	projectile.speed = float(profile.get("projectile_speed", 240.0))
+	projectile.remaining_distance = float(profile.get("projectile_range", 320.0))
+	projectile.global_position = enemy.global_position + Vector2(24.0 * enemy.facing, -44.0)
+	projectile.attack_profile = {
+		"id": "%s_projectile" % enemy.enemy_id,
+		"damage": int(profile.get("damage", 0)),
+		"reach": 26.0,
+		"knockback_x": float(profile.get("knockback_x", 0.0)),
+		"knockback_y": float(profile.get("knockback_y", -120.0)),
+		"stun": float(profile.get("stun", 0.14)),
+		"hitstop": float(profile.get("hitstop", 0.03)),
+	}
+	projectile_root.add_child(projectile)
+
+
 func reset_to_checkpoint() -> void:
 	checkpoint_reset_count += 1
 	var player_ref := get_player()
-	var dummy_ref := get_combat_dummy()
+	var projectile_container := projectile_root
+	if projectile_container == null:
+		projectile_container = get_node_or_null("Projectiles")
 	if player_ref != null:
 		player_ref.reset_to_checkpoint(CHECKPOINT_POSITION)
-	if dummy_ref != null:
-		dummy_ref.stage = self
-		dummy_ref.reset_to_spawn(DUMMY_POSITION)
+	for enemy in get_enemy_nodes():
+		enemy.stage = self
+		enemy.reset_to_spawn(ENEMY_SPAWNS.get(enemy.name, enemy.global_position))
+	if projectile_container != null:
+		for projectile in projectile_container.get_children():
+			projectile.queue_free()
 	hitstop_timer = 0.0
 
 
@@ -99,11 +162,19 @@ func apply_hitstop(duration: float) -> void:
 
 
 func get_debug_stage_status() -> String:
-	var dummy_ref := get_combat_dummy()
-	if dummy_ref == null:
-		return "Dummy systems booting"
-	return "Dummy HP: %d  Dummy state: %s  Checkpoint resets: %d" % [
-		dummy_ref.health,
-		dummy_ref.get_state_name(),
+	var elite_enemy := get_elite_enemy()
+	var elite_state := "none"
+	var projectile_count := 0
+	var projectile_container := projectile_root
+	if projectile_container == null:
+		projectile_container = get_node_or_null("Projectiles")
+	if projectile_container != null:
+		projectile_count = projectile_container.get_child_count()
+	if elite_enemy != null:
+		elite_state = elite_enemy.get_state_name()
+	return "Enemies up: %d/3  Elite: %s  Projectiles: %d  Checkpoint resets: %d" % [
+		get_live_enemy_count(),
+		elite_state,
+		projectile_count,
 		checkpoint_reset_count - 1,
 	]

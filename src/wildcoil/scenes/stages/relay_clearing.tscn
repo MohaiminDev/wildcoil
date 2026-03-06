@@ -1,8 +1,8 @@
-[gd_scene load_steps=6 format=3]
+[gd_scene load_steps=7 format=3]
 
 [ext_resource type="Script" path="res://scripts/stage_stub.gd" id="1"]
 [ext_resource type="PackedScene" path="res://scenes/player.tscn" id="2"]
-[ext_resource type="PackedScene" path="res://scenes/combat_dummy.tscn" id="3"]
+[ext_resource type="PackedScene" path="res://scenes/enemy_actor.tscn" id="3"]
 
 [sub_resource type="RectangleShape2D" id="1"]
 size = Vector2(1640, 40)
@@ -30,5 +30,18 @@ shape = SubResource("2")
 [node name="Player" parent="." instance=ExtResource("2")]
 position = Vector2(-500, 140)
 
-[node name="CombatDummy" parent="." instance=ExtResource("3")]
-position = Vector2(140, 140)
+[node name="Enemies" type="Node2D" parent="."]
+
+[node name="NeedleHound" parent="Enemies" instance=ExtResource("3")]
+position = Vector2(60, 140)
+enemy_id = "needle_hound"
+
+[node name="SporeSlinger" parent="Enemies" instance=ExtResource("3")]
+position = Vector2(320, 140)
+enemy_id = "spore_slinger"
+
+[node name="CoilBrute" parent="Enemies" instance=ExtResource("3")]
+position = Vector2(560, 140)
+enemy_id = "coil_brute"
+
+[node name="Projectiles" type="Node2D" parent="."]

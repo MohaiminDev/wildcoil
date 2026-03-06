@@ -1,6 +1,7 @@
 extends SceneTree
 
 const ContentCatalog = preload("res://scripts/core/content_catalog.gd")
+const EnemyProfileLibrary = preload("res://scripts/core/enemy_profile_library.gd")
 const InputActions = preload("res://scripts/core/input_actions.gd")
 const InputDeviceState = preload("res://scripts/core/input_device_state.gd")
 const PlayerCombatModel = preload("res://scripts/core/player_combat_model.gd")
@@ -36,7 +37,8 @@ func _initialize() -> void:
 			get_root().add_child(stage_instance)
 			payload["stage_root_name"] = stage_instance.name
 			payload["player_present"] = stage_instance.get_node_or_null("Player") != null
-			payload["dummy_present"] = stage_instance.get_node_or_null("CombatDummy") != null
+			payload["enemy_count"] = int(stage_instance.call("get_enemy_nodes").size())
+			payload["dummy_present"] = stage_instance.call("get_combat_dummy") != null
 			stage_instance.free()
 
 	if suite == "movement_model":
@@ -53,6 +55,12 @@ func _initialize() -> void:
 
 	if suite == "checkpoint_reset" and errors.is_empty():
 		payload.merge(run_checkpoint_reset_suite(catalog), true)
+
+	if suite == "enemy_profiles":
+		payload.merge(run_enemy_profile_suite(), true)
+
+	if suite == "enemy_stage" and errors.is_empty():
+		payload.merge(run_enemy_stage_suite(catalog), true)
 
 	print("WILDCOIL_TEST_RESULTS %s" % JSON.stringify(payload))
 	quit(0 if payload["passed"] else 1)
@@ -194,7 +202,7 @@ func run_checkpoint_reset_suite(catalog: ContentCatalog) -> Dictionary:
 	var stage_instance := packed_scene.instantiate()
 	get_root().add_child(stage_instance)
 	var player := stage_instance.get_node_or_null("Player") as PlayerController
-	var dummy := stage_instance.get_node_or_null("CombatDummy") as CombatDummy
+	var dummy := stage_instance.call("get_combat_dummy") as EnemyActor
 	if player == null or dummy == null:
 		stage_instance.free()
 		return {
@@ -204,13 +212,57 @@ func run_checkpoint_reset_suite(catalog: ContentCatalog) -> Dictionary:
 	player.apply_enemy_attack(dummy.get_attack_profile(), 1.0, player.global_position - Vector2(10.0, 0.0))
 	stage_instance.call("reset_to_checkpoint")
 
-	var passed: bool = player.get_health() == PlayerCombatModel.MAX_HEALTH and dummy.health == CombatDummy.MAX_HEALTH and int(stage_instance.get("checkpoint_reset_count")) >= 1
+	var expected_enemy_health := int(dummy.profile.get("health", dummy.health))
+	var passed: bool = player.get_health() == PlayerCombatModel.MAX_HEALTH and dummy.health == expected_enemy_health and int(stage_instance.get("checkpoint_reset_count")) >= 1
 	var payload := {
 		"player_health": player.get_health(),
 		"dummy_health": dummy.health,
+		"expected_dummy_health": expected_enemy_health,
 		"checkpoint_reset_count": int(stage_instance.get("checkpoint_reset_count")),
 		"passed": passed,
 		"errors": [] if passed else ["checkpoint reset did not restore player and dummy state"],
+	}
+	stage_instance.free()
+	return payload
+
+
+func run_enemy_profile_suite() -> Dictionary:
+	var errors := EnemyProfileLibrary.validate_profiles()
+	var ids := EnemyProfileLibrary.get_profile_ids()
+	var elite_count := 0
+	for enemy_id in ids:
+		var profile := EnemyProfileLibrary.get_profile(enemy_id)
+		if bool(profile.get("is_elite", false)):
+			elite_count += 1
+	var passed: bool = errors.is_empty() and ids.size() >= 3 and elite_count >= 1
+	return {
+		"profile_ids": ids,
+		"elite_count": elite_count,
+		"passed": passed,
+		"errors": errors if not passed else [],
+	}
+
+
+func run_enemy_stage_suite(catalog: ContentCatalog) -> Dictionary:
+	var stage_definition := catalog.get_first_stage()
+	var packed_scene := load(str(stage_definition.get("scene", ""))) as PackedScene
+	if packed_scene == null:
+		return {
+			"passed": false,
+			"errors": ["default stage scene failed to load for enemy stage suite"],
+		}
+
+	var stage_instance := packed_scene.instantiate()
+	get_root().add_child(stage_instance)
+	var enemies: Array = stage_instance.call("get_enemy_nodes")
+	var elite_enemy := stage_instance.call("get_elite_enemy") as EnemyActor
+	var passed: bool = enemies.size() >= 3 and elite_enemy != null
+	var payload := {
+		"enemy_count": enemies.size(),
+		"elite_present": elite_enemy != null,
+		"live_enemy_count": int(stage_instance.call("get_live_enemy_count")),
+		"passed": passed,
+		"errors": [] if passed else ["stage did not expose three enemies plus an elite foundation"],
 	}
 	stage_instance.free()
 	return payload

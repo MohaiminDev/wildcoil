@@ -20,14 +20,6 @@ The Phase 1 through release tasks below are the frozen MVP backlog. Only change 
 
 ## PENDING
 
-### [P1-04] Implement enemy systems
-- Outcome: Add the shared enemy framework, three starter archetypes, and the elite/miniboss foundation.
-- Validation:
-  - [ ] Automated tests cover spawn/state/content validation rules that can be deterministic.
-  - [ ] Manual smoke checks confirm enemy telegraphs and reactions are readable.
-  - [ ] The current test suite passes.
-- Dependencies: [P1-03]
-
 ### [P1-05] Build Stage 1 first playable
 - Outcome: Deliver one short stage with a first fight inside 30 seconds, a spectacle beat inside 3 minutes, a checkpoint, HUD, pause or restart flow, and placeholder audio.
 - Validation:
@@ -133,6 +125,15 @@ The Phase 1 through release tasks below are the frozen MVP backlog. Only change 
 - Dependencies: [P3-05]
 
 ## DONE
+
+### [P1-04] Implement enemy systems
+- Outcome: Add the shared enemy framework, three starter archetypes, and the elite/miniboss foundation.
+- Validation:
+  - [x] Automated tests cover spawn/state/content validation rules that can be deterministic.
+  - [x] Manual smoke checks confirm enemy telegraphs and reactions are readable.
+  - [x] The current test suite passes.
+- Dependencies: [P1-03]
+- Completed: 2026-03-05
 
 ### [P1-03] Implement the combat core
 - Outcome: Add light attacks, heavy finisher, launcher or sweep, crowd-control special, hitstop, damage, invulnerability windows, and checkpoint reset behavior.
