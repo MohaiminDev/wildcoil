@@ -20,14 +20,6 @@ The Phase 1 through release tasks below are the frozen MVP backlog. Only change 
 
 ## PENDING
 
-### [P3-05] Run the release-candidate regression pass
-- Outcome: Execute the full regression, performance, input, packaging, and release-candidate checks and fix release blockers only.
-- Validation:
-  - [ ] Regression, packaging, and performance notes are recorded in the docs set.
-  - [ ] No known release blocker remains open.
-  - [ ] The current test suite passes.
-- Dependencies: [P3-04]
-
 ### [REL-01] Publish the tester release
 - Outcome: Push the final code, create a release tag, attach the macOS build, and publish release notes plus install or known-issues guidance.
 - Validation:
@@ -37,6 +29,15 @@ The Phase 1 through release tasks below are the frozen MVP backlog. Only change 
 - Dependencies: [P3-05]
 
 ## DONE
+
+### [P3-05] Run the release-candidate regression pass
+- Outcome: Execute the full regression, performance, input, packaging, and release-candidate checks and fix release blockers only.
+- Validation:
+  - [x] Regression, packaging, and performance notes are recorded in the docs set.
+  - [x] No known release blocker remains open.
+  - [x] The current test suite passes.
+- Dependencies: [P3-04]
+- Completed: 2026-03-05
 
 ### [P3-04] Add onboarding, progression, and accessibility polish
 - Outcome: Finalize onboarding prompts, progression flow, options, accessibility settings, save migration safety, and balance tuning.

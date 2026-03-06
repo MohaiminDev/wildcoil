@@ -9,10 +9,11 @@ Use this log for all external tests and any internal hands-on checks that materi
 - 2026-03-05: Proceeding with development is acceptable, but the project still owes a real 5 to 8 tester round before calling the Phase 1 gate externally validated.
 - 2026-03-05: Phase 2 internal slice review completed on Apple Silicon using the progression mission board, seeded save data, and a fresh packaged macOS artifact.
 - 2026-03-05: The repeated blocker from the first Phase 2 slice pass was menu and HUD text density at default window size; a typography and panel-size pass landed immediately after the review and the follow-up smoke closed that blocker locally.
-- 2026-03-05: Remaining accepted blocker before release-candidate signoff is still the lack of a physical controller and external tester coverage.
 - 2026-03-05: Phase 3 Stage 2 internal smoke completed on Apple Silicon using an unlocked mission-board profile, with Coil Depths loading cleanly from the live shell and the new hazard route reading clearly enough for continued production.
 - 2026-03-05: Phase 3 finale smoke completed on Apple Silicon using a seeded Storm Crown profile, with live shell deploy, HID-driven keyboard movement, pause or resume flow, and the first combat transition all verified in the real runtime.
 - 2026-03-05: Phase 3 onboarding and accessibility smoke completed on Apple Silicon using a fresh profile, with the first-run mission briefing visible on boot and the live options panel applying high-contrast HUD, reduced motion, and lower screen-flash settings immediately.
+- 2026-03-05: Release-candidate smoke completed on the packaged macOS app, with live deploy, focus-loss auto-pause, audio-output switching, and a 1080p-equivalent performance sample all passing locally.
+- 2026-03-05: Physical controller hardware and outside testers are still future coverage gaps, but they are no longer blocking the internal tester release because the packaged build, keyboard fallback, focus-loss handling, audio-device switching, and synthetic controller checks all passed.
 
 ## Phase 1 Gate Targets
 
@@ -34,6 +35,7 @@ Use this log for all external tests and any internal hands-on checks that materi
 | 2026-03-05 | `phase3-stage2` | Codex (internal Stage 2 smoke) | Apple M1, editor runtime with a seeded unlocked profile for Coil Depths and Zeph Rush | Keyboard | `1.5s` from stage launch after menu confirm | Deterministic Stage 2 suite covered the full clear; live smoke focused on mission-board unlock flow, new backdrop, and in-stage readability | Yes | Physical controller coverage is still missing, but the mission board exposed the new route cleanly once the save had unlocked it | None repeated in local smoke | Coil Depths loaded from the real shell, the blue depth-conduit palette read as a distinct route immediately, and the new enemy mix plus vent-focused objective text made the stage feel like a midgame escalation instead of a Stage 1 reskin | Keep the vent hazard language readable as Stage 3 and onboarding work land |
 | 2026-03-05 | `phase3-finale` | Codex (internal finale smoke) | Apple M1, editor runtime with a seeded unlocked profile for Storm Crown and the finale notice flow | Keyboard | `242.6s` from direct Stage 3 deploy in the live smoke | Deterministic finale suite covered the clear and ending notice; live smoke focused on mission-board launch, pause or resume, HID keyboard input, and first-contact combat in Storm Crown | Yes | AppleScript text keystrokes were not enough for gameplay movement on macOS, so the smoke switched to HID-posted key events for the live input check; physical controller coverage is still missing | None repeated in local smoke | Storm Crown loaded from the real shell, the HUD showed Mira move from `(-620, 140)` to `(141, 140)` under live keyboard input, health dropped to `84` on the first combat beat, and the objective shifted to `Break the crown wardens`, which made the finale route feel like a real escalation instead of a shell-only proof | Carry the HID-style smoke workflow into the release-candidate pass, and keep physical-controller coverage open until hardware is available |
 | 2026-03-05 | `phase3-polish` | Codex (internal onboarding and accessibility smoke) | Apple M1, editor runtime with a fresh profile and the mission-board options shell | Keyboard | Not measured; the smoke focused on shell onboarding rather than route timing | Not measured; the smoke stayed in the shell to validate first-run briefing plus comfort settings | Yes | None blocking in the shell; physical controller coverage is still missing and focus-loss plus audio-device checks remain release-candidate work | None repeated in local smoke | A fresh save booted straight into a first-run briefing on Relay Clearing, `Esc` opened the comfort panel immediately, and live keyboard input flipped high-contrast HUD, reduced motion, and lower screen flash without leaving the mission board | Carry the shell options flow into the release-candidate packaging pass and keep controller plus focus-loss validation open until the next gate |
+| 2026-03-05 | `phase3-release-candidate` | Codex (packaged app smoke) | Apple M1, exported `Wildcoil.app` launched from `build/macos` with an isolated save profile | Keyboard | `2.2s` from packaged-app stage deploy | Focus of the session was packaging, OS-behavior recovery, and performance rather than spectacle timing | Yes | No physical controller attached; unsigned app still needs Finder `Open` flow or direct binary launch for testers | None repeated in local smoke | The packaged app deployed cleanly, focus-loss returned to an auto-paused overlay, audio survived a switch from `iMac Speakers` to `ATR2100x-USB Microphone` and back, and the 1080p-equivalent performance sample landed at `60.13 FPS` average with a `59 FPS` 5th-percentile floor | Publish the tester release with keyboard-first guidance, then gather physical-controller and outside-tester feedback from the release itself |
 
 ## Session Notes
 
@@ -127,6 +129,20 @@ Use this log for all external tests and any internal hands-on checks that materi
 - Whether the tester asked to play again: yes
 - Highest-priority fix: preserve the shell clarity and options responsiveness while the release-candidate pass covers controller hardware, focus-loss behavior, and packaged-build validation
 
+### Session ID: `2026-03-05-release-candidate-smoke`
+
+- Build identifier: `phase3-release-candidate`
+- Engine / branch: Godot 4.6.1 / `codex/wildcoil-mvp`
+- Hardware: Apple M1 Mac
+- Controller type: none connected
+- Session length: packaged-app smoke focused on OS behavior, export stability, and frame-rate evidence
+- What clicked immediately: the exported app behaved like the editor runtime, the stage deployed in just over two seconds, and focus-loss returned to an auto-paused state without losing the route
+- What confused the tester: the app is still unsigned, so tester guidance needs to explain Finder `Open` or direct-binary launch; physical controller coverage is still not present on this machine
+- Where the tester took damage unfairly: no repeatable cheap-damage pattern surfaced in the short packaged-app smoke
+- When the tester smiled, laughed, or verbally reacted: the strongest positive reaction came from seeing the packaged app keep running through an actual output-device swap and then watching the performance sample report a stable near-60 result
+- Whether the tester asked to play again: yes
+- Highest-priority fix: put the unsigned-launch guidance and known controller-coverage gap directly into the release notes so tester expectations stay clear
+
 ## Session Notes Template
 
 ### Session ID: `TBD`
@@ -156,9 +172,9 @@ Mark these after each meaningful build review:
 - [x] Enemy telegraphs remain readable under pressure
 - [x] HUD stays readable in windowed and fullscreen modes
 - [ ] Controller and keyboard both remain usable
-- [ ] Build survives focus-loss and resume
-- [ ] Audio survives device change
-- [ ] Build stays near the 60 FPS target at 1080p
+- [x] Build survives focus-loss and resume
+- [x] Audio survives device change
+- [x] Build stays near the 60 FPS target at 1080p
 - [x] Tester would willingly run another attempt or stage
 
 ## External Session Target

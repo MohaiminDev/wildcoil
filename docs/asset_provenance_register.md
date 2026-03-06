@@ -4,7 +4,7 @@ Track every non-trivial imported asset, tool dependency, plugin, font, audio pac
 
 ## Current State
 
-As of 2026-03-05, the production scaffold uses self-authored placeholder visuals and audio plus the Godot 4.6.1 engine toolchain and a Python `pytest` harness for headless validation. No third-party art, audio pack, font, gameplay plugin, or code library is approved for committed runtime use. Record new items here before they become habitual dependencies.
+As of 2026-03-05, the production scaffold uses self-authored placeholder visuals and audio plus the Godot 4.6.1 engine toolchain and a Python `pytest` harness for headless validation. The release-candidate pass also used the Homebrew `switchaudio-osx` CLI for repeatable audio-device smoke checks. No third-party art, audio pack, font, gameplay plugin, or code library is approved for committed runtime use. Record new items here before they become habitual dependencies.
 
 ## Register
 
@@ -18,6 +18,7 @@ As of 2026-03-05, the production scaffold uses self-authored placeholder visuals
 | TOOL-002 | Test harness | Python 3.9+ standard library plus `pytest` used to drive the real Godot project headlessly from `tests/` | https://docs.python.org/3/ and https://docs.pytest.org/ | Python Software Foundation / pytest contributors | PSF / MIT | Phase 1-Release | Tool dependency | No | TBD | Runtime suites in `res://tools/runtime_test_runner.gd` are exercised through this harness |
 | TOOL-003 | CI automation | GitHub Actions workflow using `actions/checkout`, `actions/setup-python`, and Homebrew-installed Godot on macOS runners | https://github.com/actions/checkout, https://github.com/actions/setup-python, https://formulae.brew.sh/cask/godot | GitHub / Homebrew / Godot contributors | MIT-compatible per upstream projects | Phase 2-Release | Tool dependency | No | TBD | Mirrors the local `./scripts/check.sh` gate on hosted macOS CI |
 | TOOL-004 | Packaging utilities | macOS `ditto` and `shasum` used by `scripts/package_macos.sh` to create the tester ZIP and checksum sidecar | Bundled with macOS command-line tools | Apple | Apple platform tooling | Phase 2-Release | Tool dependency | No | TBD | Required for the documented package-and-checksum flow |
+| TOOL-005 | Audio smoke tooling | Homebrew `switchaudio-osx` CLI used to swap output devices during the release-candidate macOS smoke pass | https://formulae.brew.sh/formula/switchaudio-osx | Devin Bayer and contributors / Homebrew | MIT | Phase 3 | Tool dependency | No | TBD | Used only for local release-candidate validation; not required at runtime |
 | HOLD-001 | External asset intake placeholder | Any future third-party asset under consideration | Record before use | TBD | TBD | Any | Hold | Assume yes until verified otherwise | TBD | Do not commit unclear-source assets |
 
 ## Intake Rules

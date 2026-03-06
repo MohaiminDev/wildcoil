@@ -79,6 +79,9 @@ func _initialize() -> void:
 	if suite == "stage3_finale" and errors.is_empty():
 		payload.merge(run_stage3_finale_suite(catalog), true)
 
+	if suite == "performance_sample" and errors.is_empty():
+		payload.merge(await run_performance_sample_suite(catalog), true)
+
 	if suite == "progression" and errors.is_empty():
 		payload.merge(run_progression_suite(catalog, save_path), true)
 
@@ -533,6 +536,67 @@ func run_stage3_finale_suite(catalog: ContentCatalog) -> Dictionary:
 	}
 	stage_instance.free()
 	return payload
+
+
+func run_performance_sample_suite(catalog: ContentCatalog) -> Dictionary:
+	var stage_definition := catalog.get_stage_by_id("storm_crown")
+	if stage_definition.is_empty():
+		stage_definition = catalog.get_first_stage()
+	var packed_scene := load(str(stage_definition.get("scene", ""))) as PackedScene
+	if packed_scene == null:
+		return {
+			"passed": false,
+			"errors": ["performance sample stage failed to load"],
+		}
+
+	var window := get_root() as Window
+	var screen_scale := 1.0
+	if window != null:
+		screen_scale = maxf(DisplayServer.screen_get_scale(DisplayServer.window_get_current_screen()), 1.0)
+		DisplayServer.window_set_size(Vector2i(int(round(1920.0 / screen_scale)), int(round(1080.0 / screen_scale))))
+		DisplayServer.window_set_position(Vector2i(60, 40))
+
+	var stage_instance := packed_scene.instantiate()
+	get_root().add_child(stage_instance)
+	if stage_instance.has_method("configure_run"):
+		stage_instance.call("configure_run", {
+			"stage_definition": stage_definition,
+			"character_definition": catalog.get_character_by_id(catalog.get_first_character_id()),
+		})
+
+	for _warmup_frame in range(120):
+		await process_frame
+
+	var fps_samples: Array[float] = []
+	for _sample_frame in range(240):
+		await process_frame
+		fps_samples.append(float(Engine.get_frames_per_second()))
+
+	stage_instance.free()
+	var average_fps := 0.0
+	var low_fps := 1000.0
+	for sample in fps_samples:
+		average_fps += sample
+		low_fps = minf(low_fps, sample)
+	if not fps_samples.is_empty():
+		average_fps /= float(fps_samples.size())
+	else:
+		low_fps = 0.0
+	var sorted_samples := fps_samples.duplicate()
+	sorted_samples.sort()
+	var percentile_index := maxi(int(floor(float(sorted_samples.size() - 1) * 0.05)), 0)
+	var percentile_fps := float(sorted_samples[percentile_index]) if not sorted_samples.is_empty() else 0.0
+	var passed: bool = average_fps >= 55.0 and percentile_fps >= 50.0
+	return {
+		"window_size": [window.size.x, window.size.y] if window != null else [],
+		"screen_scale": screen_scale,
+		"sample_count": fps_samples.size(),
+		"average_fps": snappedf(average_fps, 0.01),
+		"low_fps": snappedf(low_fps, 0.01),
+		"p05_fps": snappedf(percentile_fps, 0.01),
+		"passed": passed,
+		"errors": [] if passed else ["windowed performance sample fell below the release-candidate threshold"],
+	}
 
 
 func run_progression_suite(catalog: ContentCatalog, save_path: String) -> Dictionary:

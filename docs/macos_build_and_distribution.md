@@ -87,8 +87,9 @@ Current Phase 2 packaging workflow:
 6. Launch the exported binary directly with `build/macos/Wildcoil.app/Contents/MacOS/Wildcoil`.
 7. Smoke-check keyboard input, pause, fullscreen, and mission-board save data in the exported app.
 8. If you need a deterministic local profile for smoke tests, launch with `WILDCOIL_SAVE_PATH=/absolute/path/to/profile.json build/macos/Wildcoil.app/Contents/MacOS/Wildcoil`.
-9. If distributing externally, sign the bundle with the active Developer ID setup and notarize it.
-10. On unsigned internal builds, tell testers to use Finder's `Open` flow or remove quarantine manually.
+9. Run `godot --path src/wildcoil --script res://tools/runtime_test_runner.gd -- --suite performance_sample` for the 1080p-equivalent local frame-rate sample.
+10. If distributing externally, sign the bundle with the active Developer ID setup and notarize it.
+11. On unsigned internal builds, tell testers to use Finder's `Open` flow or remove quarantine manually.
 
 ## Validation Automation
 
@@ -163,3 +164,28 @@ Current Phase 2 packaging workflow:
 - Validation gate: `./scripts/check.sh`, `./scripts/package_macos.sh`, and live local smoke using a saved profile override
 - Issues found: focus-loss/resume, audio-device change, and controller-device coverage still need dedicated release-candidate validation; the export preset excludes the local `storm_warden_boss` experiments so untracked test files do not leak into packaged artifacts
 - Follow-up action: repeat the smoke pass against the packaged app with a physical controller attached, then cover focus-loss/resume and audio-device changes during the release-candidate gate
+
+### 2026-03-05 - Phase 3 Release Candidate
+
+- Date: 2026-03-05
+- Build label: `phase3-finale`
+- Engine: Godot
+- Engine version: 4.6.1.stable.official.14d19694e
+- Xcode version: full Xcode not installed on this machine; unsigned export path used
+- Export target: `build/macos/Wildcoil.app`
+- Packaging format: `.app` bundle plus `build/macos/Wildcoil-phase3-finale-macos.zip`
+- Artifact size: `.app` is `176M`; ZIP is `58M`
+- ZIP SHA-256: `9ac87a38a56238b459cffda985c8fbecd4f6817da90c82342d750120853c2e64`
+- Checksum path: `build/macos/Wildcoil-phase3-finale-macos.zip.sha256`
+- Binary architecture: universal Mach-O (`x86_64` and `arm64`)
+- Signing status: ad hoc / linker-signed only; `spctl --assess -vv build/macos/Wildcoil.app` reports `source=no usable signature`
+- Notarization status: not attempted in this phase; no Developer ID identity configured on this machine
+- Controller devices tested: no physical controller attached during the release-candidate pass; synthetic controller coverage still passes in the runtime suite
+- Keyboard fallback tested: yes; packaged app launched, deployed into Stage 1, survived focus-loss auto-pause, and resumed cleanly
+- Save persistence tested: yes; packaged app launched against an isolated profile override without regression
+- Focus-loss / resume tested: yes; switching to Finder and back returned the app to an auto-paused overlay
+- Audio-device change tested: yes; output switched from `iMac Speakers` to `ATR2100x-USB Microphone` and back while the packaged app stayed responsive
+- Performance sample: `godot --path src/wildcoil --script res://tools/runtime_test_runner.gd -- --suite performance_sample` reported `60.13 FPS` average with a `59 FPS` 5th-percentile floor at `960x540` points on a `2.0` scale display, which is a 1080p-equivalent sample on this Retina panel
+- Validation gate: `./scripts/check.sh`, `./scripts/package_macos.sh`, packaged-app live smoke, `SwitchAudioSource` output swap, and the performance sample suite
+- Issues found: physical controller hardware is still unavailable on this machine, and the app remains unsigned and unnotarized
+- Follow-up action: publish the internal tester release with keyboard-first install notes, then use the release itself to gather physical-controller and outside-tester feedback
