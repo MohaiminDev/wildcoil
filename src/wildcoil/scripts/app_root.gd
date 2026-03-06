@@ -55,13 +55,17 @@ func update_status_label() -> void:
 	var movement_text := "Awaiting player scene"
 	if player_controller != null and player_controller.has_method("get_debug_status"):
 		movement_text = player_controller.call("get_debug_status")
+	var stage_text := "Stage systems booting"
+	if stage_root != null and stage_root.has_method("get_debug_stage_status"):
+		stage_text = stage_root.call("get_debug_stage_status")
 
-	status_label.text = "Wildcoil first playable scaffold\nBuild: %s\nStage: %s\nCharacters: %d\n%s\n%s\nMove: A/D or arrows  Jump: Space/W  Dodge: Shift/C\nController: left stick, A jump, B dodge" % [
+	status_label.text = "Wildcoil first playable scaffold\nBuild: %s\nStage: %s\nCharacters: %d\n%s\n%s\n%s\nMove: A/D or arrows  Jump: Space/W  Dodge: Shift/C\nLight: J/Z  Heavy: K/X  Launch: L/V  Pulse: ;/B  Reset: R\nController: left stick, A jump, B dodge, X light, Y heavy, RB launch, LB pulse" % [
 		catalog.build_label,
 		stage_name,
 		catalog.characters.size(),
 		input_device_state.describe_status(),
 		movement_text,
+		stage_text,
 	]
 
 

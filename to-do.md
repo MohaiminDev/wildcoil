@@ -20,14 +20,6 @@ The Phase 1 through release tasks below are the frozen MVP backlog. Only change 
 
 ## PENDING
 
-### [P1-03] Implement the combat core
-- Outcome: Add light attacks, heavy finisher, launcher or sweep, crowd-control special, hitstop, damage, invulnerability windows, and checkpoint reset behavior.
-- Validation:
-  - [ ] Automated tests cover combat-state rules, damage resolution, and checkpoint reset behavior.
-  - [ ] Manual smoke checks confirm hits feel responsive and readable.
-  - [ ] The current test suite passes.
-- Dependencies: [P1-02]
-
 ### [P1-04] Implement enemy systems
 - Outcome: Add the shared enemy framework, three starter archetypes, and the elite/miniboss foundation.
 - Validation:
@@ -141,6 +133,15 @@ The Phase 1 through release tasks below are the frozen MVP backlog. Only change 
 - Dependencies: [P3-05]
 
 ## DONE
+
+### [P1-03] Implement the combat core
+- Outcome: Add light attacks, heavy finisher, launcher or sweep, crowd-control special, hitstop, damage, invulnerability windows, and checkpoint reset behavior.
+- Validation:
+  - [x] Automated tests cover combat-state rules, damage resolution, and checkpoint reset behavior.
+  - [x] Manual smoke checks confirm hits feel responsive and readable.
+  - [x] The current test suite passes.
+- Dependencies: [P1-02]
+- Completed: 2026-03-05
 
 ### [P1-02] Implement player locomotion and input
 - Outcome: Ship the first playable controller layer with run, jump, dodge, controller hot-plug, keyboard fallback, and remapping-safe actions.
