@@ -73,15 +73,15 @@ Run these checks before calling the prototype tester-ready:
 
 ## Packaging Workflow Template
 
-Complete and refine this after the winning engine spike:
+Current Phase 1 first-playable workflow:
 
-1. Export the macOS build from the chosen engine.
-2. Verify local launch on the development machine.
-3. Package the app in the chosen distribution wrapper for testers.
-4. If distributing externally, sign the bundle with the current Developer ID setup.
-5. Submit for notarization when appropriate.
-6. Verify the notarized build on a second machine.
-7. Record any warnings, exceptions, or extra setup steps here.
+1. Run `./scripts/export_macos.sh` from the repo root.
+2. Verify the bundle exists at `build/macos/Wildcoil.app`.
+3. Package the tester ZIP with `ditto -c -k --sequesterRsrc --keepParent build/macos/Wildcoil.app build/macos/Wildcoil-phase1-first-playable-macos.zip`.
+4. Launch the exported binary directly with `build/macos/Wildcoil.app/Contents/MacOS/Wildcoil`.
+5. Smoke-check keyboard input, pause, and fullscreen in the exported app.
+6. If distributing externally, sign the bundle with the active Developer ID setup and notarize it.
+7. On unsigned internal builds, tell testers to use Finder's `Open` flow or remove quarantine manually.
 
 ## Build Notes Log
 
@@ -99,3 +99,21 @@ Complete and refine this after the winning engine spike:
 - Keyboard fallback tested:
 - Issues found:
 - Follow-up action:
+
+### 2026-03-05 - Phase 1 First Playable
+
+- Date: 2026-03-05
+- Engine: Godot
+- Engine version: 4.6.1.stable.official.14d19694e
+- Xcode version: full Xcode not installed on this machine; unsigned export path used
+- Export target: `build/macos/Wildcoil.app`
+- Packaging format: `.app` bundle plus `build/macos/Wildcoil-phase1-first-playable-macos.zip`
+- Artifact size: `.app` is `176M`; ZIP is `58M`
+- ZIP SHA-256: `24de506ffa92db57469db7037be0be7a85c0cbab5a5af0c52707c629fc0c4837`
+- Binary architecture: universal Mach-O (`x86_64` and `arm64`)
+- Signing status: ad hoc / linker-signed only; `spctl --assess -vv build/macos/Wildcoil.app` reports `source=no usable signature`
+- Notarization status: not attempted; no Developer ID identity configured on this machine
+- Controller devices tested: none attached during this pass; HUD reported `Connected pads: 0 [none]`
+- Keyboard fallback tested: yes; exported app launched, moved into combat, paused with `Esc`, and toggled borderless fullscreen with `F`
+- Issues found: native AppKit fullscreen transitions were unstable under active screen capture, so the build now uses an in-game borderless fullscreen toggle instead of calling the macOS fullscreen transition directly
+- Follow-up action: smoke-test a real controller, focus-loss/resume, and audio-device changes before external tester distribution

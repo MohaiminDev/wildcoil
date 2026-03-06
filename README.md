@@ -43,6 +43,8 @@ Run the local validation gate:
 Export the current macOS app:
 
 - `scripts/export_macos.sh`
+- `ditto -c -k --sequesterRsrc --keepParent build/macos/Wildcoil.app build/macos/Wildcoil-phase1-first-playable-macos.zip`
+- `build/macos/Wildcoil.app/Contents/MacOS/Wildcoil`
 
 Direct equivalents if you want to run the pieces manually:
 
@@ -50,6 +52,7 @@ Direct equivalents if you want to run the pieces manually:
 - `python3 -m pytest tests`
 - `godot --path src/wildcoil`
 - `godot --headless --path src/wildcoil --export-release "macOS" build/macos/Wildcoil.app`
+- `ditto -c -k --sequesterRsrc --keepParent build/macos/Wildcoil.app build/macos/Wildcoil-phase1-first-playable-macos.zip`
 
 ## Current Milestone
 

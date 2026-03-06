@@ -20,14 +20,6 @@ The Phase 1 through release tasks below are the frozen MVP backlog. Only change 
 
 ## PENDING
 
-### [P1-06] Export and verify the first macOS build
-- Outcome: Produce a tester-ready Apple Silicon build and record build evidence, smoke results, and known issues.
-- Validation:
-  - [ ] A macOS build artifact exists.
-  - [ ] Apple Silicon launch and packaging notes are recorded in [`docs/macos_build_and_distribution.md`](/Users/himu/Desktop/career/personal_projects/wildcoil/docs/macos_build_and_distribution.md).
-  - [ ] The current test suite passes.
-- Dependencies: [P1-05]
-
 ### [P1-07] Run the Phase 1 playtest gate
 - Outcome: Capture 5 to 8 external playtests, fix repeated clarity or fairness issues, and document the gate result.
 - Validation:
@@ -117,6 +109,15 @@ The Phase 1 through release tasks below are the frozen MVP backlog. Only change 
 - Dependencies: [P3-05]
 
 ## DONE
+
+### [P1-06] Export and verify the first macOS build
+- Outcome: Produce a tester-ready Apple Silicon build and record build evidence, smoke results, and known issues.
+- Validation:
+  - [x] A macOS build artifact exists.
+  - [x] Apple Silicon launch and packaging notes are recorded in [`docs/macos_build_and_distribution.md`](/Users/himu/Desktop/career/personal_projects/wildcoil/docs/macos_build_and_distribution.md).
+  - [x] The current test suite passes.
+- Dependencies: [P1-05]
+- Completed: 2026-03-05
 
 ### [P1-05] Build Stage 1 first playable
 - Outcome: Deliver one short stage with a first fight inside 30 seconds, a spectacle beat inside 3 minutes, a checkpoint, HUD, pause or restart flow, and placeholder audio.
