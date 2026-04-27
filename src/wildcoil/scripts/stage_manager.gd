@@ -6,6 +6,7 @@ signal game_over
 
 const PLAYER_SCENE := preload("res://scenes/player.tscn")
 const BOSS_SCENE := preload("res://scenes/boss_brask_noll.tscn")
+const StageBackdrop := preload("res://scripts/stage_backdrop.gd")
 
 var hero_id := "raya_flint"
 var stage_id := "sunset_overpass"
@@ -67,23 +68,7 @@ func _load_profiles(path: String, key: String) -> Dictionary:
 	return profiles
 
 func _build_background() -> void:
-	var sky := ColorRect.new()
-	sky.color = biome_palette["sky"]
-	sky.size = Vector2(1280, 720)
-	add_child(sky)
-	var sun := Polygon2D.new()
-	sun.polygon = _ellipse_points(Vector2(1040, 110), Vector2(88, 88), 36)
-	sun.color = Color(1.0, 0.78, 0.28, 0.85)
-	add_child(sun)
-	animated_art.append({"node": sun, "kind": "pulse", "base": sun.position, "speed": 0.45, "amount": 8.0})
-	_build_background_dinosaurs()
-	for i in range(6):
-		var ruin := ColorRect.new()
-		ruin.color = biome_palette["shadow"]
-		ruin.position = Vector2(80 + i * 210, 210 + (i % 2) * 40)
-		ruin.size = Vector2(95, 220)
-		add_child(ruin)
-	_build_jungle_ruins()
+	_build_arcade_backdrop()
 	var road := ColorRect.new()
 	road.color = biome_palette["road"]
 	road.position = Vector2(0, 330)
@@ -104,6 +89,12 @@ func _build_background() -> void:
 		crystal.size = Vector2(16, 42)
 		add_child(crystal)
 		animated_art.append({"node": crystal, "kind": "pulse", "base": crystal.position, "speed": 1.5 + j * 0.1, "amount": 8.0})
+
+func _build_arcade_backdrop() -> void:
+	var backdrop = StageBackdrop.new()
+	backdrop.configure(stage_data, biome_palette)
+	backdrop.z_index = -200
+	add_child(backdrop)
 
 func _apply_biome_palette() -> void:
 	match stage_data.get("biome", "sunset_highway"):

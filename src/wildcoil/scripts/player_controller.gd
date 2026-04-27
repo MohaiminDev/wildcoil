@@ -31,6 +31,7 @@ var invulnerable_timer := 0.0
 var jump_timer := 0.0
 var fake_height := 0.0
 var is_knocked_down := false
+var animation_time := 0.0
 
 func setup(profile: Dictionary) -> void:
 	hero_id = profile.get("id", hero_id)
@@ -45,6 +46,7 @@ func setup(profile: Dictionary) -> void:
 	queue_redraw()
 
 func _physics_process(delta: float) -> void:
+	animation_time += delta
 	_tick_timers(delta)
 	if health <= 0:
 		return
@@ -127,26 +129,49 @@ func heal(amount: int) -> void:
 
 func _draw() -> void:
 	var alpha := 0.45 if invulnerable_timer > 0.0 else 1.0
+	var bob := _animation_bob()
 	_draw_flat_ellipse(Vector2(0, -2), Vector2(28, 7), Color(0, 0, 0, 0.28))
+	_draw_motion_smear(alpha)
+	_draw_sprite_outline(Vector2(0, bob - fake_height), alpha)
 	if hero_id == "nika_sol":
-		_draw_nika(alpha)
+		_draw_nika(alpha, bob)
 	else:
-		_draw_raya(alpha)
+		_draw_raya(alpha, bob)
 	if is_attack_active():
 		draw_rect(Rect2(Vector2(facing * 18 - 22, -52 - fake_height), Vector2(64, 48)), Color(1.0, 0.82, 0.25, 0.35))
 	if is_special_active():
 		draw_circle(Vector2(0, -30 - fake_height), 76.0, Color(0.56, 0.88, 1.0, 0.25))
 
-func _draw_raya(alpha: float) -> void:
-	var y := -fake_height
+func _animation_bob() -> float:
+	var movement_factor := 1.0 if velocity.length() > 8.0 else 0.35
+	return sin(animation_time * 11.0) * 3.0 * movement_factor
+
+func _draw_sprite_outline(offset: Vector2, alpha: float) -> void:
+	var outline := Color(0.02, 0.015, 0.012, alpha)
+	draw_circle(Vector2(0, -78 + offset.y), 18, outline)
+	draw_rect(Rect2(Vector2(-25, -69 + offset.y), Vector2(54, 45)), outline)
+	draw_line(Vector2(-16, -30 + offset.y), Vector2(-25, 2 + offset.y), outline, 11.0)
+	draw_line(Vector2(16, -30 + offset.y), Vector2(25, 2 + offset.y), outline, 11.0)
+
+func _draw_motion_smear(alpha: float) -> void:
+	if dash_timer <= 0.0 and not is_attack_active():
+		return
+	var smear_color := Color(0.95, 0.72, 0.24, 0.18 * alpha) if hero_id == "raya_flint" else Color(0.6, 0.25, 1.0, 0.22 * alpha)
+	for i in range(3):
+		var back := -facing * float(i + 1) * 13.0
+		draw_polygon([Vector2(back - 18, -62 - fake_height), Vector2(back + 20, -56 - fake_height), Vector2(back + 12, -22 - fake_height), Vector2(back - 25, -28 - fake_height)], [smear_color])
+
+func _draw_raya(alpha: float, bob: float) -> void:
+	var y := -fake_height + bob
 	var jacket := Color(0.95, 0.36, 0.12, alpha)
 	var pants := Color(0.12, 0.12, 0.13, alpha)
 	var cream := Color(0.94, 0.82, 0.58, alpha)
 	var skin := Color(0.72, 0.42, 0.24, alpha)
 	draw_line(Vector2(-10, -26 + y), Vector2(-18, 0 + y), pants, 7.0)
 	draw_line(Vector2(10, -26 + y), Vector2(18, 0 + y), pants, 7.0)
-	draw_polygon([Vector2(-20, -62 + y), Vector2(18, -64 + y), Vector2(26, -32 + y), Vector2(-22, -28 + y)], [jacket])
+	draw_polygon([Vector2(-20, -62 + y), Vector2(18, -64 + y), Vector2(28, -32 + y), Vector2(-22, -28 + y)], [jacket])
 	draw_rect(Rect2(Vector2(-10, -55 + y), Vector2(18, 25)), cream)
+	draw_line(Vector2(-15, -44 + y), Vector2(20, -50 + y), Color(1.0, 0.76, 0.36, alpha), 3.0)
 	draw_circle(Vector2(0, -78 + y), 14, skin)
 	draw_rect(Rect2(Vector2(-16, -90 + y), Vector2(30, 9)), Color(0.13, 0.08, 0.05, alpha))
 	draw_polygon([Vector2(-20, -66 + y), Vector2(-58, -72 + y), Vector2(-20, -56 + y)], [Color(0.98, 0.72, 0.38, alpha)])
@@ -156,8 +181,8 @@ func _draw_raya(alpha: float) -> void:
 	draw_circle(Vector2(-5, -80 + y), 2.0, Color(0.02, 0.02, 0.02, alpha))
 	draw_circle(Vector2(5, -80 + y), 2.0, Color(0.02, 0.02, 0.02, alpha))
 
-func _draw_nika(alpha: float) -> void:
-	var y := -fake_height
+func _draw_nika(alpha: float, bob: float) -> void:
+	var y := -fake_height + bob
 	var violet := Color(0.55, 0.12, 0.95, alpha)
 	var black := Color(0.04, 0.04, 0.06, alpha)
 	var silver := Color(0.7, 0.75, 0.82, alpha)
@@ -166,6 +191,7 @@ func _draw_nika(alpha: float) -> void:
 	draw_line(Vector2(8, -26 + y), Vector2(28, -2 + y), black, 6.0)
 	draw_polygon([Vector2(-16, -64 + y), Vector2(18, -66 + y), Vector2(20, -31 + y), Vector2(-18, -29 + y)], [black])
 	draw_polygon([Vector2(-13, -61 + y), Vector2(13, -63 + y), Vector2(18, -38 + y), Vector2(-15, -36 + y)], [violet])
+	draw_line(Vector2(-11, -43 + y), Vector2(15, -49 + y), Color(0.92, 0.82, 1.0, alpha), 3.0)
 	draw_polygon([Vector2(-20, -64 + y), Vector2(-64, -82 + y), Vector2(-24, -48 + y)], [Color(0.36, 0.08, 0.72, alpha)])
 	draw_circle(Vector2(0, -78 + y), 13, skin)
 	draw_rect(Rect2(Vector2(-13, -91 + y), Vector2(26, 9)), silver)

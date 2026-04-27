@@ -74,12 +74,31 @@ func apply_damage(amount: int, source_x: float) -> void:
 	queue_redraw()
 
 func _draw() -> void:
+	_draw_sprite_outline()
 	if species == "machine":
 		_draw_machine_enemy()
 	elif species == "creature":
 		_draw_creature_enemy()
 	else:
 		_draw_human_enemy()
+	_draw_luma_highlight()
+
+func _draw_sprite_outline() -> void:
+	var outline := Color(0.02, 0.015, 0.012, 0.92)
+	if species == "creature":
+		draw_circle(Vector2(0, -38), 34, outline)
+		draw_line(Vector2(-20, -18), Vector2(-28, 2), outline, 9.0)
+		draw_line(Vector2(18, -18), Vector2(24, 2), outline, 9.0)
+	elif species == "machine":
+		draw_circle(Vector2(0, -37), 30, outline)
+	else:
+		draw_circle(Vector2(0, -64), 17, outline)
+		draw_rect(Rect2(Vector2(-20, -58), Vector2(40, 44)), outline)
+
+func _draw_luma_highlight() -> void:
+	var highlight := Color(0.25, 1.0, 0.72, 0.45)
+	if species == "machine" or enemy_id == "crystal_leech" or enemy_id == "echo_raptor":
+		draw_circle(Vector2(0, -38), 14, highlight)
 
 func _draw_human_enemy() -> void:
 	var color := Color(0.34, 0.39, 0.44)

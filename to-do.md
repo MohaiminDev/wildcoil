@@ -31,6 +31,16 @@ None currently. Next work should be playtest, tuning, or replacing placeholder a
 
 ## DONE
 
+### [RR-P1-13] Upgrade arcade aesthetics and presentation
+- Outcome: Added animated biome backdrops, stronger title presentation, hero select cards, Sundrifter title art, character motion smears, sprite outlines, and luma enemy highlights so the prototype reads more like an arcade action game instead of a collision-box prototype.
+- Validation:
+  - [x] `python3 -m pytest tests/test_arcade_aesthetics.py -v` passes.
+  - [x] `godot --path src/wildcoil --headless --quit-after 3` launches without script errors.
+  - [x] `bash scripts/check.sh` passes.
+  - [x] `bash scripts/package_macos.sh` creates `build/macos/Rift Road.zip`.
+- Dependencies: [RR-P1-10]
+- Completed: 2026-04-27
+
 ### [RR-P1-10] Package and validate the macOS prototype
 - Outcome: Added local check/run/package scripts, Godot export preset, build documentation, and a packaged macOS prototype at `build/macos/Rift Road.zip`.
 - Validation:
