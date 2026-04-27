@@ -63,6 +63,8 @@ def test_frontend_shell_suite_transitions_modes(tmp_path: Path) -> None:
     assert payload["best_rank"] == "S"
     assert payload["unlocked_character_ids"] == ["mira_coil", "zeph_rush"]
     assert payload["reset_mode"] == "menu"
+    assert payload["keyboard_prompts_present"] is True
+    assert payload["controller_prompt_absent"] is True
 
 
 def test_save_migration_suite_preserves_progression_and_new_defaults(tmp_path: Path) -> None:

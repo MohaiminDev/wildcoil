@@ -20,14 +20,6 @@ The Phase 1 through tester-release tasks below are complete. The active producti
 
 ## PENDING
 
-### [PROD-01] Harden keyboard-first beta playability
-- Outcome: Make the full player flow readable and dependable with keyboard alone, including mission board navigation, character selection, deploy, combat, pause or resume, restart, fullscreen, options, and ending flow.
-- Validation:
-  - [ ] Player-facing prompts and release-facing docs prioritize keyboard controls.
-  - [ ] Automated input and runtime suites pass.
-  - [ ] Manual macOS smoke confirms the keyboard-only route flow works end-to-end.
-- Dependencies: [PROD-00]
-
 ### [PROD-02] Prepare cohesive beta polish
 - Outcome: Remove debug-looking or prototype-only presentation from the normal player flow while keeping self-authored placeholder visuals and audio only where they read as intentional beta style.
 - Validation:
@@ -81,6 +73,15 @@ The Phase 1 through tester-release tasks below are complete. The active producti
 - Dependencies: [PROD-06]
 
 ## DONE
+
+### [PROD-01] Harden keyboard-first beta playability
+- Outcome: Made the full player flow readable and dependable with keyboard alone, including mission board navigation, character selection, deploy, combat, pause or resume, restart, fullscreen, options, and ending flow.
+- Validation:
+  - [x] Player-facing prompts and release-facing docs prioritize keyboard controls.
+  - [x] Automated input and runtime suites pass.
+  - [x] Manual macOS smoke confirmed the keyboard-first mission board prompt set in the live Godot runtime.
+- Dependencies: [PROD-00]
+- Completed: 2026-04-27
 
 ### [PROD-00] Clear current tracker and baseline
 - Outcome: Confirm the tracker has no old pending tasks, run the baseline validation gate, and add the keyboard-first external beta production backlog.

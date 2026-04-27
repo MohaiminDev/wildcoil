@@ -796,6 +796,7 @@ func run_frontend_shell_suite() -> Dictionary:
 	var app_root := app_scene.instantiate()
 	get_root().add_child(app_root)
 	var initial_summary: Dictionary = app_root.call("get_frontend_summary")
+	var keyboard_prompt_contract: Dictionary = app_root.call("get_keyboard_prompt_contract")
 	app_root.call("debug_start_selected_stage")
 	var started_summary: Dictionary = app_root.call("get_frontend_summary")
 	app_root.call("debug_complete_selected_stage", "S", 111.2)
@@ -805,7 +806,16 @@ func run_frontend_shell_suite() -> Dictionary:
 	app_root.free()
 
 	var best_stage_result: Dictionary = results_summary.get("best_stage_result", {})
-	var passed: bool = str(initial_summary.get("mode", "")) == "menu" and bool(started_summary.get("stage_active", false)) and str(results_summary.get("mode", "")) == "results" and str(best_stage_result.get("best_rank", "")) == "S" and (results_summary.get("unlocked_character_ids", []) as Array).has("zeph_rush") and int((reset_summary.get("cleared_stage_ids", []) as Array).size()) == 0
+	var combined_prompt_text := "%s\n%s\n%s\n%s\n%s" % [
+		str(keyboard_prompt_contract.get("menu_controls", "")),
+		str(keyboard_prompt_contract.get("stage_controls", "")),
+		str(keyboard_prompt_contract.get("options_footer", "")),
+		str(keyboard_prompt_contract.get("pause_footer", "")),
+		str(keyboard_prompt_contract.get("results_footer", "")),
+	]
+	var keyboard_prompts_present := combined_prompt_text.contains("Enter/Space deploy") and combined_prompt_text.contains("W/S or Up/Down focus") and combined_prompt_text.contains("Esc resume") and combined_prompt_text.contains("Enter or Space to return")
+	var controller_prompt_absent := not combined_prompt_text.contains("Controller:") and not combined_prompt_text.contains("D-pad") and not combined_prompt_text.contains(" B ")
+	var passed: bool = str(initial_summary.get("mode", "")) == "menu" and bool(started_summary.get("stage_active", false)) and str(results_summary.get("mode", "")) == "results" and str(best_stage_result.get("best_rank", "")) == "S" and (results_summary.get("unlocked_character_ids", []) as Array).has("zeph_rush") and int((reset_summary.get("cleared_stage_ids", []) as Array).size()) == 0 and keyboard_prompts_present and controller_prompt_absent
 	return {
 		"initial_mode": str(initial_summary.get("mode", "")),
 		"started_stage_active": bool(started_summary.get("stage_active", false)),
@@ -813,8 +823,10 @@ func run_frontend_shell_suite() -> Dictionary:
 		"reset_mode": str(reset_summary.get("mode", "")),
 		"best_rank": str(best_stage_result.get("best_rank", "")),
 		"unlocked_character_ids": results_summary.get("unlocked_character_ids", []),
+		"keyboard_prompts_present": keyboard_prompts_present,
+		"controller_prompt_absent": controller_prompt_absent,
 		"passed": passed,
-		"errors": [] if passed else ["frontend shell did not transition through menu, active stage, result, and reset flows"],
+		"errors": [] if passed else ["frontend shell did not transition through menu, active stage, result, reset, and keyboard-first prompt flows"],
 	}
 
 

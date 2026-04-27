@@ -33,6 +33,12 @@ const MUSIC_BASE_VOLUMES := {
 	"clear": -18.0,
 	"boss": -14.0,
 }
+const MENU_CONTROLS_PROMPT := "Menu: A/D or Left/Right mission  W/S or Up/Down hunter  Enter/Space deploy  Esc options"
+const STAGE_CONTROLS_PROMPT := "Stage: A/D or arrows move  W/Space jump  Shift/C dodge  J/K/L/; attacks  Esc pause  R restart  F/F11 fullscreen"
+const OPTIONS_FOOTER_PROMPT := "W/S or Up/Down focus  A/D or Left/Right or Enter change  Esc close"
+const RESULTS_FOOTER_PROMPT := "Enter or Space to return to the mission board"
+const MISSION_FOOTER_PROMPT := "A/D or Left/Right switch mission  W/S or Up/Down switch hunter  Enter or Space deploy  Esc options"
+const PAUSE_FOOTER_PROMPT := "Esc resume  R restart checkpoint  F/F11 toggle fullscreen"
 const SFX_BASE_VOLUMES := {
 	"spectacle": -13.0,
 }
@@ -359,8 +365,9 @@ func set_game_paused(should_pause: bool) -> void:
 	if frontend_mode != "playing":
 		should_pause = false
 	set_tree_paused_state(should_pause)
-	for player in [explore_loop, combat_loop, clear_loop, boss_loop, spectacle_stinger]:
-		player.stream_paused = should_pause
+	for audio_player in [explore_loop, combat_loop, clear_loop, boss_loop, spectacle_stinger]:
+		if audio_player != null:
+			audio_player.stream_paused = should_pause
 	update_pause_overlay()
 
 
@@ -671,7 +678,7 @@ func build_stage_briefing_text(stage_definition: Dictionary, character_definitio
 func build_options_body() -> String:
 	var lines := [
 		"Comfort options stay in the pilot profile and apply immediately.",
-		"Use Up/Down to focus a setting and Left/Right or Enter to change it.",
+		"Use W/S or Up/Down to focus a setting and A/D or Left/Right or Enter to change it.",
 	]
 	var option_entries := get_option_entries()
 	selected_option_index = clampi(selected_option_index, 0, max(option_entries.size() - 1, 0))
@@ -737,7 +744,7 @@ func update_status_label() -> void:
 		]
 		boss_bar.value = clampf(float(stage_summary.get("boss_health_ratio", 0.0)) * 100.0, 0.0, 100.0)
 
-	controls_label.text = "Menu: A/D or Left/Right mission  W/S or Up/Down hunter  Enter deploy  Esc options\nController: D-pad browse  A deploy  B options or back  Start pause  F or F11 fullscreen\nStage: A/D move  Space/W jump  Shift/C dodge  J/K/L/; attacks  R restart"
+	controls_label.text = "%s\n%s" % [MENU_CONTROLS_PROMPT, STAGE_CONTROLS_PROMPT]
 
 
 func update_pause_overlay() -> void:
@@ -746,11 +753,12 @@ func update_pause_overlay() -> void:
 		return
 	var stage_summary := get_stage_summary()
 	var fullscreen_label := "Fullscreen" if faux_fullscreen else "Windowed"
-	pause_body.text = "Objective: %s\nTime: %s  Checkpoint resets: %d\nView: %s\nEsc resume  R restart checkpoint  F or F11 toggle fullscreen" % [
+	pause_body.text = "Objective: %s\nTime: %s  Checkpoint resets: %d\nView: %s\n%s" % [
 		str(stage_summary.get("objective", "Resume the relay run")),
 		format_seconds(float(stage_summary.get("elapsed_seconds", 0.0))),
 		int(stage_summary.get("checkpoint_resets", 0)),
 		fullscreen_label,
+		PAUSE_FOOTER_PROMPT,
 	]
 
 
@@ -782,7 +790,7 @@ func update_frontend_overlay() -> void:
 			note_text,
 			ending_text,
 		]
-		mission_footer.text = "Enter or B to return to the mission board"
+		mission_footer.text = RESULTS_FOOTER_PROMPT
 	elif menu_panel_mode == "options":
 		mission_title.text = "Comfort and Accessibility"
 		mission_body.text = "%s\nSave path: %s%s" % [
@@ -790,7 +798,7 @@ func update_frontend_overlay() -> void:
 			profile.get_absolute_save_path() if profile != null else "--",
 			note_text,
 		]
-		mission_footer.text = "Up or Down focus  Left or Right or Enter change  Esc or B close"
+		mission_footer.text = OPTIONS_FOOTER_PROMPT
 	else:
 		mission_title.text = "Mission Board"
 		mission_body.text = "Mission: %s\nBiome: %s  Stage order: %d/%d\nHunter: %s (%s)\nProfile: %s\nView: %s\n%s\n%s\nBest record: %s\nSave path: %s%s" % [
@@ -808,7 +816,18 @@ func update_frontend_overlay() -> void:
 			profile.get_absolute_save_path() if profile != null else "--",
 			note_text,
 		]
-		mission_footer.text = "A/D or Left/Right switch mission  W/S or Up/Down switch hunter  Enter or A deploy  Esc or B options"
+		mission_footer.text = MISSION_FOOTER_PROMPT
+
+
+func get_keyboard_prompt_contract() -> Dictionary:
+	return {
+		"menu_controls": MENU_CONTROLS_PROMPT,
+		"stage_controls": STAGE_CONTROLS_PROMPT,
+		"options_footer": OPTIONS_FOOTER_PROMPT,
+		"results_footer": RESULTS_FOOTER_PROMPT,
+		"mission_footer": MISSION_FOOTER_PROMPT,
+		"pause_footer": PAUSE_FOOTER_PROMPT,
+	}
 
 
 func update_audio_state() -> void:

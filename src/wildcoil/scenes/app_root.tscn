@@ -105,7 +105,7 @@ autowrap_mode = 3
 theme_override_font_sizes/font_size = 20
 
 [node name="Footer" type="Label" parent="MissionOverlay/Center/Panel/VBox"]
-text = "Enter deploy"
+text = "Enter or Space deploy"
 horizontal_alignment = 1
 autowrap_mode = 3
 theme_override_font_sizes/font_size = 18

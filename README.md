@@ -23,7 +23,7 @@ Wildcoil is a macOS-first solo action game project. The concept direction is loc
 ## Current Engine Path
 
 - Approved production engine: Godot 4.6.1
-- Current backlog shape: 3 stages, 2 playable characters, 6 enemy archetypes, 3 boss encounters, persistent save/progression, controller-first input with keyboard fallback, and a tester-ready Apple Silicon macOS build
+- Current backlog shape: keyboard-first external beta hardening for 3 stages, 2 playable characters, 6 enemy archetypes, 3 boss encounters, persistent save/progression, and an unsigned tester-ready Apple Silicon macOS build
 - Scope rule: stay solo-first for MVP; local co-op remains architecture-friendly but out of scope, and online play remains deferred
 
 ## Current Build And Check Commands
@@ -68,4 +68,4 @@ CI mirror:
 
 ## Current Milestone
 
-Post-release follow-up: collect outside-tester feedback, close the physical-controller coverage gap, and decide the first post-tester patch set from real play data.
+Keyboard-first external beta production: harden keyboard playability first, keep physical-controller coverage as a documented future gap, and decide beta patches from tester evidence.
