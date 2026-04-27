@@ -1,0 +1,16 @@
+{
+  "bosses": [
+    {
+      "id": "brask_noll",
+      "name": "Brask Noll",
+      "max_health": 360,
+      "move_speed": 135,
+      "attack_damage": 20,
+      "phase_change_health_ratio": 0.5,
+      "moves": ["axe_swing", "ground_slam", "charge", "summon_grunts", "double_swing"],
+      "stun_condition": "charge_hits_wall",
+      "score": 1500
+    }
+  ]
+}
+

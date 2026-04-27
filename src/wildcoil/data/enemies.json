@@ -1,0 +1,35 @@
+{
+  "enemies": [
+    {
+      "id": "iron_veil_grunt",
+      "name": "Iron Veil Grunt",
+      "max_health": 42,
+      "move_speed": 145,
+      "attack_damage": 8,
+      "attack_range": 54,
+      "telegraph_seconds": 0.22,
+      "score": 100
+    },
+    {
+      "id": "iron_veil_runner",
+      "name": "Iron Veil Runner",
+      "max_health": 30,
+      "move_speed": 215,
+      "attack_damage": 6,
+      "attack_range": 48,
+      "telegraph_seconds": 0.12,
+      "score": 125
+    },
+    {
+      "id": "iron_veil_brute",
+      "name": "Iron Veil Brute",
+      "max_health": 86,
+      "move_speed": 105,
+      "attack_damage": 16,
+      "attack_range": 66,
+      "telegraph_seconds": 0.48,
+      "score": 250
+    }
+  ]
+}
+

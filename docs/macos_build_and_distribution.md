@@ -99,3 +99,24 @@ Complete and refine this after the winning engine spike:
 - Keyboard fallback tested:
 - Issues found:
 - Follow-up action:
+# Rift Road Prototype Addendum
+
+As of 2026-04-27, the Rift Road prototype uses Godot 4.x under `src/wildcoil`.
+
+## Local Commands
+
+- Run checks: `bash scripts/check.sh`
+- Run game: `bash scripts/run_game.sh`
+- Package macOS build: `bash scripts/package_macos.sh`
+
+`GODOT_BIN` can point to a custom Godot executable when `godot` is not on `PATH`.
+
+## Current Packaging State
+
+The repository includes `src/wildcoil/export_presets.cfg` with a macOS export preset named `macOS`. Local export still depends on Godot macOS export templates being installed on the machine.
+
+On 2026-04-27, `bash scripts/package_macos.sh` succeeded locally with Godot 4.6.1 and created:
+
+- `build/macos/Rift Road.zip`
+
+The exported archive contains `Rift Road- Beasts of the Afterglow.app`.

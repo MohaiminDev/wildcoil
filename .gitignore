@@ -191,6 +191,12 @@ cython_debug/
 # Ruff stuff:
 .ruff_cache/
 
+# Godot local/editor state
+src/wildcoil/.godot/
+src/wildcoil/**/*.uid
+src/wildcoil/**/*.import
+Temp/
+
 # PyPI configuration file
 .pypirc
 

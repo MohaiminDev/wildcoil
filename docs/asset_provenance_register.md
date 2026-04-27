@@ -20,3 +20,11 @@ As of 2026-03-05, no third-party art, audio, font, plugin, or engine-specific pa
 - Mark whether it is a placeholder or a permanent dependency.
 - If future open-source release is uncertain, treat replacement as required until proven otherwise.
 - Keep code dependencies that affect build or packaging visible here or in a linked dependency appendix later.
+# Rift Road Prototype Addendum
+
+As of 2026-04-27, the playable prototype uses only programmatically drawn placeholder rectangles, circles, bars, and labels from local Godot scripts. No external art, audio, sprites, fonts, logos, ROMs, traced assets, or third-party asset packs were added for the Rift Road scaffold.
+
+| Asset / system | Source | License / provenance | Notes |
+| --- | --- | --- | --- |
+| Raya, Nika, Iron Veil enemies, Brask, pickups, road, crystals, HUD placeholders | Programmatic drawing in `src/wildcoil/scripts/*.gd` | Original placeholder work created in-repo | Replace with original sprite sheets and sounds later |
+| Placeholder audio hooks | Empty local methods in `audio_manager.gd` | Original placeholder code | No sound files included yet |

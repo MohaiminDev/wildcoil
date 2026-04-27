@@ -1,0 +1,18 @@
+{
+  "stages": [
+    {
+      "id": "sunset_overpass",
+      "title": "Sunset Overpass",
+      "bounds": {"left": 80, "right": 1200, "top": 330, "bottom": 620},
+      "boss_id": "brask_noll",
+      "waves": [
+        {"arena_x": 260, "enemies": ["iron_veil_grunt", "iron_veil_grunt", "iron_veil_runner"]},
+        {"arena_x": 560, "enemies": ["iron_veil_grunt", "iron_veil_runner", "iron_veil_brute"]},
+        {"arena_x": 870, "enemies": ["iron_veil_runner", "iron_veil_runner", "iron_veil_brute"]}
+      ],
+      "opening_cutscene": "Roadblock ahead. Those cages are moving. Iron Veil is worse than a roadblock.",
+      "ending_cutscene": "Brask escapes by helicopter platform. The heroes rescue a young dinosaur tagged with an Iron Veil beacon. The beacon points toward the jungle lab."
+    }
+  ]
+}
+

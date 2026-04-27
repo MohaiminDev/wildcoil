@@ -1,10 +1,12 @@
-# Wildcoil Living Game Spec
+# Rift Road Living Game Spec
 
-Schedule A-aligned working draft for Phase 0. This document is meant to stay current as decisions harden. It is intentionally concrete enough to start work from, while leaving engine choice and a few research-heavy items open until the required spike evidence exists.
+Schedule A-aligned working draft. As of 2026-04-27, the active story direction is `Rift Road: Beasts of the Afterglow`; the full story bible lives in [`docs/game-story.md`](/Users/himu/Desktop/career/personal_projects/wildcoil/docs/game-story.md). Earlier Wildcoil planning remains historical context only.
+
+Current implementation path: Godot 4.x macOS prototype for Stage 1, `Sunset Overpass`, with Raya Flint and Nika Sol playable first, grunt/runner/brute enemies, Brask Noll as the boss, original placeholder assets, and validation-first tasks tracked in [`to-do.md`](/Users/himu/Desktop/career/personal_projects/wildcoil/to-do.md).
 
 ## 1. Executive Summary
 
-- Recommended game direction: `Wildcoil`, a solo-first action adventure about fighting through storm-fed wilds grown around dead machine-serpents and buried relay ruins.
+- Active game direction: `Rift Road: Beasts of the Afterglow`, a solo-first 2D arcade beat-'em-up about crossing a glowing prehistoric future to stop Iron Veil Excavation from draining the Afterglow Rift.
 - Target audience: players who want modern beat-'em-up immediacy, readable melee combat, and a distinctive pulp-tech wilderness identity without live-service bloat.
 - Product thesis: deliver a tight macOS-native first playable where movement, hits, and spectacle sell the game before content breadth does.
 - Core design pillars: immediate impact, readable chaos, strange wilderness identity, and ruthless scope discipline.
@@ -13,9 +15,9 @@ Schedule A-aligned working draft for Phase 0. This document is meant to stay cur
 - Prototype priorities: first combat within 30 seconds, first wow moment within 3 minutes, one memorable miniboss encounter, and validation evidence for all gate calls.
 - Major risks: originality drift, engine/tool friction on macOS, solo-production art cost, and combat readability under enemy stacks.
 - Immediate next steps:
-  - approve or replace the recommended concept winner
-  - run the same micro-spike in Godot, Unity, and Unreal
-  - lock the Phase 1 backlog only after the scorecard and risk review are updated
+  - scaffold the production Godot project under `src/wildcoil`
+  - build Stage 1: Sunset Overpass with Raya, Nika, grunt, runner, brute, and Brask Noll
+  - package and validate a macOS prototype with original placeholder assets only
 
 ## 2. Target Experience
 
@@ -320,7 +322,7 @@ Recommendation: ship the first playable as solo-only, keep data structures and i
 
 ## 16. Technology and Engine Recommendation
 
-Use the same micro-spike in Godot, Unity, and Unreal, then score them with fixed weights:
+Rift Road now proceeds with Godot 4.x for the first playable. Earlier multi-engine spike planning remains useful historical context, but it is no longer a blocker for Stage 1 implementation.
 
 - gameplay iteration: 25
 - macOS tooling/export: 20
@@ -338,10 +340,10 @@ Provisional read before spikes:
 | Unreal | Conditional option | Visual upside and tooling depth are real | Iteration, build size, and macOS overhead may be too costly for the target scope |
 
 Recommendation today:
-- best engine for prototype: `TBD after spike`, with Godot as the default tie-break winner if scores are close
-- best engine for long-term development: `TBD after spike`
-- best engine for macOS practicality: `TBD after spike`
-- best engine for future open-source posture: Godot by default, pending confirmation that the gameplay workflow is sufficient
+- best engine for prototype: Godot 4.x
+- best engine for long-term development: Godot 4.x unless Stage 1 evidence exposes a severe workflow blocker
+- best engine for macOS practicality: Godot 4.x, validated through the Stage 1 packaging task
+- best engine for future open-source posture: Godot 4.x
 
 Override rule:
 - choose Unity only if it clearly wins gameplay iteration or art-animation throughput
@@ -471,13 +473,13 @@ See [`docs/risk_register.md`](/Users/himu/Desktop/career/personal_projects/wildc
 
 ## 25. Final Recommendation
 
-- Best concept direction: `Wildcoil`
-- Best engine: `TBD after spike`, with Godot as the default tie-break preference
+- Best concept direction: `Rift Road: Beasts of the Afterglow`
+- Best engine: Godot 4.x for the Stage 1 macOS prototype
 - Best solo / co-op strategy: solo-only first playable, local-co-op-ready architecture, online deferred
 - Best visual direction: controlled 2.5D with stylized 3D or hybrid assets and strict silhouette discipline
 - Best sound direction: percussion plus failing-machine resonance with sharp, tactile combat layers
-- Best prototype scope: one character, one short stage, three enemies, one elite/miniboss, one spectacle beat
-- Best MVP scope: three stages, two characters, six to eight enemies, two bosses
+- Best prototype scope: Stage 1, Raya and Nika, grunt/runner/brute enemies, Brask Noll, pickups, HUD, pause, debug overlay, and ending cutscene
+- Best MVP scope: one polished Stage 1 slice first, then expand only after the prototype passes playtest and packaging gates
 - Best workflow approach: validation-first with `to-do.md` as the public control plane
 - Best testing discipline: early hands-on macOS tests, explicit gate checklists, and external playtests before promotion
 - Biggest risks: engine friction, originality drift, and readability collapse under combat chaos

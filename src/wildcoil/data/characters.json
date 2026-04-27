@@ -1,0 +1,33 @@
+{
+  "heroes": [
+    {
+      "id": "raya_flint",
+      "name": "Raya Flint",
+      "role": "balanced mechanic",
+      "palette": ["rust-orange", "charcoal", "warm-cream"],
+      "max_health": 120,
+      "move_speed": 245,
+      "dash_speed": 620,
+      "attack_damage": 18,
+      "special_damage": 34,
+      "special_cost": 50,
+      "actions": ["light_attack", "jump_attack", "dash", "special", "grab"],
+      "signature_moves": ["Spanner Jab", "Gearbreaker Kick", "Overdrive Slam", "Field Repair"]
+    },
+    {
+      "id": "nika_sol",
+      "name": "Nika Sol",
+      "role": "agile scout",
+      "palette": ["electric-violet", "black", "silver"],
+      "max_health": 90,
+      "move_speed": 315,
+      "dash_speed": 760,
+      "attack_damage": 13,
+      "special_damage": 25,
+      "special_cost": 45,
+      "actions": ["light_attack", "jump_attack", "dash", "special", "grab"],
+      "signature_moves": ["Flash Step", "Heel Arc", "Skyline Drop", "Static Burst"]
+    }
+  ]
+}
+

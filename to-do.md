@@ -1,132 +1,229 @@
-# Wildcoil Task Tracker
+# Rift Road Task Tracker
 
 ## Project Goal
-Build an original macOS-first arcade-heritage action game that proves satisfying combat feel, clear readability, distinct identity, practical macOS delivery, and future open-source readiness before any larger MVP expansion.
+
+Build an original macOS-first 2D side-scrolling arcade beat-'em-up, `Rift Road: Beasts of the Afterglow`, that proves satisfying combat feel, readable belt-scroll arenas, distinct hero identities, practical Godot/macOS delivery, and strong originality safeguards before expanding beyond Stage 1.
 
 ## Product Thesis
-Wildcoil should deliver a solo-first, controller-first, stage-based combat prototype with immediate melee satisfaction, strong spectacle in the first three minutes, readable enemy intent, and a strange wilderness-plus-machine-ruin identity that feels original rather than referential.
+
+Rift Road should feel like a new 1990s-inspired arcade road adventure: fast action, colorful prehistoric-future staging, expressive silhouettes, heroic banter, big readable bosses, and a theme of coexistence over extraction.
 
 ## Current Milestone
-Phase 0 - Discovery and Direction Lock
 
-## Success Gate for Current Milestone
-- One concept direction is approved.
-- One first-playable prototype plan is approved.
-- One initial engine path is approved after the same macOS micro-spike in Godot, Unity, and Unreal.
-- The risk register and milestone backlog are prioritized and actionable.
-- Approval includes written validation evidence in the docs set, not just verbal agreement.
+Rift Road Phase 1 - Stage 1 Playable Prototype
 
-## Backlog
+## Active Story Source
 
-### [P1-01] Build the combat sandbox first playable
-- Purpose: Turn the locked concept and engine choice into a tester-ready solo combat prototype.
-- Expected outcome: One playable character, one short stage, three enemy archetypes, one elite/miniboss, placeholder UI/audio, and a macOS build path.
-- Validation: Core-feel gate checklist, controller and keyboard checks, Apple Silicon smoke run, and playtest evidence in [`docs/playtest_log.md`](/Users/himu/Desktop/career/personal_projects/wildcoil/docs/playtest_log.md).
-- Dependencies: Phase 0 gate pass.
+- [`docs/game-story.md`](/Users/himu/Desktop/career/personal_projects/wildcoil/docs/game-story.md) is the current story bible and product direction.
+- [`docs/superpowers/plans/2026-04-27-rift-road-mvp.md`](/Users/himu/Desktop/career/personal_projects/wildcoil/docs/superpowers/plans/2026-04-27-rift-road-mvp.md) is the implementation plan for the first playable.
 
-### [P1-02] Package a tester-ready macOS build
-- Purpose: Make external testing practical early instead of leaving platform risk until late.
-- Expected outcome: Repeatable packaging steps, controller checks, keyboard fallback, and a notarization checklist.
-- Validation: Manual acceptance matrix in [`docs/macos_build_and_distribution.md`](/Users/himu/Desktop/career/personal_projects/wildcoil/docs/macos_build_and_distribution.md).
-- Dependencies: Engine choice, first playable build.
+## Commit Gate
 
-### [P2-01] Define vertical slice promotion criteria
-- Purpose: Prevent MVP scope creep before the first playable proves itself.
-- Expected outcome: A Phase 2 promotion checklist tied to feel, readability, art feasibility, and production cost.
-- Validation: Updated spec, tracker, and risk register after Phase 1 results.
-- Dependencies: Phase 1 gate pass.
+- Complete one tracker task at a time.
+- Run that task's full validation checklist before committing.
+- Commit and push immediately after the task is green when a commit/push is requested.
+- Do not commit or push failing work.
+- Keep task buckets to `PENDING` and `DONE`.
 
-## Pending
+## PENDING
 
-### [P0-02] Run the Godot micro-spike
-- Purpose: Measure prototype speed, controller reliability, macOS export friction, and frame stability in a real slice.
-- Expected outcome: Same spike features as the other engines with notes captured in [`docs/engine_matrix.md`](/Users/himu/Desktop/career/personal_projects/wildcoil/docs/engine_matrix.md).
-- Validation: Playable local spike, export artifact, and evidence notes for build friction and performance.
-- Dependencies: Spike checklist from the engine matrix.
+None currently. Next work should be playtest, tuning, or replacing placeholder art/audio after this Stage 1 prototype is reviewed.
 
-### [P0-03] Run the Unity micro-spike
-- Purpose: Compare Unity against the same prototype and packaging workload rather than reputation alone.
-- Expected outcome: Equivalent movement, combo, enemy, controller input, and macOS export evidence.
-- Validation: Same as [P0-02].
-- Dependencies: Spike checklist from the engine matrix.
+## DONE
 
-### [P0-04] Run the Unreal micro-spike
-- Purpose: Confirm whether Unreal's visual upside is worth the iteration and macOS cost for this scope.
-- Expected outcome: Equivalent spike plus notes on editor friction, packaging, and Apple Silicon performance.
-- Validation: Same as [P0-02].
-- Dependencies: Spike checklist from the engine matrix.
+### [RR-P1-10] Package and validate the macOS prototype
+- Outcome: Added local check/run/package scripts, Godot export preset, build documentation, and a packaged macOS prototype at `build/macos/Rift Road.zip`.
+- Validation:
+  - [x] `bash scripts/check.sh` passes.
+  - [x] `bash scripts/package_macos.sh` creates `build/macos/Rift Road.zip`.
+  - [x] macOS build notes document Godot version, commands, artifact path, and export dependency.
+- Dependencies: [RR-P1-09]
+- Completed: 2026-04-27
 
-### [P0-05] Score engines and lock the initial engine path
-- Purpose: Convert evidence into a documented choice instead of leaving engine selection open-ended.
-- Expected outcome: Weighted scorecard, written recommendation, and rejected-option notes.
-- Validation: Completed score rows in [`docs/engine_matrix.md`](/Users/himu/Desktop/career/personal_projects/wildcoil/docs/engine_matrix.md) and a matching decision update in [`docs/game_spec.md`](/Users/himu/Desktop/career/personal_projects/wildcoil/docs/game_spec.md).
-- Dependencies: [P0-02], [P0-03], [P0-04].
+### [RR-P1-09] Complete menus, cutscene, debug overlay, and audio placeholders
+- Outcome: Added title screen, character select, Stage 1 opening and ending text, debug overlay toggle, FPS/player/enemy/collision summary, and placeholder audio hooks.
+- Validation:
+  - [x] `python3 -m pytest tests -v` passes.
+  - [x] `godot --path src/wildcoil --headless --quit-after 2` launches without script errors.
+  - [x] [`docs/asset_provenance_register.md`](/Users/himu/Desktop/career/personal_projects/wildcoil/docs/asset_provenance_register.md) records placeholder asset provenance.
+- Dependencies: [RR-P1-08]
+- Completed: 2026-04-27
 
-### [P0-06] Lock the milestone backlog for Phase 1
-- Purpose: Enter implementation with a small, reviewable, validation-first backlog.
-- Expected outcome: Ordered Phase 1 tasks, acceptance criteria, and a clear salvage-pass rule if the gate fails.
-- Validation: Tracker update plus a risk register review.
-- Dependencies: [P0-01], [VAL-01], [P0-05].
+### [RR-P1-08] Implement Brask Noll boss fight
+- Outcome: Added Brask Noll with axe swing, charge, wall stun, slam/summon behavior, phase-two aggression, boss health bar, defeat flow, and Stage 1 completion trigger.
+- Validation:
+  - [x] Boss content tests cover required profile moves, stun condition, and phase-change ratio.
+  - [x] Headless Godot launch parses and loads the boss scene.
+  - [x] Boss design uses original placeholder visuals and data.
+- Dependencies: [RR-P1-07]
+- Completed: 2026-04-27
 
-## In Progress
-- None currently. Start the engine spikes next; do not begin `src/` implementation work before the Phase 0 gate passes.
+### [RR-P1-07] Add HUD, pickups, pause, and game over
+- Outcome: Added health bar, special meter, luma score, glowfruit pickup behavior, pause overlay, restart-to-title flow, and game over screen.
+- Validation:
+  - [x] Runtime file tests confirm HUD and system scripts exist.
+  - [x] Headless Godot launch parses and loads UI scripts.
+  - [x] Pickup names and visuals are original placeholders.
+- Dependencies: [RR-P1-06]
+- Completed: 2026-04-27
 
-## Blocked
-- None currently recorded.
+### [RR-P1-06] Build Sunset Overpass wave flow
+- Outcome: Added Stage 1 arena flow, wave spawning, placeholder parallax-like background layers, lower road space, and transition to Brask Noll.
+- Validation:
+  - [x] Stage content tests cover Stage 1 title, waves, boss id, and ending cutscene.
+  - [x] Headless Godot launch parses and loads the stage scene.
+  - [x] Backgrounds use original programmatic placeholder shapes.
+- Dependencies: [RR-P1-05]
+- Completed: 2026-04-27
 
-## Validation Needed
+### [RR-P1-05] Add grunt, runner, and brute enemies
+- Outcome: Implemented Iron Veil grunt, runner, and brute with data profiles, simple approach/telegraph/attack behavior, damage, defeat, and score values.
+- Validation:
+  - [x] Enemy profile tests confirm grunt, runner, and brute tuning differences.
+  - [x] Headless Godot launch parses and loads enemy scripts.
+  - [x] Enemy visuals are original placeholders.
+- Dependencies: [RR-P1-04]
+- Completed: 2026-04-27
+
+### [RR-P1-04] Build the combat hitbox and damage core
+- Outcome: Added light attack, jump attack support, special attack, attack rectangles, health, knockback, invulnerability, meter gain/spend, and simple hit feedback.
+- Validation:
+  - [x] Runtime smoke confirms gameplay scripts parse in Godot.
+  - [x] Headless Godot launch starts without script errors.
+  - [x] Combat behavior is implemented through local original code.
+- Dependencies: [RR-P1-03]
+- Completed: 2026-04-27
+
+### [RR-P1-03] Implement belt-scroll movement and keyboard controls
+- Outcome: Added WASD/arrow movement, fake jump, dash/dodge, stage bounds, and Y-position sorting on a belt-scroll plane.
+- Validation:
+  - [x] Runtime smoke confirms player script exists and loads.
+  - [x] Headless Godot launch starts without script errors.
+  - [x] Controls match the story bible: attack `J`, jump `K`, special `L`, interact `U`, dash `I`, pause `Esc`.
+- Dependencies: [RR-P1-02]
+- Completed: 2026-04-27
+
+### [RR-P1-02] Add Raya and Nika as data-driven heroes
+- Outcome: Added character data and a hero select shell for Raya Flint and Nika Sol with distinct stats, palettes, combat profile, and signature moves.
+- Validation:
+  - [x] Character roster tests confirm both heroes exist and are mechanically distinct.
+  - [x] Hero select supports choosing Raya or Nika.
+  - [x] No copied character assets are introduced.
+- Dependencies: [RR-P1-01]
+- Completed: 2026-04-27
+
+### [RR-P1-01] Scaffold the production Godot project
+- Outcome: Created the Godot 4.x project under `src/wildcoil`, added a bootable app root, wired a headless runtime smoke test, and documented run/test commands.
+- Validation:
+  - [x] `python3 -m pytest tests/test_runtime_smoke.py -v` passes.
+  - [x] `godot --path src/wildcoil --headless --quit-after 2` launches without runtime script errors.
+  - [x] [`README.md`](/Users/himu/Desktop/career/personal_projects/wildcoil/README.md) documents the current run, test, and package commands.
+- Dependencies: [RR-DOC-01]
+- Completed: 2026-04-27
+
+### [RR-DOC-01] Lock the Rift Road story direction
+- Outcome: Added the Rift Road story bible, updated the project entry point, and rebuilt the tracker around the Stage 1 MVP path.
+- Validation:
+  - [x] [`docs/game-story.md`](/Users/himu/Desktop/career/personal_projects/wildcoil/docs/game-story.md) captures the concept, heroes, world, antagonists, stages, MVP scope, development order, and originality checklist.
+  - [x] [`to-do.md`](/Users/himu/Desktop/career/personal_projects/wildcoil/to-do.md) uses only `PENDING` and `DONE` buckets.
+  - [x] The previous Wildcoil planning tasks remain recorded below as completed/superseded history.
+- Dependencies: User-provided Rift Road story prompt.
+- Completed: 2026-04-27
+
+### [LEGACY-P1-01] Build the combat sandbox first playable
+- Outcome: Superseded by the Rift Road Stage 1 MVP path.
+- Validation:
+  - [x] Replaced by [RR-P1-01] through [RR-P1-10].
+- Dependencies: Legacy Phase 0 gate.
+- Completed: 2026-04-27 as planning migration.
+
+### [LEGACY-P1-02] Package a tester-ready macOS build
+- Outcome: Superseded by the Rift Road macOS packaging task.
+- Validation:
+  - [x] Replaced by [RR-P1-10].
+- Dependencies: Legacy engine choice and first playable.
+- Completed: 2026-04-27 as planning migration.
+
+### [LEGACY-P2-01] Define vertical slice promotion criteria
+- Outcome: Superseded by the Rift Road MVP success criteria and Stage 1 task sequence.
+- Validation:
+  - [x] Rift Road promotion criteria are captured in [`docs/game-story.md`](/Users/himu/Desktop/career/personal_projects/wildcoil/docs/game-story.md) and the PENDING tracker.
+- Dependencies: Legacy Phase 1 gate.
+- Completed: 2026-04-27 as planning migration.
+
+### [LEGACY-P0-02] Run the Godot micro-spike
+- Outcome: Superseded by the user's direction to prefer Godot 4.x for the Rift Road playable prototype.
+- Validation:
+  - [x] Godot is the active implementation path for [RR-P1-01].
+- Dependencies: Legacy engine matrix.
+- Completed: 2026-04-27 as planning migration.
+
+### [LEGACY-P0-03] Run the Unity micro-spike
+- Outcome: Superseded by the user's direction to prefer Godot 4.x for the Rift Road playable prototype.
+- Validation:
+  - [x] Unity is no longer an active Phase 0 blocker for this story direction.
+- Dependencies: Legacy engine matrix.
+- Completed: 2026-04-27 as planning migration.
+
+### [LEGACY-P0-04] Run the Unreal micro-spike
+- Outcome: Superseded by the user's direction to prefer Godot 4.x for the Rift Road playable prototype.
+- Validation:
+  - [x] Unreal is no longer an active Phase 0 blocker for this story direction.
+- Dependencies: Legacy engine matrix.
+- Completed: 2026-04-27 as planning migration.
+
+### [LEGACY-P0-05] Score engines and lock the initial engine path
+- Outcome: Superseded by the Rift Road MVP decision to proceed with Godot unless implementation evidence proves otherwise.
+- Validation:
+  - [x] Active implementation tasks target Godot 4.x.
+- Dependencies: Legacy engine spikes.
+- Completed: 2026-04-27 as planning migration.
+
+### [LEGACY-P0-06] Lock the milestone backlog for Phase 1
+- Outcome: Superseded by the Rift Road tracker and implementation plan.
+- Validation:
+  - [x] [RR-P1-01] through [RR-P1-10] define the current backlog.
+- Dependencies: Legacy concept and engine approval.
+- Completed: 2026-04-27 as planning migration.
 
 ### [VAL-01] Approve the recommended concept direction
-- Purpose: Confirm that the recommended winner is original, attractive, and small enough for a solo part-time prototype.
-- Expected outcome: Go/no-go call on the recommended concept in [`docs/game_spec.md`](/Users/himu/Desktop/career/personal_projects/wildcoil/docs/game_spec.md).
-- Validation: Review against originality safeguards, production complexity, and first-playable clarity.
-- Dependencies: Initial spec draft.
+- Outcome: Superseded by explicit user approval of `Rift Road: Beasts of the Afterglow` as the new working story.
+- Validation:
+  - [x] The new direction is recorded in [`docs/game-story.md`](/Users/himu/Desktop/career/personal_projects/wildcoil/docs/game-story.md).
+- Dependencies: User story prompt.
+- Completed: 2026-04-27
 
 ### [VAL-02] Convert pre-spike engine notes into measured scores
-- Purpose: Replace provisional engine assumptions with evidence from real macOS work.
-- Expected outcome: Final scores for gameplay iteration, macOS tooling/export, responsiveness/input workflow, art-animation workflow, open-source posture, and performance headroom.
-- Validation: Scorecard completion with export and packaging notes.
-- Dependencies: [P0-02], [P0-03], [P0-04].
-
-## Done
+- Outcome: Superseded by the Godot-first Rift Road MVP path.
+- Validation:
+  - [x] Engine scoring is no longer a prerequisite for Stage 1 prototype work.
+- Dependencies: Legacy engine spikes.
+- Completed: 2026-04-27 as planning migration.
 
 ### [P0-01] Draft the Schedule A-aligned living spec
-- Purpose: Turn the contract and development roadmap into one working design and planning brief.
-- Expected outcome: [`docs/game_spec.md`](/Users/himu/Desktop/career/personal_projects/wildcoil/docs/game_spec.md) exists with all Schedule A section headings, ranked concepts, and a recommended winner.
-- Validation: Section-by-section cross-check against Schedule A on 2026-03-05.
+- Outcome: `docs/game_spec.md` exists with the original Schedule A-aligned working draft.
+- Validation:
+  - [x] Section-by-section cross-check against Schedule A on 2026-03-05.
 - Dependencies: Contract review and development plan inputs.
+- Completed: 2026-03-05
 
 ### [DOC-01] Create the contract-aligned task tracker
-- Purpose: Establish one public source of truth for tasks, validation, and milestone status.
-- Expected outcome: `to-do.md` exists with the contract-required sections.
-- Validation: Cross-checked against Sections 19-21 and 30 of the contract on 2026-03-05.
+- Outcome: `to-do.md` exists with project tasks, validation, and milestone state.
+- Validation:
+  - [x] Cross-checked against Sections 19-21 and 30 of the contract on 2026-03-05.
 - Dependencies: Contract review.
+- Completed: 2026-03-05
 
 ### [DOC-02] Create the initial planning docs set
-- Purpose: Put the living spec, engine matrix, risk register, playtest log, asset provenance register, and macOS build note under `docs/`.
-- Expected outcome: The Phase 0 public planning scaffold is in place and internally consistent.
-- Validation: File set review and link check on 2026-03-05.
+- Outcome: The Phase 0 public planning scaffold is in place.
+- Validation:
+  - [x] File set review and link check on 2026-03-05.
 - Dependencies: Contract review and development plan inputs.
+- Completed: 2026-03-05
 
 ### [DOC-03] Update contributor entry points
-- Purpose: Make the repo self-explanatory for future sessions and contributors.
-- Expected outcome: `README.md` points to the active docs and `AGENTS.md` records durable planning conventions.
-- Validation: Manual review of repo entry points on 2026-03-05.
-- Dependencies: [DOC-01], [DOC-02].
-
-## Technical Debt
-- The Schedule A spec is intentionally concise; expand the similar-game research with source-backed store/review notes during Phase 0.
-- The engine matrix currently contains pre-spike evidence and process notes, not final weighted scores.
-- The macOS build note describes the required path, but real signing and notarization friction cannot be trusted until the chosen engine is tested with an export artifact.
-
-## Risks / Assumptions
-- Assumption: solo developer, part-time pace, and about 12 weeks to reach the first playable after kickoff.
-- Assumption: solo-first, controller-first, local-co-op-ready architecture remains the safest prototype strategy.
-- Risk: concept originality can drift too close to genre references if silhouettes, factions, or stage beats are not reviewed early.
-- Risk: engine choice can look fine in theory but create painful macOS packaging or controller problems in practice.
-- Risk: feel and readability may fail even if the scope stays small.
-
-## Later / Nice-to-Have
-- Detailed market-comparison appendix with store-page screenshot and trailer notes.
-- Accessibility options matrix once the control scheme is more concrete.
-- Repo setup instructions once a real engine/toolchain is selected.
+- Outcome: `README.md` points to the active docs and `AGENTS.md` records durable planning conventions.
+- Validation:
+  - [x] Manual review of repo entry points on 2026-03-05.
+- Dependencies: [DOC-01], [DOC-02]
+- Completed: 2026-03-05

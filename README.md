@@ -1,10 +1,14 @@
-# Wildcoil
+# Rift Road: Beasts of the Afterglow
 
-Wildcoil is a documentation-first solo action game project for macOS. The current goal is to lock Phase 0 direction and ship a Phase 1 first playable within 12 weeks of kickoff, following the rules in [`arcade_heritage_game_master_contract.txt`](/Users/himu/Desktop/career/personal_projects/wildcoil/arcade_heritage_game_master_contract.txt).
+Rift Road: Beasts of the Afterglow is an original macOS-first 2D side-scrolling arcade beat-'em-up about four road adventurers crossing a glowing prehistoric future to stop a mining empire from draining the living crystal heart of the world.
+
+The project is now story-first around the Rift Road concept while keeping the repository name and existing planning history. The current goal is to build a Godot 4.x macOS prototype for Stage 1: Sunset Overpass, with two playable heroes, three enemy types, Brask Noll as the first boss, original placeholder assets, and a validation-first task flow.
 
 ## Current Working Docs
 
 - [`to-do.md`](/Users/himu/Desktop/career/personal_projects/wildcoil/to-do.md): single source of truth for milestone status, tasks, validation, and risks
+- [`docs/game-story.md`](/Users/himu/Desktop/career/personal_projects/wildcoil/docs/game-story.md): Rift Road story bible, world, heroes, stages, MVP scope, and originality checklist
+- [`docs/superpowers/plans/2026-04-27-rift-road-mvp.md`](/Users/himu/Desktop/career/personal_projects/wildcoil/docs/superpowers/plans/2026-04-27-rift-road-mvp.md): implementation plan for the Stage 1 playable prototype
 - [`docs/game_spec.md`](/Users/himu/Desktop/career/personal_projects/wildcoil/docs/game_spec.md): Schedule A-aligned living game spec
 - [`docs/engine_matrix.md`](/Users/himu/Desktop/career/personal_projects/wildcoil/docs/engine_matrix.md): Phase 0 engine evaluation workflow and weighted scorecard
 - [`docs/risk_register.md`](/Users/himu/Desktop/career/personal_projects/wildcoil/docs/risk_register.md): living risk and inspiration log
@@ -15,9 +19,19 @@ Wildcoil is a documentation-first solo action game project for macOS. The curren
 ## Repo Shape
 
 - Keep living planning artifacts in `docs/`.
-- Keep implementation out of the repo until Phase 0 direction lock is complete.
-- When implementation starts, place runtime code in `src/` and automated checks in `tests/`.
+- Place runtime code in `src/wildcoil`.
+- Place automated checks in `tests/`.
+- Keep implementation tasks small, validated, committed, and pushed one tracker task at a time when requested.
 
 ## Current Milestone
 
-Phase 0: choose one original concept direction, one prototype plan, one initial engine path, and one risk-prioritized milestone backlog backed by validation evidence.
+Rift Road Phase 1: build the Stage 1 macOS playable prototype in Godot.
+
+## Run and Test
+
+- Run checks: `bash scripts/check.sh`
+- Run the game: `bash scripts/run_game.sh`
+- Run tests only: `python3 -m pytest tests -v`
+- Package macOS build: `bash scripts/package_macos.sh`
+
+Set `GODOT_BIN=/path/to/godot` if `godot` is not on `PATH`.
