@@ -7,10 +7,10 @@ Build an original macOS-first arcade-heritage action game that proves satisfying
 Wildcoil should deliver a controller-first, stage-based action game with immediate melee satisfaction, strong spectacle in the first three minutes, readable enemy intent, and a strange wilderness-plus-machine-ruin identity that feels original rather than referential.
 
 ## Current Milestone
-Phase 3 - MVP Expansion
+Keyboard-First External Beta Production
 
 ## Backlog Status
-The Phase 1 through release tasks below are the frozen MVP backlog. Only change them when playtest evidence or a documented risk review justifies it.
+The Phase 1 through tester-release tasks below are complete. The active production-readiness backlog is the keyboard-first external beta path, targeting an unsigned macOS beta build with cohesive self-authored presentation, keyboard-first playability, and external tester evidence before wider claims.
 
 ## Commit Gate
 - Complete one task at a time.
@@ -20,7 +20,76 @@ The Phase 1 through release tasks below are the frozen MVP backlog. Only change 
 
 ## PENDING
 
+### [PROD-01] Harden keyboard-first beta playability
+- Outcome: Make the full player flow readable and dependable with keyboard alone, including mission board navigation, character selection, deploy, combat, pause or resume, restart, fullscreen, options, and ending flow.
+- Validation:
+  - [ ] Player-facing prompts and release-facing docs prioritize keyboard controls.
+  - [ ] Automated input and runtime suites pass.
+  - [ ] Manual macOS smoke confirms the keyboard-only route flow works end-to-end.
+- Dependencies: [PROD-00]
+
+### [PROD-02] Prepare cohesive beta polish
+- Outcome: Remove debug-looking or prototype-only presentation from the normal player flow while keeping self-authored placeholder visuals and audio only where they read as intentional beta style.
+- Validation:
+  - [ ] Mission board, HUD, pause/options, first-run briefing, and ending copy read as beta-facing rather than debug-facing.
+  - [ ] The current test suite passes.
+  - [ ] Manual smoke confirms no UI copy or layout change blocks the keyboard flow.
+- Dependencies: [PROD-01]
+
+### [PROD-03] Harden unsigned macOS packaging
+- Outcome: Update the beta build label, package naming, checksum flow, isolated-save launch guidance, and unsigned macOS install notes for the keyboard-first beta.
+- Validation:
+  - [ ] Build label is `keyboard-beta-v1`.
+  - [ ] `scripts/package_macos.sh` produces `Wildcoil-keyboard-beta-v1-macos.zip` and a matching `.sha256` sidecar.
+  - [ ] README and release notes document unsigned launch guidance and known limitations.
+  - [ ] The current test suite passes.
+- Dependencies: [PROD-02]
+
+### [PROD-04] Record Computer Use release smoke evidence
+- Outcome: Launch the packaged app with an isolated save profile, inspect the macOS app window with Computer Use, confirm the mission board renders, verify visible keyboard-first state changes, and record the evidence.
+- Validation:
+  - [ ] Packaged app launches from the exported bundle with an isolated save profile.
+  - [ ] Computer Use inspection confirms the beta mission board renders.
+  - [ ] Smoke notes are recorded in the playtest and macOS build docs.
+  - [ ] The current test suite passes.
+- Dependencies: [PROD-03]
+
+### [PROD-05] Run external keyboard tester round
+- Outcome: Send the unsigned keyboard beta to at least 5 keyboard-first testers, collect feedback, and log install friction, first-combat clarity, cheap damage, performance/audio/windowing issues, replay desire, and originality comparisons.
+- Validation:
+  - [ ] At least 5 keyboard-first tester sessions are recorded, or the exact tester-availability blocker is documented.
+  - [ ] Repeated findings are reflected in the playtest log and risk register.
+  - [ ] Any release-blocking repeated issue is converted into a follow-up task before new scope is added.
+- Dependencies: [PROD-04]
+
+### [PROD-06] Apply evidence-driven beta patches
+- Outcome: Fix repeated keyboard-beta blockers before adding scope, prioritizing launch/install friction, keyboard confusion, unreadable combat, cheap damage, save/progression bugs, and performance regressions.
+- Validation:
+  - [ ] Each patch references the tester evidence or documented risk that justified it.
+  - [ ] Controller hardware issues remain documented but non-blocking for keyboard beta v1.
+  - [ ] The current test suite passes after every patch.
+- Dependencies: [PROD-05]
+
+### [PROD-07] Publish final keyboard beta release candidate
+- Outcome: Run the final regression, package the unsigned beta, publish `v0.2.0-keyboard-beta`, verify the hosted release asset, and record release-candidate evidence.
+- Validation:
+  - [ ] `./scripts/check.sh` passes.
+  - [ ] `./scripts/package_macos.sh` produces the final ZIP and checksum.
+  - [ ] The performance sample suite passes.
+  - [ ] Packaged-app keyboard smoke passes with an isolated save profile.
+  - [ ] Hosted ZIP download, checksum verification, unzip, and first-launch smoke pass.
+- Dependencies: [PROD-06]
+
 ## DONE
+
+### [PROD-00] Clear current tracker and baseline
+- Outcome: Confirm the tracker has no old pending tasks, run the baseline validation gate, and add the keyboard-first external beta production backlog.
+- Validation:
+  - [x] `to-do.md` had no existing pending tasks before the production backlog was added.
+  - [x] `./scripts/check.sh` passed with 23 tests on 2026-04-27.
+  - [x] The keyboard-first beta backlog is recorded using only `PENDING` and `DONE` task buckets.
+- Dependencies: None
+- Completed: 2026-04-27
 
 ### [REL-01] Publish the tester release
 - Outcome: Push the final code, create a release tag, attach the macOS build, and publish release notes plus install or known-issues guidance.
