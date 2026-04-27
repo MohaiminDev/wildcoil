@@ -8,6 +8,7 @@ const PLAYER_SCENE := preload("res://scenes/player.tscn")
 const BOSS_SCENE := preload("res://scenes/boss_brask_noll.tscn")
 
 var hero_id := "raya_flint"
+var stage_id := "sunset_overpass"
 var stage_data := {}
 var character_profiles := {}
 var boss_profiles := {}
@@ -22,17 +23,28 @@ var wave_index := -1
 var boss_started := false
 var complete := false
 var camera: Camera2D
+var animated_art: Array = []
+var stage_time := 0.0
+var biome_palette := {
+	"sky": Color(0.94, 0.46, 0.18),
+	"road": Color(0.16, 0.15, 0.15),
+	"accent": Color(0.2, 1.0, 0.58),
+	"shadow": Color(0.09, 0.13, 0.14, 0.45)
+}
 
 func _ready() -> void:
 	character_profiles = _load_profiles("res://data/characters.json", "heroes")
 	boss_profiles = _load_profiles("res://data/bosses.json", "bosses")
-	stage_data = _load_profiles("res://data/stages.json", "stages")["sunset_overpass"]
+	stage_data = _load_profiles("res://data/stages.json", "stages")[stage_id]
+	_apply_biome_palette()
 	_build_background()
 	_build_player()
 	_build_systems()
 	_start_next_wave()
 
-func _process(_delta: float) -> void:
+func _process(delta: float) -> void:
+	stage_time += delta
+	_animate_stage_art(delta)
 	if complete:
 		return
 	_handle_combat()
@@ -56,29 +68,30 @@ func _load_profiles(path: String, key: String) -> Dictionary:
 
 func _build_background() -> void:
 	var sky := ColorRect.new()
-	sky.color = Color(0.94, 0.46, 0.18)
+	sky.color = biome_palette["sky"]
 	sky.size = Vector2(1280, 720)
 	add_child(sky)
 	var sun := Polygon2D.new()
 	sun.polygon = _ellipse_points(Vector2(1040, 110), Vector2(88, 88), 36)
 	sun.color = Color(1.0, 0.78, 0.28, 0.85)
 	add_child(sun)
+	animated_art.append({"node": sun, "kind": "pulse", "base": sun.position, "speed": 0.45, "amount": 8.0})
 	_build_background_dinosaurs()
 	for i in range(6):
 		var ruin := ColorRect.new()
-		ruin.color = Color(0.20, 0.16, 0.22, 0.82)
+		ruin.color = biome_palette["shadow"]
 		ruin.position = Vector2(80 + i * 210, 210 + (i % 2) * 40)
 		ruin.size = Vector2(95, 220)
 		add_child(ruin)
 	_build_jungle_ruins()
 	var road := ColorRect.new()
-	road.color = Color(0.16, 0.15, 0.15)
+	road.color = biome_palette["road"]
 	road.position = Vector2(0, 330)
 	road.size = Vector2(1280, 300)
 	add_child(road)
 	for stripe in range(8):
 		var lane := ColorRect.new()
-		lane.color = Color(0.86, 0.74, 0.42, 0.55)
+		lane.color = biome_palette["accent"].lightened(0.35)
 		lane.position = Vector2(70 + stripe * 160, 462)
 		lane.size = Vector2(72, 7)
 		add_child(lane)
@@ -86,10 +99,43 @@ func _build_background() -> void:
 	_build_transport_cages()
 	for j in range(10):
 		var crystal := ColorRect.new()
-		crystal.color = Color(0.2, 1.0, 0.58, 0.76)
+		crystal.color = biome_palette["accent"]
 		crystal.position = Vector2(70 + j * 125, 585 - (j % 3) * 20)
 		crystal.size = Vector2(16, 42)
 		add_child(crystal)
+		animated_art.append({"node": crystal, "kind": "pulse", "base": crystal.position, "speed": 1.5 + j * 0.1, "amount": 8.0})
+
+func _apply_biome_palette() -> void:
+	match stage_data.get("biome", "sunset_highway"):
+		"blue_jungle":
+			biome_palette = {"sky": Color(0.05, 0.16, 0.28), "road": Color(0.07, 0.18, 0.16), "accent": Color(0.25, 1.0, 0.78), "shadow": Color(0.03, 0.24, 0.16, 0.82)}
+		"market_lanterns":
+			biome_palette = {"sky": Color(0.18, 0.12, 0.25), "road": Color(0.21, 0.15, 0.12), "accent": Color(1.0, 0.58, 0.22), "shadow": Color(0.16, 0.09, 0.12, 0.82)}
+		"crystal_canyon":
+			biome_palette = {"sky": Color(0.18, 0.24, 0.4), "road": Color(0.10, 0.11, 0.16), "accent": Color(0.45, 0.82, 1.0), "shadow": Color(0.12, 0.10, 0.18, 0.82)}
+		"volcanic_factory":
+			biome_palette = {"sky": Color(0.55, 0.12, 0.08), "road": Color(0.12, 0.08, 0.07), "accent": Color(1.0, 0.28, 0.08), "shadow": Color(0.22, 0.12, 0.09, 0.86)}
+		"storm_badlands":
+			biome_palette = {"sky": Color(0.23, 0.18, 0.36), "road": Color(0.20, 0.15, 0.11), "accent": Color(0.72, 0.32, 1.0), "shadow": Color(0.11, 0.10, 0.16, 0.82)}
+		"underground_roots":
+			biome_palette = {"sky": Color(0.03, 0.08, 0.16), "road": Color(0.06, 0.10, 0.11), "accent": Color(0.22, 0.92, 1.0), "shadow": Color(0.02, 0.18, 0.22, 0.82)}
+		"rift_citadel":
+			biome_palette = {"sky": Color(0.10, 0.06, 0.16), "road": Color(0.11, 0.10, 0.15), "accent": Color(1.0, 0.76, 0.24), "shadow": Color(0.18, 0.14, 0.22, 0.88)}
+		_:
+			biome_palette = {"sky": Color(0.94, 0.46, 0.18), "road": Color(0.16, 0.15, 0.15), "accent": Color(0.2, 1.0, 0.58), "shadow": Color(0.09, 0.13, 0.14, 0.45)}
+
+func _animate_stage_art(_delta: float) -> void:
+	for item in animated_art:
+		var node = item["node"]
+		if node == null or not is_instance_valid(node):
+			continue
+		var kind: String = str(item["kind"])
+		if kind == "drift":
+			node.position.x = item["base"].x + sin(stage_time * item["speed"] + item.get("phase", 0.0)) * item["amount"]
+		elif kind == "pulse":
+			var glow := 0.65 + sin(stage_time * item["speed"]) * 0.25
+			if node is CanvasItem:
+				node.modulate = Color(1.0, 1.0, 1.0, glow)
 
 func _build_sundrifter() -> void:
 	var crawler := Node2D.new()
@@ -114,6 +160,7 @@ func _build_sundrifter() -> void:
 		hub.polygon = _ellipse_points(Vector2(wheel_x, 38), Vector2(12, 12), 16)
 		hub.color = Color(0.82, 0.78, 0.58)
 		crawler.add_child(hub)
+	animated_art.append({"node": crawler, "kind": "drift", "base": crawler.position, "speed": 0.9, "amount": 18.0})
 
 func _build_transport_cages() -> void:
 	for i in range(3):
@@ -137,6 +184,7 @@ func _build_transport_cages() -> void:
 		eye.size = Vector2(10, 5)
 		eye.color = Color(0.2, 1.0, 0.55)
 		cage.add_child(eye)
+		animated_art.append({"node": eye, "kind": "pulse", "base": eye.position, "speed": 2.0 + i, "amount": 2.0})
 
 func _build_background_dinosaurs() -> void:
 	for i in range(3):
@@ -152,6 +200,7 @@ func _build_background_dinosaurs() -> void:
 		])
 		dino.color = Color(0.09, 0.13, 0.14, 0.45)
 		add_child(dino)
+		animated_art.append({"node": dino, "kind": "drift", "base": dino.position, "speed": 0.25 + i * 0.08, "amount": 20.0})
 
 func _build_jungle_ruins() -> void:
 	for i in range(9):
@@ -160,6 +209,7 @@ func _build_jungle_ruins() -> void:
 		vine.size = Vector2(8, 160 + (i % 3) * 30)
 		vine.color = Color(0.08, 0.42, 0.16, 0.72)
 		add_child(vine)
+		animated_art.append({"node": vine, "kind": "drift", "base": vine.position, "speed": 0.5 + i * 0.07, "amount": 4.0})
 	for i in range(5):
 		var sign := ColorRect.new()
 		sign.position = Vector2(150 + i * 230, 300)
@@ -207,7 +257,7 @@ func _start_next_wave() -> void:
 	for enemy in enemies:
 		enemy.defeated.connect(_on_enemy_defeated)
 		enemy.attack_landed.connect(_on_enemy_attack)
-	hud.show_notice("Wave %d | Iron Veil roadblock" % [wave_index + 1])
+	hud.show_notice("%s\nWave %d" % [stage_data["title"], wave_index + 1])
 
 func _start_boss() -> void:
 	boss_started = true
@@ -219,7 +269,7 @@ func _start_boss() -> void:
 	boss.attack_landed.connect(func(amount): player.apply_damage(amount, boss.position.x))
 	boss.summon_requested.connect(_summon_boss_grunts)
 	add_child(boss)
-	hud.show_notice("Brask Noll blocks the road.")
+	hud.show_notice("%s enters!" % boss.display_name)
 
 func _summon_boss_grunts() -> void:
 	var adds: Array = wave_spawner.spawn_wave(self, ["iron_veil_grunt", "iron_veil_runner"], player, boss.position.x - 160.0)

@@ -74,7 +74,9 @@ func apply_damage(amount: int, source_x: float) -> void:
 	queue_redraw()
 
 func _draw() -> void:
-	if species == "creature":
+	if species == "machine":
+		_draw_machine_enemy()
+	elif species == "creature":
 		_draw_creature_enemy()
 	else:
 		_draw_human_enemy()
@@ -85,6 +87,12 @@ func _draw_human_enemy() -> void:
 		color = Color(0.38, 0.52, 0.74)
 	elif enemy_id == "iron_veil_brute":
 		color = Color(0.48, 0.16, 0.14)
+	elif enemy_id == "shield_guard":
+		color = Color(0.24, 0.32, 0.44)
+	elif enemy_id == "scrap_hurler":
+		color = Color(0.52, 0.38, 0.20)
+	elif enemy_id == "elite_commando":
+		color = Color(0.12, 0.12, 0.16)
 	if hurt_flash > 0.0:
 		color = Color(1.0, 0.9, 0.5)
 	var scale_boost := 1.25 if enemy_id == "iron_veil_brute" else 1.0
@@ -99,6 +107,14 @@ func _draw_human_enemy() -> void:
 	if enemy_id == "iron_veil_brute":
 		draw_rect(Rect2(Vector2(20, -61), Vector2(38, 9)), Color(0.6, 0.6, 0.64))
 		draw_rect(Rect2(Vector2(46, -67), Vector2(12, 22)), Color(0.42, 0.42, 0.45))
+	elif enemy_id == "shield_guard":
+		draw_rect(Rect2(Vector2(20, -60), Vector2(15, 44)), Color(0.62, 0.64, 0.68))
+	elif enemy_id == "scrap_hurler":
+		draw_circle(Vector2(43, -48), 9, Color(0.55, 0.55, 0.58))
+	elif enemy_id == "drone_tech" or enemy_id == "bio_handler":
+		draw_circle(Vector2(36, -48), 10, Color(0.25, 0.95, 0.65, 0.8))
+	elif enemy_id == "elite_commando":
+		draw_line(Vector2(-28, -66), Vector2(28, -20), Color(1.0, 0.72, 0.18), 4.0)
 	elif enemy_id == "iron_veil_runner":
 		draw_line(Vector2(18, -50), Vector2(48, -26), Color(0.82, 0.82, 0.86), 4.0)
 	else:
@@ -107,11 +123,27 @@ func _draw_human_enemy() -> void:
 		draw_rect(Rect2(Vector2(-28, -58), Vector2(56, 60)), Color(1.0, 0.08, 0.04, 0.25))
 
 func _draw_creature_enemy() -> void:
-	var color := Color(0.18, 0.7, 0.34) if enemy_id == "frightened_raptorling" else Color(0.75, 0.58, 0.22)
+	var color := Color(0.18, 0.7, 0.34)
+	if enemy_id == "hornbeak_dinosaur":
+		color = Color(0.75, 0.58, 0.22)
+	elif enemy_id == "ashscale_dinosaur":
+		color = Color(0.52, 0.18, 0.12)
+	elif enemy_id == "cliff_glider":
+		color = Color(0.35, 0.52, 0.78)
+	elif enemy_id == "crystal_leech":
+		color = Color(0.15, 0.9, 0.88)
+	elif enemy_id == "echo_raptor":
+		color = Color(0.18, 0.55, 0.86)
 	if hurt_flash > 0.0:
 		color = Color(1.0, 0.9, 0.5)
 	_draw_flat_ellipse(Vector2(0, -2), Vector2(32, 8), Color(0.0, 0.0, 0.0, 0.28))
-	if enemy_id == "hornbeak_dinosaur":
+	if enemy_id == "crystal_leech":
+		draw_circle(Vector2(0, -30), 20, color)
+		draw_circle(Vector2(15, -34), 5, Color(0.95, 1.0, 0.75))
+	elif enemy_id == "cliff_glider":
+		draw_polygon([Vector2(-58, -40), Vector2(0, -70), Vector2(58, -40), Vector2(12, -28), Vector2(0, -48), Vector2(-12, -28)], [color])
+		draw_circle(Vector2(12, -52), 4, Color(0.03, 0.03, 0.03))
+	elif enemy_id == "hornbeak_dinosaur" or enemy_id == "ashscale_dinosaur":
 		draw_polygon([Vector2(-42, -42), Vector2(12, -64), Vector2(54, -42), Vector2(23, -20), Vector2(-28, -18)], [color])
 		draw_polygon([Vector2(42, -55), Vector2(78, -48), Vector2(44, -38)], [Color(1.0, 0.8, 0.24)])
 		draw_circle(Vector2(28, -54), 5, Color(0.04, 0.04, 0.04))
@@ -127,6 +159,18 @@ func _draw_creature_enemy() -> void:
 		draw_polygon([Vector2(-29, -34), Vector2(-58, -28), Vector2(-31, -23)], [color.darkened(0.2)])
 	if telegraph_timer > 0.0:
 		draw_circle(Vector2(0, -38), 44, Color(1.0, 0.1, 0.04, 0.22))
+
+func _draw_machine_enemy() -> void:
+	var color := Color(0.35, 0.38, 0.42)
+	if hurt_flash > 0.0:
+		color = Color(1.0, 0.9, 0.5)
+	_draw_flat_ellipse(Vector2(0, -2), Vector2(24, 7), Color(0, 0, 0, 0.28))
+	draw_polygon([Vector2(-25, -38), Vector2(0, -58), Vector2(25, -38), Vector2(20, -18), Vector2(-20, -18)], [color])
+	draw_circle(Vector2(0, -38), 10, Color(0.2, 1.0, 0.72))
+	for leg in [-24, -12, 12, 24]:
+		draw_line(Vector2(0, -24), Vector2(leg, -2), Color(0.12, 0.12, 0.14), 4.0)
+	if telegraph_timer > 0.0:
+		draw_circle(Vector2(0, -36), 36, Color(1.0, 0.1, 0.04, 0.22))
 
 func _draw_flat_ellipse(center: Vector2, radius: Vector2, color: Color) -> void:
 	var points := []

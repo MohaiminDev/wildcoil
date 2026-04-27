@@ -1,64 +1,19 @@
 {
   "enemies": [
-    {
-      "id": "iron_veil_grunt",
-      "name": "Iron Veil Grunt",
-      "species": "human",
-      "behavior": "basic_melee",
-      "max_health": 42,
-      "move_speed": 145,
-      "attack_damage": 8,
-      "attack_range": 54,
-      "telegraph_seconds": 0.22,
-      "score": 100
-    },
-    {
-      "id": "iron_veil_runner",
-      "name": "Iron Veil Runner",
-      "species": "human",
-      "behavior": "fast_melee",
-      "max_health": 30,
-      "move_speed": 215,
-      "attack_damage": 6,
-      "attack_range": 48,
-      "telegraph_seconds": 0.12,
-      "score": 125
-    },
-    {
-      "id": "iron_veil_brute",
-      "name": "Iron Veil Brute",
-      "species": "human",
-      "behavior": "slow_grabber",
-      "max_health": 86,
-      "move_speed": 105,
-      "attack_damage": 16,
-      "attack_range": 66,
-      "telegraph_seconds": 0.48,
-      "score": 250
-    },
-    {
-      "id": "frightened_raptorling",
-      "name": "Frightened Raptorling",
-      "species": "creature",
-      "behavior": "panicked_nearest_target",
-      "max_health": 34,
-      "move_speed": 240,
-      "attack_damage": 7,
-      "attack_range": 46,
-      "telegraph_seconds": 0.16,
-      "score": 80
-    },
-    {
-      "id": "hornbeak_dinosaur",
-      "name": "Hornbeak Dinosaur",
-      "species": "creature",
-      "behavior": "territorial_charge",
-      "max_health": 72,
-      "move_speed": 175,
-      "attack_damage": 14,
-      "attack_range": 72,
-      "telegraph_seconds": 0.38,
-      "score": 180
-    }
+    {"id": "iron_veil_grunt", "name": "Iron Veil Grunt", "species": "human", "behavior": "basic_melee", "max_health": 42, "move_speed": 145, "attack_damage": 8, "attack_range": 54, "telegraph_seconds": 0.22, "score": 100},
+    {"id": "iron_veil_runner", "name": "Iron Veil Runner", "species": "human", "behavior": "fast_melee", "max_health": 30, "move_speed": 215, "attack_damage": 6, "attack_range": 48, "telegraph_seconds": 0.12, "score": 125},
+    {"id": "iron_veil_brute", "name": "Iron Veil Brute", "species": "human", "behavior": "slow_grabber", "max_health": 86, "move_speed": 105, "attack_damage": 16, "attack_range": 66, "telegraph_seconds": 0.48, "score": 250},
+    {"id": "shield_guard", "name": "Iron Veil Shield Guard", "species": "human", "behavior": "front_blocker", "max_health": 68, "move_speed": 118, "attack_damage": 10, "attack_range": 60, "telegraph_seconds": 0.34, "score": 170},
+    {"id": "scrap_hurler", "name": "Scrap Hurler", "species": "human", "behavior": "ranged_thrower", "max_health": 38, "move_speed": 132, "attack_damage": 9, "attack_range": 190, "telegraph_seconds": 0.42, "score": 160},
+    {"id": "bio_handler", "name": "Bio-Tech Handler", "species": "human", "behavior": "creature_support", "max_health": 44, "move_speed": 126, "attack_damage": 7, "attack_range": 76, "telegraph_seconds": 0.28, "score": 190},
+    {"id": "drone_tech", "name": "Drone Tech", "species": "human", "behavior": "summoner", "max_health": 46, "move_speed": 116, "attack_damage": 8, "attack_range": 132, "telegraph_seconds": 0.45, "score": 210},
+    {"id": "elite_commando", "name": "Iron Veil Elite", "species": "human", "behavior": "mixed_attacker", "max_health": 92, "move_speed": 172, "attack_damage": 15, "attack_range": 64, "telegraph_seconds": 0.24, "score": 320},
+    {"id": "frightened_raptorling", "name": "Frightened Raptorling", "species": "creature", "behavior": "panicked_nearest_target", "max_health": 34, "move_speed": 240, "attack_damage": 7, "attack_range": 46, "telegraph_seconds": 0.16, "score": 80},
+    {"id": "hornbeak_dinosaur", "name": "Hornbeak Dinosaur", "species": "creature", "behavior": "territorial_charge", "max_health": 72, "move_speed": 175, "attack_damage": 14, "attack_range": 72, "telegraph_seconds": 0.38, "score": 180},
+    {"id": "ashscale_dinosaur", "name": "Ashscale Dinosaur", "species": "creature", "behavior": "armored_biter", "max_health": 96, "move_speed": 112, "attack_damage": 18, "attack_range": 70, "telegraph_seconds": 0.48, "score": 280},
+    {"id": "cliff_glider", "name": "Cliff Glider", "species": "creature", "behavior": "swoop", "max_health": 36, "move_speed": 230, "attack_damage": 8, "attack_range": 62, "telegraph_seconds": 0.18, "score": 150},
+    {"id": "crystal_leech", "name": "Crystal Leech", "species": "creature", "behavior": "swarm", "max_health": 24, "move_speed": 205, "attack_damage": 5, "attack_range": 34, "telegraph_seconds": 0.1, "score": 70},
+    {"id": "echo_raptor", "name": "Echo Raptor", "species": "creature", "behavior": "sound_reactive", "max_health": 74, "move_speed": 245, "attack_damage": 13, "attack_range": 60, "telegraph_seconds": 0.2, "score": 260},
+    {"id": "drone_mite", "name": "Drone Mite", "species": "machine", "behavior": "skittering_machine", "max_health": 28, "move_speed": 220, "attack_damage": 6, "attack_range": 42, "telegraph_seconds": 0.14, "score": 110}
   ]
 }

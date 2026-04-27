@@ -1,16 +1,12 @@
 {
   "bosses": [
-    {
-      "id": "brask_noll",
-      "name": "Brask Noll",
-      "max_health": 360,
-      "move_speed": 135,
-      "attack_damage": 20,
-      "phase_change_health_ratio": 0.5,
-      "moves": ["axe_swing", "ground_slam", "charge", "summon_grunts", "double_swing"],
-      "stun_condition": "charge_hits_wall",
-      "score": 1500
-    }
+    {"id": "brask_noll", "name": "Brask Noll", "palette": "steel_red", "arena_hazard": "collapsing_overpass", "max_health": 360, "move_speed": 135, "attack_damage": 20, "phase_change_health_ratio": 0.5, "moves": ["axe_swing", "ground_slam", "charge", "summon_grunts", "double_swing"], "stun_condition": "charge_hits_wall", "score": 1500},
+    {"id": "glassback", "name": "The Glassback", "palette": "crystal_green", "arena_hazard": "sleep_spores", "max_health": 420, "move_speed": 108, "attack_damage": 18, "phase_change_health_ratio": 0.5, "moves": ["tail_sweep", "crystal_roll", "spore_burst", "armor_slam"], "stun_condition": "control_device_exposed", "score": 1700},
+    {"id": "sable_rin", "name": "Sable Rin", "palette": "market_violet", "arena_hazard": "smoke_bombs", "max_health": 380, "move_speed": 245, "attack_damage": 17, "phase_change_health_ratio": 0.5, "moves": ["hook_pull", "wall_jump", "dash_slash", "smoke_escape"], "stun_condition": "missed_hook", "score": 1800},
+    {"id": "rail_maw", "name": "The Rail Maw", "palette": "rail_iron", "arena_hazard": "moving_train", "max_health": 500, "move_speed": 90, "attack_damage": 22, "phase_change_health_ratio": 0.5, "moves": ["front_ram", "steam_burst", "drone_panels", "overheat"], "stun_condition": "overheated_core", "score": 2100},
+    {"id": "vorrak", "name": "Vorrak", "palette": "ash_exoframe", "arena_hazard": "molten_channels", "max_health": 520, "move_speed": 128, "attack_damage": 24, "phase_change_health_ratio": 0.5, "moves": ["shield_wall", "grapple_throw", "missile_stomp", "armor_break"], "stun_condition": "broken_exoframe", "score": 2300},
+    {"id": "klade_mobile_lab", "name": "Klade's Mobile Lab", "palette": "storm_lab", "arena_hazard": "lightning_chase", "max_health": 560, "move_speed": 100, "attack_damage": 21, "phase_change_health_ratio": 0.5, "moves": ["turret_sweep", "mine_drop", "release_beasts", "control_tower"], "stun_condition": "exposed_control_tower", "score": 2500},
+    {"id": "echo_queen", "name": "The Echo Queen", "palette": "underroot_blue", "arena_hazard": "sound_sensitive_nest", "max_health": 540, "move_speed": 210, "attack_damage": 23, "phase_change_health_ratio": 0.5, "moves": ["nest_guard", "scream_wave", "pounce", "crystal_guard"], "stun_condition": "mutation_crystals_destroyed", "score": 2600},
+    {"id": "mara_deep_crown", "name": "Mara Voss and the Deep Crown", "palette": "gold_luma", "arena_hazard": "rift_collapse", "max_health": 700, "move_speed": 175, "attack_damage": 26, "phase_change_health_ratio": 0.5, "moves": ["gauntlet_slash", "energy_shield", "elite_call", "laser_sweep", "power_nodes"], "stun_condition": "three_power_nodes", "score": 4000}
   ]
 }
-
