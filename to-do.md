@@ -31,6 +31,15 @@ None currently. Next work should be playtest, tuning, or replacing placeholder a
 
 ## DONE
 
+### [RR-P1-14] Add real brawler fight presentation and win feedback
+- Outcome: Added runtime fight cards, scenario objectives, boss intro banners, arena boundary markers, hit sparks, attack arcs, damage numbers, combo HUD feedback, camera punch, stronger enemy behavior differences, boss move telegraphs, and explicit win conditions for every stage.
+- Validation:
+  - [x] `python3 -m pytest tests/test_brawler_presentation.py -v` passes.
+  - [x] `godot --path src/wildcoil --headless --quit-after 3` launches without script errors.
+  - [x] `bash scripts/check.sh` passes.
+- Dependencies: [RR-P1-13]
+- Completed: 2026-04-27
+
 ### [RR-P1-13] Upgrade arcade aesthetics and presentation
 - Outcome: Added animated biome backdrops, stronger title presentation, hero select cards, Sundrifter title art, character motion smears, sprite outlines, and luma enemy highlights so the prototype reads more like an arcade action game instead of a collision-box prototype.
 - Validation:

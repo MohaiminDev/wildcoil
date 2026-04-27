@@ -32,6 +32,9 @@ var jump_timer := 0.0
 var fake_height := 0.0
 var is_knocked_down := false
 var animation_time := 0.0
+var attack_step := 0
+var combo_count := 0
+var combo_timer := 0.0
 
 func setup(profile: Dictionary) -> void:
 	hero_id = profile.get("id", hero_id)
@@ -71,7 +74,7 @@ func _physics_process(delta: float) -> void:
 		jump_timer = 0.52
 
 	if Input.is_key_pressed(KEY_J) and attack_timer <= 0.0:
-		attack_timer = 0.30
+		_start_light_attack()
 
 	if Input.is_key_pressed(KEY_L) and special_timer <= 0.0 and special_meter >= special_cost:
 		special_meter -= special_cost
@@ -85,12 +88,19 @@ func _physics_process(delta: float) -> void:
 	z_index = int(position.y)
 	queue_redraw()
 
+func _start_light_attack() -> void:
+	attack_step = (attack_step % 3) + 1
+	attack_timer = 0.24 + float(attack_step) * 0.04
+
 func _tick_timers(delta: float) -> void:
 	dash_timer = maxf(dash_timer - delta, 0.0)
 	dash_cooldown = maxf(dash_cooldown - delta, 0.0)
 	attack_timer = maxf(attack_timer - delta, 0.0)
 	special_timer = maxf(special_timer - delta, 0.0)
 	invulnerable_timer = maxf(invulnerable_timer - delta, 0.0)
+	combo_timer = maxf(combo_timer - delta, 0.0)
+	if combo_timer <= 0.0:
+		combo_count = 0
 	if jump_timer > 0.0:
 		jump_timer = maxf(jump_timer - delta, 0.0)
 		var progress := 1.0 - (jump_timer / 0.52)
@@ -105,7 +115,8 @@ func is_special_active() -> bool:
 	return special_timer > 0.08 and special_timer < 0.30
 
 func attack_rect() -> Rect2:
-	return Rect2(Vector2(position.x + facing * 18.0 - 22.0, position.y - 52.0 - fake_height), Vector2(64, 48))
+	var width := 64.0 + float(attack_step) * 8.0
+	return Rect2(Vector2(position.x + facing * 18.0 - 22.0, position.y - 52.0 - fake_height), Vector2(width, 48))
 
 func body_rect() -> Rect2:
 	return Rect2(position - Vector2(BODY_SIZE.x * 0.5, BODY_SIZE.y), BODY_SIZE)
@@ -123,6 +134,15 @@ func apply_damage(amount: int, source_x: float) -> void:
 func add_meter(amount: int) -> void:
 	special_meter = mini(special_meter + amount, 100)
 
+func register_hit() -> void:
+	combo_count += 1
+	combo_timer = 1.45
+	add_meter(4 + mini(combo_count, 8))
+	score += combo_count * 3
+
+func current_attack_damage() -> int:
+	return attack_damage + attack_step * 3
+
 func heal(amount: int) -> void:
 	health = mini(health + amount, max_health)
 	queue_redraw()
@@ -137,8 +157,10 @@ func _draw() -> void:
 		_draw_nika(alpha, bob)
 	else:
 		_draw_raya(alpha, bob)
+	_draw_combo_charge(alpha)
 	if is_attack_active():
-		draw_rect(Rect2(Vector2(facing * 18 - 22, -52 - fake_height), Vector2(64, 48)), Color(1.0, 0.82, 0.25, 0.35))
+		var arc_color := Color(1.0, 0.82, 0.25, 0.38) if attack_step < 3 else Color(1.0, 0.42, 0.18, 0.46)
+		draw_rect(Rect2(Vector2(facing * 18 - 22, -52 - fake_height), Vector2(64 + attack_step * 8, 48)), arc_color)
 	if is_special_active():
 		draw_circle(Vector2(0, -30 - fake_height), 76.0, Color(0.56, 0.88, 1.0, 0.25))
 
@@ -160,6 +182,13 @@ func _draw_motion_smear(alpha: float) -> void:
 	for i in range(3):
 		var back := -facing * float(i + 1) * 13.0
 		draw_polygon([Vector2(back - 18, -62 - fake_height), Vector2(back + 20, -56 - fake_height), Vector2(back + 12, -22 - fake_height), Vector2(back - 25, -28 - fake_height)], [smear_color])
+
+func _draw_combo_charge(alpha: float) -> void:
+	if combo_count < 2:
+		return
+	var pulse := 0.35 + sin(animation_time * 18.0) * 0.18
+	var color := Color(0.24, 0.92, 1.0, pulse * alpha)
+	draw_arc(Vector2(0, -48 - fake_height), 42.0 + mini(combo_count, 8), 0.0, TAU, 28, color, 3.0)
 
 func _draw_raya(alpha: float, bob: float) -> void:
 	var y := -fake_height + bob

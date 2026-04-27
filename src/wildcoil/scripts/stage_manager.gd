@@ -7,6 +7,7 @@ signal game_over
 const PLAYER_SCENE := preload("res://scenes/player.tscn")
 const BOSS_SCENE := preload("res://scenes/boss_brask_noll.tscn")
 const StageBackdrop := preload("res://scripts/stage_backdrop.gd")
+const ArcadeCombatFx := preload("res://scripts/arcade_combat_fx.gd")
 
 var hero_id := "raya_flint"
 var stage_id := "sunset_overpass"
@@ -18,6 +19,7 @@ var hud
 var debug_overlay
 var pickup_manager
 var wave_spawner
+var combat_fx: ArcadeCombatFx
 var enemies: Array = []
 var boss
 var wave_index := -1
@@ -26,6 +28,10 @@ var complete := false
 var camera: Camera2D
 var animated_art: Array = []
 var stage_time := 0.0
+var active_arena_markers: Array = []
+var hit_registry := {}
+var camera_punch_timer := 0.0
+var camera_punch_strength := 0.0
 var biome_palette := {
 	"sky": Color(0.94, 0.46, 0.18),
 	"road": Color(0.16, 0.15, 0.15),
@@ -46,6 +52,7 @@ func _ready() -> void:
 func _process(delta: float) -> void:
 	stage_time += delta
 	_animate_stage_art(delta)
+	_tick_camera_punch(delta)
 	if complete:
 		return
 	_handle_combat()
@@ -58,6 +65,7 @@ func _process(delta: float) -> void:
 	if boss_started and (boss == null or not is_instance_valid(boss)) and not complete:
 		complete = true
 		hud.show_notice(stage_data["ending_cutscene"])
+		_spawn_victory_banner(stage_data["ending_cutscene"])
 		stage_completed.emit(stage_data["ending_cutscene"])
 
 func _load_profiles(path: String, key: String) -> Dictionary:
@@ -233,9 +241,12 @@ func _build_systems() -> void:
 	add_child(pickup_manager)
 	hud = load("res://scripts/hud_controller.gd").new()
 	add_child(hud)
+	combat_fx = ArcadeCombatFx.new()
+	add_child(combat_fx)
 	debug_overlay = load("res://scripts/debug_overlay.gd").new()
 	add_child(debug_overlay)
 	hud.show_notice(stage_data["opening_cutscene"])
+	hud.update_objective(stage_data.get("scenario_goal", "Win the fight"))
 
 func _start_next_wave() -> void:
 	wave_index += 1
@@ -244,14 +255,16 @@ func _start_next_wave() -> void:
 		_start_boss()
 		return
 	var wave: Dictionary = waves[wave_index]
+	_build_arena_boundaries(float(wave["arena_x"]))
 	enemies = wave_spawner.spawn_wave(self, wave["enemies"], player, float(wave["arena_x"]))
 	for enemy in enemies:
 		enemy.defeated.connect(_on_enemy_defeated)
 		enemy.attack_landed.connect(_on_enemy_attack)
-	hud.show_notice("%s\nWave %d" % [stage_data["title"], wave_index + 1])
+	_show_wave_objective(wave_index)
 
 func _start_boss() -> void:
 	boss_started = true
+	_clear_arena_boundaries()
 	boss = BOSS_SCENE.instantiate()
 	boss.setup(boss_profiles[stage_data["boss_id"]])
 	boss.position = Vector2(940, 500)
@@ -260,7 +273,7 @@ func _start_boss() -> void:
 	boss.attack_landed.connect(func(amount): player.apply_damage(amount, boss.position.x))
 	boss.summon_requested.connect(_summon_boss_grunts)
 	add_child(boss)
-	hud.show_notice("%s enters!" % boss.display_name)
+	_show_boss_intro()
 
 func _summon_boss_grunts() -> void:
 	var adds: Array = wave_spawner.spawn_wave(self, ["iron_veil_grunt", "iron_veil_runner"], player, boss.position.x - 160.0)
@@ -270,18 +283,34 @@ func _summon_boss_grunts() -> void:
 	enemies.append_array(adds)
 
 func _handle_combat() -> void:
+	if not player.is_attack_active() and not player.is_special_active():
+		hit_registry.clear()
+		return
 	if player.is_attack_active() or player.is_special_active():
+		combat_fx.spawn_attack_arc(_world_to_screen(player.position + Vector2(player.facing * 34, -48)), player.facing)
 		for enemy in enemies.duplicate():
 			if enemy != null and is_instance_valid(enemy) and player.attack_rect().intersects(enemy.body_rect()):
-				enemy.apply_damage(player.attack_damage, player.position.x)
-				player.add_meter(6)
+				var key := "enemy_%d" % enemy.get_instance_id()
+				if hit_registry.has(key):
+					continue
+				hit_registry[key] = true
+				var damage: int = player.special_damage if player.is_special_active() else player.current_attack_damage()
+				enemy.apply_damage(damage, player.position.x)
+				player.register_hit()
+				_spawn_hit_feedback(enemy.position + Vector2(0, -46), damage, player.is_special_active())
 		if boss != null and is_instance_valid(boss):
 			var hit_rect: Rect2 = player.attack_rect()
 			if player.is_special_active():
 				hit_rect = Rect2(player.position - Vector2(84, 104), Vector2(168, 168))
 			if hit_rect.intersects(boss.body_rect()):
-				boss.apply_damage(player.special_damage if player.is_special_active() else player.attack_damage, player.position.x)
-				player.add_meter(8)
+				var boss_key := "boss_%d" % boss.get_instance_id()
+				if hit_registry.has(boss_key):
+					return
+				hit_registry[boss_key] = true
+				var boss_damage: int = player.special_damage if player.is_special_active() else player.current_attack_damage()
+				boss.apply_damage(boss_damage, player.position.x)
+				player.register_hit()
+				_spawn_hit_feedback(boss.position + Vector2(0, -72), boss_damage, true)
 
 func _on_enemy_defeated(enemy) -> void:
 	player.score += enemy.score_value
@@ -290,6 +319,8 @@ func _on_enemy_defeated(enemy) -> void:
 
 func _on_enemy_attack(enemy, amount: int) -> void:
 	player.apply_damage(amount, enemy.position.x)
+	combat_fx.spawn_hit_spark(_world_to_screen(player.position + Vector2(0, -48)), Color(1.0, 0.18, 0.08), false)
+	_apply_camera_punch(4.0)
 
 func _on_boss_defeated() -> void:
 	player.score += 1500
@@ -301,3 +332,64 @@ func _living_enemy_count() -> int:
 		if enemy != null and is_instance_valid(enemy):
 			count += 1
 	return count
+
+func _show_wave_objective(next_wave_index: int) -> void:
+	var objective: String = stage_data.get("scenario_goal", "Defeat the enemy wave")
+	hud.update_objective("%s | Wave %d/%d" % [objective, next_wave_index + 1, stage_data["waves"].size()])
+	hud.show_notice("%s\nWave %d" % [stage_data["title"], next_wave_index + 1])
+	combat_fx.show_stage_card(stage_data["title"], objective, next_wave_index)
+
+func _show_boss_intro() -> void:
+	var boss_goal: String = stage_data.get("win_condition", "Defeat the boss")
+	hud.update_objective(boss_goal)
+	hud.show_notice("%s enters! %s" % [boss.display_name, boss_goal])
+	combat_fx.show_boss_intro(boss.display_name, boss.arena_hazard)
+	_apply_camera_punch(9.0)
+
+func _spawn_hit_feedback(world_position: Vector2, damage: int, big: bool) -> void:
+	var screen_position := _world_to_screen(world_position)
+	combat_fx.spawn_hit_spark(screen_position, Color(1.0, 0.76, 0.18), big)
+	combat_fx.spawn_damage_number(screen_position, damage, player.combo_count)
+	_apply_camera_punch(7.0 if big else 3.0)
+
+func _spawn_victory_banner(text: String) -> void:
+	combat_fx.show_victory_banner(text)
+
+func _world_to_screen(world_position: Vector2) -> Vector2:
+	return get_global_transform_with_canvas() * world_position
+
+func _apply_camera_punch(strength: float) -> void:
+	camera_punch_timer = 0.16
+	camera_punch_strength = maxf(camera_punch_strength, strength)
+
+func _tick_camera_punch(delta: float) -> void:
+	if camera == null:
+		return
+	if camera_punch_timer <= 0.0:
+		camera.offset = Vector2.ZERO
+		camera_punch_strength = 0.0
+		return
+	camera_punch_timer = maxf(camera_punch_timer - delta, 0.0)
+	camera.offset = Vector2(randf_range(-camera_punch_strength, camera_punch_strength), randf_range(-camera_punch_strength, camera_punch_strength))
+
+func _build_arena_boundaries(arena_x: float) -> void:
+	_clear_arena_boundaries()
+	for side in [-1, 1]:
+		var marker := ColorRect.new()
+		marker.color = Color(0.9, 0.28, 0.08, 0.35)
+		marker.position = Vector2(arena_x + side * 250.0, 330)
+		marker.size = Vector2(8, 290)
+		add_child(marker)
+		active_arena_markers.append(marker)
+		var glow := ColorRect.new()
+		glow.color = biome_palette["accent"].lightened(0.25)
+		glow.position = marker.position + Vector2(-4, 0)
+		glow.size = Vector2(16, 290)
+		add_child(glow)
+		active_arena_markers.append(glow)
+
+func _clear_arena_boundaries() -> void:
+	for marker in active_arena_markers:
+		if marker != null and is_instance_valid(marker):
+			marker.queue_free()
+	active_arena_markers.clear()

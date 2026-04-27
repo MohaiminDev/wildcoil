@@ -110,9 +110,9 @@ func _draw() -> void:
 	draw_line(Vector2(-42, -72), Vector2(-78, -38), Color(0.46, 0.47, 0.5), 10.0)
 	_draw_hydraulic_axe()
 	_draw_boss_signature()
+	_draw_boss_portrait_read()
 	if telegraph_timer > 0.0:
-		var danger := Color(1.0, 0.1, 0.04, 0.28)
-		draw_rect(Rect2(Vector2(-72, -92), Vector2(144, 96)), danger)
+		_draw_move_telegraph()
 	if stunned_timer > 0.0:
 		draw_circle(Vector2(0, -112), 16.0, Color(0.8, 0.92, 1.0, 0.6))
 
@@ -165,6 +165,29 @@ func _draw_hydraulic_axe() -> void:
 	draw_polygon([Vector2(96, -88), Vector2(130, -68), Vector2(95, -48)], [Color(0.82, 0.82, 0.86)])
 	draw_polygon([Vector2(93, -86), Vector2(68, -68), Vector2(93, -50)], [Color(0.5, 0.52, 0.56)])
 	draw_circle(Vector2(80, -70), 5, Color(1.0, 0.72, 0.18))
+
+func _draw_move_telegraph() -> void:
+	match active_move:
+		"charge":
+			draw_rect(Rect2(Vector2(-180, -72), Vector2(360, 66)), Color(1.0, 0.18, 0.08, 0.20))
+			draw_line(Vector2(-155, -38), Vector2(155, -38), Color(1.0, 0.32, 0.15, 0.72), 7.0)
+		"ground_slam":
+			for radius in [42.0, 78.0, 114.0]:
+				draw_arc(Vector2.ZERO, radius, 0.0, TAU, 32, Color(1.0, 0.58, 0.12, 0.36), 5.0)
+		"summon_grunts":
+			draw_circle(Vector2(-78, -46), 22.0, Color(0.25, 1.0, 0.7, 0.32))
+			draw_circle(Vector2(78, -46), 22.0, Color(0.25, 1.0, 0.7, 0.32))
+		"double_swing":
+			draw_arc(Vector2(0, -58), 108.0, -2.8, 0.3, 24, Color(1.0, 0.2, 0.08, 0.45), 10.0)
+			draw_arc(Vector2(0, -58), 88.0, -0.2, 2.9, 24, Color(1.0, 0.72, 0.12, 0.34), 7.0)
+		_:
+			draw_rect(Rect2(Vector2(-72, -92), Vector2(144, 96)), Color(1.0, 0.1, 0.04, 0.28))
+
+func _draw_boss_portrait_read() -> void:
+	var glow := Color(1.0, 0.72, 0.18, 0.42) if phase_two else Color(0.95, 0.95, 0.82, 0.24)
+	draw_arc(Vector2(0, -72), 70.0, -0.2, PI + 0.2, 20, glow, 4.0)
+	draw_circle(Vector2(-14, -96), 3.0, Color(1.0, 0.78, 0.18))
+	draw_circle(Vector2(14, -96), 3.0, Color(1.0, 0.78, 0.18))
 
 func _draw_flat_ellipse(center: Vector2, radius: Vector2, color: Color) -> void:
 	var points := []

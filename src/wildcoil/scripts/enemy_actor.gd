@@ -21,6 +21,8 @@ var target: Node2D
 var attack_cooldown := 0.7
 var telegraph_timer := 0.0
 var hurt_flash := 0.0
+var behavior_phase := 0.0
+var facing := -1
 
 func setup(profile: Dictionary) -> void:
 	enemy_id = profile.get("id", enemy_id)
@@ -41,21 +43,22 @@ func _physics_process(delta: float) -> void:
 		return
 	hurt_flash = maxf(hurt_flash - delta, 0.0)
 	attack_cooldown = maxf(attack_cooldown - delta, 0.0)
+	behavior_phase += delta
 
 	var offset := target.position - position
 	var distance := offset.length()
+	if absf(offset.x) > 2.0:
+		facing = sign(offset.x)
 	if telegraph_timer > 0.0:
 		telegraph_timer -= delta
 		if telegraph_timer <= 0.0 and distance <= attack_range + 18.0:
 			attack_landed.emit(self, attack_damage)
 		velocity = Vector2.ZERO
-	elif distance > attack_range:
-		velocity = offset.normalized() * move_speed
 	else:
-		velocity = Vector2.ZERO
-		if attack_cooldown <= 0.0:
+		_apply_behavior_movement(offset, distance, delta)
+		if attack_cooldown <= 0.0 and _can_start_attack(distance):
 			telegraph_timer = telegraph_seconds
-			attack_cooldown = 1.1
+			attack_cooldown = 1.28 if behavior == "ranged_thrower" else 1.1
 
 	move_and_slide()
 	z_index = int(position.y)
@@ -140,6 +143,7 @@ func _draw_human_enemy() -> void:
 		draw_line(Vector2(16, -47), Vector2(38, -35), Color(0.7, 0.72, 0.75), 5.0)
 	if telegraph_timer > 0.0:
 		draw_rect(Rect2(Vector2(-28, -58), Vector2(56, 60)), Color(1.0, 0.08, 0.04, 0.25))
+	_draw_behavior_weapon()
 
 func _draw_creature_enemy() -> void:
 	var color := Color(0.18, 0.7, 0.34)
@@ -178,6 +182,7 @@ func _draw_creature_enemy() -> void:
 		draw_polygon([Vector2(-29, -34), Vector2(-58, -28), Vector2(-31, -23)], [color.darkened(0.2)])
 	if telegraph_timer > 0.0:
 		draw_circle(Vector2(0, -38), 44, Color(1.0, 0.1, 0.04, 0.22))
+	_draw_behavior_weapon()
 
 func _draw_machine_enemy() -> void:
 	var color := Color(0.35, 0.38, 0.42)
@@ -190,6 +195,62 @@ func _draw_machine_enemy() -> void:
 		draw_line(Vector2(0, -24), Vector2(leg, -2), Color(0.12, 0.12, 0.14), 4.0)
 	if telegraph_timer > 0.0:
 		draw_circle(Vector2(0, -36), 36, Color(1.0, 0.1, 0.04, 0.22))
+	_draw_behavior_weapon()
+
+func _apply_behavior_movement(offset: Vector2, distance: float, _delta: float) -> void:
+	if distance <= 0.01:
+		velocity = Vector2.ZERO
+		return
+	var direction := offset.normalized()
+	match behavior:
+		"ranged_thrower":
+			if distance < 135.0:
+				velocity = -direction * move_speed * 0.82
+			elif distance > attack_range:
+				velocity = direction * move_speed * 0.72
+			else:
+				velocity = Vector2(0, sin(behavior_phase * 3.0) * move_speed * 0.25)
+		"territorial_charge":
+			if distance > attack_range:
+				velocity = direction * move_speed * 1.18
+			else:
+				velocity = Vector2.ZERO
+		"fast_melee", "panicked_nearest_target", "sound_reactive":
+			if distance > attack_range:
+				var weave := Vector2(-direction.y, direction.x) * sin(behavior_phase * 5.5) * 0.38
+				velocity = (direction + weave).normalized() * move_speed
+			else:
+				velocity = Vector2.ZERO
+		"front_blocker", "slow_grabber", "armored_biter":
+			if distance > attack_range:
+				velocity = direction * move_speed * 0.74
+			else:
+				velocity = Vector2.ZERO
+		_:
+			if distance > attack_range:
+				velocity = direction * move_speed
+			else:
+				velocity = Vector2.ZERO
+
+func _can_start_attack(distance: float) -> bool:
+	if behavior == "ranged_thrower" or behavior == "summoner":
+		return distance <= attack_range + 35.0
+	return distance <= attack_range + 12.0
+
+func _draw_behavior_weapon() -> void:
+	var weapon_color := Color(0.9, 0.88, 0.78, 0.92)
+	match behavior:
+		"ranged_thrower":
+			draw_circle(Vector2(48 * facing, -48), 9, Color(0.72, 0.72, 0.76))
+			draw_line(Vector2(8 * facing, -50), Vector2(48 * facing, -48), weapon_color, 3.0)
+		"front_blocker":
+			draw_rect(Rect2(Vector2(22 * facing - 9, -66), Vector2(18, 56)), Color(0.75, 0.78, 0.82, 0.9))
+		"territorial_charge":
+			draw_line(Vector2(40 * facing, -56), Vector2(82 * facing, -50), Color(1.0, 0.88, 0.32), 6.0)
+		"skittering_machine", "summoner", "creature_support":
+			draw_circle(Vector2(34 * facing, -42), 12, Color(0.25, 1.0, 0.72, 0.72))
+		_:
+			draw_line(Vector2(18 * facing, -50), Vector2(48 * facing, -35), weapon_color, 4.0)
 
 func _draw_flat_ellipse(center: Vector2, radius: Vector2, color: Color) -> void:
 	var points := []
