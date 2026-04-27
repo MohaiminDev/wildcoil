@@ -8,6 +8,8 @@ const BODY_SIZE := Vector2(34, 52)
 
 var enemy_id := "iron_veil_grunt"
 var display_name := "Iron Veil Grunt"
+var species := "human"
+var behavior := "basic_melee"
 var max_health := 42
 var health := 42
 var move_speed := 145.0
@@ -23,6 +25,8 @@ var hurt_flash := 0.0
 func setup(profile: Dictionary) -> void:
 	enemy_id = profile.get("id", enemy_id)
 	display_name = profile.get("name", display_name)
+	species = profile.get("species", species)
+	behavior = profile.get("behavior", behavior)
 	max_health = int(profile.get("max_health", max_health))
 	health = max_health
 	move_speed = float(profile.get("move_speed", move_speed))
@@ -70,6 +74,12 @@ func apply_damage(amount: int, source_x: float) -> void:
 	queue_redraw()
 
 func _draw() -> void:
+	if species == "creature":
+		_draw_creature_enemy()
+	else:
+		_draw_human_enemy()
+
+func _draw_human_enemy() -> void:
 	var color := Color(0.34, 0.39, 0.44)
 	if enemy_id == "iron_veil_runner":
 		color = Color(0.38, 0.52, 0.74)
@@ -77,8 +87,50 @@ func _draw() -> void:
 		color = Color(0.48, 0.16, 0.14)
 	if hurt_flash > 0.0:
 		color = Color(1.0, 0.9, 0.5)
-	draw_rect(Rect2(Vector2(-17, -52), BODY_SIZE), color)
-	draw_rect(Rect2(Vector2(-12, -66), Vector2(24, 14)), Color(0.06, 0.06, 0.07))
+	var scale_boost := 1.25 if enemy_id == "iron_veil_brute" else 1.0
+	_draw_flat_ellipse(Vector2(0, -2), Vector2(25 * scale_boost, 7), Color(0.0, 0.0, 0.0, 0.28))
+	draw_rect(Rect2(Vector2(-13 * scale_boost, -55 * scale_boost), Vector2(26 * scale_boost, 36 * scale_boost)), color)
+	draw_rect(Rect2(Vector2(-19 * scale_boost, -49 * scale_boost), Vector2(10 * scale_boost, 27 * scale_boost)), Color(0.11, 0.11, 0.12))
+	draw_rect(Rect2(Vector2(9 * scale_boost, -49 * scale_boost), Vector2(10 * scale_boost, 27 * scale_boost)), Color(0.11, 0.11, 0.12))
+	draw_rect(Rect2(Vector2(-11 * scale_boost, -20 * scale_boost), Vector2(8 * scale_boost, 20 * scale_boost)), Color(0.08, 0.08, 0.09))
+	draw_rect(Rect2(Vector2(3 * scale_boost, -20 * scale_boost), Vector2(8 * scale_boost, 20 * scale_boost)), Color(0.08, 0.08, 0.09))
+	draw_rect(Rect2(Vector2(-12 * scale_boost, -73 * scale_boost), Vector2(24 * scale_boost, 18 * scale_boost)), Color(0.06, 0.06, 0.07))
+	draw_rect(Rect2(Vector2(-7 * scale_boost, -68 * scale_boost), Vector2(14 * scale_boost, 4 * scale_boost)), Color(1.0, 0.7, 0.22))
+	if enemy_id == "iron_veil_brute":
+		draw_rect(Rect2(Vector2(20, -61), Vector2(38, 9)), Color(0.6, 0.6, 0.64))
+		draw_rect(Rect2(Vector2(46, -67), Vector2(12, 22)), Color(0.42, 0.42, 0.45))
+	elif enemy_id == "iron_veil_runner":
+		draw_line(Vector2(18, -50), Vector2(48, -26), Color(0.82, 0.82, 0.86), 4.0)
+	else:
+		draw_line(Vector2(16, -47), Vector2(38, -35), Color(0.7, 0.72, 0.75), 5.0)
 	if telegraph_timer > 0.0:
 		draw_rect(Rect2(Vector2(-28, -58), Vector2(56, 60)), Color(1.0, 0.08, 0.04, 0.25))
 
+func _draw_creature_enemy() -> void:
+	var color := Color(0.18, 0.7, 0.34) if enemy_id == "frightened_raptorling" else Color(0.75, 0.58, 0.22)
+	if hurt_flash > 0.0:
+		color = Color(1.0, 0.9, 0.5)
+	_draw_flat_ellipse(Vector2(0, -2), Vector2(32, 8), Color(0.0, 0.0, 0.0, 0.28))
+	if enemy_id == "hornbeak_dinosaur":
+		draw_polygon([Vector2(-42, -42), Vector2(12, -64), Vector2(54, -42), Vector2(23, -20), Vector2(-28, -18)], [color])
+		draw_polygon([Vector2(42, -55), Vector2(78, -48), Vector2(44, -38)], [Color(1.0, 0.8, 0.24)])
+		draw_circle(Vector2(28, -54), 5, Color(0.04, 0.04, 0.04))
+		draw_line(Vector2(-22, -20), Vector2(-36, 0), Color(0.1, 0.1, 0.08), 6.0)
+		draw_line(Vector2(16, -20), Vector2(8, 0), Color(0.1, 0.1, 0.08), 6.0)
+		draw_polygon([Vector2(-40, -39), Vector2(-72, -30), Vector2(-43, -25)], [color.darkened(0.18)])
+	else:
+		draw_polygon([Vector2(-32, -36), Vector2(8, -54), Vector2(42, -36), Vector2(18, -18), Vector2(-24, -18)], [color])
+		draw_polygon([Vector2(33, -45), Vector2(59, -41), Vector2(34, -32)], [Color(0.82, 0.98, 0.7)])
+		draw_circle(Vector2(24, -45), 4, Color(0.03, 0.03, 0.03))
+		draw_line(Vector2(-14, -18), Vector2(-22, 0), Color(0.08, 0.16, 0.08), 5.0)
+		draw_line(Vector2(10, -18), Vector2(18, 0), Color(0.08, 0.16, 0.08), 5.0)
+		draw_polygon([Vector2(-29, -34), Vector2(-58, -28), Vector2(-31, -23)], [color.darkened(0.2)])
+	if telegraph_timer > 0.0:
+		draw_circle(Vector2(0, -38), 44, Color(1.0, 0.1, 0.04, 0.22))
+
+func _draw_flat_ellipse(center: Vector2, radius: Vector2, color: Color) -> void:
+	var points := []
+	for i in range(24):
+		var angle := TAU * float(i) / 24.0
+		points.append(center + Vector2(cos(angle) * radius.x, sin(angle) * radius.y))
+	draw_polygon(points, [color])

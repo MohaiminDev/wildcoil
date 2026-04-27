@@ -95,11 +95,30 @@ func apply_damage(amount: int, source_x: float) -> void:
 
 func _draw() -> void:
 	var color := Color(0.22, 0.22, 0.24) if hurt_flash <= 0.0 else Color(1.0, 0.86, 0.42)
-	draw_rect(Rect2(Vector2(-42, -82), Vector2(84, 82)), color)
-	draw_rect(Rect2(Vector2(-28, -100), Vector2(56, 18)), Color(0.07, 0.06, 0.06))
-	draw_rect(Rect2(Vector2(22, -68), Vector2(58, 12)), Color(0.66, 0.66, 0.7))
+	_draw_flat_ellipse(Vector2(0, -2), Vector2(58, 10), Color(0, 0, 0, 0.3))
+	draw_line(Vector2(-18, -35), Vector2(-30, 0), Color(0.06, 0.06, 0.07), 12.0)
+	draw_line(Vector2(18, -35), Vector2(30, 0), Color(0.06, 0.06, 0.07), 12.0)
+	draw_polygon([Vector2(-48, -88), Vector2(44, -90), Vector2(58, -36), Vector2(33, -18), Vector2(-38, -18), Vector2(-58, -42)], [color])
+	draw_rect(Rect2(Vector2(-31, -104), Vector2(62, 21)), Color(0.07, 0.06, 0.06))
+	draw_rect(Rect2(Vector2(-21, -98), Vector2(42, 5)), Color(1.0, 0.72, 0.18))
+	draw_line(Vector2(-42, -72), Vector2(-78, -38), Color(0.46, 0.47, 0.5), 10.0)
+	_draw_hydraulic_axe()
 	if telegraph_timer > 0.0:
 		var danger := Color(1.0, 0.1, 0.04, 0.28)
 		draw_rect(Rect2(Vector2(-72, -92), Vector2(144, 96)), danger)
 	if stunned_timer > 0.0:
 		draw_circle(Vector2(0, -112), 16.0, Color(0.8, 0.92, 1.0, 0.6))
+
+func _draw_hydraulic_axe() -> void:
+	draw_line(Vector2(35, -72), Vector2(92, -28), Color(0.62, 0.62, 0.66), 9.0)
+	draw_rect(Rect2(Vector2(66, -78), Vector2(36, 16)), Color(0.3, 0.32, 0.35))
+	draw_polygon([Vector2(96, -88), Vector2(130, -68), Vector2(95, -48)], [Color(0.82, 0.82, 0.86)])
+	draw_polygon([Vector2(93, -86), Vector2(68, -68), Vector2(93, -50)], [Color(0.5, 0.52, 0.56)])
+	draw_circle(Vector2(80, -70), 5, Color(1.0, 0.72, 0.18))
+
+func _draw_flat_ellipse(center: Vector2, radius: Vector2, color: Color) -> void:
+	var points := []
+	for i in range(24):
+		var angle := TAU * float(i) / 24.0
+		points.append(center + Vector2(cos(angle) * radius.x, sin(angle) * radius.y))
+	draw_polygon(points, [color])

@@ -126,13 +126,57 @@ func heal(amount: int) -> void:
 	queue_redraw()
 
 func _draw() -> void:
-	var body_color := Color(0.95, 0.38, 0.12) if hero_id == "raya_flint" else Color(0.55, 0.18, 0.95)
 	var alpha := 0.45 if invulnerable_timer > 0.0 else 1.0
-	body_color.a = alpha
-	draw_rect(Rect2(Vector2(-17, -58 - fake_height), BODY_SIZE), body_color)
-	draw_rect(Rect2(Vector2(-10, -72 - fake_height), Vector2(20, 16)), Color(0.98, 0.86, 0.64, alpha))
+	_draw_flat_ellipse(Vector2(0, -2), Vector2(28, 7), Color(0, 0, 0, 0.28))
+	if hero_id == "nika_sol":
+		_draw_nika(alpha)
+	else:
+		_draw_raya(alpha)
 	if is_attack_active():
 		draw_rect(Rect2(Vector2(facing * 18 - 22, -52 - fake_height), Vector2(64, 48)), Color(1.0, 0.82, 0.25, 0.35))
 	if is_special_active():
 		draw_circle(Vector2(0, -30 - fake_height), 76.0, Color(0.56, 0.88, 1.0, 0.25))
 
+func _draw_raya(alpha: float) -> void:
+	var y := -fake_height
+	var jacket := Color(0.95, 0.36, 0.12, alpha)
+	var pants := Color(0.12, 0.12, 0.13, alpha)
+	var cream := Color(0.94, 0.82, 0.58, alpha)
+	var skin := Color(0.72, 0.42, 0.24, alpha)
+	draw_line(Vector2(-10, -26 + y), Vector2(-18, 0 + y), pants, 7.0)
+	draw_line(Vector2(10, -26 + y), Vector2(18, 0 + y), pants, 7.0)
+	draw_polygon([Vector2(-20, -62 + y), Vector2(18, -64 + y), Vector2(26, -32 + y), Vector2(-22, -28 + y)], [jacket])
+	draw_rect(Rect2(Vector2(-10, -55 + y), Vector2(18, 25)), cream)
+	draw_circle(Vector2(0, -78 + y), 14, skin)
+	draw_rect(Rect2(Vector2(-16, -90 + y), Vector2(30, 9)), Color(0.13, 0.08, 0.05, alpha))
+	draw_polygon([Vector2(-20, -66 + y), Vector2(-58, -72 + y), Vector2(-20, -56 + y)], [Color(0.98, 0.72, 0.38, alpha)])
+	draw_line(Vector2(16, -58 + y), Vector2(54 * facing, -36 + y), Color(0.55, 0.52, 0.48, alpha), 7.0)
+	draw_line(Vector2(42 * facing, -43 + y), Vector2(64 * facing, -63 + y), Color(0.82, 0.8, 0.74, alpha), 5.0)
+	draw_line(Vector2(42 * facing, -43 + y), Vector2(68 * facing, -31 + y), Color(0.82, 0.8, 0.74, alpha), 5.0)
+	draw_circle(Vector2(-5, -80 + y), 2.0, Color(0.02, 0.02, 0.02, alpha))
+	draw_circle(Vector2(5, -80 + y), 2.0, Color(0.02, 0.02, 0.02, alpha))
+
+func _draw_nika(alpha: float) -> void:
+	var y := -fake_height
+	var violet := Color(0.55, 0.12, 0.95, alpha)
+	var black := Color(0.04, 0.04, 0.06, alpha)
+	var silver := Color(0.7, 0.75, 0.82, alpha)
+	var skin := Color(0.62, 0.36, 0.25, alpha)
+	draw_line(Vector2(-8, -26 + y), Vector2(-28, -2 + y), black, 6.0)
+	draw_line(Vector2(8, -26 + y), Vector2(28, -2 + y), black, 6.0)
+	draw_polygon([Vector2(-16, -64 + y), Vector2(18, -66 + y), Vector2(20, -31 + y), Vector2(-18, -29 + y)], [black])
+	draw_polygon([Vector2(-13, -61 + y), Vector2(13, -63 + y), Vector2(18, -38 + y), Vector2(-15, -36 + y)], [violet])
+	draw_polygon([Vector2(-20, -64 + y), Vector2(-64, -82 + y), Vector2(-24, -48 + y)], [Color(0.36, 0.08, 0.72, alpha)])
+	draw_circle(Vector2(0, -78 + y), 13, skin)
+	draw_rect(Rect2(Vector2(-13, -91 + y), Vector2(26, 9)), silver)
+	draw_line(Vector2(15, -56 + y), Vector2(50 * facing, -44 + y), silver, 5.0)
+	draw_line(Vector2(-15, -54 + y), Vector2(-45 * facing, -42 + y), violet, 4.0)
+	draw_circle(Vector2(-5, -79 + y), 2.0, Color(0.02, 0.02, 0.02, alpha))
+	draw_circle(Vector2(5, -79 + y), 2.0, Color(0.02, 0.02, 0.02, alpha))
+
+func _draw_flat_ellipse(center: Vector2, radius: Vector2, color: Color) -> void:
+	var points := []
+	for i in range(24):
+		var angle := TAU * float(i) / 24.0
+		points.append(center + Vector2(cos(angle) * radius.x, sin(angle) * radius.y))
+	draw_polygon(points, [color])

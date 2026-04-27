@@ -56,26 +56,123 @@ func _load_profiles(path: String, key: String) -> Dictionary:
 
 func _build_background() -> void:
 	var sky := ColorRect.new()
-	sky.color = Color(0.95, 0.42, 0.18)
+	sky.color = Color(0.94, 0.46, 0.18)
 	sky.size = Vector2(1280, 720)
 	add_child(sky)
+	var sun := Polygon2D.new()
+	sun.polygon = _ellipse_points(Vector2(1040, 110), Vector2(88, 88), 36)
+	sun.color = Color(1.0, 0.78, 0.28, 0.85)
+	add_child(sun)
+	_build_background_dinosaurs()
 	for i in range(6):
 		var ruin := ColorRect.new()
-		ruin.color = Color(0.24, 0.18, 0.22, 0.82)
+		ruin.color = Color(0.20, 0.16, 0.22, 0.82)
 		ruin.position = Vector2(80 + i * 210, 210 + (i % 2) * 40)
 		ruin.size = Vector2(95, 220)
 		add_child(ruin)
+	_build_jungle_ruins()
 	var road := ColorRect.new()
 	road.color = Color(0.16, 0.15, 0.15)
 	road.position = Vector2(0, 330)
 	road.size = Vector2(1280, 300)
 	add_child(road)
+	for stripe in range(8):
+		var lane := ColorRect.new()
+		lane.color = Color(0.86, 0.74, 0.42, 0.55)
+		lane.position = Vector2(70 + stripe * 160, 462)
+		lane.size = Vector2(72, 7)
+		add_child(lane)
+	_build_sundrifter()
+	_build_transport_cages()
 	for j in range(10):
 		var crystal := ColorRect.new()
 		crystal.color = Color(0.2, 1.0, 0.58, 0.76)
 		crystal.position = Vector2(70 + j * 125, 585 - (j % 3) * 20)
 		crystal.size = Vector2(16, 42)
 		add_child(crystal)
+
+func _build_sundrifter() -> void:
+	var crawler := Node2D.new()
+	crawler.name = "Sundrifter"
+	crawler.position = Vector2(150, 315)
+	add_child(crawler)
+	var body := Polygon2D.new()
+	body.polygon = PackedVector2Array([Vector2(-92, 20), Vector2(-54, -30), Vector2(64, -36), Vector2(105, 8), Vector2(82, 34), Vector2(-80, 35)])
+	body.color = Color(0.88, 0.44, 0.16)
+	crawler.add_child(body)
+	var glass := ColorRect.new()
+	glass.position = Vector2(-22, -24)
+	glass.size = Vector2(48, 22)
+	glass.color = Color(0.4, 0.9, 1.0, 0.72)
+	crawler.add_child(glass)
+	for wheel_x in [-64, 68]:
+		var wheel := Polygon2D.new()
+		wheel.polygon = _ellipse_points(Vector2(wheel_x, 38), Vector2(28, 28), 20)
+		wheel.color = Color(0.05, 0.05, 0.06)
+		crawler.add_child(wheel)
+		var hub := Polygon2D.new()
+		hub.polygon = _ellipse_points(Vector2(wheel_x, 38), Vector2(12, 12), 16)
+		hub.color = Color(0.82, 0.78, 0.58)
+		crawler.add_child(hub)
+
+func _build_transport_cages() -> void:
+	for i in range(3):
+		var cage := Node2D.new()
+		cage.name = "TransportCage%d" % i
+		cage.position = Vector2(760 + i * 92, 332)
+		add_child(cage)
+		var frame := ColorRect.new()
+		frame.position = Vector2(-30, -46)
+		frame.size = Vector2(60, 45)
+		frame.color = Color(0.18, 0.18, 0.2, 0.82)
+		cage.add_child(frame)
+		for bar in range(4):
+			var line := ColorRect.new()
+			line.position = Vector2(-25 + bar * 16, -45)
+			line.size = Vector2(4, 44)
+			line.color = Color(0.72, 0.72, 0.76)
+			cage.add_child(line)
+		var eye := ColorRect.new()
+		eye.position = Vector2(-5, -30)
+		eye.size = Vector2(10, 5)
+		eye.color = Color(0.2, 1.0, 0.55)
+		cage.add_child(eye)
+
+func _build_background_dinosaurs() -> void:
+	for i in range(3):
+		var dino := Polygon2D.new()
+		var x := 160 + i * 320
+		var y := 255 + (i % 2) * 25
+		dino.polygon = PackedVector2Array([
+			Vector2(x - 52, y),
+			Vector2(x + 10, y - 48),
+			Vector2(x + 76, y - 20),
+			Vector2(x + 42, y + 4),
+			Vector2(x - 20, y + 8)
+		])
+		dino.color = Color(0.09, 0.13, 0.14, 0.45)
+		add_child(dino)
+
+func _build_jungle_ruins() -> void:
+	for i in range(9):
+		var vine := ColorRect.new()
+		vine.position = Vector2(35 + i * 138, 250)
+		vine.size = Vector2(8, 160 + (i % 3) * 30)
+		vine.color = Color(0.08, 0.42, 0.16, 0.72)
+		add_child(vine)
+	for i in range(5):
+		var sign := ColorRect.new()
+		sign.position = Vector2(150 + i * 230, 300)
+		sign.size = Vector2(70, 22)
+		sign.color = Color(0.45, 0.22, 0.08)
+		add_child(sign)
+
+func _ellipse_points(center: Vector2, radius: Vector2, count: int) -> PackedVector2Array:
+	var points := PackedVector2Array()
+	for i in range(count):
+		var angle := TAU * float(i) / float(count)
+		points.append(center + Vector2(cos(angle) * radius.x, sin(angle) * radius.y))
+	return points
 
 func _build_player() -> void:
 	player = PLAYER_SCENE.instantiate()

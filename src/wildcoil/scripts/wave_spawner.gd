@@ -22,7 +22,7 @@ func spawn_wave(parent: Node, enemy_ids: Array, player, center_x: float) -> Arra
 		var enemy = ENEMY_SCENE.instantiate()
 		enemy.setup(enemy_profiles[enemy_ids[index]])
 		enemy.target = player
-		enemy.position = Vector2(center_x + 90.0 + index * 54.0, 410.0 + (index % 3) * 52.0)
+		enemy.position = Vector2(center_x + 90.0 + index * 68.0, 410.0 + (index % 3) * 52.0)
 		parent.add_child(enemy)
 		spawned.append(enemy)
 	return spawned

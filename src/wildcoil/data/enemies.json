@@ -3,6 +3,8 @@
     {
       "id": "iron_veil_grunt",
       "name": "Iron Veil Grunt",
+      "species": "human",
+      "behavior": "basic_melee",
       "max_health": 42,
       "move_speed": 145,
       "attack_damage": 8,
@@ -13,6 +15,8 @@
     {
       "id": "iron_veil_runner",
       "name": "Iron Veil Runner",
+      "species": "human",
+      "behavior": "fast_melee",
       "max_health": 30,
       "move_speed": 215,
       "attack_damage": 6,
@@ -23,13 +27,38 @@
     {
       "id": "iron_veil_brute",
       "name": "Iron Veil Brute",
+      "species": "human",
+      "behavior": "slow_grabber",
       "max_health": 86,
       "move_speed": 105,
       "attack_damage": 16,
       "attack_range": 66,
       "telegraph_seconds": 0.48,
       "score": 250
+    },
+    {
+      "id": "frightened_raptorling",
+      "name": "Frightened Raptorling",
+      "species": "creature",
+      "behavior": "panicked_nearest_target",
+      "max_health": 34,
+      "move_speed": 240,
+      "attack_damage": 7,
+      "attack_range": 46,
+      "telegraph_seconds": 0.16,
+      "score": 80
+    },
+    {
+      "id": "hornbeak_dinosaur",
+      "name": "Hornbeak Dinosaur",
+      "species": "creature",
+      "behavior": "territorial_charge",
+      "max_health": 72,
+      "move_speed": 175,
+      "attack_damage": 14,
+      "attack_range": 72,
+      "telegraph_seconds": 0.38,
+      "score": 180
     }
   ]
 }
-
