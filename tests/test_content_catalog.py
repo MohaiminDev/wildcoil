@@ -14,7 +14,7 @@ def test_content_catalog_matches_scaffold_contract() -> None:
 
     assert data["build_label"] == "phase3-finale"
     assert len(data["characters"]) == 2
-    assert len(data["stages"]) == 3
+    assert len(data["stages"]) == 4
 
     first_character = data["characters"][0]
     assert first_character["id"] == "mira_coil"
@@ -49,6 +49,13 @@ def test_content_catalog_matches_scaffold_contract() -> None:
     assert third_stage["locked"] is True
     assert third_stage["ending_title"] == "Ending: Crown Quieted"
     assert "briefing" in third_stage
+
+    fourth_stage = data["stages"][3]
+    assert fourth_stage["id"] == "road_relic_run"
+    assert fourth_stage["order"] == 4
+    assert fourth_stage["locked"] is False
+    assert fourth_stage["boss_objective"] == "Break the Road Tyrant"
+    assert "briefing" in fourth_stage
 
 
 def test_catalog_scene_paths_exist() -> None:

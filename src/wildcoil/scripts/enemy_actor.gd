@@ -203,6 +203,17 @@ func _draw() -> void:
 	elif attack_pending:
 		body_color = Color("ffd86c")
 
+	var silhouette := str(profile.get("silhouette", "humanoid"))
+	if silhouette == "raptor":
+		draw_raptor(body_color)
+		return
+	if silhouette == "spitter":
+		draw_spitter(body_color)
+		return
+	if silhouette == "hornback":
+		draw_hornback(body_color)
+		return
+
 	var size := Vector2(42.0, 76.0)
 	if is_elite():
 		size = Vector2(58.0, 98.0)
@@ -211,3 +222,44 @@ func _draw() -> void:
 	draw_line(Vector2(-12.0 * facing, -size.y * 0.46), Vector2(26.0 * facing, -size.y * 0.28), Color("fff4cb"), 5.0)
 	if attack_pending:
 		draw_rect(Rect2(Vector2(18.0 * facing - 60.0, -size.y + 8.0), Vector2(76.0, 34.0)), Color(1.0, 0.9, 0.5, 0.25))
+
+
+func draw_raptor(body_color: Color) -> void:
+	var accent_color := Color(str(profile.get("accent", "f3ffd7")))
+	draw_circle(Vector2(-8.0, -58.0), 28.0, body_color)
+	draw_circle(Vector2(28.0 * facing, -80.0), 18.0, body_color)
+	draw_line(Vector2(-28.0 * facing, -56.0), Vector2(-64.0 * facing, -76.0), body_color, 10.0)
+	draw_line(Vector2(-4.0, -36.0), Vector2(-22.0 * facing, -2.0), body_color, 8.0)
+	draw_line(Vector2(10.0, -38.0), Vector2(34.0 * facing, -2.0), body_color, 8.0)
+	draw_line(Vector2(30.0 * facing, -76.0), Vector2(50.0 * facing, -70.0), accent_color, 4.0)
+	draw_circle(Vector2(35.0 * facing, -86.0), 3.0, Color("10140e"))
+	if attack_pending:
+		draw_rect(Rect2(Vector2(18.0 * facing - 58.0, -96.0), Vector2(74.0, 42.0)), Color(1.0, 0.9, 0.5, 0.24))
+
+
+func draw_spitter(body_color: Color) -> void:
+	var accent_color := Color(str(profile.get("accent", "ffe1a1")))
+	draw_circle(Vector2(-12.0, -50.0), 30.0, body_color)
+	draw_circle(Vector2(26.0 * facing, -74.0), 22.0, body_color)
+	draw_line(Vector2(-36.0 * facing, -50.0), Vector2(-66.0 * facing, -34.0), body_color, 9.0)
+	draw_line(Vector2(-24.0, -26.0), Vector2(-48.0 * facing, 0.0), body_color, 7.0)
+	draw_line(Vector2(10.0, -28.0), Vector2(36.0 * facing, 0.0), body_color, 7.0)
+	draw_circle(Vector2(44.0 * facing, -74.0), 10.0, accent_color)
+	draw_line(Vector2(48.0 * facing, -74.0), Vector2(72.0 * facing, -74.0), accent_color, 5.0)
+	if attack_pending:
+		draw_circle(Vector2(82.0 * facing, -74.0), 18.0, Color(0.98, 0.76, 0.38, 0.26))
+
+
+func draw_hornback(body_color: Color) -> void:
+	var accent_color := Color(str(profile.get("accent", "fff0c7")))
+	draw_rect(Rect2(Vector2(-44.0, -78.0), Vector2(88.0, 52.0)), body_color)
+	draw_circle(Vector2(44.0 * facing, -78.0), 24.0, body_color)
+	draw_line(Vector2(54.0 * facing, -96.0), Vector2(82.0 * facing, -112.0), accent_color, 8.0)
+	draw_line(Vector2(52.0 * facing, -86.0), Vector2(84.0 * facing, -88.0), accent_color, 7.0)
+	for plate_index in range(4):
+		var plate_x := -30.0 + float(plate_index) * 20.0
+		draw_line(Vector2(plate_x, -82.0), Vector2(plate_x + 8.0, -108.0), accent_color, 6.0)
+	draw_line(Vector2(-36.0, -28.0), Vector2(-58.0, 0.0), body_color, 9.0)
+	draw_line(Vector2(26.0, -28.0), Vector2(54.0, 0.0), body_color, 9.0)
+	if attack_pending:
+		draw_rect(Rect2(Vector2(30.0 * facing - 82.0, -104.0), Vector2(118.0, 56.0)), Color(1.0, 0.9, 0.5, 0.23))

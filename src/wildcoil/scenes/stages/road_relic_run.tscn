@@ -1,0 +1,52 @@
+[gd_scene load_steps=8 format=3]
+
+[ext_resource type="Script" path="res://scripts/road_relic_stage.gd" id="1"]
+[ext_resource type="PackedScene" path="res://scenes/player.tscn" id="2"]
+[ext_resource type="PackedScene" path="res://scenes/enemy_actor.tscn" id="3"]
+[ext_resource type="PackedScene" path="res://scenes/boss_actor.tscn" id="4"]
+
+[sub_resource type="RectangleShape2D" id="1"]
+size = Vector2(3200, 40)
+
+[sub_resource type="RectangleShape2D" id="2"]
+size = Vector2(280, 24)
+
+[node name="RoadRelicRun" type="Node2D"]
+script = ExtResource("1")
+
+[node name="Ground" type="StaticBody2D" parent="."]
+position = Vector2(0, 140)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Ground"]
+position = Vector2(0, 20)
+shape = SubResource("1")
+
+[node name="Overpass" type="StaticBody2D" parent="."]
+position = Vector2(360, 12)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Overpass"]
+position = Vector2(0, 12)
+shape = SubResource("2")
+
+[node name="Player" parent="." instance=ExtResource("2")]
+position = Vector2(-500, 140)
+
+[node name="Enemies" type="Node2D" parent="."]
+
+[node name="RaptorRunner" parent="Enemies" instance=ExtResource("3")]
+position = Vector2(80, 140)
+enemy_id = "raptor_runner"
+
+[node name="TarSpitter" parent="Enemies" instance=ExtResource("3")]
+position = Vector2(330, 140)
+enemy_id = "tar_spitter"
+
+[node name="HornbackBrawler" parent="Enemies" instance=ExtResource("3")]
+position = Vector2(590, 140)
+enemy_id = "hornback_brawler"
+
+[node name="Projectiles" type="Node2D" parent="."]
+
+[node name="Boss" parent="." instance=ExtResource("4")]
+position = Vector2(1180, 140)
+enemy_id = "road_tyrant"

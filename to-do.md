@@ -22,6 +22,15 @@ The Phase 1 through release tasks below are the frozen MVP backlog. Only change 
 
 ## DONE
 
+### [P4-01] Add an original fossil-highway arcade brawler branch stage
+- Outcome: Add a playable Road Relic Run stage with roadster spectacle, dinosaur-like enemy profiles, a tyrant boss encounter, and catalog access on macOS.
+- Validation:
+  - [x] Automated tests cover the catalog entry and headless clear path.
+  - [x] The stage avoids licensed names, characters, and art from external inspirations.
+  - [x] The current test suite passes.
+- Dependencies: [REL-01]
+- Completed: 2026-04-27
+
 ### [REL-01] Publish the tester release
 - Outcome: Push the final code, create a release tag, attach the macOS build, and publish release notes plus install or known-issues guidance.
 - Validation:

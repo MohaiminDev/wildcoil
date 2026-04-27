@@ -301,6 +301,10 @@ func _draw() -> void:
 	elif attack_windup > 0.0:
 		body_color = Color("ffe69c")
 
+	if str(profile.get("silhouette", "")) == "tyrant":
+		draw_tyrant(body_color)
+		return
+
 	var size := Vector2(92.0, 148.0)
 	draw_rect(Rect2(Vector2(-size.x * 0.5, -size.y), size), body_color)
 	draw_rect(Rect2(Vector2(-18.0, -size.y - 26.0), Vector2(36.0, 26.0)), Color(str(profile.get("accent", "fff4ba"))))
@@ -312,3 +316,24 @@ func _draw() -> void:
 		draw_circle(Vector2.ZERO, 112.0 + 16.0 * sin((1.0 - intro_timer) * 9.0), Color(0.88, 1.0, 0.94, 0.16))
 	if attack_windup > 0.0:
 		draw_rect(Rect2(Vector2(20.0 * facing - 110.0, -112.0), Vector2(140.0, 56.0)), Color(1.0, 0.94, 0.70, 0.22))
+
+
+func draw_tyrant(body_color: Color) -> void:
+	var accent_color := Color(str(profile.get("accent", "ffe3a7")))
+	draw_circle(Vector2(-8.0, -88.0), 58.0, body_color)
+	draw_circle(Vector2(62.0 * facing, -132.0), 40.0, body_color)
+	draw_line(Vector2(-52.0 * facing, -84.0), Vector2(-116.0 * facing, -122.0), body_color, 18.0)
+	draw_line(Vector2(20.0 * facing, -62.0), Vector2(62.0 * facing, 0.0), body_color, 14.0)
+	draw_line(Vector2(-26.0 * facing, -60.0), Vector2(-62.0 * facing, 0.0), body_color, 14.0)
+	draw_line(Vector2(86.0 * facing, -126.0), Vector2(128.0 * facing, -116.0), accent_color, 10.0)
+	draw_line(Vector2(80.0 * facing, -148.0), Vector2(116.0 * facing, -168.0), accent_color, 8.0)
+	draw_circle(Vector2(78.0 * facing, -148.0), 5.0, Color("10100c"))
+	for stripe_index in range(4):
+		var stripe_offset := -44.0 + float(stripe_index) * 22.0
+		draw_line(Vector2(stripe_offset, -128.0), Vector2(stripe_offset + 14.0 * facing, -72.0), accent_color, 5.0)
+	if phase_two:
+		draw_circle(Vector2(0.0, -84.0), 112.0, Color(0.98, 0.74, 0.35, 0.15))
+	if intro_timer > 0.0:
+		draw_circle(Vector2(10.0 * facing, -90.0), 140.0 + 18.0 * sin((1.0 - intro_timer) * 9.0), Color(1.0, 0.86, 0.48, 0.14))
+	if attack_windup > 0.0:
+		draw_rect(Rect2(Vector2(42.0 * facing - 130.0, -156.0), Vector2(170.0, 76.0)), Color(1.0, 0.94, 0.70, 0.22))

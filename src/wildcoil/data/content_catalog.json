@@ -69,6 +69,23 @@
       "clear_objective": "Storm crown stabilized. Stage clear.",
       "ending_title": "Ending: Crown Quieted",
       "ending_summary": "The crown engine falls silent, the route steadies, and Wildcoil finally gets to stand down from the storm line."
+    },
+    {
+      "id": "road_relic_run",
+      "name": "Road Relic Run",
+      "scene": "res://scenes/stages/road_relic_run.tscn",
+      "order": 4,
+      "biome": "fossil_highway_relic_route",
+      "spectacle_target_seconds": 190,
+      "locked": false,
+      "summary": "Race through a fossil highway where rusted luxury roadsters, tar pits, and territorial thunder-lizards collide.",
+      "briefing": "This branch stage leans into road-brawler spectacle: clear the raptor pack, let the roadster charge open the lane, then break the tyrant guarding the wreck line.",
+      "opening_objective": "Push down the fossil highway",
+      "mid_objective": "Follow the roadster wake to the wreck line",
+      "spectacle_objective": "Roadster charge breaks the fossil blockade. Push through.",
+      "boss_intro_objective": "Brace for the Road Tyrant",
+      "boss_objective": "Break the Road Tyrant",
+      "clear_objective": "Fossil highway cleared. Stage clear."
     }
   ]
 }

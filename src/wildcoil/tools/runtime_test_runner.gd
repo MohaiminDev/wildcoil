@@ -79,6 +79,9 @@ func _initialize() -> void:
 	if suite == "stage3_finale" and errors.is_empty():
 		payload.merge(run_stage3_finale_suite(catalog), true)
 
+	if suite == "road_relic_run" and errors.is_empty():
+		payload.merge(run_road_relic_run_suite(catalog), true)
+
 	if suite == "performance_sample" and errors.is_empty():
 		payload.merge(await run_performance_sample_suite(catalog), true)
 
@@ -533,6 +536,67 @@ func run_stage3_finale_suite(catalog: ContentCatalog) -> Dictionary:
 		"rank": str(final_summary.get("rank", "--")),
 		"passed": passed,
 		"errors": [] if passed else ["Stage 3 did not expose the finale enemy mix, hazard escalation, and final boss clear flow"],
+	}
+	stage_instance.free()
+	return payload
+
+
+func run_road_relic_run_suite(catalog: ContentCatalog) -> Dictionary:
+	var stage_definition := catalog.get_stage_by_id("road_relic_run")
+	var packed_scene := load(str(stage_definition.get("scene", ""))) as PackedScene
+	if packed_scene == null:
+		return {
+			"passed": false,
+			"errors": ["Road Relic Run scene failed to load"],
+		}
+
+	var stage_instance := packed_scene.instantiate()
+	get_root().add_child(stage_instance)
+	if stage_instance.has_method("configure_run"):
+		stage_instance.call("configure_run", {
+			"stage_definition": stage_definition,
+			"character_definition": catalog.get_character_by_id("mira_coil"),
+		})
+
+	var player := stage_instance.call("get_player") as PlayerController
+	var boss_actor := stage_instance.call("get_boss_actor") as BossActor
+	if player == null or boss_actor == null:
+		stage_instance.free()
+		return {
+			"passed": false,
+			"errors": ["Road Relic Run did not expose player and boss actors"],
+		}
+
+	var enemy_ids: Array[String] = []
+	for enemy in stage_instance.call("get_enemy_nodes"):
+		if enemy is EnemyActor:
+			enemy_ids.append(str(enemy.enemy_id))
+	enemy_ids.sort()
+
+	player.global_position.x = -80.0
+	stage_instance.call("advance_stage_flow", 0.1)
+	for enemy in stage_instance.call("get_enemy_nodes"):
+		if enemy is EnemyActor:
+			enemy.health = 0
+	stage_instance.call("advance_stage_flow", 0.1)
+	var spectacle_summary: Dictionary = stage_instance.call("get_stage_summary")
+	stage_instance.call("advance_stage_flow", 4.0)
+	player.global_position.x = 980.0
+	stage_instance.call("advance_stage_flow", 0.1)
+	stage_instance.call("advance_stage_flow", 2.0)
+	boss_actor.health = 0
+	stage_instance.call("advance_stage_flow", 0.1)
+	var final_summary: Dictionary = stage_instance.call("get_stage_summary")
+
+	var passed: bool = enemy_ids == ["hornback_brawler", "raptor_runner", "tar_spitter"] and bool(spectacle_summary.get("roadster_setpiece_seen", false)) and str(final_summary.get("boss_name", "")) == "Road Tyrant" and bool(final_summary.get("stage_complete", false))
+	var payload := {
+		"enemy_ids": enemy_ids,
+		"boss_name": str(final_summary.get("boss_name", "")),
+		"stage_complete": bool(final_summary.get("stage_complete", false)),
+		"roadster_setpiece_seen": bool(spectacle_summary.get("roadster_setpiece_seen", false)),
+		"rank": str(final_summary.get("rank", "--")),
+		"passed": passed,
+		"errors": [] if passed else ["Road Relic Run did not expose the dino roadster enemy mix, setpiece, and clear flow"],
 	}
 	stage_instance.free()
 	return payload
