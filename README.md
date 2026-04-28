@@ -7,6 +7,8 @@ The project is now story-first around the Rift Road concept while keeping the re
 ## Current Working Docs
 
 - [`to-do.md`](/Users/himu/Desktop/career/personal_projects/wildcoil/to-do.md): single source of truth for milestone status, tasks, validation, and risks
+- [`ARCHITECTURE.md`](/Users/himu/Desktop/career/personal_projects/wildcoil/ARCHITECTURE.md): current runtime map, entry points, and known gaps
+- [`docs/PLANS.md`](/Users/himu/Desktop/career/personal_projects/wildcoil/docs/PLANS.md): index of public and Codex-only planning sources
 - [`docs/game-story.md`](/Users/himu/Desktop/career/personal_projects/wildcoil/docs/game-story.md): Rift Road story bible, world, heroes, stages, MVP scope, and originality checklist
 - [`docs/superpowers/plans/2026-04-27-rift-road-mvp.md`](/Users/himu/Desktop/career/personal_projects/wildcoil/docs/superpowers/plans/2026-04-27-rift-road-mvp.md): implementation plan for the Stage 1 playable prototype
 - [`docs/game_spec.md`](/Users/himu/Desktop/career/personal_projects/wildcoil/docs/game_spec.md): Schedule A-aligned living game spec
@@ -30,6 +32,7 @@ Rift Road Phase 1: build the Stage 1 macOS playable prototype in Godot.
 ## Run and Test
 
 - Run checks: `bash scripts/check.sh`
+- Run agent docs check: `python3 scripts/check_agent_docs.py`
 - Run the game: `bash scripts/run_game.sh`
 - Run tests only: `python3 -m pytest tests -v`
 - Package macOS build: `bash scripts/package_macos.sh`

@@ -1,43 +1,53 @@
-# Repository Guidelines
+# AGENTS.md
 
-## Project Structure & Module Organization
-This repository is currently documentation-first. [`README.md`](/Users/himu/Desktop/career/personal_projects/wildcoil/README.md) is the entry point, [`arcade_heritage_game_master_contract.txt`](/Users/himu/Desktop/career/personal_projects/wildcoil/arcade_heritage_game_master_contract.txt) defines the game vision and production constraints, and [`LICENSE`](/Users/himu/Desktop/career/personal_projects/wildcoil/LICENSE) covers reuse terms. No `src/` or `tests/` tree is committed yet. When implementation begins, place runtime code in `src/`, automated tests in `tests/`, and longer design notes in `docs/` instead of adding more root-level files.
+## Repo Purpose
+Wildcoil currently hosts `Rift Road: Beasts of the Afterglow`, a macOS-first Godot 4.x 2D arcade beat-'em-up prototype. Runtime code lives in `src/wildcoil`, tests live in `tests`, and contributor-facing docs live in `docs`.
 
-## Build, Test, and Development Commands
-No build pipeline or runnable prototype is checked in yet, so keep setup lightweight and document new tooling in the same PR that introduces it. Useful current commands:
+## Fast Path
+1. Read `README.md` for the current milestone and local commands.
+2. Read `to-do.md` for the active task tracker and validation gate.
+3. Read `ARCHITECTURE.md` for the runtime map before changing code.
+4. Read `docs/game-story.md` and `docs/product-specs/index.md` before changing product behavior.
+5. Read `docs/exec-plans/active/` before starting planned work.
 
-- `rg --files` to inspect the tracked layout quickly.
-- `python -m pytest` once a `tests/` suite exists.
-- `ruff check .` and `ruff format .` if Python source is added.
+## System of Record
+- Architecture: `ARCHITECTURE.md`
+- Product specs: `docs/product-specs/index.md`, `docs/game-story.md`, `docs/game_spec.md`
+- Execution plans: `docs/exec-plans/`, `docs/PLANS.md`, `.codex/`
+- Design guidance: `docs/DESIGN.md`, `docs/design-docs/`
+- Frontend/UI guidance: `docs/FRONTEND.md`
+- Reliability: `docs/RELIABILITY.md`
+- Security/config: `docs/SECURITY.md`
+- Quality tracking: `docs/QUALITY_SCORE.md`, `docs/exec-plans/tech-debt-tracker.md`
+- References: `docs/references/index.md`
+- Generated references: `docs/generated/index.md`
 
-If you introduce a different stack, add its install, run, and test commands to `README.md` immediately.
+## Commands
+- Setup: TODO(source-needed): setup command
+- Run game: `bash scripts/run_game.sh`
+- Test: `python3 -m pytest tests -v`
+- Full validation: `bash scripts/check.sh`
+- Docs structure check: `python3 scripts/check_agent_docs.py`
+- Package macOS build: `bash scripts/package_macos.sh`
+- Lint: TODO(source-needed): lint command
 
-## Coding Style & Naming Conventions
-The existing `.gitignore` is Python-oriented, so default to Python conventions unless the project formally adopts another language. Use 4-space indentation, descriptive module names such as `combat_loop.py`, `stage_flow.py`, or `enemy_spawn_rules.py`, PascalCase for classes, and UPPER_SNAKE_CASE for constants. Keep modules focused, prefer pure functions for deterministic gameplay logic, and separate implementation files from design or production notes.
+Set `GODOT_BIN=/path/to/godot` when `godot` is not on `PATH`.
 
-## Testing Guidelines
-No test framework is committed yet. New code should arrive with `pytest`-style tests in `tests/` named `test_<feature>.py`. Prioritize deterministic coverage for combat rules, stage progression, save/load behavior, and content validation. New gameplay systems should not merge without at least one regression test.
+## Agent Rules
+- Preserve runtime behavior unless explicitly asked to change it.
+- Do not invent architecture, deployment details, commands, owners, or SLAs.
+- Prefer existing repo patterns and small, reviewable changes.
+- Update docs when changing behavior, structure, or workflow.
+- Add or update tests for behavior changes.
+- Do not log, print, copy, or expose secrets.
+- Keep runtime assets and scenes inside `src/wildcoil`.
+- Keep public planning/status in `to-do.md` and `docs/`; keep Codex-only continuity in `.codex/`.
+- Use `docs/game-story.md` as the story bible for `Rift Road: Beasts of the Afterglow`.
+- Run the relevant validation before commit or handoff.
+- For Databricks code, if introduced later, prefer `pathlib`, Unity Catalog-aware paths, Databricks secret scopes, and job/app-safe configuration.
 
-## Commit & Pull Request Guidelines
-The visible history currently starts with `Initial commit`, so use short, imperative commit subjects going forward, for example `docs: add combat prototype checklist` or `feat: scaffold stage loader`. When a contributor asks for a commit message plus description, return it in a fenced `txt` block so it is easy to copy, using this exact template:
-
-```txt
-Commit Message
-
-Desc
-- <dash bullet item 1>
-- <dash bullet item 2>
-```
-
-Use `-` for bullets, not dots. Keep pull requests focused and include a summary, motivation, linked issue or task, and screenshots or short clips for gameplay, UI, or asset changes. Call out third-party asset provenance and licensing in the PR description.
-
-## Agent-Specific Instructions
-Treat this file as a living contributor memory. Update `AGENTS.md` whenever you learn a stable user preference, working convention, or durable solution to a repeated issue so future sessions do not repeat the same back-and-forth. Record only concise, reusable guidance that is relevant to contributors in this repository.
-- `.codex/` is the hidden tracked planning area for Codex-only execution notes, active plan state, and plan-history records; keep contributor-facing docs in `docs/`.
-- `to-do.md` is the single public source of truth for status, backlog, validation, and milestone state; keep task buckets to `PENDING` and `DONE`.
-- Keep living planning artifacts in `docs/`; avoid adding new root-level planning files beyond `to-do.md`.
-- The active game direction is `Rift Road: Beasts of the Afterglow`; use `docs/game-story.md` as the story bible and `to-do.md` as the task source of truth.
-- The production Godot project root lives at `src/wildcoil`; keep runtime assets and scenes there so the repo-level `src/` rule stays true.
-- Automated runtime checks should run from `pytest` in the repo `tests/` directory and drive the real Godot project headlessly rather than maintaining a separate fake gameplay implementation.
-- After any commit/push requested in this repo, include the exact commit message and a short description in the final response.
-- Complete one tracker task at a time; run that task's full validation before commit, then commit and push immediately once it is green.
+## Commit/Push Notes
+- Complete one tracker task at a time.
+- Run that task's full validation before commit.
+- Commit and push immediately once green only when commit/push is requested.
+- After any requested commit or push, include the exact commit message and a short description in the final response.
