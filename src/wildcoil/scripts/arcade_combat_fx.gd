@@ -53,6 +53,24 @@ func spawn_attack_arc(screen_position: Vector2, facing: int, color: Color = Colo
 	])
 	arc.color = color
 	add_child(arc)
+	var edge := Line2D.new()
+	edge.points = PackedVector2Array([
+		Vector2(6 * facing, -43),
+		Vector2(86 * facing, -28),
+		Vector2(110 * facing, 2),
+		Vector2(68 * facing, 30)
+	])
+	edge.default_color = Color(1.0, 0.95, 0.58, 0.88)
+	edge.width = 4.0
+	arc.add_child(edge)
+	var speed_line := Line2D.new()
+	speed_line.points = PackedVector2Array([
+		Vector2(-42 * facing, -18),
+		Vector2(66 * facing, -5)
+	])
+	speed_line.default_color = Color(1.0, 1.0, 1.0, 0.46)
+	speed_line.width = 3.0
+	arc.add_child(speed_line)
 	var tween := create_tween()
 	tween.set_parallel(true)
 	tween.tween_property(arc, "scale", Vector2(1.25, 1.25), 0.14)

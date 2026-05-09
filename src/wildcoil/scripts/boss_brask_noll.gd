@@ -4,6 +4,10 @@ class_name BossBraskNoll
 signal defeated
 signal attack_landed(damage)
 signal summon_requested
+signal move_telegraphed(move_name)
+signal phase_changed
+
+const VisualAssetLoader := preload("res://scripts/visual_asset_loader.gd")
 
 var display_name := "Brask Noll"
 var boss_id := "brask_noll"
@@ -21,6 +25,8 @@ var active_move := "axe_swing"
 var telegraph_timer := 0.0
 var charge_velocity := 0.0
 var hurt_flash := 0.0
+var animation_time := 0.0
+var visual_sprites := {}
 
 func setup(profile: Dictionary) -> void:
 	boss_id = profile.get("id", boss_id)
@@ -31,9 +37,11 @@ func setup(profile: Dictionary) -> void:
 	health = max_health
 	attack_damage = int(profile.get("attack_damage", attack_damage))
 	move_speed = float(profile.get("move_speed", move_speed))
+	_load_visual_sprites()
 	queue_redraw()
 
 func _physics_process(delta: float) -> void:
+	animation_time += delta
 	if health <= 0 or target == null:
 		return
 	hurt_flash = maxf(hurt_flash - delta, 0.0)
@@ -81,6 +89,7 @@ func _pick_next_move() -> void:
 	if active_move == "charge":
 		charge_velocity = sign(target.position.x - position.x) * 520.0
 	action_timer = 1.2 if phase_two else 1.55
+	move_telegraphed.emit(active_move)
 
 func body_rect() -> Rect2:
 	return Rect2(position - Vector2(42, 82), Vector2(84, 82))
@@ -94,6 +103,7 @@ func apply_damage(amount: int, source_x: float) -> void:
 	if not phase_two and health <= int(max_health * 0.5):
 		phase_two = true
 		action_timer = 0.25
+		phase_changed.emit()
 	if health <= 0:
 		defeated.emit()
 		queue_free()
@@ -102,19 +112,53 @@ func apply_damage(amount: int, source_x: float) -> void:
 func _draw() -> void:
 	var color := _boss_color() if hurt_flash <= 0.0 else Color(1.0, 0.86, 0.42)
 	_draw_flat_ellipse(Vector2(0, -2), Vector2(58, 10), Color(0, 0, 0, 0.3))
-	draw_line(Vector2(-18, -35), Vector2(-30, 0), Color(0.06, 0.06, 0.07), 12.0)
-	draw_line(Vector2(18, -35), Vector2(30, 0), Color(0.06, 0.06, 0.07), 12.0)
-	draw_polygon([Vector2(-48, -88), Vector2(44, -90), Vector2(58, -36), Vector2(33, -18), Vector2(-38, -18), Vector2(-58, -42)], [color])
-	draw_rect(Rect2(Vector2(-31, -104), Vector2(62, 21)), Color(0.07, 0.06, 0.06))
-	draw_rect(Rect2(Vector2(-21, -98), Vector2(42, 5)), Color(1.0, 0.72, 0.18))
-	draw_line(Vector2(-42, -72), Vector2(-78, -38), Color(0.46, 0.47, 0.5), 10.0)
-	_draw_hydraulic_axe()
-	_draw_boss_signature()
-	_draw_boss_portrait_read()
+	if not _draw_visual_sprite(color):
+		draw_line(Vector2(-18, -35), Vector2(-30, 0), Color(0.06, 0.06, 0.07), 12.0)
+		draw_line(Vector2(18, -35), Vector2(30, 0), Color(0.06, 0.06, 0.07), 12.0)
+		draw_polygon([Vector2(-48, -88), Vector2(44, -90), Vector2(58, -36), Vector2(33, -18), Vector2(-38, -18), Vector2(-58, -42)], [color])
+		draw_rect(Rect2(Vector2(-31, -104), Vector2(62, 21)), Color(0.07, 0.06, 0.06))
+		draw_rect(Rect2(Vector2(-21, -98), Vector2(42, 5)), Color(1.0, 0.72, 0.18))
+		draw_line(Vector2(-42, -72), Vector2(-78, -38), Color(0.46, 0.47, 0.5), 10.0)
+		_draw_hydraulic_axe()
+		_draw_boss_signature()
+		_draw_boss_portrait_read()
 	if telegraph_timer > 0.0:
 		_draw_move_telegraph()
 	if stunned_timer > 0.0:
 		draw_circle(Vector2(0, -112), 16.0, Color(0.8, 0.92, 1.0, 0.6))
+
+func _load_visual_sprites() -> void:
+	visual_sprites.clear()
+	var loader := VisualAssetLoader.new()
+	for state in ["idle", "attack", "hurt"]:
+		var texture := loader.actor_texture("brask_noll", state)
+		if texture != null:
+			visual_sprites[state] = texture
+
+func _draw_visual_sprite(modulate_color: Color) -> bool:
+	var state := _current_visual_sprite_state()
+	var texture: Texture2D = visual_sprites.get(state, visual_sprites.get("idle", null))
+	if texture == null:
+		return false
+	var target_size := Vector2(292, 292)
+	var bob := sin(animation_time * 4.8) * 2.0
+	if telegraph_timer > 0.0:
+		bob += sin(animation_time * 28.0) * 2.5
+	var draw_pos := Vector2(-target_size.x * 0.5, -target_size.y + 14 + bob)
+	var facing := -1.0
+	if target != null and target.position.x > position.x:
+		facing = 1.0
+	draw_set_transform(Vector2.ZERO, 0.0, Vector2(facing, 1.0))
+	draw_texture_rect(texture, Rect2(draw_pos, target_size), false, modulate_color)
+	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+	return true
+
+func _current_visual_sprite_state() -> String:
+	if hurt_flash > 0.0:
+		return "hurt"
+	if telegraph_timer > 0.0:
+		return "attack"
+	return "idle"
 
 func _boss_color() -> Color:
 	match palette:

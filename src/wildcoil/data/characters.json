@@ -11,8 +11,30 @@
       "attack_damage": 18,
       "special_damage": 34,
       "special_cost": 50,
+      "stats": {"power": 3, "speed": 3, "control": 3, "defense": 3},
+      "specialty": "Reliable combos, field repair, and balanced lane control",
+      "weakness": "No extreme advantage; must use positioning well",
+      "capability_summary": "Balanced mechanic who can handle any wave and recover mistakes.",
       "actions": ["light_attack", "jump_attack", "dash", "special", "grab"],
       "signature_moves": ["Spanner Jab", "Gearbreaker Kick", "Overdrive Slam", "Field Repair"]
+    },
+    {
+      "id": "kian_vale",
+      "name": "Kian Vale",
+      "role": "field medic",
+      "palette": ["moss-green", "white", "deep-blue"],
+      "max_health": 100,
+      "move_speed": 270,
+      "dash_speed": 650,
+      "attack_damage": 12,
+      "special_damage": 22,
+      "special_cost": 35,
+      "stats": {"power": 2, "speed": 3, "control": 5, "defense": 3},
+      "specialty": "Crowd control, fast recovery, creature calming, and med patches",
+      "weakness": "Lower raw damage; wins through spacing and control",
+      "capability_summary": "Technical biologist who controls groups and protects fragile creatures.",
+      "actions": ["light_attack", "jump_attack", "dash", "special", "grab"],
+      "signature_moves": ["Pulse Staff Combo", "Vine Snare", "Sonic Whistle", "Med Patch"]
     },
     {
       "id": "nika_sol",
@@ -25,9 +47,30 @@
       "attack_damage": 13,
       "special_damage": 25,
       "special_cost": 45,
+      "stats": {"power": 2, "speed": 5, "control": 2, "defense": 1},
+      "specialty": "Fast movement, aerial pressure, and burst repositioning",
+      "weakness": "Low health; bad trades punish her quickly",
+      "capability_summary": "Agile scout who turns the arena into a race line.",
       "actions": ["light_attack", "jump_attack", "dash", "special", "grab"],
       "signature_moves": ["Flash Step", "Heel Arc", "Skyline Drop", "Static Burst"]
+    },
+    {
+      "id": "tor_bram",
+      "name": "Tor Bram",
+      "role": "heavy defender",
+      "palette": ["steel-gray", "dark-red", "sandy-tan"],
+      "max_health": 160,
+      "move_speed": 205,
+      "dash_speed": 470,
+      "attack_damage": 24,
+      "special_damage": 42,
+      "special_cost": 60,
+      "stats": {"power": 5, "speed": 1, "control": 3, "defense": 5},
+      "specialty": "Armor, throws, shoulder checks, and holding lanes under pressure",
+      "weakness": "Slowest hero; can be surrounded if he misses",
+      "capability_summary": "Ex-Iron Veil defender who absorbs hits and breaks enemy lines.",
+      "actions": ["light_attack", "jump_attack", "dash", "special", "grab"],
+      "signature_moves": ["Hammer Fist", "Shoulder Ram", "Titan Throw", "Hold the Line"]
     }
   ]
 }
-

@@ -4,6 +4,7 @@ class_name EnemyActor
 signal defeated(enemy)
 signal attack_landed(enemy, damage)
 
+const VisualAssetLoader := preload("res://scripts/visual_asset_loader.gd")
 const BODY_SIZE := Vector2(34, 52)
 
 var enemy_id := "iron_veil_grunt"
@@ -23,6 +24,12 @@ var telegraph_timer := 0.0
 var hurt_flash := 0.0
 var behavior_phase := 0.0
 var facing := -1
+var visual_sprites := {}
+var arcade_slot_index := 0
+var arcade_slot_count := 1
+var cinematic_entry_active := false
+var cinematic_entry_target := Vector2.ZERO
+var cinematic_entry_speed := 0.0
 
 func setup(profile: Dictionary) -> void:
 	enemy_id = profile.get("id", enemy_id)
@@ -36,7 +43,18 @@ func setup(profile: Dictionary) -> void:
 	attack_range = float(profile.get("attack_range", attack_range))
 	telegraph_seconds = float(profile.get("telegraph_seconds", telegraph_seconds))
 	score_value = int(profile.get("score", score_value))
+	_load_visual_sprites()
 	queue_redraw()
+
+func configure_arcade_slot(index: int, total: int) -> void:
+	arcade_slot_index = index
+	arcade_slot_count = maxi(total, 1)
+
+func start_cinematic_entry(target_position: Vector2, entry_speed: float) -> void:
+	cinematic_entry_target = target_position
+	cinematic_entry_speed = maxf(entry_speed, move_speed)
+	cinematic_entry_active = true
+	attack_cooldown = maxf(attack_cooldown, 0.9)
 
 func _physics_process(delta: float) -> void:
 	if health <= 0 or target == null:
@@ -45,17 +63,25 @@ func _physics_process(delta: float) -> void:
 	attack_cooldown = maxf(attack_cooldown - delta, 0.0)
 	behavior_phase += delta
 
-	var offset := target.position - position
-	var distance := offset.length()
-	if absf(offset.x) > 2.0:
-		facing = sign(offset.x)
+	if cinematic_entry_active:
+		_tick_cinematic_entry(delta)
+		move_and_slide()
+		z_index = int(position.y)
+		queue_redraw()
+		return
+
+	var direct_offset := target.position - position
+	var distance := direct_offset.length()
+	if absf(direct_offset.x) > 2.0:
+		facing = sign(direct_offset.x)
+	var movement_offset := _arcade_engagement_offset(direct_offset)
 	if telegraph_timer > 0.0:
 		telegraph_timer -= delta
 		if telegraph_timer <= 0.0 and distance <= attack_range + 18.0:
 			attack_landed.emit(self, attack_damage)
 		velocity = Vector2.ZERO
 	else:
-		_apply_behavior_movement(offset, distance, delta)
+		_apply_behavior_movement(movement_offset, distance, delta)
 		if attack_cooldown <= 0.0 and _can_start_attack(distance):
 			telegraph_timer = telegraph_seconds
 			attack_cooldown = 1.28 if behavior == "ranged_thrower" else 1.1
@@ -63,6 +89,18 @@ func _physics_process(delta: float) -> void:
 	move_and_slide()
 	z_index = int(position.y)
 	queue_redraw()
+
+func _tick_cinematic_entry(_delta: float) -> void:
+	var offset: Vector2 = cinematic_entry_target - position
+	if absf(offset.x) > 2.0:
+		facing = sign(offset.x)
+	if offset.length() <= 10.0:
+		position = cinematic_entry_target
+		velocity = Vector2.ZERO
+		cinematic_entry_active = false
+		return
+	var weave := Vector2(0.0, sin(behavior_phase * 10.0 + float(arcade_slot_index)) * 18.0)
+	velocity = (offset + weave).normalized() * cinematic_entry_speed
 
 func body_rect() -> Rect2:
 	return Rect2(position - Vector2(BODY_SIZE.x * 0.5, BODY_SIZE.y), BODY_SIZE)
@@ -77,14 +115,100 @@ func apply_damage(amount: int, source_x: float) -> void:
 	queue_redraw()
 
 func _draw() -> void:
-	_draw_sprite_outline()
-	if species == "machine":
-		_draw_machine_enemy()
-	elif species == "creature":
-		_draw_creature_enemy()
-	else:
-		_draw_human_enemy()
+	if not _draw_visual_sprite():
+		_draw_sprite_outline()
+		if species == "machine":
+			_draw_machine_enemy()
+		elif species == "creature":
+			_draw_creature_enemy()
+		else:
+			_draw_human_enemy()
+	elif telegraph_timer > 0.0:
+		draw_rect(Rect2(Vector2(-31, -86), Vector2(62, 88)), Color(1.0, 0.08, 0.04, 0.22))
 	_draw_luma_highlight()
+
+func _load_visual_sprites() -> void:
+	visual_sprites.clear()
+	var loader := VisualAssetLoader.new()
+	for state in ["idle", "walk", "attack", "hurt"]:
+		var texture := loader.actor_texture(enemy_id, state)
+		if texture != null:
+			visual_sprites[state] = texture
+
+func _draw_visual_sprite() -> bool:
+	var state := _current_visual_sprite_state()
+	var texture: Texture2D = visual_sprites.get(state, visual_sprites.get("idle", null))
+	if texture == null:
+		return false
+	var target_size := _visual_target_size()
+	var bob := sin(behavior_phase * _visual_motion_speed()) * _visual_motion_amount()
+	var attack_lunge := 10.0 if telegraph_timer > 0.0 else 0.0
+	var draw_pos := Vector2(-target_size.x * 0.5 + attack_lunge, -target_size.y + 7 + bob)
+	var tint := Color.WHITE
+	if hurt_flash > 0.0:
+		tint = Color(1.0, 0.86, 0.62, 1.0)
+	var squash := _visual_squash_scale()
+	draw_set_transform(Vector2.ZERO, _visual_tilt(), Vector2(float(facing) * squash.x, squash.y))
+	draw_texture_rect(texture, Rect2(draw_pos, target_size), false, tint)
+	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+	return true
+
+func _visual_squash_scale() -> Vector2:
+	if hurt_flash > 0.0:
+		return Vector2(1.10, 0.92)
+	if telegraph_timer > 0.0:
+		return Vector2(1.08, 0.95)
+	if velocity.length() > 8.0:
+		var walk := absf(sin(behavior_phase * _visual_motion_speed()))
+		return Vector2(1.0 + walk * 0.035, 1.0 - walk * 0.025)
+	return Vector2(1.0, 1.0 + sin(behavior_phase * 3.0) * 0.012)
+
+func _visual_tilt() -> float:
+	if hurt_flash > 0.0:
+		return deg_to_rad(5.0 * float(facing))
+	if telegraph_timer > 0.0:
+		return deg_to_rad(-4.0 * float(facing))
+	if velocity.length() > 8.0:
+		return deg_to_rad(sin(behavior_phase * 7.0) * 1.2 * float(facing))
+	return 0.0
+
+func _visual_target_size() -> Vector2:
+	match enemy_id:
+		"iron_veil_runner":
+			return Vector2(148, 224)
+		"iron_veil_brute":
+			return Vector2(224, 270)
+		"scrap_hurler":
+			return Vector2(164, 210)
+		"frightened_raptorling":
+			return Vector2(150, 130)
+		"hornbeak_dinosaur":
+			return Vector2(238, 196)
+		_:
+			return Vector2(158, 188)
+
+func _visual_motion_amount() -> float:
+	if species == "creature":
+		return 3.5
+	if enemy_id == "iron_veil_brute":
+		return 1.4
+	return 2.2
+
+func _visual_motion_speed() -> float:
+	if species == "creature":
+		return 8.0
+	if enemy_id == "iron_veil_brute":
+		return 4.0
+	return 6.0
+
+func _current_visual_sprite_state() -> String:
+	if hurt_flash > 0.0:
+		return "hurt"
+	if telegraph_timer > 0.0:
+		return "attack"
+	if velocity.length() > 8.0:
+		return "walk"
+	return "idle"
 
 func _draw_sprite_outline() -> void:
 	var outline := Color(0.02, 0.015, 0.012, 0.92)
@@ -119,13 +243,17 @@ func _draw_human_enemy() -> void:
 		color = Color(1.0, 0.9, 0.5)
 	var scale_boost := 1.25 if enemy_id == "iron_veil_brute" else 1.0
 	_draw_flat_ellipse(Vector2(0, -2), Vector2(25 * scale_boost, 7), Color(0.0, 0.0, 0.0, 0.28))
-	draw_rect(Rect2(Vector2(-13 * scale_boost, -55 * scale_boost), Vector2(26 * scale_boost, 36 * scale_boost)), color)
-	draw_rect(Rect2(Vector2(-19 * scale_boost, -49 * scale_boost), Vector2(10 * scale_boost, 27 * scale_boost)), Color(0.11, 0.11, 0.12))
-	draw_rect(Rect2(Vector2(9 * scale_boost, -49 * scale_boost), Vector2(10 * scale_boost, 27 * scale_boost)), Color(0.11, 0.11, 0.12))
-	draw_rect(Rect2(Vector2(-11 * scale_boost, -20 * scale_boost), Vector2(8 * scale_boost, 20 * scale_boost)), Color(0.08, 0.08, 0.09))
-	draw_rect(Rect2(Vector2(3 * scale_boost, -20 * scale_boost), Vector2(8 * scale_boost, 20 * scale_boost)), Color(0.08, 0.08, 0.09))
-	draw_rect(Rect2(Vector2(-12 * scale_boost, -73 * scale_boost), Vector2(24 * scale_boost, 18 * scale_boost)), Color(0.06, 0.06, 0.07))
-	draw_rect(Rect2(Vector2(-7 * scale_boost, -68 * scale_boost), Vector2(14 * scale_boost, 4 * scale_boost)), Color(1.0, 0.7, 0.22))
+	_draw_humanoid_limb_outline(scale_boost)
+	draw_polygon([
+		Vector2(-16 * scale_boost, -58 * scale_boost),
+		Vector2(14 * scale_boost, -61 * scale_boost),
+		Vector2(23 * scale_boost, -26 * scale_boost),
+		Vector2(9 * scale_boost, -15 * scale_boost),
+		Vector2(-17 * scale_boost, -18 * scale_boost),
+		Vector2(-24 * scale_boost, -36 * scale_boost)
+	], [color])
+	_draw_human_armor_panels(scale_boost, color)
+	_draw_enemy_flinch_pose(scale_boost)
 	if enemy_id == "iron_veil_brute":
 		draw_rect(Rect2(Vector2(20, -61), Vector2(38, 9)), Color(0.6, 0.6, 0.64))
 		draw_rect(Rect2(Vector2(46, -67), Vector2(12, 22)), Color(0.42, 0.42, 0.45))
@@ -144,6 +272,36 @@ func _draw_human_enemy() -> void:
 	if telegraph_timer > 0.0:
 		draw_rect(Rect2(Vector2(-28, -58), Vector2(56, 60)), Color(1.0, 0.08, 0.04, 0.25))
 	_draw_behavior_weapon()
+
+func _draw_humanoid_limb_outline(scale_boost: float) -> void:
+	var outline := Color(0.02, 0.015, 0.012, 0.94)
+	var boot := Color(0.04, 0.04, 0.045)
+	draw_line(Vector2(-11 * scale_boost, -25 * scale_boost), Vector2(-25 * scale_boost, -1), outline, 11.0 * scale_boost)
+	draw_line(Vector2(10 * scale_boost, -25 * scale_boost), Vector2(24 * scale_boost, -1), outline, 11.0 * scale_boost)
+	draw_line(Vector2(-17 * scale_boost, -48 * scale_boost), Vector2(-40 * scale_boost, -31 * scale_boost), outline, 10.0 * scale_boost)
+	draw_line(Vector2(17 * scale_boost, -48 * scale_boost), Vector2(38 * scale_boost, -35 * scale_boost), outline, 10.0 * scale_boost)
+	draw_circle(Vector2(0, -68 * scale_boost), 15.0 * scale_boost, outline)
+	draw_rect(Rect2(Vector2(-28 * scale_boost, -5), Vector2(20 * scale_boost, 7)), boot)
+	draw_rect(Rect2(Vector2(8 * scale_boost, -5), Vector2(20 * scale_boost, 7)), boot)
+
+func _draw_human_armor_panels(scale_boost: float, base_color: Color) -> void:
+	var armor_shadow := base_color.darkened(0.34)
+	var armor_light := base_color.lightened(0.24)
+	draw_line(Vector2(-15 * scale_boost, -51 * scale_boost), Vector2(16 * scale_boost, -55 * scale_boost), armor_light, 4.0 * scale_boost)
+	draw_rect(Rect2(Vector2(-9 * scale_boost, -49 * scale_boost), Vector2(18 * scale_boost, 16 * scale_boost)), armor_light)
+	draw_rect(Rect2(Vector2(-16 * scale_boost, -30 * scale_boost), Vector2(30 * scale_boost, 7 * scale_boost)), armor_shadow)
+	draw_rect(Rect2(Vector2(-12 * scale_boost, -83 * scale_boost), Vector2(24 * scale_boost, 18 * scale_boost)), Color(0.06, 0.06, 0.07))
+	var helmet_eye_slit := Rect2(Vector2(-8 * scale_boost, -77 * scale_boost), Vector2(16 * scale_boost, 4 * scale_boost))
+	draw_rect(helmet_eye_slit, Color(1.0, 0.7, 0.22))
+	draw_circle(Vector2(0, -62 * scale_boost), 4.0 * scale_boost, Color(0.22, 1.0, 0.66, 0.68))
+
+func _draw_enemy_flinch_pose(scale_boost: float) -> void:
+	if hurt_flash <= 0.0:
+		return
+	var spark := Color(1.0, 0.96, 0.56, 0.82)
+	draw_line(Vector2(-29 * scale_boost, -70 * scale_boost), Vector2(-48 * scale_boost, -88 * scale_boost), spark, 3.0)
+	draw_line(Vector2(28 * scale_boost, -68 * scale_boost), Vector2(46 * scale_boost, -84 * scale_boost), spark, 3.0)
+	draw_arc(Vector2(0, -48 * scale_boost), 36.0 * scale_boost, -0.4, PI + 0.4, 18, spark, 3.0)
 
 func _draw_creature_enemy() -> void:
 	var color := Color(0.18, 0.7, 0.34)
@@ -197,37 +355,52 @@ func _draw_machine_enemy() -> void:
 		draw_circle(Vector2(0, -36), 36, Color(1.0, 0.1, 0.04, 0.22))
 	_draw_behavior_weapon()
 
-func _apply_behavior_movement(offset: Vector2, distance: float, _delta: float) -> void:
+func _arcade_engagement_offset(direct_offset: Vector2) -> Vector2:
+	var side: float = sign(position.x - target.position.x)
+	if side == 0:
+		side = 1
+	var lane_index: float = float(arcade_slot_index) - float(arcade_slot_count - 1) * 0.5
+	var desired_x: float = side * (attack_range + 46.0 + absf(lane_index) * 24.0)
+	var desired_y: float = lane_index * 36.0
+	if behavior == "ranged_thrower":
+		desired_x = side * maxf(attack_range - 10.0, 118.0)
+	if behavior == "territorial_charge" or species == "creature":
+		desired_y *= 0.65
+	var desired_position := target.position + Vector2(desired_x, desired_y)
+	return desired_position - position
+
+func _apply_behavior_movement(offset: Vector2, direct_distance: float, _delta: float) -> void:
+	var distance := offset.length()
 	if distance <= 0.01:
 		velocity = Vector2.ZERO
 		return
 	var direction := offset.normalized()
 	match behavior:
 		"ranged_thrower":
-			if distance < 135.0:
+			if direct_distance < 135.0:
 				velocity = -direction * move_speed * 0.82
-			elif distance > attack_range:
+			elif distance > 18.0:
 				velocity = direction * move_speed * 0.72
 			else:
 				velocity = Vector2(0, sin(behavior_phase * 3.0) * move_speed * 0.25)
 		"territorial_charge":
-			if distance > attack_range:
+			if distance > 18.0:
 				velocity = direction * move_speed * 1.18
 			else:
 				velocity = Vector2.ZERO
 		"fast_melee", "panicked_nearest_target", "sound_reactive":
-			if distance > attack_range:
+			if distance > 18.0:
 				var weave := Vector2(-direction.y, direction.x) * sin(behavior_phase * 5.5) * 0.38
 				velocity = (direction + weave).normalized() * move_speed
 			else:
 				velocity = Vector2.ZERO
 		"front_blocker", "slow_grabber", "armored_biter":
-			if distance > attack_range:
+			if distance > 18.0:
 				velocity = direction * move_speed * 0.74
 			else:
 				velocity = Vector2.ZERO
 		_:
-			if distance > attack_range:
+			if distance > 18.0:
 				velocity = direction * move_speed
 			else:
 				velocity = Vector2.ZERO
@@ -235,7 +408,7 @@ func _apply_behavior_movement(offset: Vector2, distance: float, _delta: float) -
 func _can_start_attack(distance: float) -> bool:
 	if behavior == "ranged_thrower" or behavior == "summoner":
 		return distance <= attack_range + 35.0
-	return distance <= attack_range + 12.0
+	return distance <= attack_range + 16.0 and absf(target.position.y - position.y) <= 54.0
 
 func _draw_behavior_weapon() -> void:
 	var weapon_color := Color(0.9, 0.88, 0.78, 0.92)

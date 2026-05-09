@@ -3,6 +3,15 @@
 ## Repo Purpose
 Wildcoil currently hosts `Rift Road: Beasts of the Afterglow`, a macOS-first Godot 4.x 2D arcade beat-'em-up prototype. Runtime code lives in `src/wildcoil`, tests live in `tests`, and contributor-facing docs live in `docs`.
 
+## Active Goal
+The single current goal is to make the running game UI and Stage 1 presentation as polished as the generated north-star images in `docs/design-docs/assets/`, while keeping the current Godot game, story bible, and original Rift Road identity.
+
+Use these images as the visual quality bar:
+- `docs/design-docs/assets/stage1-visual-north-star.png`
+- `docs/design-docs/assets/stage1-background-north-star.png`
+
+Do not call work complete, production-grade, or visually matched unless a real launched-game screenshot and manual playtest show the current build moving toward those references. Automated tests alone are not enough for this goal.
+
 ## Fast Path
 1. Read `README.md` for the current milestone and local commands.
 2. Read `to-do.md` for the active task tracker and validation gate.
@@ -41,9 +50,10 @@ Set `GODOT_BIN=/path/to/godot` when `godot` is not on `PATH`.
 - Add or update tests for behavior changes.
 - Do not log, print, copy, or expose secrets.
 - Keep runtime assets and scenes inside `src/wildcoil`.
+- Keep generated concept references in `docs/design-docs/assets/`; do not depend on files under `$CODEX_HOME` for project work.
 - Keep public planning/status in `to-do.md` and `docs/`; keep Codex-only continuity in `.codex/`.
 - Use `docs/game-story.md` as the story bible for `Rift Road: Beasts of the Afterglow`.
-- Run the relevant validation before commit or handoff.
+- Run the relevant validation before commit or handoff, including screenshot/playtest evidence for visual/UI claims.
 - For Databricks code, if introduced later, prefer `pathlib`, Unity Catalog-aware paths, Databricks secret scopes, and job/app-safe configuration.
 
 ## Commit/Push Notes

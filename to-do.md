@@ -2,20 +2,49 @@
 
 ## Project Goal
 
-Build an original macOS-first 2D side-scrolling arcade beat-'em-up, `Rift Road: Beasts of the Afterglow`, that proves satisfying combat feel, readable belt-scroll arenas, distinct hero identities, practical Godot/macOS delivery, and strong originality safeguards before expanding beyond Stage 1.
+Make the running game UI and Stage 1 presentation as polished as the generated north-star images while keeping the current Godot game, story bible, and original `Rift Road: Beasts of the Afterglow` identity.
+
+The current build can prove flow, combat scaffolding, and packaging, but it does not visually match the approved generated images yet. The next work must replace rectangle/polygon prototype presentation with actual Stage 1 art assets and premium HUD/menu treatment, then prove the result through real launched-game screenshots and manual playtest.
 
 ## Product Thesis
 
-Rift Road should feel like a new 1990s-inspired arcade road adventure: fast action, colorful prehistoric-future staging, expressive silhouettes, heroic banter, big readable bosses, and a theme of coexistence over extraction.
+Rift Road should feel like a new 1990s arcade road adventure: fast side-scrolling action, warm prehistoric-future staging, expressive human characters, big readable enemies, punchy but non-bloody impact effects, and strong originality safeguards.
 
 ## Current Milestone
 
-Rift Road Phase 1 - Stage 1 Playable Prototype
+Production Vertical Slice - Asset-Backed Stage 1 Visual Slice
 
 ## Active Story Source
 
-- [`docs/game-story.md`](/Users/himu/Desktop/career/personal_projects/wildcoil/docs/game-story.md) is the current story bible and product direction.
-- [`docs/superpowers/plans/2026-04-27-rift-road-mvp.md`](/Users/himu/Desktop/career/personal_projects/wildcoil/docs/superpowers/plans/2026-04-27-rift-road-mvp.md) is the implementation plan for the first playable.
+- [`docs/game-story.md`](/Users/himu/Desktop/career/personal_projects/wildcoil/docs/game-story.md) is the story bible and product direction.
+- [`docs/design-docs/stage1-visual-north-star.md`](/Users/himu/Desktop/career/personal_projects/wildcoil/docs/design-docs/stage1-visual-north-star.md) locks the approved concept-image direction for Stage 1.
+- [`docs/design-docs/stage1-visual-production-recovery.md`](/Users/himu/Desktop/career/personal_projects/wildcoil/docs/design-docs/stage1-visual-production-recovery.md) defines the recovery path from prototype shapes to asset-backed visuals.
+- [`docs/design-docs/assets/stage1-visual-north-star.png`](/Users/himu/Desktop/career/personal_projects/wildcoil/docs/design-docs/assets/stage1-visual-north-star.png) is the UI/combat/presentation quality bar.
+- [`docs/design-docs/assets/stage1-background-north-star.png`](/Users/himu/Desktop/career/personal_projects/wildcoil/docs/design-docs/assets/stage1-background-north-star.png) is the Stage 1 environment quality bar.
+- [`docs/superpowers/plans/2026-04-27-rift-road-mvp.md`](/Users/himu/Desktop/career/personal_projects/wildcoil/docs/superpowers/plans/2026-04-27-rift-road-mvp.md) records the first playable implementation plan.
+
+## Vertical Slice Target
+
+The playable path is: title screen, hero select, Stage 1 cinematic start, enemy waves, Brask Noll boss, victory screen, restart or return-to-title flow, and packaged macOS zip.
+
+The visual target is the approved north-star direction: modern stylized arcade realism with pixel-art-inspired readability, cinematic sunset highway ruins, jungle depth, luma glow, dramatic sparks and dust, strong silhouettes, clean premium HUD and menus, no modern 3D realism, no generic cyberpunk drift, and no copied characters, UI, layouts, stages, sprites, logos, vehicles, or music from existing games.
+
+## Current Truth
+
+- Mechanically playable prototype: yes.
+- Production-grade visual/UI match to north-star images: no.
+- Manual playtest evidence: current Codex/Computer Use run opened the Godot app directly into Stage 1 and verified the image-backed background, Raya, denser Iron Veil waves, HUD, cinematic background motion, moving dinosaur/glider silhouettes, combat autoplay, and camera/combat feedback.
+- Latest capture note: Computer Use and System Events did not expose the Godot accessibility window, but CoreGraphics did expose the current exported Rift Road app window. Current proof includes both the exported macOS window capture and a scripted normal-renderer Godot viewport capture after fixing the Raya/Nika texture swap.
+- Current proof artifacts:
+  - Current exported Rift Road app window screenshot: [`docs/playtest-captures/stage1-current-rift-road-export-window.png`](/Users/himu/Desktop/career/personal_projects/wildcoil/docs/playtest-captures/stage1-current-rift-road-export-window.png)
+  - Current exported Rift Road app window motion capture: [`docs/playtest-captures/stage1-current-rift-road-export-window.mov`](/Users/himu/Desktop/career/personal_projects/wildcoil/docs/playtest-captures/stage1-current-rift-road-export-window.mov)
+  - Clean exported-app keyflow proof, title input to Stage 1: [`docs/playtest-captures/stage1-manual-keyflow-export-window.png`](/Users/himu/Desktop/career/personal_projects/wildcoil/docs/playtest-captures/stage1-manual-keyflow-export-window.png), [`docs/playtest-captures/stage1-manual-keyflow-export-window.mov`](/Users/himu/Desktop/career/personal_projects/wildcoil/docs/playtest-captures/stage1-manual-keyflow-export-window.mov)
+  - Current Stage 1 motion capture from the Godot runtime viewport: [`docs/playtest-captures/stage1-motion-current-runtime.mp4`](/Users/himu/Desktop/career/personal_projects/wildcoil/docs/playtest-captures/stage1-motion-current-runtime.mp4)
+  - Current motion sample frames: [`docs/playtest-captures/stage1-motion-current-sample-01.png`](/Users/himu/Desktop/career/personal_projects/wildcoil/docs/playtest-captures/stage1-motion-current-sample-01.png), [`docs/playtest-captures/stage1-motion-current-sample-02.png`](/Users/himu/Desktop/career/personal_projects/wildcoil/docs/playtest-captures/stage1-motion-current-sample-02.png), [`docs/playtest-captures/stage1-motion-current-sample-03.png`](/Users/himu/Desktop/career/personal_projects/wildcoil/docs/playtest-captures/stage1-motion-current-sample-03.png)
+  - Four-hero roster/capability UI screenshot: [`docs/playtest-captures/hero-roster-capabilities-window.png`](/Users/himu/Desktop/career/personal_projects/wildcoil/docs/playtest-captures/hero-roster-capabilities-window.png)
+  - Static launched-game screenshot: [`docs/playtest-captures/stage1-cinematic-fight-window.png`](/Users/himu/Desktop/career/personal_projects/wildcoil/docs/playtest-captures/stage1-cinematic-fight-window.png)
+  - Short motion capture: [`docs/playtest-captures/stage1-cinematic-fight-window.mov`](/Users/himu/Desktop/career/personal_projects/wildcoil/docs/playtest-captures/stage1-cinematic-fight-window.mov)
+  - Earlier visual slice screenshot: [`docs/playtest-captures/stage1-generated-slice.png`](/Users/himu/Desktop/career/personal_projects/wildcoil/docs/playtest-captures/stage1-generated-slice.png)
 
 ## Commit Gate
 
@@ -23,226 +52,122 @@ Rift Road Phase 1 - Stage 1 Playable Prototype
 - Run that task's full validation checklist before committing.
 - Commit and push immediately after the task is green when a commit/push is requested.
 - Do not commit or push failing work.
+- Do not mark this visual/UI goal done from tests alone; it requires launched-game screenshots and manual playtest notes.
 - Keep task buckets to `PENDING` and `DONE`.
 
 ## PENDING
 
-None currently. Next work should be playtest, tuning, or replacing placeholder art/audio after this Stage 1 prototype is reviewed.
+### [RR-PROD-02] Convert placeholder characters toward human arcade sprites
+- Outcome: Improve Raya, Nika, enemies, and Brask so they read as human or humanoid arcade characters instead of simple blocks.
+- Focus: Heads, torsos, arms, legs, stances, outlines, attack poses, and body proportions visible at gameplay zoom.
+- Validation:
+  - [ ] Screenshot review shows each actor has a readable body shape at 1280x720.
+  - [ ] No copied character sprites, names, costumes, or poses are introduced.
+- Dependencies: [RR-PROD-01]
+
+### [RR-PROD-03] Push the visual style toward modern retro-action readability
+- Outcome: Add stronger outlines, disciplined color, crisp scaling, cinematic lighting cues, and premium arcade readability.
+- Focus: Original modern retro-action presentation without copying any existing game characters, UI, stages, sprites, logos, or layouts.
+- Validation:
+  - [ ] `python3 -m pytest tests/test_visual_content.py -v` passes.
+  - [ ] `python3 -m pytest tests/test_arcade_aesthetics.py -v` passes.
+  - [ ] Headless Godot launch succeeds after style changes.
+- Dependencies: [RR-PROD-02]
+
+### [RR-PROD-04] Build a jungle-road ruins Stage 1 presentation pass
+- Outcome: Make Sunset Overpass look more like a detailed arcade stage with ruined road, jungle growth, broken railings or signage, warm sunset, luma plants, and background depth.
+- Validation:
+  - [ ] `godot --path src/wildcoil --headless --quit-after 3` launches without script errors.
+  - [ ] Captured gameplay screenshot shows visible stage layers and road depth.
+- Dependencies: [RR-PROD-03]
+
+### [RR-PROD-05] Improve fight readability and impact
+- Outcome: Add clearer punch and kick arcs, hit sparks, knockback, hit pause, input buffering, shadow blobs, enemy flinch poses, and non-bloody impact effects.
+- Validation:
+  - [ ] Combat screenshot or autoplay capture shows readable impact timing and feedback.
+  - [ ] Basic input buffering prevents missed attack presses during recovery.
+  - [ ] Hit effects remain original and non-bloody.
+- Dependencies: [RR-PROD-04]
+
+### [RR-PROD-06] Make Stage 1 flow reliable
+- Outcome: Ensure title screen, hero select, Stage 1 start, waves, boss, victory, restart, and quit work without relying on debug-only instructions.
+- Validation:
+  - [ ] One full autoplay or manual run reaches victory without script errors.
+  - [ ] Restart or return-to-title path works after victory or failure.
+- Dependencies: [RR-PROD-05]
+
+### [RR-PROD-07] Polish HUD for arcade readability
+- Outcome: Improve player name, health, special meter, score or luma, boss bar, and objective labels.
+- Focus: Original arcade cabinet readability at 1280x720 without copying existing arcade HUD layouts.
+- Validation:
+  - [ ] HUD is readable in a 1280x720 screenshot.
+  - [ ] Boss bar and objective text do not overlap combat action.
+- Dependencies: [RR-PROD-06]
+
+### [RR-PROD-08] Add audio and cinematic polish pass
+- Outcome: Add original placeholder music/SFX hooks, punchy UI sounds, boss cues, stage/boss transition polish, and victory feedback.
+- Validation:
+  - [ ] Audio manager has clear stage, boss, hit, UI, and victory hooks.
+  - [ ] Cinematic banners are readable and short.
+  - [ ] Placeholder provenance is documented.
+- Dependencies: [RR-PROD-07]
+
+### [RR-PROD-09] Package the macOS vertical slice
+- Outcome: Produce `build/macos/Rift Road.zip` for the team-review prototype.
+- Validation:
+  - [ ] `bash scripts/check.sh` passes.
+  - [ ] `bash scripts/package_macos.sh` creates `build/macos/Rift Road.zip`.
+- Dependencies: [RR-PROD-08]
+
+### [RR-PROD-10] Capture proof for handoff
+- Outcome: Save at least one gameplay screenshot and a short note describing what works, what is still placeholder, and what comes next.
+- Validation:
+  - [ ] Artifact path is recorded in this tracker.
+  - [ ] Summary is suitable for a quick user handoff.
+- Dependencies: [RR-PROD-09]
 
 ## DONE
 
-### [RR-P1-14] Add real brawler fight presentation and win feedback
-- Outcome: Added runtime fight cards, scenario objectives, boss intro banners, arena boundary markers, hit sparks, attack arcs, damage numbers, combo HUD feedback, camera punch, stronger enemy behavior differences, boss move telegraphs, and explicit win conditions for every stage.
+### [RR-VIS-02] Add first image-backed actor sprites
+- Outcome: Replaced Raya, Nika, Brask, and the Stage 1 wave enemy roster with manifest-backed PNG sprites for runtime use.
 - Validation:
-  - [x] `python3 -m pytest tests/test_brawler_presentation.py -v` passes.
-  - [x] `godot --path src/wildcoil --headless --quit-after 3` launches without script errors.
+  - [x] Gameplay screenshot includes image-backed Raya and image-backed Stage 1 enemies: [`docs/playtest-captures/stage1-generated-slice.png`](/Users/himu/Desktop/career/personal_projects/wildcoil/docs/playtest-captures/stage1-generated-slice.png)
+  - [x] Existing hitboxes, movement, and enemy AI still pass runtime validation through `bash scripts/check.sh`.
+  - [x] Generated runtime art sources and cutouts are recorded in `docs/asset_provenance_register.md`.
+- Dependencies: [RR-VIS-01]
+- Completed: 2026-05-09
+
+### [RR-VIS-01] Build the asset-backed Stage 1 background slice
+- Outcome: Replaced the most visible Stage 1 programmatic background shapes with imported image-backed layers for sky/ruins, overpass, road playfield, and atmosphere.
+- Validation:
+  - [x] `src/wildcoil/assets/stage1/backgrounds/` contains the first layer assets.
+  - [x] StageManager loads image-backed layers with fallback to programmatic shapes if missing.
+  - [x] A real launched-game screenshot shows Stage 1 no longer reads as only rectangle/polygon prototype art: [`docs/playtest-captures/stage1-generated-slice.png`](/Users/himu/Desktop/career/personal_projects/wildcoil/docs/playtest-captures/stage1-generated-slice.png)
   - [x] `bash scripts/check.sh` passes.
-- Dependencies: [RR-P1-13]
+- Dependencies: [RR-PROD-01]
+- Completed: 2026-05-09
+
+### [RR-PROD-01] Lock Stage 1 production north star
+- Outcome: Defined the production-grade Stage 1 goal, approved visual direction, required playable path, and non-goals.
+- Validation:
+  - [x] Tracker clearly states the playable vertical-slice target.
+  - [x] Stage 1 visual north-star doc exists and references the approved concept direction.
+  - [x] The target is constrained to original Rift Road content.
+- Dependencies: Current Godot prototype baseline.
+- Completed: 2026-05-09
+
+### [RR-BASELINE-01] Current playable prototype baseline
+- Outcome: The active Godot project exists under `src/wildcoil` with Raya and Nika, enemy waves, Brask Noll boss, HUD, menus, Stage 1 flow, packaging scripts, and a current arcade-presentation pass.
+- Validation:
+  - [x] Runtime code is under `src/wildcoil`.
+  - [x] Automated checks are under `tests/`.
+  - [x] `bash scripts/check.sh` has previously passed.
+  - [x] `bash scripts/package_macos.sh` has previously created `build/macos/Rift Road.zip`.
 - Completed: 2026-04-27
 
-### [RR-P1-13] Upgrade arcade aesthetics and presentation
-- Outcome: Added animated biome backdrops, stronger title presentation, hero select cards, Sundrifter title art, character motion smears, sprite outlines, and luma enemy highlights so the prototype reads more like an arcade action game instead of a collision-box prototype.
+### [RR-BASELINE-02] Cleared old completed-task history from active tracker
+- Outcome: The long Phase 1 and legacy completed-task history was removed from the active tracker and replaced with this compact baseline so tomorrow's backlog is clear.
 - Validation:
-  - [x] `python3 -m pytest tests/test_arcade_aesthetics.py -v` passes.
-  - [x] `godot --path src/wildcoil --headless --quit-after 3` launches without script errors.
-  - [x] `bash scripts/check.sh` passes.
-  - [x] `bash scripts/package_macos.sh` creates `build/macos/Rift Road.zip`.
-- Dependencies: [RR-P1-10]
+  - [x] Tracker keeps only `PENDING` and `DONE` task buckets.
+  - [x] Completed implementation history is summarized instead of repeated task-by-task.
 - Completed: 2026-04-27
-
-### [RR-P1-10] Package and validate the macOS prototype
-- Outcome: Added local check/run/package scripts, Godot export preset, build documentation, and a packaged macOS prototype at `build/macos/Rift Road.zip`.
-- Validation:
-  - [x] `bash scripts/check.sh` passes.
-  - [x] `bash scripts/package_macos.sh` creates `build/macos/Rift Road.zip`.
-  - [x] macOS build notes document Godot version, commands, artifact path, and export dependency.
-- Dependencies: [RR-P1-09]
-- Completed: 2026-04-27
-
-### [RR-P1-09] Complete menus, cutscene, debug overlay, and audio placeholders
-- Outcome: Added title screen, character select, Stage 1 opening and ending text, debug overlay toggle, FPS/player/enemy/collision summary, and placeholder audio hooks.
-- Validation:
-  - [x] `python3 -m pytest tests -v` passes.
-  - [x] `godot --path src/wildcoil --headless --quit-after 2` launches without script errors.
-  - [x] [`docs/asset_provenance_register.md`](/Users/himu/Desktop/career/personal_projects/wildcoil/docs/asset_provenance_register.md) records placeholder asset provenance.
-- Dependencies: [RR-P1-08]
-- Completed: 2026-04-27
-
-### [RR-P1-08] Implement Brask Noll boss fight
-- Outcome: Added Brask Noll with axe swing, charge, wall stun, slam/summon behavior, phase-two aggression, boss health bar, defeat flow, and Stage 1 completion trigger.
-- Validation:
-  - [x] Boss content tests cover required profile moves, stun condition, and phase-change ratio.
-  - [x] Headless Godot launch parses and loads the boss scene.
-  - [x] Boss design uses original placeholder visuals and data.
-- Dependencies: [RR-P1-07]
-- Completed: 2026-04-27
-
-### [RR-P1-07] Add HUD, pickups, pause, and game over
-- Outcome: Added health bar, special meter, luma score, glowfruit pickup behavior, pause overlay, restart-to-title flow, and game over screen.
-- Validation:
-  - [x] Runtime file tests confirm HUD and system scripts exist.
-  - [x] Headless Godot launch parses and loads UI scripts.
-  - [x] Pickup names and visuals are original placeholders.
-- Dependencies: [RR-P1-06]
-- Completed: 2026-04-27
-
-### [RR-P1-06] Build Sunset Overpass wave flow
-- Outcome: Added Stage 1 arena flow, wave spawning, placeholder parallax-like background layers, lower road space, and transition to Brask Noll.
-- Validation:
-  - [x] Stage content tests cover Stage 1 title, waves, boss id, and ending cutscene.
-  - [x] Headless Godot launch parses and loads the stage scene.
-  - [x] Backgrounds use original programmatic placeholder shapes.
-- Dependencies: [RR-P1-05]
-- Completed: 2026-04-27
-
-### [RR-P1-05] Add grunt, runner, and brute enemies
-- Outcome: Implemented Iron Veil grunt, runner, and brute with data profiles, simple approach/telegraph/attack behavior, damage, defeat, and score values.
-- Validation:
-  - [x] Enemy profile tests confirm grunt, runner, and brute tuning differences.
-  - [x] Headless Godot launch parses and loads enemy scripts.
-  - [x] Enemy visuals are original placeholders.
-- Dependencies: [RR-P1-04]
-- Completed: 2026-04-27
-
-### [RR-P1-04] Build the combat hitbox and damage core
-- Outcome: Added light attack, jump attack support, special attack, attack rectangles, health, knockback, invulnerability, meter gain/spend, and simple hit feedback.
-- Validation:
-  - [x] Runtime smoke confirms gameplay scripts parse in Godot.
-  - [x] Headless Godot launch starts without script errors.
-  - [x] Combat behavior is implemented through local original code.
-- Dependencies: [RR-P1-03]
-- Completed: 2026-04-27
-
-### [RR-P1-03] Implement belt-scroll movement and keyboard controls
-- Outcome: Added WASD/arrow movement, fake jump, dash/dodge, stage bounds, and Y-position sorting on a belt-scroll plane.
-- Validation:
-  - [x] Runtime smoke confirms player script exists and loads.
-  - [x] Headless Godot launch starts without script errors.
-  - [x] Controls match the story bible: attack `J`, jump `K`, special `L`, interact `U`, dash `I`, pause `Esc`.
-- Dependencies: [RR-P1-02]
-- Completed: 2026-04-27
-
-### [RR-P1-02] Add Raya and Nika as data-driven heroes
-- Outcome: Added character data and a hero select shell for Raya Flint and Nika Sol with distinct stats, palettes, combat profile, and signature moves.
-- Validation:
-  - [x] Character roster tests confirm both heroes exist and are mechanically distinct.
-  - [x] Hero select supports choosing Raya or Nika.
-  - [x] No copied character assets are introduced.
-- Dependencies: [RR-P1-01]
-- Completed: 2026-04-27
-
-### [RR-P1-01] Scaffold the production Godot project
-- Outcome: Created the Godot 4.x project under `src/wildcoil`, added a bootable app root, wired a headless runtime smoke test, and documented run/test commands.
-- Validation:
-  - [x] `python3 -m pytest tests/test_runtime_smoke.py -v` passes.
-  - [x] `godot --path src/wildcoil --headless --quit-after 2` launches without runtime script errors.
-  - [x] [`README.md`](/Users/himu/Desktop/career/personal_projects/wildcoil/README.md) documents the current run, test, and package commands.
-- Dependencies: [RR-DOC-01]
-- Completed: 2026-04-27
-
-### [RR-DOC-01] Lock the Rift Road story direction
-- Outcome: Added the Rift Road story bible, updated the project entry point, and rebuilt the tracker around the Stage 1 MVP path.
-- Validation:
-  - [x] [`docs/game-story.md`](/Users/himu/Desktop/career/personal_projects/wildcoil/docs/game-story.md) captures the concept, heroes, world, antagonists, stages, MVP scope, development order, and originality checklist.
-  - [x] [`to-do.md`](/Users/himu/Desktop/career/personal_projects/wildcoil/to-do.md) uses only `PENDING` and `DONE` buckets.
-  - [x] The previous Wildcoil planning tasks remain recorded below as completed/superseded history.
-- Dependencies: User-provided Rift Road story prompt.
-- Completed: 2026-04-27
-
-### [LEGACY-P1-01] Build the combat sandbox first playable
-- Outcome: Superseded by the Rift Road Stage 1 MVP path.
-- Validation:
-  - [x] Replaced by [RR-P1-01] through [RR-P1-10].
-- Dependencies: Legacy Phase 0 gate.
-- Completed: 2026-04-27 as planning migration.
-
-### [LEGACY-P1-02] Package a tester-ready macOS build
-- Outcome: Superseded by the Rift Road macOS packaging task.
-- Validation:
-  - [x] Replaced by [RR-P1-10].
-- Dependencies: Legacy engine choice and first playable.
-- Completed: 2026-04-27 as planning migration.
-
-### [LEGACY-P2-01] Define vertical slice promotion criteria
-- Outcome: Superseded by the Rift Road MVP success criteria and Stage 1 task sequence.
-- Validation:
-  - [x] Rift Road promotion criteria are captured in [`docs/game-story.md`](/Users/himu/Desktop/career/personal_projects/wildcoil/docs/game-story.md) and the PENDING tracker.
-- Dependencies: Legacy Phase 1 gate.
-- Completed: 2026-04-27 as planning migration.
-
-### [LEGACY-P0-02] Run the Godot micro-spike
-- Outcome: Superseded by the user's direction to prefer Godot 4.x for the Rift Road playable prototype.
-- Validation:
-  - [x] Godot is the active implementation path for [RR-P1-01].
-- Dependencies: Legacy engine matrix.
-- Completed: 2026-04-27 as planning migration.
-
-### [LEGACY-P0-03] Run the Unity micro-spike
-- Outcome: Superseded by the user's direction to prefer Godot 4.x for the Rift Road playable prototype.
-- Validation:
-  - [x] Unity is no longer an active Phase 0 blocker for this story direction.
-- Dependencies: Legacy engine matrix.
-- Completed: 2026-04-27 as planning migration.
-
-### [LEGACY-P0-04] Run the Unreal micro-spike
-- Outcome: Superseded by the user's direction to prefer Godot 4.x for the Rift Road playable prototype.
-- Validation:
-  - [x] Unreal is no longer an active Phase 0 blocker for this story direction.
-- Dependencies: Legacy engine matrix.
-- Completed: 2026-04-27 as planning migration.
-
-### [LEGACY-P0-05] Score engines and lock the initial engine path
-- Outcome: Superseded by the Rift Road MVP decision to proceed with Godot unless implementation evidence proves otherwise.
-- Validation:
-  - [x] Active implementation tasks target Godot 4.x.
-- Dependencies: Legacy engine spikes.
-- Completed: 2026-04-27 as planning migration.
-
-### [LEGACY-P0-06] Lock the milestone backlog for Phase 1
-- Outcome: Superseded by the Rift Road tracker and implementation plan.
-- Validation:
-  - [x] [RR-P1-01] through [RR-P1-10] define the current backlog.
-- Dependencies: Legacy concept and engine approval.
-- Completed: 2026-04-27 as planning migration.
-
-### [VAL-01] Approve the recommended concept direction
-- Outcome: Superseded by explicit user approval of `Rift Road: Beasts of the Afterglow` as the new working story.
-- Validation:
-  - [x] The new direction is recorded in [`docs/game-story.md`](/Users/himu/Desktop/career/personal_projects/wildcoil/docs/game-story.md).
-- Dependencies: User story prompt.
-- Completed: 2026-04-27
-
-### [VAL-02] Convert pre-spike engine notes into measured scores
-- Outcome: Superseded by the Godot-first Rift Road MVP path.
-- Validation:
-  - [x] Engine scoring is no longer a prerequisite for Stage 1 prototype work.
-- Dependencies: Legacy engine spikes.
-- Completed: 2026-04-27 as planning migration.
-
-### [P0-01] Draft the Schedule A-aligned living spec
-- Outcome: `docs/game_spec.md` exists with the original Schedule A-aligned working draft.
-- Validation:
-  - [x] Section-by-section cross-check against Schedule A on 2026-03-05.
-- Dependencies: Contract review and development plan inputs.
-- Completed: 2026-03-05
-
-### [DOC-01] Create the contract-aligned task tracker
-- Outcome: `to-do.md` exists with project tasks, validation, and milestone state.
-- Validation:
-  - [x] Cross-checked against Sections 19-21 and 30 of the contract on 2026-03-05.
-- Dependencies: Contract review.
-- Completed: 2026-03-05
-
-### [DOC-02] Create the initial planning docs set
-- Outcome: The Phase 0 public planning scaffold is in place.
-- Validation:
-  - [x] File set review and link check on 2026-03-05.
-- Dependencies: Contract review and development plan inputs.
-- Completed: 2026-03-05
-
-### [DOC-03] Update contributor entry points
-- Outcome: `README.md` points to the active docs and `AGENTS.md` records durable planning conventions.
-- Validation:
-  - [x] Manual review of repo entry points on 2026-03-05.
-- Dependencies: [DOC-01], [DOC-02]
-- Completed: 2026-03-05

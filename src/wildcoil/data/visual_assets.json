@@ -1,0 +1,93 @@
+{
+  "stage1": {
+    "background_layers": [
+      {
+        "id": "far_sky_ruins",
+        "path": "res://assets/stage1/backgrounds/far_sky_ruins.png",
+        "position": [-640, 0],
+        "size": [2560, 330],
+        "z_index": -260,
+        "required": false
+      },
+      {
+        "id": "mid_overpass",
+        "path": "res://assets/stage1/backgrounds/mid_overpass.png",
+        "position": [-640, 250],
+        "size": [2560, 210],
+        "z_index": -230,
+        "required": false
+      },
+      {
+        "id": "road_playfield",
+        "path": "res://assets/stage1/backgrounds/road_playfield.png",
+        "position": [-640, 330],
+        "size": [2560, 390],
+        "z_index": -220,
+        "required": false
+      },
+      {
+        "id": "foreground_atmosphere",
+        "path": "res://assets/stage1/backgrounds/foreground_atmosphere.png",
+        "position": [-640, 0],
+        "size": [2560, 720],
+        "z_index": 120,
+        "required": false
+      }
+    ],
+    "actors": {
+      "raya_flint": {
+        "idle": "res://assets/stage1/actors/raya_flint_idle.png",
+        "walk": "res://assets/stage1/actors/raya_flint_walk.png",
+        "attack": "res://assets/stage1/actors/raya_flint_attack.png",
+        "hurt": "res://assets/stage1/actors/raya_flint_hurt.png"
+      },
+      "nika_sol": {
+        "idle": "res://assets/stage1/actors/nika_sol_idle.png",
+        "walk": "res://assets/stage1/actors/nika_sol_walk.png",
+        "attack": "res://assets/stage1/actors/nika_sol_attack.png",
+        "hurt": "res://assets/stage1/actors/nika_sol_hurt.png"
+      },
+      "iron_veil_grunt": {
+        "idle": "res://assets/stage1/actors/iron_veil_grunt_idle.png",
+        "walk": "res://assets/stage1/actors/iron_veil_grunt_walk.png",
+        "attack": "res://assets/stage1/actors/iron_veil_grunt_attack.png",
+        "hurt": "res://assets/stage1/actors/iron_veil_grunt_hurt.png"
+      },
+      "iron_veil_runner": {
+        "idle": "res://assets/stage1/actors/iron_veil_runner_idle.png",
+        "walk": "res://assets/stage1/actors/iron_veil_runner_walk.png",
+        "attack": "res://assets/stage1/actors/iron_veil_runner_attack.png",
+        "hurt": "res://assets/stage1/actors/iron_veil_runner_hurt.png"
+      },
+      "iron_veil_brute": {
+        "idle": "res://assets/stage1/actors/iron_veil_brute_idle.png",
+        "walk": "res://assets/stage1/actors/iron_veil_brute_walk.png",
+        "attack": "res://assets/stage1/actors/iron_veil_brute_attack.png",
+        "hurt": "res://assets/stage1/actors/iron_veil_brute_hurt.png"
+      },
+      "scrap_hurler": {
+        "idle": "res://assets/stage1/actors/scrap_hurler_idle.png",
+        "walk": "res://assets/stage1/actors/scrap_hurler_walk.png",
+        "attack": "res://assets/stage1/actors/scrap_hurler_attack.png",
+        "hurt": "res://assets/stage1/actors/scrap_hurler_hurt.png"
+      },
+      "frightened_raptorling": {
+        "idle": "res://assets/stage1/actors/frightened_raptorling_idle.png",
+        "walk": "res://assets/stage1/actors/frightened_raptorling_walk.png",
+        "attack": "res://assets/stage1/actors/frightened_raptorling_attack.png",
+        "hurt": "res://assets/stage1/actors/frightened_raptorling_hurt.png"
+      },
+      "hornbeak_dinosaur": {
+        "idle": "res://assets/stage1/actors/hornbeak_dinosaur_idle.png",
+        "walk": "res://assets/stage1/actors/hornbeak_dinosaur_walk.png",
+        "attack": "res://assets/stage1/actors/hornbeak_dinosaur_attack.png",
+        "hurt": "res://assets/stage1/actors/hornbeak_dinosaur_hurt.png"
+      },
+      "brask_noll": {
+        "idle": "res://assets/stage1/actors/brask_noll_idle.png",
+        "attack": "res://assets/stage1/actors/brask_noll_attack.png",
+        "hurt": "res://assets/stage1/actors/brask_noll_hurt.png"
+      }
+    }
+  }
+}

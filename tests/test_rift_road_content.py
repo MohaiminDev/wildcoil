@@ -6,18 +6,26 @@ def load_json(project_root, relative_path):
         return json.load(handle)
 
 
-def test_mvp_hero_roster_defines_raya_and_nika(project_root):
+def test_full_hero_roster_defines_four_distinct_playable_styles(project_root):
     data = load_json(project_root, "data/characters.json")
     heroes = {hero["id"]: hero for hero in data["heroes"]}
 
-    assert {"raya_flint", "nika_sol"}.issubset(heroes)
+    assert {"raya_flint", "kian_vale", "nika_sol", "tor_bram"}.issubset(heroes)
     assert heroes["raya_flint"]["role"] == "balanced mechanic"
+    assert heroes["kian_vale"]["role"] == "field medic"
     assert heroes["nika_sol"]["role"] == "agile scout"
+    assert heroes["tor_bram"]["role"] == "heavy defender"
     assert heroes["raya_flint"]["max_health"] > heroes["nika_sol"]["max_health"]
     assert heroes["nika_sol"]["move_speed"] > heroes["raya_flint"]["move_speed"]
+    assert heroes["tor_bram"]["max_health"] > heroes["raya_flint"]["max_health"]
+    assert heroes["kian_vale"]["special_cost"] < heroes["raya_flint"]["special_cost"]
 
     for hero in heroes.values():
         assert len(hero["palette"]) == 3
+        assert hero["capability_summary"]
+        assert hero["specialty"]
+        assert hero["weakness"]
+        assert {"power", "speed", "control", "defense"}.issubset(hero["stats"])
         assert {"light_attack", "jump_attack", "dash", "special", "grab"}.issubset(
             set(hero["actions"])
         )
@@ -54,4 +62,3 @@ def test_sunset_overpass_stage_flow(project_root):
     assert stage["boss_id"] == "brask_noll"
     assert len(stage["waves"]) >= 3
     assert stage["ending_cutscene"].endswith("points toward the jungle lab.")
-
