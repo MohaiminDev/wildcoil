@@ -7,6 +7,8 @@ const STAGE_CARD_HEIGHT := 58.0
 const STAGE_CARD_FONT_SIZE := 18
 const STAGE_CARD_BODY_LIMIT := 46
 const STAGE_CARD_Y_RATIO := 0.17
+const BANNER_GROUP_NAME := "arcade-fx-banner"
+const BANNER_GROUP_META := "arcade_fx_banner"
 
 var non_bloody_impact_palette := {
 	"spark": Color(1.0, 0.78, 0.20, 0.90),
@@ -162,8 +164,11 @@ func spawn_damage_number(screen_position: Vector2, amount: int, combo_count: int
 	tween.chain().tween_callback(number.queue_free)
 
 func _flash_banner(title: String, body: String, bg_color: Color, accent_color: Color, y_ratio: float, hold: float, banner_height := 132.0, font_size := 27, body_limit := 72, banner_width := 0.0) -> void:
+	_clear_existing_banners()
 	var banner_width_resolved := SCREEN_SIZE.x if banner_width <= 0.0 else minf(banner_width, SCREEN_SIZE.x)
 	var group := Control.new()
+	group.name = BANNER_GROUP_NAME
+	group.set_meta(BANNER_GROUP_META, true)
 	group.position = Vector2((SCREEN_SIZE.x - banner_width_resolved) * 0.5, SCREEN_SIZE.y * y_ratio)
 	group.size = Vector2(banner_width_resolved, banner_height)
 	group.clip_contents = true
@@ -192,6 +197,16 @@ func _flash_banner(title: String, body: String, bg_color: Color, accent_color: C
 	tween.tween_interval(hold)
 	tween.tween_property(group, "modulate:a", 0.0, 0.30)
 	tween.tween_callback(group.queue_free)
+
+func _clear_existing_banners() -> void:
+	for child in get_children():
+		if child == null or not is_instance_valid(child):
+			continue
+		if not child.has_meta(BANNER_GROUP_META) and not str(child.name).contains(BANNER_GROUP_NAME):
+			continue
+		if child is CanvasItem:
+			child.visible = false
+		child.queue_free()
 
 func _short_banner_body(body: String, limit := 72) -> String:
 	var clean := body.replace("\n", " | ")

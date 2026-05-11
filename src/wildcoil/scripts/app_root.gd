@@ -8,6 +8,7 @@ const SMOKE_HERO_SELECT_CAPTURE_NAME := "stage1-exported-app-smoke-hero-select.p
 const SMOKE_GAMEPLAY_CAPTURE_NAME := "stage1-exported-app-smoke-gameplay.png"
 const SMOKE_COMBAT_CAPTURE_NAME := "stage1-exported-app-smoke-combat.png"
 const SMOKE_ROAD_COLLAPSE_CAPTURE_NAME := "stage1-exported-app-smoke-road-collapse.png"
+const SMOKE_BRASK_INTRO_CAPTURE_NAME := "stage1-exported-app-smoke-brask-intro.png"
 const SMOKE_STAGE_CLEAR_CAPTURE_NAME := "stage1-exported-app-smoke-stage-clear.png"
 const SMOKE_GAME_OVER_CAPTURE_NAME := "stage1-exported-app-smoke-game-over.png"
 const SMOKE_RETRY_GAMEPLAY_CAPTURE_NAME := "stage1-exported-app-smoke-retry-gameplay.png"
@@ -161,6 +162,13 @@ func _run_exported_smoke_capture(capture_dir: String) -> void:
 	if not _save_viewport_png(road_collapse_path):
 		get_tree().quit(1)
 		return
+	if not await _show_brask_intro_smoke_capture():
+		get_tree().quit(1)
+		return
+	var brask_intro_path := capture_dir.path_join(SMOKE_BRASK_INTRO_CAPTURE_NAME)
+	if not _save_viewport_png(brask_intro_path):
+		get_tree().quit(1)
+		return
 	if not await _fast_forward_stage1_smoke_to_stage_clear():
 		get_tree().quit(1)
 		return
@@ -182,7 +190,7 @@ func _run_exported_smoke_capture(capture_dir: String) -> void:
 	if not _save_viewport_png(retry_gameplay_path):
 		get_tree().quit(1)
 		return
-	print("RIFT_ROAD_EXPORTED_APP_SMOKE_CAPTURE ok title_capture=%s hero_select_capture=%s gameplay_capture=%s combat_capture=%s road_collapse_capture=%s stage_clear_capture=%s game_over_capture=%s retry_gameplay_capture=%s" % [title_path, hero_select_path, gameplay_path, combat_path, road_collapse_path, stage_clear_path, game_over_path, retry_gameplay_path])
+	print("RIFT_ROAD_EXPORTED_APP_SMOKE_CAPTURE ok title_capture=%s hero_select_capture=%s gameplay_capture=%s combat_capture=%s road_collapse_capture=%s brask_intro_capture=%s stage_clear_capture=%s game_over_capture=%s retry_gameplay_capture=%s" % [title_path, hero_select_path, gameplay_path, combat_path, road_collapse_path, brask_intro_path, stage_clear_path, game_over_path, retry_gameplay_path])
 	get_tree().quit(0)
 
 func _show_combat_action_smoke_capture() -> bool:
@@ -218,9 +226,17 @@ func _show_road_collapse_smoke_capture() -> bool:
 	await RenderingServer.frame_post_draw
 	return true
 
-func _fast_forward_stage1_smoke_to_stage_clear() -> bool:
+func _show_brask_intro_smoke_capture() -> bool:
+	if not await _fast_forward_stage1_smoke_to_brask_intro():
+		return false
+	for _i in range(10):
+		await get_tree().process_frame
+	await RenderingServer.frame_post_draw
+	return true
+
+func _fast_forward_stage1_smoke_to_brask_intro() -> bool:
 	if stage == null or not is_instance_valid(stage):
-		push_error("Unable to fast-forward exported smoke: Stage 1 is not running")
+		push_error("Unable to fast-forward exported smoke to Brask: Stage 1 is not running")
 		return false
 	if stage.has_method("set_demo_autoplay"):
 		stage.set_demo_autoplay(false)
@@ -230,7 +246,7 @@ func _fast_forward_stage1_smoke_to_stage_clear() -> bool:
 			if not stage.road_collapse_active:
 				break
 	if stage.road_collapse_active:
-		push_error("Unable to fast-forward exported smoke: road collapse did not resume")
+		push_error("Unable to fast-forward exported smoke to Brask: road collapse did not resume")
 		return false
 	var waves: Array = stage.stage_data.get("waves", [])
 	for _i in range(waves.size()):
@@ -239,6 +255,20 @@ func _fast_forward_stage1_smoke_to_stage_clear() -> bool:
 		_clear_stage1_smoke_enemies(stage)
 		stage._start_next_wave()
 		await get_tree().process_frame
+	if not stage.boss_started or stage.boss == null or not is_instance_valid(stage.boss):
+		push_error("Unable to fast-forward exported smoke to Brask: boss did not start")
+		return false
+	return true
+
+func _fast_forward_stage1_smoke_to_stage_clear() -> bool:
+	if stage == null or not is_instance_valid(stage):
+		push_error("Unable to fast-forward exported smoke: Stage 1 is not running")
+		return false
+	if stage.has_method("set_demo_autoplay"):
+		stage.set_demo_autoplay(false)
+	if not stage.boss_started:
+		if not await _fast_forward_stage1_smoke_to_brask_intro():
+			return false
 	if not stage.boss_started or stage.boss == null or not is_instance_valid(stage.boss):
 		push_error("Unable to fast-forward exported smoke: Stage 1 boss did not start")
 		return false

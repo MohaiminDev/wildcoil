@@ -233,6 +233,24 @@ def test_stage_one_has_road_collapse_set_piece(project_root):
     assert "show_stage_event" in fx_script
 
 
+def test_stage_one_has_brask_story_beats(project_root):
+    stages_data = json.loads((project_root / "data" / "stages.json").read_text())
+    stage_one = next(stage for stage in stages_data["stages"] if stage["id"] == "sunset_overpass")
+    stage_manager = (project_root / "scripts" / "stage_manager.gd").read_text()
+
+    boss_story = stage_one["boss_story"]
+
+    assert boss_story["intro_title"] == "BRASK NOLL"
+    assert "end of the ride" in boss_story["intro_line"].lower()
+    assert "road comes down" in boss_story["phase_line"].lower()
+    assert "already bought" in boss_story["escape_line"].lower()
+    assert "_boss_story" in stage_manager
+    assert "intro_line" in stage_manager
+    assert "phase_line" in stage_manager
+    assert "escape_line" in stage_manager
+    assert "show_stage_event" in stage_manager
+
+
 def test_controller_support_is_exposed_for_menu_and_combat(project_root):
     app_root = (project_root / "scripts" / "app_root.gd").read_text()
     player = (project_root / "scripts" / "player_controller.gd").read_text()

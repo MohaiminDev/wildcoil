@@ -4,8 +4,8 @@
 
 - Package: `build/macos/Rift Road.zip`
 - Engine: Godot 4.6.1
-- Validation: `bash scripts/check.sh` passed with 82 tests and Godot runtime smoke.
-- Export validation: `bash scripts/package_macos.sh` regenerated `build/macos/Rift Road.zip`; `bash scripts/smoke_exported_macos_app.sh` refreshed the launched-app title, hero-select, Stage 1 gameplay, post-intro combat, road-collapse, Stage Clear score/rank summary, Game Over/retry, and post-retry gameplay screenshots.
+- Validation: `bash scripts/check.sh` passed with 85 tests and Godot runtime smoke.
+- Export validation: `bash scripts/package_macos.sh` regenerated `build/macos/Rift Road.zip`; `bash scripts/smoke_exported_macos_app.sh` refreshed the launched-app title, hero-select, Stage 1 gameplay, post-intro combat, road-collapse, Brask intro, Stage Clear score/rank summary, Game Over/retry, and post-retry gameplay screenshots.
 - Signing preflight: `bash scripts/check_macos_signing_env.sh` reports `RIFT_ROAD_SIGNING_PREFLIGHT blocked` until real Developer ID/notary configuration exists.
 - Package audit: `bash scripts/audit_macos_package.sh` reports `RIFT_ROAD_PACKAGE_AUDIT internal-only`.
 - Second-machine evidence: `bash scripts/check_second_machine_evidence.sh` currently reports `RIFT_ROAD_SECOND_MACHINE_EVIDENCE blocked` because no clean-machine proof files have been recorded.
@@ -29,6 +29,7 @@
 - Repeatable exported-app smoke gameplay: `docs/playtest-captures/exported-app-smoke-latest/stage1-exported-app-smoke-gameplay.png`
 - Repeatable exported-app smoke post-intro combat: `docs/playtest-captures/exported-app-smoke-latest/stage1-exported-app-smoke-combat.png`
 - Repeatable exported-app smoke road collapse: `docs/playtest-captures/exported-app-smoke-latest/stage1-exported-app-smoke-road-collapse.png`
+- Repeatable exported-app smoke Brask intro: `docs/playtest-captures/exported-app-smoke-latest/stage1-exported-app-smoke-brask-intro.png`
 - Repeatable exported-app smoke Stage Clear: `docs/playtest-captures/exported-app-smoke-latest/stage1-exported-app-smoke-stage-clear.png`
 - Repeatable exported-app smoke Game Over/retry: `docs/playtest-captures/exported-app-smoke-latest/stage1-exported-app-smoke-game-over.png`
 - Repeatable exported-app smoke post-retry gameplay: `docs/playtest-captures/exported-app-smoke-latest/stage1-exported-app-smoke-retry-gameplay.png`
@@ -50,6 +51,7 @@
 - Wave-start notice text now auto-clears after the intro beat, so the refreshed post-intro combat capture no longer carries stale centered `Sunset Overpass / Wave 1` text over the sky.
 - The exported-app smoke path now captures a post-intro combat viewport after the Stage 1 intro strap has faded, giving cleaner launched-game fight evidence without claiming a human playtest.
 - Stage 1 now triggers the updated spec's road-collapse beat after the opening cage-loading fight, briefly sells the luma extraction overload, and resumes combat on the lower service-lane wave.
+- Brask now has data-driven intro, phase-change, and escape lines surfaced through the runtime HUD/combat banner path, with the intro captured by exported-app smoke.
 - Hero select now uses canted arcade cards, selected-card glow, portrait wells, planned-hero silhouettes, and stat pips in the refreshed launched-app smoke capture.
 - Hero select now also uses a canted arcade header/ribbon for `ARCADE CAMPAIGN` / `Choose Hero`, replacing plain floating heading text without overlapping cards or bottom controls in the refreshed launched-app smoke capture.
 - Combat now has non-bloody hit bursts, timing rings, speed lines, hit stop, camera punch, combo/damage feedback, and existing input buffering.

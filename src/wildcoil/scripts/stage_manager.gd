@@ -44,6 +44,7 @@ var road_collapse_triggered := false
 var road_collapse_active := false
 var road_collapse_timer := 0.0
 var road_collapse_group: Node2D
+var last_boss_story_beat := ""
 var biome_palette := {
 	"sky": Color(0.94, 0.46, 0.18),
 	"road": Color(0.16, 0.15, 0.15),
@@ -865,6 +866,7 @@ func _on_boss_defeated() -> void:
 	player.score += 1500
 	audio_manager.play_victory()
 	audio_manager.play_stage_clear()
+	_show_boss_story_beat("escape_title", "escape_line", "BRASK ESCAPES", stage_data.get("ending_cutscene", "Brask escapes."), 1.35)
 	boss = null
 
 func stage_clear_summary() -> Dictionary:
@@ -904,8 +906,7 @@ func _on_boss_move_telegraphed(_move_name: String) -> void:
 
 func _on_boss_phase_changed() -> void:
 	audio_manager.play_heavy()
-	hud.show_notice("BRASK NOLL OVERDRIVE\nWatch the second swing.")
-	combat_fx.show_boss_intro("BRASK OVERDRIVE", "phase two pressure")
+	_show_boss_story_beat("phase_title", "phase_line", "BRASK OVERDRIVE", "Watch the second swing.", 1.55)
 	_apply_camera_punch(11.0)
 
 func _living_enemy_count() -> int:
@@ -985,10 +986,20 @@ func _stage_card_goal(default_goal: String) -> String:
 func _show_boss_intro() -> void:
 	var boss_goal: String = stage_data.get("win_condition", "Defeat the boss")
 	hud.update_objective(boss_goal)
-	hud.show_notice("%s enters! %s" % [boss.display_name, boss_goal])
 	audio_manager.play_boss_intro()
-	combat_fx.show_boss_intro(boss.display_name, boss.arena_hazard)
+	_show_boss_story_beat("intro_title", "intro_line", boss.display_name, boss.arena_hazard, 1.8)
 	_apply_camera_punch(9.0)
+
+func _boss_story() -> Dictionary:
+	return stage_data.get("boss_story", {})
+
+func _show_boss_story_beat(title_key: String, line_key: String, fallback_title: String, fallback_line: String, _duration: float) -> void:
+	var story := _boss_story()
+	var title := str(story.get(title_key, fallback_title))
+	var line := str(story.get(line_key, fallback_line))
+	last_boss_story_beat = "%s\n%s" % [title, line]
+	hud.clear_notice()
+	combat_fx.show_stage_event(title, line)
 
 func _spawn_hit_feedback(world_position: Vector2, damage: int, big: bool) -> void:
 	var screen_position := _world_to_screen(world_position)

@@ -56,6 +56,20 @@ def test_stage_one_road_collapse_event_resumes_service_lane(project_root, godot_
     assert "RIFT_ROAD_RUNTIME_OK stage1_road_collapse" in result.stdout
 
 
+def test_stage_one_brask_story_beats_surface_in_runtime(project_root, godot_runner):
+    result = godot_runner(
+        "--headless",
+        "--script",
+        str(project_root / "tools" / "runtime_test_runner.gd"),
+        "--",
+        "stage1_brask_story",
+    )
+
+    assert result.returncode == 0, result.stderr + result.stdout
+    assert "RIFT_ROAD_BRASK_STORY intro=true phase=true escape=true" in result.stdout
+    assert "RIFT_ROAD_RUNTIME_OK stage1_brask_story" in result.stdout
+
+
 def test_character_select_preview_starts_selected_hero(project_root, godot_runner):
     result = godot_runner(
         "--headless",

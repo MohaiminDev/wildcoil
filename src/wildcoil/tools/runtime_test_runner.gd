@@ -19,6 +19,8 @@ func _run() -> void:
 		ok = await _run_stage1_autoplay()
 	if ok and mode == "stage1_road_collapse":
 		ok = await _run_stage1_road_collapse()
+	if ok and mode == "stage1_brask_story":
+		ok = await _run_stage1_brask_story()
 	if ok and mode == "hero_select_preview":
 		ok = await _run_hero_select_preview()
 	if ok and mode == "stage1_restart_flow":
@@ -232,6 +234,47 @@ func _run_stage1_road_collapse() -> bool:
 	await process_frame
 	if not resumed:
 		printerr("Road collapse did not resume into service-lane wave")
+		return false
+	return true
+
+func _run_stage1_brask_story() -> bool:
+	var packed: PackedScene = load("res://scenes/stages/sunset_overpass.tscn")
+	if packed == null:
+		printerr("Could not load Stage 1 scene")
+		return false
+	var stage = packed.instantiate()
+	stage.hero_id = "raya_flint"
+	stage.stage_id = "sunset_overpass"
+	root.add_child(stage)
+	await process_frame
+	await process_frame
+	var waves: Array = stage.stage_data.get("waves", [])
+	for _i in range(waves.size()):
+		_clear_spawned_enemies(stage)
+		stage._start_next_wave()
+		await process_frame
+	if not stage.boss_started or stage.boss == null or not is_instance_valid(stage.boss):
+		printerr("Stage 1 Brask story check did not reach the boss")
+		stage.queue_free()
+		return false
+	var story: Dictionary = stage._boss_story()
+	var intro_line := str(story.get("intro_line", ""))
+	var intro_seen: bool = intro_line != "" and stage.last_boss_story_beat.contains(intro_line)
+	stage.boss.apply_damage(int(stage.boss.max_health * 0.55), stage.player.position.x)
+	await process_frame
+	var phase_line := str(story.get("phase_line", ""))
+	var phase_seen: bool = phase_line != "" and stage.last_boss_story_beat.contains(phase_line)
+	stage._on_boss_defeated()
+	var escape_line := str(story.get("escape_line", ""))
+	var escape_seen: bool = escape_line != "" and stage.last_boss_story_beat.contains(escape_line)
+	var intro_text := "true" if intro_seen else "false"
+	var phase_text := "true" if phase_seen else "false"
+	var escape_text := "true" if escape_seen else "false"
+	print("RIFT_ROAD_BRASK_STORY intro=%s phase=%s escape=%s" % [intro_text, phase_text, escape_text])
+	stage.queue_free()
+	await process_frame
+	if not intro_seen or not phase_seen or not escape_seen:
+		printerr("Stage 1 Brask story beats were not all surfaced")
 		return false
 	return true
 
