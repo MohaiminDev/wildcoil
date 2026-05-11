@@ -53,4 +53,4 @@ Do not add `RIFT_ROAD_KEYBOARD_FALLBACK ok` until keyboard-only play has complet
 
 ## Current Status
 
-No physical controller sessions have been recorded yet. `bash scripts/check_controller_evidence.sh` is expected to report `RIFT_ROAD_CONTROLLER_EVIDENCE blocked` until real device sessions exist.
+No physical controller sessions or manual exported-app keyboard fallback session have been recorded yet. `keyboard_fallback_flow` in `src/wildcoil/tools/runtime_test_runner.gd` provides automated keyboard regression coverage, but it is not a substitute for the manual exported-app row required by `bash scripts/check_controller_evidence.sh`. The gate is expected to report `RIFT_ROAD_CONTROLLER_EVIDENCE blocked` until real device sessions and the manual keyboard fallback session exist.

@@ -4,12 +4,13 @@
 
 - Package: `build/macos/Rift Road.zip`
 - Engine: Godot 4.6.1
-- Validation: `bash scripts/check.sh` passed with 91 tests and Godot runtime smoke.
+- Validation: `bash scripts/check.sh` passed with 92 tests and Godot runtime smoke.
 - Export validation: `bash scripts/package_macos.sh` regenerated `build/macos/Rift Road.zip`; `bash scripts/smoke_exported_macos_app.sh` refreshed the launched-app title, hero-select, opening story, Stage 1 gameplay, post-intro combat, pickup clarity, road-collapse, Brask intro, Stage Clear score/rank summary, Game Over/retry, and post-retry gameplay screenshots.
 - Signing preflight: `bash scripts/check_macos_signing_env.sh` reports `RIFT_ROAD_SIGNING_PREFLIGHT blocked` until real Developer ID/notary configuration exists.
 - Package audit: `bash scripts/audit_macos_package.sh` reports `RIFT_ROAD_PACKAGE_AUDIT internal-only`.
 - Second-machine evidence: `bash scripts/check_second_machine_evidence.sh` currently reports `RIFT_ROAD_SECOND_MACHINE_EVIDENCE blocked` because no clean-machine proof files have been recorded.
 - Controller evidence: `bash scripts/check_controller_evidence.sh` currently reports `RIFT_ROAD_CONTROLLER_EVIDENCE blocked` because no physical controller-family sessions have been recorded.
+- Keyboard fallback smoke: `python3 -m pytest tests/test_runtime_smoke.py::test_keyboard_fallback_title_to_stage_and_action_flow -q` proves the headless runtime covers title, hero select, preview cancel, Stage 1 movement, attack, jump, special, dash, and pause/resume through keyboard input. This is automated regression coverage, not a manual exported-app keyboard session.
 - Exported-app smoke: `bash scripts/smoke_exported_macos_app.sh` reports `RIFT_ROAD_EXPORTED_APP_SMOKE ok` when it can launch the zipped app and capture title, hero-select, opening story, Stage 1 gameplay, post-intro combat, pickup clarity, road-collapse, Stage Clear, Game Over/retry, and post-retry gameplay viewports from the running exported app.
 - Exported-app performance: `bash scripts/sample_exported_app_performance.sh` reports `RIFT_ROAD_EXPORTED_PERF stage1` on local Apple Silicon Mac A (`arm64`, `Apple M1`, `iMac21,2`) with latest local 1280x720 windowed steady-state result `avg_ms=2.187`, `max_ms=5.704`, and writes `docs/playtest-captures/exported-app-performance-latest/stage1-exported-performance.json` after excluding 8 startup/render warmup frames. A local 1920x1080 windowed sample records `avg_ms=3.199`, `max_ms=6.652` under `docs/playtest-captures/exported-app-performance-windowed-1080p-latest/`. A local fullscreen exported-app performance sample records `avg_ms=1.583`, `max_ms=2.793` under `docs/playtest-captures/exported-app-performance-fullscreen-latest/`.
 - Release-candidate gate: `bash scripts/check_release_candidate.sh` reports `RIFT_ROAD_RELEASE_GATE blocked` while package and player-evidence gates remain unresolved.
@@ -45,6 +46,7 @@
 - The Stage 1 opening fight now starts with four enemies and delays heavier/ranged pressure until later waves.
 - Stage 1 now opens with data-driven short comic-style story panels and in-stage barks for Raya, Nika, the cages, and the route stakes, captured by launched-app smoke without blocking player control.
 - Baseline gamepad support now covers title/hero/start flow, pause, movement, attack, jump, special, dash, and controller-visible prompts.
+- Keyboard fallback now has automated runtime smoke coverage for title, hero select, preview cancel/back, Stage 1 movement, attack, jump, special, dash, and pause/resume.
 - Stage 1 has image-backed background and actor art, plus additive ruined signs, cage silhouettes, rubble, luma plants, and readable HUD treatment.
 - The title screen now uses a branded Rift Road logo lockup, rift crack, subtitle ribbon, and start plate in the refreshed launched-app smoke capture.
 - The Stage 1 intro banner now uses a centered 760px by 58px strap above the combatants, so the launched-game gameplay capture preserves more of the combat lane and background silhouettes while the objective text is visible.
@@ -73,7 +75,7 @@
 - There is now a known-tester packet command that bundles the current internal-only package, validation logs, controller and second-machine checklists, and evidence for supervised sessions.
 - There is now a playtest evidence gate command that blocks public-playtest-candidate status until the playtest log has enough external sessions, second-Mac coverage, physical controller-family coverage, and replay intent.
 - There is now a second-machine evidence gate command that blocks release-candidate status until a real second Apple Silicon Mac records host, install, Gatekeeper, and launched-game capture proof.
-- There is now a controller evidence gate command that blocks release-candidate status until two physical controller-family sessions and keyboard fallback record detailed control coverage.
+- There is now a controller evidence gate command that blocks release-candidate status until two physical controller-family sessions and a manual exported-app keyboard fallback session record detailed control coverage.
 
 ## Still Placeholder
 
@@ -82,7 +84,7 @@
 - The game is not yet proven commercially marketable. There is no external tester evidence that players love it or would buy it.
 - The public playtest gate exists, but no outside sessions have been recorded against it.
 - The exported-app manual input proof and smoke script confirm launch/keyflow and a survivable opening state, but they are still not substitutes for a recorded human playtest session.
-- Signing, notarization, Gatekeeper acceptance, stapled ticket validation, physical controller-device testing, second Apple Silicon Mac coverage, and external tester distribution policy remain unresolved.
+- Signing, notarization, Gatekeeper acceptance, stapled ticket validation, physical controller-device testing, manual exported-app keyboard fallback, second Apple Silicon Mac coverage, and external tester distribution policy remain unresolved.
 
 ## Next Gate
 

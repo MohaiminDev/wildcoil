@@ -35,7 +35,7 @@ The visual target is the approved north-star direction: modern stylized arcade r
 - Mechanically playable prototype: yes.
 - Production-grade visual/UI match to north-star images: no.
 - Manual playtest evidence: current Codex run opened the rebuilt exported macOS app through LaunchServices, advanced title -> hero select -> Stage 1 with real key input, and sent movement/attack input while the easier four-enemy opening wave stayed playable with health/HUD visible.
-- Controller baseline: simulated Godot runtime smoke covers controller title -> hero select -> Stage 1 and pause/resume; gameplay code supports left stick/D-pad movement plus X/A/Y/B/LB/RB/Start actions. Physical controller devices are not tested yet.
+- Controller/keyboard baseline: simulated Godot runtime smoke covers controller title -> hero select -> Stage 1 and pause/resume; a keyboard-fallback runtime smoke now covers title -> hero select -> preview cancel -> Stage 1 plus movement, attack, jump, special, dash, and pause/resume. Gameplay code supports keyboard movement/actions and left stick/D-pad movement plus X/A/Y/B/LB/RB/Start actions. Physical controller devices and manual exported-app keyboard fallback are not tested yet.
 - Controller evidence gate: `bash scripts/check_controller_evidence.sh` reads `docs/controller_validation.md` and currently reports `RIFT_ROAD_CONTROLLER_EVIDENCE blocked` because no physical controller-family sessions have been recorded.
 - Latest capture note: the exported macOS app supports a repeatable launched-app viewport smoke capture path that is not dependent on the current macOS Space being visible to `screencapture`; the latest title smoke capture now shows a branded Rift Road logo lockup and start plate, the latest hero-select smoke capture shows canted arcade cards, selected-card glow, portrait wells, planned-hero silhouettes, stat pips, and a canted arcade header/ribbon instead of plain heading text, the latest opening-story smoke capture shows a short Raya/Nika story panel about drill marks, cages, and route stakes, the latest gameplay capture shows the Stage 1 intro as a centered slim strap above the combatants with non-ellipsized `Free the transport cages` copy plus a slimmer top HUD that exposes more sunset/backdrop area, the latest post-intro combat capture shows the running fight after the intro strap has cleared with a one-line objective rail and no stale center wave notice, the latest pickup smoke capture shows distinct health and luma/meter pickup markers from the launched exported app, the latest road-collapse smoke capture shows luma fractures and the exposed service lane after the opening cage-loading fight, the latest Brask intro smoke capture shows the boss story banner from the launched exported app, the latest Stage Clear smoke capture shows rank, score, luma, and health summary text in the canted arcade result frame, the Game Over/retry smoke capture shows the fail-state result text and controls, and the post-retry smoke capture shows Stage 1 gameplay after restarting from the Game Over path.
 - Package audit: `bash scripts/audit_macos_package.sh` reports `RIFT_ROAD_PACKAGE_AUDIT internal-only`; the bundle signature verifies, but Developer ID authority, Apple Team ID, notarization, Gatekeeper acceptance, and stapled ticket validation are not present.
@@ -112,6 +112,19 @@ The visual target is the approved north-star direction: modern stylized arcade r
 - Dependencies: [RR-PROD-15]
 
 ## DONE
+
+### [RR-PROD-50] Add keyboard fallback runtime smoke coverage
+- Outcome: Added a repeatable headless keyboard-fallback regression that exercises title, hero select, preview cancel/back, Stage 1 start, movement, attack, jump, special, dash, and pause/resume through the runtime input path.
+- Validation:
+  - [x] Added a failing regression for `keyboard_fallback_flow` that required the runtime smoke runner to emit `RIFT_ROAD_KEYBOARD_FALLBACK title=true hero_select=true movement=true attack=true jump=true special=true dash=true pause=true cancel=true`.
+  - [x] Verified the regression failed before implementation because the runtime runner accepted the mode name but did not emit keyboard-fallback evidence.
+  - [x] Added `keyboard_fallback_flow` to `src/wildcoil/tools/runtime_test_runner.gd` with menu key events and in-stage keyboard state checks for movement/actions.
+  - [x] `python3 -m pytest tests/test_runtime_smoke.py::test_keyboard_fallback_title_to_stage_and_action_flow -q` passes.
+  - [x] `bash scripts/check.sh` passes with 92 tests and Godot runtime smoke.
+- Progress:
+  - 2026-05-11: Added automated keyboard-fallback coverage to reduce input-regression risk before manual controller and exported-app keyboard sessions.
+- Dependencies: [RR-PROD-12]
+- Completed: 2026-05-11
 
 ### [RR-PROD-49] Add Stage 1 opening story and barks
 - Outcome: Stage 1 now starts with short data-driven Raya/Nika story panels and in-stage bark hooks that explain drill marks, Iron Veil cages, and route stakes without blocking player control, with a repeatable launched-app opening-story screenshot.

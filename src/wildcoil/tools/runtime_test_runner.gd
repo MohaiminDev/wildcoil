@@ -31,6 +31,8 @@ func _run() -> void:
 		ok = await _run_stage1_restart_flow()
 	if ok and mode == "controller_title_flow":
 		ok = await _run_controller_title_flow()
+	if ok and mode == "keyboard_fallback_flow":
+		ok = await _run_keyboard_fallback_flow()
 	if ok and mode == "stage1_performance_sample":
 		ok = await _run_stage1_performance_sample()
 	if ok:
@@ -514,11 +516,122 @@ func _run_controller_title_flow() -> bool:
 	await process_frame
 	return true
 
+func _run_keyboard_fallback_flow() -> bool:
+	var packed: PackedScene = load("res://scenes/app_root.tscn")
+	if packed == null:
+		printerr("Could not load app root scene")
+		return false
+	var app = packed.instantiate()
+	root.add_child(app)
+	await process_frame
+	await process_frame
+	var title_ok: bool = app.mode == "title" and app.controls_label.text.contains("Attack J")
+	_press_keyboard_menu_key(app, KEY_ENTER)
+	await process_frame
+	var hero_select_ok: bool = app.mode == "character_select"
+	_press_keyboard_menu_key(app, KEY_RIGHT)
+	await process_frame
+	hero_select_ok = hero_select_ok and app.selected_hero_index == 1 and app.mode == "hero_preview"
+	if not hero_select_ok:
+		printerr("Keyboard roster key did not open the selected hero preview")
+		app.queue_free()
+		await process_frame
+		return false
+	_press_keyboard_menu_key(app, KEY_ESCAPE)
+	await process_frame
+	var cancel_ok: bool = app.mode == "character_select"
+	_press_keyboard_menu_key(app, KEY_ENTER)
+	await process_frame
+	_press_keyboard_menu_key(app, KEY_ENTER)
+	await process_frame
+	await process_frame
+	if app.mode != "stage" or app.stage == null or app.stage.player == null:
+		printerr("Keyboard Enter did not start Stage 1")
+		app.queue_free()
+		await process_frame
+		return false
+	var player = app.stage.player
+	player.max_health = 999
+	player.health = 999
+	var start_position: Vector2 = player.position
+	_set_keyboard_key_state(KEY_D, true)
+	for _i in range(8):
+		await physics_frame
+		await process_frame
+	_set_keyboard_key_state(KEY_D, false)
+	var movement_ok: bool = player.position.x > start_position.x + 4.0
+	_set_keyboard_key_state(KEY_J, true)
+	await physics_frame
+	await process_frame
+	_set_keyboard_key_state(KEY_J, false)
+	var attack_ok: bool = player.attack_step > 0
+	_set_keyboard_key_state(KEY_K, true)
+	await physics_frame
+	await process_frame
+	_set_keyboard_key_state(KEY_K, false)
+	var jump_ok: bool = player.jump_timer > 0.0 or player.fake_height > 0.0
+	player.special_meter = 100
+	player.special_timer = 0.0
+	_set_keyboard_key_state(KEY_L, true)
+	await physics_frame
+	await process_frame
+	_set_keyboard_key_state(KEY_L, false)
+	var special_ok: bool = player.special_timer > 0.0 and player.special_meter < 100
+	player.dash_cooldown = 0.0
+	_set_keyboard_key_state(KEY_I, true)
+	await physics_frame
+	await process_frame
+	_set_keyboard_key_state(KEY_I, false)
+	var dash_ok: bool = player.dash_timer > 0.0
+	_press_keyboard_menu_key(app, KEY_ESCAPE)
+	await process_frame
+	var pause_ok: bool = paused and app.paused_overlay.visible
+	_press_keyboard_menu_key(app, KEY_ESCAPE)
+	await process_frame
+	pause_ok = pause_ok and not paused and not app.paused_overlay.visible
+	print("RIFT_ROAD_KEYBOARD_FALLBACK title=%s hero_select=%s movement=%s attack=%s jump=%s special=%s dash=%s pause=%s cancel=%s" % [
+		str(title_ok),
+		str(hero_select_ok),
+		str(movement_ok),
+		str(attack_ok),
+		str(jump_ok),
+		str(special_ok),
+		str(dash_ok),
+		str(pause_ok),
+		str(cancel_ok)
+	])
+	var ok := title_ok and hero_select_ok and movement_ok and attack_ok and jump_ok and special_ok and dash_ok and pause_ok and cancel_ok
+	if not ok:
+		printerr("Keyboard fallback flow did not cover every required control")
+	paused = false
+	_release_keyboard_keys([KEY_D, KEY_J, KEY_K, KEY_L, KEY_I])
+	app.queue_free()
+	await process_frame
+	return ok
+
 func _press_controller_button(app, button_index: int) -> void:
 	var event := InputEventJoypadButton.new()
 	event.button_index = button_index
 	event.pressed = true
 	app._unhandled_input(event)
+
+func _press_keyboard_menu_key(app, keycode: int) -> void:
+	var event := InputEventKey.new()
+	event.keycode = keycode
+	event.physical_keycode = keycode
+	event.pressed = true
+	app._unhandled_input(event)
+
+func _set_keyboard_key_state(keycode: int, pressed_key: bool) -> void:
+	var event := InputEventKey.new()
+	event.keycode = keycode
+	event.physical_keycode = keycode
+	event.pressed = pressed_key
+	Input.parse_input_event(event)
+
+func _release_keyboard_keys(keys: Array) -> void:
+	for keycode in keys:
+		_set_keyboard_key_state(int(keycode), false)
 
 func _run_stage1_performance_sample() -> bool:
 	var packed: PackedScene = load("res://scenes/stages/sunset_overpass.tscn")

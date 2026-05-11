@@ -137,6 +137,23 @@ def test_controller_title_to_stage_flow(project_root, godot_runner):
     assert "RIFT_ROAD_RUNTIME_OK controller_title_flow" in result.stdout
 
 
+def test_keyboard_fallback_title_to_stage_and_action_flow(project_root, godot_runner):
+    result = godot_runner(
+        "--headless",
+        "--script",
+        str(project_root / "tools" / "runtime_test_runner.gd"),
+        "--",
+        "keyboard_fallback_flow",
+    )
+
+    assert result.returncode == 0, result.stderr + result.stdout
+    assert (
+        "RIFT_ROAD_KEYBOARD_FALLBACK "
+        "title=true hero_select=true movement=true attack=true jump=true special=true dash=true pause=true cancel=true"
+    ) in result.stdout
+    assert "RIFT_ROAD_RUNTIME_OK keyboard_fallback_flow" in result.stdout
+
+
 def test_stage_one_performance_sample_stays_within_budget(project_root, godot_runner):
     result = godot_runner(
         "--headless",

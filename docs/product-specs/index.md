@@ -9,6 +9,7 @@
 - Current playable heroes in runtime data: Raya Flint and Nika Sol, from `src/wildcoil/data/characters.json`.
 - Current campaign data contains eight stages, validated by `tests/test_full_campaign.py`, but `docs/game_spec.md` says production must not depend on building all eight early; Stage 1 quality comes first.
 - Current keyboard controls are documented in `docs/game-story.md`: movement through WASD/arrow keys, attack `J`, jump `K`, special `L`, grab/interact `U`, dash/dodge `I`, pause `Esc`.
+- Current automated keyboard fallback coverage: `keyboard_fallback_flow` in `src/wildcoil/tools/runtime_test_runner.gd` checks title, hero select, preview cancel/back, Stage 1 start, movement, attack, jump, special, dash, and pause/resume.
 - Current baseline gamepad mapping: left stick/D-pad move, `X` attack, `A` jump/confirm, `Y` or left bumper special, `B` or right bumper dash/cancel, shoulder/D-pad hero selection, `Start` pause/confirm.
 - Current originality rule: all content must be original or clearly marked as original placeholder work, per `docs/game-story.md` and `docs/asset_provenance_register.md`.
 - Current public-claim rule: the first success condition is that Stage 1 feels good, looks alive, and is satisfying to play on the target Mac; market-facing claims come only after playtest evidence.
