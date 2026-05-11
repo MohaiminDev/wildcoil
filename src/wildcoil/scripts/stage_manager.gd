@@ -44,6 +44,7 @@ var road_collapse_triggered := false
 var road_collapse_active := false
 var road_collapse_timer := 0.0
 var road_collapse_group: Node2D
+var last_story_beat := ""
 var last_boss_story_beat := ""
 var last_pickup_notice := ""
 var pickup_drop_count := 0
@@ -698,7 +699,7 @@ func _trigger_road_collapse() -> void:
 	_apply_camera_punch(14.0)
 	audio_manager.play_heavy()
 	hud.update_objective("Service lane exposed | Wave %d/%d" % [int(event.get("resume_wave", wave_index + 1)) + 1, stage_data["waves"].size()])
-	hud.show_notice("Road collapse\nRegain the lower lane.", 1.2)
+	_show_story_bark("service_lane", "Road collapse\nRegain the lower lane.", 1.2)
 	combat_fx.show_stage_event(str(event.get("title", "ROAD COLLAPSE")), str(event.get("body", "Service lane exposed.")))
 
 func _tick_road_collapse(delta: float) -> void:
@@ -993,15 +994,54 @@ func _show_wave_objective(next_wave_index: int) -> void:
 	var hud_goal := _stage_hud_goal("Defeat the enemy wave")
 	var stage_card_goal := _stage_card_goal(objective)
 	hud.update_objective("%s | Wave %d/%d" % [hud_goal, next_wave_index + 1, stage_data["waves"].size()])
-	hud.show_notice("%s\nWave %d" % [stage_data["title"], next_wave_index + 1], 1.25)
+	var default_notice := "%s\nWave %d" % [stage_data["title"], next_wave_index + 1]
+	if next_wave_index == 0:
+		_show_story_bark("wave_start", default_notice, 1.25)
+	elif next_wave_index == 1:
+		_show_story_bark("cage_loading", default_notice, 1.25)
+	else:
+		hud.show_notice(default_notice, 1.25)
 	audio_manager.play_wave_start()
 	combat_fx.show_stage_card(stage_data["title"], stage_card_goal, next_wave_index)
+	if next_wave_index == 0:
+		_show_opening_story_panel(0)
 
 func _stage_hud_goal(default_goal: String) -> String:
 	return stage_data.get("hud_goal", stage_data.get("scenario_goal", default_goal))
 
 func _stage_card_goal(default_goal: String) -> String:
 	return stage_data.get("stage_card_goal", stage_data.get("scenario_goal", default_goal))
+
+func _opening_story_panels() -> Array:
+	return stage_data.get("opening_story", [])
+
+func _show_opening_story_panel(panel_index: int) -> void:
+	var panels := _opening_story_panels()
+	if panels.is_empty():
+		last_story_beat = stage_data.get("opening_cutscene", "")
+		hud.show_notice(last_story_beat, 1.35)
+		return
+	var panel: Dictionary = panels[clampi(panel_index, 0, panels.size() - 1)]
+	var panel_title := str(panel.get("panel_title", "Opening"))
+	var speaker := str(panel.get("speaker", "Rift Road"))
+	var line := str(panel.get("line", stage_data.get("opening_cutscene", "")))
+	last_story_beat = "%s\n%s: %s" % [panel_title, speaker, line]
+	if hud != null:
+		hud.clear_notice()
+	if combat_fx != null:
+		combat_fx.show_story_panel(panel_title, speaker, line)
+	else:
+		hud.show_notice(last_story_beat, 1.5)
+
+func _story_bark(key: String, fallback: String = "") -> String:
+	var barks: Dictionary = stage_data.get("stage_barks", {})
+	return str(barks.get(key, fallback))
+
+func _show_story_bark(key: String, fallback: String, duration: float) -> String:
+	last_story_beat = _story_bark(key, fallback)
+	if hud != null and last_story_beat != "":
+		hud.show_notice(last_story_beat, duration)
+	return last_story_beat
 
 func _show_boss_intro() -> void:
 	var boss_goal: String = stage_data.get("win_condition", "Defeat the boss")

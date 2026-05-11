@@ -5,6 +5,7 @@ const STAGE1_SMOKE_ARG := "--rift-road-smoke-stage1"
 const SMOKE_CAPTURE_DIR_PREFIX := "--rift-road-smoke-capture-dir="
 const SMOKE_TITLE_CAPTURE_NAME := "stage1-exported-app-smoke-title.png"
 const SMOKE_HERO_SELECT_CAPTURE_NAME := "stage1-exported-app-smoke-hero-select.png"
+const SMOKE_OPENING_STORY_CAPTURE_NAME := "stage1-exported-app-smoke-opening-story.png"
 const SMOKE_GAMEPLAY_CAPTURE_NAME := "stage1-exported-app-smoke-gameplay.png"
 const SMOKE_COMBAT_CAPTURE_NAME := "stage1-exported-app-smoke-combat.png"
 const SMOKE_PICKUP_CAPTURE_NAME := "stage1-exported-app-smoke-pickups.png"
@@ -142,6 +143,16 @@ func _run_exported_smoke_capture(capture_dir: String) -> void:
 		get_tree().quit(1)
 		return
 	await _start_stage1_demo()
+	if not await _show_opening_story_smoke_capture():
+		get_tree().quit(1)
+		return
+	var opening_story_path := capture_dir.path_join(SMOKE_OPENING_STORY_CAPTURE_NAME)
+	if not _save_viewport_png(opening_story_path):
+		get_tree().quit(1)
+		return
+	if stage != null and is_instance_valid(stage) and stage.combat_fx != null:
+		var smoke_goal := str(stage.stage_data.get("scenario_goal", "Free caged dinos"))
+		stage.combat_fx.show_stage_card(str(stage.stage_data.get("title", "Sunset Overpass")), stage._stage_card_goal(smoke_goal), maxi(stage.wave_index, 0))
 	for _i in range(45):
 		await get_tree().process_frame
 	await RenderingServer.frame_post_draw
@@ -198,8 +209,29 @@ func _run_exported_smoke_capture(capture_dir: String) -> void:
 	if not _save_viewport_png(retry_gameplay_path):
 		get_tree().quit(1)
 		return
-	print("RIFT_ROAD_EXPORTED_APP_SMOKE_CAPTURE ok title_capture=%s hero_select_capture=%s gameplay_capture=%s combat_capture=%s pickup_capture=%s road_collapse_capture=%s brask_intro_capture=%s stage_clear_capture=%s game_over_capture=%s retry_gameplay_capture=%s" % [title_path, hero_select_path, gameplay_path, combat_path, pickup_path, road_collapse_path, brask_intro_path, stage_clear_path, game_over_path, retry_gameplay_path])
+	print("RIFT_ROAD_EXPORTED_APP_SMOKE_CAPTURE ok title_capture=%s hero_select_capture=%s opening_story_capture=%s gameplay_capture=%s combat_capture=%s pickup_capture=%s road_collapse_capture=%s brask_intro_capture=%s stage_clear_capture=%s game_over_capture=%s retry_gameplay_capture=%s" % [title_path, hero_select_path, opening_story_path, gameplay_path, combat_path, pickup_path, road_collapse_path, brask_intro_path, stage_clear_path, game_over_path, retry_gameplay_path])
 	get_tree().quit(0)
+
+func _show_opening_story_smoke_capture() -> bool:
+	if mode != "stage":
+		push_error("Unable to show exported smoke opening story: expected stage, got %s" % mode)
+		return false
+	if stage == null or not is_instance_valid(stage):
+		push_error("Unable to show exported smoke opening story: Stage 1 is not running")
+		return false
+	if stage.has_method("set_demo_autoplay"):
+		stage.set_demo_autoplay(false)
+	if stage.has_method("_show_opening_story_panel"):
+		stage._show_opening_story_panel(0)
+	for _i in range(16):
+		await get_tree().process_frame
+	if str(stage.last_story_beat) == "":
+		push_error("Unable to show exported smoke opening story: no story beat was surfaced")
+		return false
+	await RenderingServer.frame_post_draw
+	if stage.has_method("set_demo_autoplay"):
+		stage.set_demo_autoplay(true)
+	return true
 
 func _show_combat_action_smoke_capture() -> bool:
 	await get_tree().create_timer(2.8).timeout

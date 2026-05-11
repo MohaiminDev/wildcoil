@@ -70,6 +70,20 @@ def test_stage_one_brask_story_beats_surface_in_runtime(project_root, godot_runn
     assert "RIFT_ROAD_RUNTIME_OK stage1_brask_story" in result.stdout
 
 
+def test_stage_one_opening_story_and_barks_surface_in_runtime(project_root, godot_runner):
+    result = godot_runner(
+        "--headless",
+        "--script",
+        str(project_root / "tools" / "runtime_test_runner.gd"),
+        "--",
+        "stage1_opening_story",
+    )
+
+    assert result.returncode == 0, result.stderr + result.stdout
+    assert "RIFT_ROAD_OPENING_STORY panels=true barks=true" in result.stdout
+    assert "RIFT_ROAD_RUNTIME_OK stage1_opening_story" in result.stdout
+
+
 def test_stage_one_pickups_apply_clear_health_and_luma_effects(project_root, godot_runner):
     result = godot_runner(
         "--headless",

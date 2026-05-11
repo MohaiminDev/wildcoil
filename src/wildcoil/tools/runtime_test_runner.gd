@@ -21,6 +21,8 @@ func _run() -> void:
 		ok = await _run_stage1_road_collapse()
 	if ok and mode == "stage1_brask_story":
 		ok = await _run_stage1_brask_story()
+	if ok and mode == "stage1_opening_story":
+		ok = await _run_stage1_opening_story()
 	if ok and mode == "stage1_pickup_clarity":
 		ok = await _run_stage1_pickup_clarity()
 	if ok and mode == "hero_select_preview":
@@ -277,6 +279,40 @@ func _run_stage1_brask_story() -> bool:
 	await process_frame
 	if not intro_seen or not phase_seen or not escape_seen:
 		printerr("Stage 1 Brask story beats were not all surfaced")
+		return false
+	return true
+
+func _run_stage1_opening_story() -> bool:
+	var packed: PackedScene = load("res://scenes/stages/sunset_overpass.tscn")
+	if packed == null:
+		printerr("Could not load Stage 1 scene")
+		return false
+	var stage = packed.instantiate()
+	stage.hero_id = "raya_flint"
+	stage.stage_id = "sunset_overpass"
+	root.add_child(stage)
+	await process_frame
+	await process_frame
+	var panels: Array = stage._opening_story_panels()
+	var first_panel_seen: bool = panels.size() >= 3 and stage.last_story_beat.contains("Sundrifter Approach") and stage.last_story_beat.contains("drill marks")
+	stage._show_opening_story_panel(1)
+	await process_frame
+	var second_panel_seen: bool = stage.last_story_beat.contains("Cage Line") and stage.last_story_beat.contains("Nika") and stage.last_story_beat.contains("cages")
+	stage._show_opening_story_panel(2)
+	await process_frame
+	var third_panel_seen: bool = stage.last_story_beat.contains("Repair The Route") and stage.last_story_beat.contains("routes")
+	stage._show_story_bark("cage_loading", "", 0.5)
+	await process_frame
+	var bark_seen: bool = stage.last_story_beat.contains("Nika") and stage.last_story_beat.contains("Cages on the right")
+	var panels_seen: bool = first_panel_seen and second_panel_seen and third_panel_seen
+	print("RIFT_ROAD_OPENING_STORY panels=%s barks=%s" % [
+		"true" if panels_seen else "false",
+		"true" if bark_seen else "false"
+	])
+	stage.queue_free()
+	await process_frame
+	if not panels_seen or not bark_seen:
+		printerr("Stage 1 opening story panels or barks were not surfaced")
 		return false
 	return true
 

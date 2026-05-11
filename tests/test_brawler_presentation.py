@@ -251,6 +251,35 @@ def test_stage_one_has_brask_story_beats(project_root):
     assert "show_stage_event" in stage_manager
 
 
+def test_stage_one_has_opening_story_panels_and_barks(project_root):
+    stages_data = json.loads((project_root / "data" / "stages.json").read_text())
+    stage_one = next(stage for stage in stages_data["stages"] if stage["id"] == "sunset_overpass")
+    stage_manager = (project_root / "scripts" / "stage_manager.gd").read_text()
+    fx_script = (project_root / "scripts" / "arcade_combat_fx.gd").read_text()
+
+    opening_story = stage_one["opening_story"]
+    assert len(opening_story) >= 3
+    assert opening_story[0]["panel_title"] == "Sundrifter Approach"
+    assert opening_story[0]["speaker"] == "Raya"
+    assert "drill marks" in opening_story[0]["line"].lower()
+    assert opening_story[1]["speaker"] == "Nika"
+    assert "cages" in opening_story[1]["line"].lower()
+    assert opening_story[2]["speaker"] == "Raya"
+    assert "routes" in opening_story[2]["line"].lower()
+
+    stage_barks = stage_one["stage_barks"]
+    assert "wave_start" in stage_barks
+    assert "cage_loading" in stage_barks
+    assert "service_lane" in stage_barks
+    assert "Nika" in stage_barks["cage_loading"]
+
+    assert "last_story_beat" in stage_manager
+    assert "_opening_story_panels" in stage_manager
+    assert "_show_opening_story_panel" in stage_manager
+    assert "_story_bark" in stage_manager
+    assert "show_story_panel" in fx_script
+
+
 def test_pickups_are_distinct_and_surface_collection_feedback(project_root):
     pickup_script = (project_root / "scripts" / "pickup_manager.gd").read_text()
     stage_script = (project_root / "scripts" / "stage_manager.gd").read_text()

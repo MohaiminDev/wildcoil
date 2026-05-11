@@ -240,7 +240,9 @@ def test_wave_notice_auto_clears_after_intro_strap(project_root):
     assert "func clear_notice() -> void:" in hud
     assert "notice_timer -= delta" in hud
     assert "clear_notice()" in hud
-    assert "hud.show_notice(\"%s\\nWave %d\" % [stage_data[\"title\"], next_wave_index + 1], 1.25)" in stage_manager
+    assert "var default_notice := \"%s\\nWave %d\" % [stage_data[\"title\"], next_wave_index + 1]" in stage_manager
+    assert "_show_story_bark(\"wave_start\", default_notice, 1.25)" in stage_manager
+    assert "hud.show_notice(default_notice, 1.25)" in stage_manager
 
 
 def test_asset_backed_stage_one_has_jungle_road_ruins_set_dressing(project_root):

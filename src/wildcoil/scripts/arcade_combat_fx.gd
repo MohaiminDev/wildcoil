@@ -28,6 +28,10 @@ func show_stage_card(stage_title: String, objective: String, wave_index: int) ->
 func show_stage_event(title: String, body: String) -> void:
 	_flash_banner(title.to_upper(), body, Color(0.08, 0.035, 0.02, 0.72), Color(0.35, 1.0, 0.72), 0.20, 1.1, 74.0, 21, 58, 820.0)
 
+func show_story_panel(panel_title: String, speaker: String, line: String) -> void:
+	var title := "%s  |  %s" % [panel_title.to_upper(), speaker.to_upper()]
+	_flash_banner(title, line, Color(0.035, 0.045, 0.055, 0.82), Color(0.96, 0.54, 0.24), 0.13, 1.85, 102.0, 21, 84, 960.0)
+
 func show_boss_intro(boss_name: String, hazard: String) -> void:
 	var hazard_text := hazard.replace("_", " ").to_upper()
 	_flash_banner("BOSS: %s" % boss_name.to_upper(), "Arena hazard: %s" % hazard_text, Color(0.18, 0.04, 0.03, 0.90), Color(1.0, 0.32, 0.15), 0.15, 2.0)

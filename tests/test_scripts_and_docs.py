@@ -67,6 +67,28 @@ def test_exported_app_smoke_script_captures_launched_viewport(repo_root):
     assert "RIFT_ROAD_EXPORTED_APP_SMOKE ok" in handoff
 
 
+def test_exported_app_smoke_script_captures_opening_story_viewport(repo_root):
+    script = (repo_root / "scripts" / "smoke_exported_macos_app.sh").read_text()
+    app_root = (repo_root / "src" / "wildcoil" / "scripts" / "app_root.gd").read_text()
+    handoff = (
+        repo_root
+        / "docs"
+        / "playtest-captures"
+        / "stage1-marketability-handoff-2026-05-10.md"
+    ).read_text()
+    audit = (repo_root / "docs" / "market-readiness-audit-2026-05-10.md").read_text()
+
+    assert "stage1-exported-app-smoke-opening-story.png" in script
+    assert "OPENING_STORY_CAPTURE" in script
+    assert "opening_story_capture=" in script
+    assert "SMOKE_OPENING_STORY_CAPTURE_NAME" in app_root
+    assert "_show_opening_story_smoke_capture" in app_root
+    assert app_root.index("_start_stage1_demo()") < app_root.index("var opening_story_path")
+    assert "last_story_beat" in app_root
+    assert "stage1-exported-app-smoke-opening-story.png" in handoff
+    assert "stage1-exported-app-smoke-opening-story.png" in audit
+
+
 def test_exported_app_smoke_script_captures_stage_clear_viewport(repo_root):
     script = (repo_root / "scripts" / "smoke_exported_macos_app.sh").read_text()
     app_root = (repo_root / "src" / "wildcoil" / "scripts" / "app_root.gd").read_text()
