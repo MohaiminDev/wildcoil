@@ -551,18 +551,39 @@ func _on_game_over() -> void:
 	controls_label.text = "R/Y Restart Stage   Esc/T/B Return Title"
 
 func _on_stage_completed(text: String) -> void:
+	var result_summary := _stage_clear_result_summary()
 	if stage != null and is_instance_valid(stage):
 		last_completed_stage_id = stage.stage_id
 	current_stage_index += 1
 	_prepare_result_overlay()
 	if current_stage_index >= stage_order.size():
 		mode = "complete"
-		label.text = "FINAL CLEAR\n\n%s\n\n%s" % [text, final_ending]
+		label.text = "FINAL CLEAR\n\n%s\n\n%s\n\n%s" % [_format_stage_clear_result_summary(result_summary), text, final_ending]
 		controls_label.text = "R/Y Replay Stage   Esc/T/B Return Title"
 	else:
 		mode = "stage_clear"
-		label.text = "STAGE CLEAR\n\n%s\n\nNext: %s" % [text, stage_order[current_stage_index].replace("_", " ").to_upper()]
+		label.text = "STAGE CLEAR\n\n%s\n\n%s\n\nNext: %s" % [_format_stage_clear_result_summary(result_summary), text, stage_order[current_stage_index].replace("_", " ").to_upper()]
 		controls_label.text = "Enter/J/A Continue   R/Y Restart Stage   Esc/T/B Return Title"
+
+func _stage_clear_result_summary() -> Dictionary:
+	if stage != null and is_instance_valid(stage) and stage.has_method("stage_clear_summary"):
+		return stage.stage_clear_summary()
+	return {
+		"rank": "C",
+		"score": 0,
+		"luma": 0,
+		"health": 0,
+		"max_health": 1
+	}
+
+func _format_stage_clear_result_summary(summary: Dictionary) -> String:
+	return "RANK %s | Score %d | Luma %d\nHealth %d/%d" % [
+		str(summary.get("rank", "C")),
+		int(summary.get("score", 0)),
+		int(summary.get("luma", 0)),
+		int(summary.get("health", 0)),
+		int(summary.get("max_health", 1))
+	]
 
 func _prepare_result_overlay() -> void:
 	_ensure_title_layer()
@@ -571,12 +592,12 @@ func _prepare_result_overlay() -> void:
 	_set_hero_select_header_visible(false)
 	_set_result_overlay_visible(true)
 	_set_hero_cards_visible(false)
-	label.position = Vector2(140, 122)
-	label.size = Vector2(1000, 318)
+	label.position = Vector2(140, 104)
+	label.size = Vector2(1000, 356)
 	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	label.add_theme_font_size_override("font_size", 30)
+	label.add_theme_font_size_override("font_size", 27)
 
 func _start_next_campaign_stage() -> void:
 	_clear_stage()

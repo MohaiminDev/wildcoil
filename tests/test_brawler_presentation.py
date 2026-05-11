@@ -149,6 +149,19 @@ def test_app_flow_exposes_restart_and_return_to_title_controls(project_root):
     assert "stage1_restart_flow" in runtime_runner
 
 
+def test_stage_clear_surfaces_score_rank_summary(project_root):
+    app_root = (project_root / "scripts" / "app_root.gd").read_text()
+    stage_script = (project_root / "scripts" / "stage_manager.gd").read_text()
+
+    assert "stage_clear_summary" in stage_script
+    assert "_stage_clear_result_summary" in app_root
+    assert "_format_stage_clear_result_summary" in app_root
+    assert "RANK" in app_root
+    assert "Score %d" in app_root
+    assert "Luma %d" in app_root
+    assert "Health %d/%d" in app_root
+
+
 def test_audio_and_cinematic_polish_have_named_placeholder_hooks(project_root):
     audio_script = (project_root / "scripts" / "audio_manager.gd").read_text()
     fx_script = (project_root / "scripts" / "arcade_combat_fx.gd").read_text()

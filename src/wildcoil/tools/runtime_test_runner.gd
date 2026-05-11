@@ -136,6 +136,9 @@ func _run_stage1_flow() -> bool:
 	if not app.label.text.contains("STAGE CLEAR"):
 		printerr("Stage clear label was not shown")
 		return false
+	if not app.label.text.contains("RANK ") or not app.label.text.contains("Score") or not app.label.text.contains("Luma") or not app.label.text.contains("Health"):
+		printerr("Stage clear label did not show score/rank summary")
+		return false
 	if _any_visible_hero_card(app):
 		printerr("Stage clear retained visible hero-select cards")
 		return false

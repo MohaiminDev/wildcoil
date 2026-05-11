@@ -867,6 +867,38 @@ func _on_boss_defeated() -> void:
 	audio_manager.play_stage_clear()
 	boss = null
 
+func stage_clear_summary() -> Dictionary:
+	if player == null or not is_instance_valid(player):
+		return {
+			"rank": "C",
+			"score": 0,
+			"luma": 0,
+			"health": 0,
+			"max_health": 1
+		}
+	var health_value: int = max(player.health, 0)
+	var max_health_value: int = max(player.max_health, 1)
+	var score_value: int = max(player.score, 0)
+	var luma_value: int = max(player.luma_shards, 0)
+	return {
+		"rank": _stage_clear_rank(score_value, luma_value, health_value, max_health_value),
+		"score": score_value,
+		"luma": luma_value,
+		"health": health_value,
+		"max_health": max_health_value
+	}
+
+func _stage_clear_rank(score_value: int, luma_value: int, health_value: int, max_health_value: int) -> String:
+	var health_ratio := float(health_value) / float(max(max_health_value, 1))
+	var adjusted_score := score_value + luma_value * 150
+	if adjusted_score >= 3600 and health_ratio >= 0.75:
+		return "S"
+	if adjusted_score >= 2800 and health_ratio >= 0.50:
+		return "A"
+	if adjusted_score >= 1800:
+		return "B"
+	return "C"
+
 func _on_boss_move_telegraphed(_move_name: String) -> void:
 	audio_manager.play_boss_warning()
 

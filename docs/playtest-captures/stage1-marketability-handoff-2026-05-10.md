@@ -4,8 +4,8 @@
 
 - Package: `build/macos/Rift Road.zip`
 - Engine: Godot 4.6.1
-- Validation: `bash scripts/check.sh` passed with 81 tests and Godot runtime smoke.
-- Export validation: `bash scripts/package_macos.sh` regenerated `build/macos/Rift Road.zip`; `bash scripts/smoke_exported_macos_app.sh` refreshed the launched-app title, hero-select, Stage 1 gameplay, post-intro combat, road-collapse, Stage Clear, Game Over/retry, and post-retry gameplay screenshots.
+- Validation: `bash scripts/check.sh` passed with 82 tests and Godot runtime smoke.
+- Export validation: `bash scripts/package_macos.sh` regenerated `build/macos/Rift Road.zip`; `bash scripts/smoke_exported_macos_app.sh` refreshed the launched-app title, hero-select, Stage 1 gameplay, post-intro combat, road-collapse, Stage Clear score/rank summary, Game Over/retry, and post-retry gameplay screenshots.
 - Signing preflight: `bash scripts/check_macos_signing_env.sh` reports `RIFT_ROAD_SIGNING_PREFLIGHT blocked` until real Developer ID/notary configuration exists.
 - Package audit: `bash scripts/audit_macos_package.sh` reports `RIFT_ROAD_PACKAGE_AUDIT internal-only`.
 - Second-machine evidence: `bash scripts/check_second_machine_evidence.sh` currently reports `RIFT_ROAD_SECOND_MACHINE_EVIDENCE blocked` because no clean-machine proof files have been recorded.
@@ -54,7 +54,7 @@
 - Hero select now also uses a canted arcade header/ribbon for `ARCADE CAMPAIGN` / `Choose Hero`, replacing plain floating heading text without overlapping cards or bottom controls in the refreshed launched-app smoke capture.
 - Combat now has non-bloody hit bursts, timing rings, speed lines, hit stop, camera punch, combo/damage feedback, and existing input buffering.
 - Stage Clear, Game Over restart, and return-to-title paths are covered by a Godot runtime smoke test.
-- Stage Clear now hides stale hero-select cards, renders above stage combat FX, wraps long story text inside the viewport, and uses a canted arcade result frame in the refreshed launched-app smoke capture.
+- Stage Clear now hides stale hero-select cards, renders above stage combat FX, wraps long story text inside the viewport, uses a canted arcade result frame, and surfaces rank, score, luma, and health in the refreshed launched-app smoke capture.
 - The Game Over/retry presentation now uses the same framed result treatment in the repeatable launched-app smoke capture.
 - The exported-app smoke path now restarts Stage 1 after the Game Over presentation and captures post-retry gameplay from the running exported app.
 - The macOS zip can be produced locally.
