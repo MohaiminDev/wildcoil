@@ -45,6 +45,8 @@ var road_collapse_active := false
 var road_collapse_timer := 0.0
 var road_collapse_group: Node2D
 var last_boss_story_beat := ""
+var last_pickup_notice := ""
+var pickup_drop_count := 0
 var biome_palette := {
 	"sky": Color(0.94, 0.46, 0.18),
 	"road": Color(0.16, 0.15, 0.15),
@@ -637,6 +639,7 @@ func _build_systems() -> void:
 	add_child(wave_spawner)
 	pickup_manager = load("res://scripts/pickup_manager.gd").new()
 	add_child(pickup_manager)
+	pickup_manager.picked_up.connect(_on_pickup_collected)
 	hud = load("res://scripts/hud_controller.gd").new()
 	add_child(hud)
 	combat_fx = ArcadeCombatFx.new()
@@ -852,8 +855,25 @@ func _handle_combat() -> void:
 
 func _on_enemy_defeated(enemy) -> void:
 	player.score += enemy.score_value
-	if randi() % 3 == 0:
-		pickup_manager.spawn_pickup("glowfruit", enemy.position)
+	var drop_kind := _pickup_kind_for_drop()
+	if drop_kind != "":
+		pickup_manager.spawn_pickup(drop_kind, enemy.position)
+
+func _pickup_kind_for_drop() -> String:
+	if pickup_drop_count == 0:
+		pickup_drop_count += 1
+		return "glowfruit"
+	if randi() % 3 != 0:
+		return ""
+	pickup_drop_count += 1
+	return "luma_shard" if pickup_drop_count % 2 == 0 else "glowfruit"
+
+func _on_pickup_collected(kind: String) -> void:
+	last_pickup_notice = pickup_manager.pickup_notice(kind)
+	if hud != null and last_pickup_notice != "":
+		hud.show_notice(last_pickup_notice, 1.1)
+	if audio_manager != null:
+		audio_manager.play_pickup()
 
 func _on_enemy_attack(enemy, amount: int) -> void:
 	player.apply_damage(amount, enemy.position.x)

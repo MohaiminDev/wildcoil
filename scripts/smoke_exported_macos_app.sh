@@ -10,6 +10,7 @@ TITLE_CAPTURE=""
 HERO_SELECT_CAPTURE=""
 GAMEPLAY_CAPTURE=""
 COMBAT_CAPTURE=""
+PICKUP_CAPTURE=""
 ROAD_COLLAPSE_CAPTURE=""
 BRASK_INTRO_CAPTURE=""
 STAGE_CLEAR_CAPTURE=""
@@ -37,13 +38,14 @@ TITLE_CAPTURE="$OUTPUT_DIR/stage1-exported-app-smoke-title.png"
 HERO_SELECT_CAPTURE="$OUTPUT_DIR/stage1-exported-app-smoke-hero-select.png"
 GAMEPLAY_CAPTURE="$OUTPUT_DIR/stage1-exported-app-smoke-gameplay.png"
 COMBAT_CAPTURE="$OUTPUT_DIR/stage1-exported-app-smoke-combat.png"
+PICKUP_CAPTURE="$OUTPUT_DIR/stage1-exported-app-smoke-pickups.png"
 ROAD_COLLAPSE_CAPTURE="$OUTPUT_DIR/stage1-exported-app-smoke-road-collapse.png"
 BRASK_INTRO_CAPTURE="$OUTPUT_DIR/stage1-exported-app-smoke-brask-intro.png"
 STAGE_CLEAR_CAPTURE="$OUTPUT_DIR/stage1-exported-app-smoke-stage-clear.png"
 GAME_OVER_CAPTURE="$OUTPUT_DIR/stage1-exported-app-smoke-game-over.png"
 RETRY_GAMEPLAY_CAPTURE="$OUTPUT_DIR/stage1-exported-app-smoke-retry-gameplay.png"
 SMOKE_CAPTURE_ARG="${SMOKE_CAPTURE_ARG_PREFIX}${OUTPUT_DIR}"
-rm -f "$TITLE_CAPTURE" "$HERO_SELECT_CAPTURE" "$GAMEPLAY_CAPTURE" "$COMBAT_CAPTURE" "$ROAD_COLLAPSE_CAPTURE" "$BRASK_INTRO_CAPTURE" "$STAGE_CLEAR_CAPTURE" "$GAME_OVER_CAPTURE" "$RETRY_GAMEPLAY_CAPTURE"
+rm -f "$TITLE_CAPTURE" "$HERO_SELECT_CAPTURE" "$GAMEPLAY_CAPTURE" "$COMBAT_CAPTURE" "$PICKUP_CAPTURE" "$ROAD_COLLAPSE_CAPTURE" "$BRASK_INTRO_CAPTURE" "$STAGE_CLEAR_CAPTURE" "$GAME_OVER_CAPTURE" "$RETRY_GAMEPLAY_CAPTURE"
 TMP_DIR="$(mktemp -d "${TMPDIR:-/tmp}/rift-road-exported-smoke.XXXXXX")"
 APP_PID=""
 
@@ -94,13 +96,13 @@ assert_capture_size() {
 
 wait_for_captures() {
   for _attempt in {1..80}; do
-    if [[ -s "$TITLE_CAPTURE" && -s "$HERO_SELECT_CAPTURE" && -s "$GAMEPLAY_CAPTURE" && -s "$COMBAT_CAPTURE" && -s "$ROAD_COLLAPSE_CAPTURE" && -s "$BRASK_INTRO_CAPTURE" && -s "$STAGE_CLEAR_CAPTURE" && -s "$GAME_OVER_CAPTURE" && -s "$RETRY_GAMEPLAY_CAPTURE" ]]; then
+    if [[ -s "$TITLE_CAPTURE" && -s "$HERO_SELECT_CAPTURE" && -s "$GAMEPLAY_CAPTURE" && -s "$COMBAT_CAPTURE" && -s "$PICKUP_CAPTURE" && -s "$ROAD_COLLAPSE_CAPTURE" && -s "$BRASK_INTRO_CAPTURE" && -s "$STAGE_CLEAR_CAPTURE" && -s "$GAME_OVER_CAPTURE" && -s "$RETRY_GAMEPLAY_CAPTURE" ]]; then
       return 0
     fi
     sleep 0.5
   done
 
-  echo "ERROR: Exported app did not write smoke captures: $TITLE_CAPTURE $HERO_SELECT_CAPTURE $GAMEPLAY_CAPTURE $COMBAT_CAPTURE $ROAD_COLLAPSE_CAPTURE $BRASK_INTRO_CAPTURE $STAGE_CLEAR_CAPTURE $GAME_OVER_CAPTURE $RETRY_GAMEPLAY_CAPTURE" >&2
+  echo "ERROR: Exported app did not write smoke captures: $TITLE_CAPTURE $HERO_SELECT_CAPTURE $GAMEPLAY_CAPTURE $COMBAT_CAPTURE $PICKUP_CAPTURE $ROAD_COLLAPSE_CAPTURE $BRASK_INTRO_CAPTURE $STAGE_CLEAR_CAPTURE $GAME_OVER_CAPTURE $RETRY_GAMEPLAY_CAPTURE" >&2
   exit 1
 }
 
@@ -116,10 +118,11 @@ assert_capture_size "$TITLE_CAPTURE"
 assert_capture_size "$HERO_SELECT_CAPTURE"
 assert_capture_size "$GAMEPLAY_CAPTURE"
 assert_capture_size "$COMBAT_CAPTURE"
+assert_capture_size "$PICKUP_CAPTURE"
 assert_capture_size "$ROAD_COLLAPSE_CAPTURE"
 assert_capture_size "$BRASK_INTRO_CAPTURE"
 assert_capture_size "$STAGE_CLEAR_CAPTURE"
 assert_capture_size "$GAME_OVER_CAPTURE"
 assert_capture_size "$RETRY_GAMEPLAY_CAPTURE"
 
-echo "RIFT_ROAD_EXPORTED_APP_SMOKE ok title_capture=$TITLE_CAPTURE hero_select_capture=$HERO_SELECT_CAPTURE gameplay_capture=$GAMEPLAY_CAPTURE combat_capture=$COMBAT_CAPTURE road_collapse_capture=$ROAD_COLLAPSE_CAPTURE brask_intro_capture=$BRASK_INTRO_CAPTURE stage_clear_capture=$STAGE_CLEAR_CAPTURE game_over_capture=$GAME_OVER_CAPTURE retry_gameplay_capture=$RETRY_GAMEPLAY_CAPTURE"
+echo "RIFT_ROAD_EXPORTED_APP_SMOKE ok title_capture=$TITLE_CAPTURE hero_select_capture=$HERO_SELECT_CAPTURE gameplay_capture=$GAMEPLAY_CAPTURE combat_capture=$COMBAT_CAPTURE pickup_capture=$PICKUP_CAPTURE road_collapse_capture=$ROAD_COLLAPSE_CAPTURE brask_intro_capture=$BRASK_INTRO_CAPTURE stage_clear_capture=$STAGE_CLEAR_CAPTURE game_over_capture=$GAME_OVER_CAPTURE retry_gameplay_capture=$RETRY_GAMEPLAY_CAPTURE"

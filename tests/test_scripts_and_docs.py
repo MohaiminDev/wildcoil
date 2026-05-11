@@ -156,6 +156,28 @@ def test_exported_app_smoke_script_captures_brask_intro_viewport(repo_root):
     assert "stage1-exported-app-smoke-brask-intro.png" in audit
 
 
+def test_exported_app_smoke_script_captures_pickup_clarity_viewport(repo_root):
+    script = (repo_root / "scripts" / "smoke_exported_macos_app.sh").read_text()
+    app_root = (repo_root / "src" / "wildcoil" / "scripts" / "app_root.gd").read_text()
+    handoff = (
+        repo_root
+        / "docs"
+        / "playtest-captures"
+        / "stage1-marketability-handoff-2026-05-10.md"
+    ).read_text()
+    audit = (repo_root / "docs" / "market-readiness-audit-2026-05-10.md").read_text()
+
+    assert "stage1-exported-app-smoke-pickups.png" in script
+    assert "PICKUP_CAPTURE" in script
+    assert "pickup_capture=" in script
+    assert "SMOKE_PICKUP_CAPTURE_NAME" in app_root
+    assert "_show_pickup_smoke_capture" in app_root
+    assert "spawn_pickup(\"glowfruit\"" in app_root
+    assert "spawn_pickup(\"luma_shard\"" in app_root
+    assert "stage1-exported-app-smoke-pickups.png" in handoff
+    assert "stage1-exported-app-smoke-pickups.png" in audit
+
+
 def test_exported_app_smoke_script_captures_game_over_viewport(repo_root):
     script = (repo_root / "scripts" / "smoke_exported_macos_app.sh").read_text()
     app_root = (repo_root / "src" / "wildcoil" / "scripts" / "app_root.gd").read_text()

@@ -7,6 +7,7 @@ const SMOKE_TITLE_CAPTURE_NAME := "stage1-exported-app-smoke-title.png"
 const SMOKE_HERO_SELECT_CAPTURE_NAME := "stage1-exported-app-smoke-hero-select.png"
 const SMOKE_GAMEPLAY_CAPTURE_NAME := "stage1-exported-app-smoke-gameplay.png"
 const SMOKE_COMBAT_CAPTURE_NAME := "stage1-exported-app-smoke-combat.png"
+const SMOKE_PICKUP_CAPTURE_NAME := "stage1-exported-app-smoke-pickups.png"
 const SMOKE_ROAD_COLLAPSE_CAPTURE_NAME := "stage1-exported-app-smoke-road-collapse.png"
 const SMOKE_BRASK_INTRO_CAPTURE_NAME := "stage1-exported-app-smoke-brask-intro.png"
 const SMOKE_STAGE_CLEAR_CAPTURE_NAME := "stage1-exported-app-smoke-stage-clear.png"
@@ -155,6 +156,13 @@ func _run_exported_smoke_capture(capture_dir: String) -> void:
 	if not _save_viewport_png(combat_path):
 		get_tree().quit(1)
 		return
+	if not await _show_pickup_smoke_capture():
+		get_tree().quit(1)
+		return
+	var pickup_path := capture_dir.path_join(SMOKE_PICKUP_CAPTURE_NAME)
+	if not _save_viewport_png(pickup_path):
+		get_tree().quit(1)
+		return
 	if not await _show_road_collapse_smoke_capture():
 		get_tree().quit(1)
 		return
@@ -190,7 +198,7 @@ func _run_exported_smoke_capture(capture_dir: String) -> void:
 	if not _save_viewport_png(retry_gameplay_path):
 		get_tree().quit(1)
 		return
-	print("RIFT_ROAD_EXPORTED_APP_SMOKE_CAPTURE ok title_capture=%s hero_select_capture=%s gameplay_capture=%s combat_capture=%s road_collapse_capture=%s brask_intro_capture=%s stage_clear_capture=%s game_over_capture=%s retry_gameplay_capture=%s" % [title_path, hero_select_path, gameplay_path, combat_path, road_collapse_path, brask_intro_path, stage_clear_path, game_over_path, retry_gameplay_path])
+	print("RIFT_ROAD_EXPORTED_APP_SMOKE_CAPTURE ok title_capture=%s hero_select_capture=%s gameplay_capture=%s combat_capture=%s pickup_capture=%s road_collapse_capture=%s brask_intro_capture=%s stage_clear_capture=%s game_over_capture=%s retry_gameplay_capture=%s" % [title_path, hero_select_path, gameplay_path, combat_path, pickup_path, road_collapse_path, brask_intro_path, stage_clear_path, game_over_path, retry_gameplay_path])
 	get_tree().quit(0)
 
 func _show_combat_action_smoke_capture() -> bool:
@@ -203,6 +211,34 @@ func _show_combat_action_smoke_capture() -> bool:
 	if stage == null or not is_instance_valid(stage):
 		push_error("Unable to show exported smoke combat action: Stage 1 is not running")
 		return false
+	await RenderingServer.frame_post_draw
+	return true
+
+func _show_pickup_smoke_capture() -> bool:
+	if mode != "stage":
+		push_error("Unable to show exported smoke pickups: expected stage, got %s" % mode)
+		return false
+	if stage == null or not is_instance_valid(stage):
+		push_error("Unable to show exported smoke pickups: Stage 1 is not running")
+		return false
+	if stage.has_method("set_demo_autoplay"):
+		stage.set_demo_autoplay(false)
+	if stage.pickup_manager == null or stage.player == null:
+		push_error("Unable to show exported smoke pickups: pickup manager or player missing")
+		return false
+	if stage.player.has_method("set_demo_intent"):
+		stage.player.set_demo_intent(Vector2.ZERO, false)
+	for _i in range(95):
+		await get_tree().process_frame
+	stage.pickup_manager.pickups.clear()
+	var player_pos: Vector2 = stage.player.position
+	var pickup_y := clampf(player_pos.y + 70.0, 390.0, 596.0)
+	stage.pickup_manager.spawn_pickup("glowfruit", Vector2(clampf(player_pos.x + 108.0, 110.0, 1130.0), pickup_y))
+	stage.pickup_manager.spawn_pickup("luma_shard", Vector2(clampf(player_pos.x + 180.0, 110.0, 1130.0), pickup_y))
+	stage.last_pickup_notice = "Pickups: Glowfruit HP | Luma Shard Meter"
+	stage.hud.show_notice(stage.last_pickup_notice, 1.6)
+	for _i in range(18):
+		await get_tree().process_frame
 	await RenderingServer.frame_post_draw
 	return true
 
@@ -241,7 +277,8 @@ func _fast_forward_stage1_smoke_to_brask_intro() -> bool:
 	if stage.has_method("set_demo_autoplay"):
 		stage.set_demo_autoplay(false)
 	if stage.road_collapse_active:
-		for _i in range(140):
+		for _i in range(50):
+			stage._tick_road_collapse(0.05)
 			await get_tree().process_frame
 			if not stage.road_collapse_active:
 				break

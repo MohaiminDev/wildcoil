@@ -4,13 +4,13 @@
 
 - Package: `build/macos/Rift Road.zip`
 - Engine: Godot 4.6.1
-- Validation: `bash scripts/check.sh` passed with 85 tests and Godot runtime smoke.
-- Export validation: `bash scripts/package_macos.sh` regenerated `build/macos/Rift Road.zip`; `bash scripts/smoke_exported_macos_app.sh` refreshed the launched-app title, hero-select, Stage 1 gameplay, post-intro combat, road-collapse, Brask intro, Stage Clear score/rank summary, Game Over/retry, and post-retry gameplay screenshots.
+- Validation: `bash scripts/check.sh` passed with 88 tests and Godot runtime smoke.
+- Export validation: `bash scripts/package_macos.sh` regenerated `build/macos/Rift Road.zip`; `bash scripts/smoke_exported_macos_app.sh` refreshed the launched-app title, hero-select, Stage 1 gameplay, post-intro combat, pickup clarity, road-collapse, Brask intro, Stage Clear score/rank summary, Game Over/retry, and post-retry gameplay screenshots.
 - Signing preflight: `bash scripts/check_macos_signing_env.sh` reports `RIFT_ROAD_SIGNING_PREFLIGHT blocked` until real Developer ID/notary configuration exists.
 - Package audit: `bash scripts/audit_macos_package.sh` reports `RIFT_ROAD_PACKAGE_AUDIT internal-only`.
 - Second-machine evidence: `bash scripts/check_second_machine_evidence.sh` currently reports `RIFT_ROAD_SECOND_MACHINE_EVIDENCE blocked` because no clean-machine proof files have been recorded.
 - Controller evidence: `bash scripts/check_controller_evidence.sh` currently reports `RIFT_ROAD_CONTROLLER_EVIDENCE blocked` because no physical controller-family sessions have been recorded.
-- Exported-app smoke: `bash scripts/smoke_exported_macos_app.sh` reports `RIFT_ROAD_EXPORTED_APP_SMOKE ok` when it can launch the zipped app and capture title, hero-select, Stage 1 gameplay, post-intro combat, road-collapse, Stage Clear, Game Over/retry, and post-retry gameplay viewports from the running exported app.
+- Exported-app smoke: `bash scripts/smoke_exported_macos_app.sh` reports `RIFT_ROAD_EXPORTED_APP_SMOKE ok` when it can launch the zipped app and capture title, hero-select, Stage 1 gameplay, post-intro combat, pickup clarity, road-collapse, Stage Clear, Game Over/retry, and post-retry gameplay viewports from the running exported app.
 - Exported-app performance: `bash scripts/sample_exported_app_performance.sh` reports `RIFT_ROAD_EXPORTED_PERF stage1` on local Apple Silicon Mac A (`arm64`, `Apple M1`, `iMac21,2`) with latest local 1280x720 windowed steady-state result `avg_ms=1.476`, `max_ms=1.515`, and writes `docs/playtest-captures/exported-app-performance-latest/stage1-exported-performance.json` after excluding 8 startup/render warmup frames. A local 1920x1080 windowed sample records `avg_ms=3.199`, `max_ms=6.652` under `docs/playtest-captures/exported-app-performance-windowed-1080p-latest/`. A local fullscreen exported-app performance sample records `avg_ms=1.583`, `max_ms=2.793` under `docs/playtest-captures/exported-app-performance-fullscreen-latest/`.
 - Release-candidate gate: `bash scripts/check_release_candidate.sh` reports `RIFT_ROAD_RELEASE_GATE blocked` while package and player-evidence gates remain unresolved.
 - Known-tester packet: `bash scripts/prepare_known_tester_packet.sh` creates `build/known-tester-packet/latest/` with the zip, manifest, logs, docs, controller and second-machine checklists, smoke captures, performance JSON, and host profile for supervised internal sessions.
@@ -28,6 +28,7 @@
 - Repeatable exported-app smoke hero select: `docs/playtest-captures/exported-app-smoke-latest/stage1-exported-app-smoke-hero-select.png`
 - Repeatable exported-app smoke gameplay: `docs/playtest-captures/exported-app-smoke-latest/stage1-exported-app-smoke-gameplay.png`
 - Repeatable exported-app smoke post-intro combat: `docs/playtest-captures/exported-app-smoke-latest/stage1-exported-app-smoke-combat.png`
+- Repeatable exported-app smoke pickups: `docs/playtest-captures/exported-app-smoke-latest/stage1-exported-app-smoke-pickups.png`
 - Repeatable exported-app smoke road collapse: `docs/playtest-captures/exported-app-smoke-latest/stage1-exported-app-smoke-road-collapse.png`
 - Repeatable exported-app smoke Brask intro: `docs/playtest-captures/exported-app-smoke-latest/stage1-exported-app-smoke-brask-intro.png`
 - Repeatable exported-app smoke Stage Clear: `docs/playtest-captures/exported-app-smoke-latest/stage1-exported-app-smoke-stage-clear.png`
@@ -50,6 +51,7 @@
 - The Stage 1 objective rail now uses short HUD-specific copy and a one-line top-center treatment, so the refreshed post-intro combat capture keeps the mission readable without covering the sky with a paragraph panel.
 - Wave-start notice text now auto-clears after the intro beat, so the refreshed post-intro combat capture no longer carries stale centered `Sunset Overpass / Wave 1` text over the sky.
 - The exported-app smoke path now captures a post-intro combat viewport after the Stage 1 intro strap has faded, giving cleaner launched-game fight evidence without claiming a human playtest.
+- Pickups now use distinct data-driven health and luma/meter treatments, collection feedback, and a launched-app pickup clarity smoke capture.
 - Stage 1 now triggers the updated spec's road-collapse beat after the opening cage-loading fight, briefly sells the luma extraction overload, and resumes combat on the lower service-lane wave.
 - Brask now has data-driven intro, phase-change, and escape lines surfaced through the runtime HUD/combat banner path, with the intro captured by exported-app smoke.
 - Hero select now uses canted arcade cards, selected-card glow, portrait wells, planned-hero silhouettes, and stat pips in the refreshed launched-app smoke capture.
@@ -61,7 +63,7 @@
 - The exported-app smoke path now restarts Stage 1 after the Game Over presentation and captures post-retry gameplay from the running exported app.
 - The macOS zip can be produced locally.
 - The package audit now exposes release blockers instead of allowing the local zip to be mistaken for production-ready distribution.
-- The exported-app smoke script can repeatedly extract the zip, launch the app directly into the Stage 1 smoke mode, and capture title, hero-select, Stage 1 gameplay, post-intro combat, road-collapse, Stage Clear, Game Over/retry, and post-retry gameplay viewports from the running exported app.
+- The exported-app smoke script can repeatedly extract the zip, launch the app directly into the Stage 1 smoke mode, and capture title, hero-select, Stage 1 gameplay, post-intro combat, pickup clarity, road-collapse, Stage Clear, Game Over/retry, and post-retry gameplay viewports from the running exported app.
 - Stage 1 now has a repeatable headless performance regression sample.
 - Stage 1 now has a repeatable launched-app performance sample.
 - Stage 1 now has local Apple Silicon Mac A, 1920x1080 windowed, and fullscreen launched-app performance samples.

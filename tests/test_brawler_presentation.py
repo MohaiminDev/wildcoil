@@ -251,6 +251,26 @@ def test_stage_one_has_brask_story_beats(project_root):
     assert "show_stage_event" in stage_manager
 
 
+def test_pickups_are_distinct_and_surface_collection_feedback(project_root):
+    pickup_script = (project_root / "scripts" / "pickup_manager.gd").read_text()
+    stage_script = (project_root / "scripts" / "stage_manager.gd").read_text()
+
+    assert "PICKUP_DEFINITIONS" in pickup_script
+    assert '"glowfruit"' in pickup_script
+    assert '"luma_shard"' in pickup_script
+    assert "display_name" in pickup_script
+    assert "short_label" in pickup_script
+    assert "heal" in pickup_script
+    assert "meter" in pickup_script
+    assert "outer_color" in pickup_script
+    assert "_draw_pickup_marker" in pickup_script
+    assert "_draw_luma_shard" in pickup_script
+    assert "_draw_glowfruit" in pickup_script
+    assert "_on_pickup_collected" in stage_script
+    assert "last_pickup_notice" in stage_script
+    assert "play_pickup" in stage_script
+
+
 def test_controller_support_is_exposed_for_menu_and_combat(project_root):
     app_root = (project_root / "scripts" / "app_root.gd").read_text()
     player = (project_root / "scripts" / "player_controller.gd").read_text()

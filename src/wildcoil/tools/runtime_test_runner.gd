@@ -21,6 +21,8 @@ func _run() -> void:
 		ok = await _run_stage1_road_collapse()
 	if ok and mode == "stage1_brask_story":
 		ok = await _run_stage1_brask_story()
+	if ok and mode == "stage1_pickup_clarity":
+		ok = await _run_stage1_pickup_clarity()
 	if ok and mode == "hero_select_preview":
 		ok = await _run_hero_select_preview()
 	if ok and mode == "stage1_restart_flow":
@@ -275,6 +277,47 @@ func _run_stage1_brask_story() -> bool:
 	await process_frame
 	if not intro_seen or not phase_seen or not escape_seen:
 		printerr("Stage 1 Brask story beats were not all surfaced")
+		return false
+	return true
+
+func _run_stage1_pickup_clarity() -> bool:
+	var packed: PackedScene = load("res://scenes/stages/sunset_overpass.tscn")
+	if packed == null:
+		printerr("Could not load Stage 1 scene")
+		return false
+	var stage = packed.instantiate()
+	stage.hero_id = "raya_flint"
+	stage.stage_id = "sunset_overpass"
+	root.add_child(stage)
+	await process_frame
+	await process_frame
+	if stage.player == null or stage.pickup_manager == null:
+		printerr("Stage 1 pickup clarity check did not build player or pickup manager")
+		stage.queue_free()
+		return false
+	var damaged_health: int = maxi(stage.player.max_health - 40, 1)
+	stage.player.health = damaged_health
+	stage.pickup_manager.spawn_pickup("glowfruit", stage.player.position)
+	stage.pickup_manager.collect_near(stage.player)
+	await process_frame
+	var glowfruit_seen: bool = stage.player.health > damaged_health and stage.last_pickup_notice.contains("Glowfruit") and stage.last_pickup_notice.contains("HP")
+	var luma_before: int = stage.player.luma_shards
+	var meter_before: int = stage.player.special_meter
+	var score_before: int = stage.player.score
+	stage.pickup_manager.spawn_pickup("luma_shard", stage.player.position)
+	stage.pickup_manager.collect_near(stage.player)
+	await process_frame
+	var luma_seen: bool = stage.player.luma_shards > luma_before and stage.player.special_meter > meter_before and stage.player.score > score_before
+	var notice_seen: bool = stage.last_pickup_notice.contains("Luma Shard") and stage.last_pickup_notice.contains("Meter")
+	print("RIFT_ROAD_PICKUPS glowfruit=%s luma_shard=%s notice=%s" % [
+		"true" if glowfruit_seen else "false",
+		"true" if luma_seen else "false",
+		"true" if notice_seen else "false"
+	])
+	stage.queue_free()
+	await process_frame
+	if not glowfruit_seen or not luma_seen or not notice_seen:
+		printerr("Stage 1 pickups did not expose clear health and luma effects")
 		return false
 	return true
 
