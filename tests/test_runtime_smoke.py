@@ -137,6 +137,20 @@ def test_controller_title_to_stage_flow(project_root, godot_runner):
     assert "RIFT_ROAD_RUNTIME_OK controller_title_flow" in result.stdout
 
 
+def test_controller_hotplug_status_updates_ui_and_runtime_state(project_root, godot_runner):
+    result = godot_runner(
+        "--headless",
+        "--script",
+        str(project_root / "tools" / "runtime_test_runner.gd"),
+        "--",
+        "controller_hotplug_status",
+    )
+
+    assert result.returncode == 0, result.stderr + result.stdout
+    assert "RIFT_ROAD_CONTROLLER_HOTPLUG connected=true disconnected=true prompt=true events=2" in result.stdout
+    assert "RIFT_ROAD_RUNTIME_OK controller_hotplug_status" in result.stdout
+
+
 def test_keyboard_fallback_title_to_stage_and_action_flow(project_root, godot_runner):
     result = godot_runner(
         "--headless",

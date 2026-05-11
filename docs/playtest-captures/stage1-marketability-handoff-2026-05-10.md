@@ -4,7 +4,7 @@
 
 - Package: `build/macos/Rift Road.zip`
 - Engine: Godot 4.6.1
-- Validation: `bash scripts/check.sh` passed with 96 tests and Godot runtime smoke; focus-loss smoke now includes audio-manager suspend/resume state, but audible exported-app focus-loss behavior still needs manual confirmation.
+- Validation: `bash scripts/check.sh` passed with 97 tests and Godot runtime smoke; focus-loss smoke now includes audio-manager suspend/resume state and controller hot-plug status is covered in automation, but audible exported-app focus-loss behavior and physical controller devices still need manual confirmation.
 - Export validation: `bash scripts/package_macos.sh` regenerated `build/macos/Rift Road.zip`; `bash scripts/smoke_exported_macos_app.sh` refreshed the launched-app title, hero-select, opening story, Stage 1 gameplay, post-intro combat, pickup clarity, road-collapse, Brask intro, Stage Clear score/rank summary, Game Over/retry, and post-retry gameplay screenshots.
 - Signing preflight: `bash scripts/check_macos_signing_env.sh` reports `RIFT_ROAD_SIGNING_PREFLIGHT blocked` until real Developer ID/notary configuration exists.
 - Package audit: `bash scripts/audit_macos_package.sh` reports `RIFT_ROAD_PACKAGE_AUDIT internal-only`.

@@ -71,8 +71,11 @@ var render_perf_window_mode := "windowed"
 var render_perf_warmup_frames_remaining := RENDER_PERF_WARMUP_FRAMES
 var render_perf_frame_ms: Array[float] = []
 var focus_pause_active := false
+var controller_status_text := ""
+var controller_hotplug_events := 0
 
 func _ready() -> void:
+	_connect_controller_hotplug_signal()
 	DisplayServer.window_set_title("Rift Road: Beasts of the Afterglow")
 	hero_roster = _load_hero_roster()
 	var stage_text := FileAccess.get_file_as_string("res://data/stages.json")
@@ -122,6 +125,37 @@ func _launch_arg_value(args: PackedStringArray, prefix: String, default_value :=
 		if arg.begins_with(prefix):
 			return arg.substr(prefix.length())
 	return default_value
+
+func _connect_controller_hotplug_signal() -> void:
+	var callback := Callable(self, "_on_joy_connection_changed")
+	if not Input.joy_connection_changed.is_connected(callback):
+		Input.joy_connection_changed.connect(callback)
+
+func _on_joy_connection_changed(device_id: int, connected: bool) -> void:
+	controller_hotplug_events += 1
+	var controller_name := Input.get_joy_name(device_id)
+	if controller_name == "":
+		controller_name = "device %d" % device_id
+	controller_status_text = "Controller %s: %s" % ["connected" if connected else "disconnected", controller_name]
+	_refresh_controller_status_prompt()
+
+func _set_controls_text(base_text: String) -> void:
+	if controls_label == null:
+		return
+	controls_label.text = base_text
+	if controller_status_text != "":
+		controls_label.text = "%s\n%s" % [controls_label.text, controller_status_text]
+
+func _refresh_controller_status_prompt() -> void:
+	if controls_label == null:
+		return
+	var prompt_lines := PackedStringArray()
+	for line in controls_label.text.split("\n"):
+		var prompt_line := str(line)
+		if prompt_line.begins_with("Controller connected:") or prompt_line.begins_with("Controller disconnected:"):
+			continue
+		prompt_lines.append(prompt_line)
+	_set_controls_text("\n".join(prompt_lines))
 
 func _configure_render_perf_window(size_text: String, mode_text: String) -> void:
 	if mode_text == "fullscreen":
@@ -732,7 +766,7 @@ func _show_title() -> void:
 	label.size = Vector2(420, 58)
 	label.add_theme_font_size_override("font_size", 28)
 	label.text = "Press any key"
-	controls_label.text = "Keyboard: WASD/Arrows Move  Attack J  Jump K  Special L  Dash I  Pause Esc\nGamepad: LS/D-pad Move  Attack X  Jump A  Special Y/LB  Dash B/RB  Pause Start"
+	_set_controls_text("Keyboard: WASD/Arrows Move  Attack J  Jump K  Special L  Dash I  Pause Esc\nGamepad: LS/D-pad Move  Attack X  Jump A  Special Y/LB  Dash B/RB  Pause Start")
 	_set_hero_cards_visible(false)
 	paused_overlay.visible = false
 
@@ -746,7 +780,7 @@ func _show_character_select() -> void:
 	label.size = Vector2(920, 150)
 	label.add_theme_font_size_override("font_size", 32)
 	label.text = ""
-	controls_label.text = "1/R Raya   2/K Kian   3/N Nika   4/T Tor   Enter/A: capabilities\nGamepad: D-pad/LB/RB change hero   B back"
+	_set_controls_text("1/R Raya   2/K Kian   3/N Nika   4/T Tor   Enter/A: capabilities\nGamepad: D-pad/LB/RB change hero   B back")
 	_set_hero_cards_visible(true)
 	_refresh_hero_card_selection()
 
@@ -773,7 +807,7 @@ func _show_hero_capability_preview() -> void:
 		str(stats.get("control", 3)),
 		str(stats.get("defense", 3))
 	]
-	controls_label.text = "Enter/J/A Start Stage 1   1-4 or D-pad Change Hero   Esc/B Back"
+	_set_controls_text("Enter/J/A Start Stage 1   1-4 or D-pad Change Hero   Esc/B Back")
 	_set_hero_cards_visible(true)
 	_refresh_hero_card_selection()
 
@@ -800,7 +834,7 @@ func _on_game_over() -> void:
 	mode = "game_over"
 	_prepare_result_overlay()
 	label.text = "GAME OVER\n\nThe road can still be won."
-	controls_label.text = "R/Y Restart Stage   Esc/T/B Return Title"
+	_set_controls_text("R/Y Restart Stage   Esc/T/B Return Title")
 
 func _on_stage_completed(text: String) -> void:
 	var result_summary := _stage_clear_result_summary()
@@ -811,11 +845,11 @@ func _on_stage_completed(text: String) -> void:
 	if current_stage_index >= stage_order.size():
 		mode = "complete"
 		label.text = "FINAL CLEAR\n\n%s\n\n%s\n\n%s" % [_format_stage_clear_result_summary(result_summary), text, final_ending]
-		controls_label.text = "R/Y Replay Stage   Esc/T/B Return Title"
+		_set_controls_text("R/Y Replay Stage   Esc/T/B Return Title")
 	else:
 		mode = "stage_clear"
 		label.text = "STAGE CLEAR\n\n%s\n\n%s\n\nNext: %s" % [_format_stage_clear_result_summary(result_summary), text, stage_order[current_stage_index].replace("_", " ").to_upper()]
-		controls_label.text = "Enter/J/A Continue   R/Y Restart Stage   Esc/T/B Return Title"
+		_set_controls_text("Enter/J/A Continue   R/Y Restart Stage   Esc/T/B Return Title")
 
 func _stage_clear_result_summary() -> Dictionary:
 	if stage != null and is_instance_valid(stage) and stage.has_method("stage_clear_summary"):

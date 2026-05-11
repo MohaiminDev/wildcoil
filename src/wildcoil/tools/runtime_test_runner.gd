@@ -31,6 +31,8 @@ func _run() -> void:
 		ok = await _run_stage1_restart_flow()
 	if ok and mode == "controller_title_flow":
 		ok = await _run_controller_title_flow()
+	if ok and mode == "controller_hotplug_status":
+		ok = await _run_controller_hotplug_status()
 	if ok and mode == "keyboard_fallback_flow":
 		ok = await _run_keyboard_fallback_flow()
 	if ok and mode == "stage1_focus_resume":
@@ -517,6 +519,37 @@ func _run_controller_title_flow() -> bool:
 	app.queue_free()
 	await process_frame
 	return true
+
+func _run_controller_hotplug_status() -> bool:
+	var packed: PackedScene = load("res://scenes/app_root.tscn")
+	if packed == null:
+		printerr("Could not load app root scene")
+		return false
+	var app = packed.instantiate()
+	root.add_child(app)
+	await process_frame
+	await process_frame
+	app._on_joy_connection_changed(4, true)
+	await process_frame
+	var connected_ok: bool = app.controller_hotplug_events == 1 and app.controller_status_text.contains("Controller connected") and app.controls_label.text.contains("Controller connected")
+	app._show_character_select()
+	await process_frame
+	var prompt_ok: bool = app.controls_label.text.contains("Controller connected")
+	app._on_joy_connection_changed(4, false)
+	await process_frame
+	var disconnected_ok: bool = app.controller_hotplug_events == 2 and app.controller_status_text.contains("Controller disconnected") and app.controls_label.text.contains("Controller disconnected") and not app.controls_label.text.contains("Controller connected:")
+	print("RIFT_ROAD_CONTROLLER_HOTPLUG connected=%s disconnected=%s prompt=%s events=%d" % [
+		str(connected_ok),
+		str(disconnected_ok),
+		str(prompt_ok),
+		app.controller_hotplug_events
+	])
+	var ok: bool = connected_ok and disconnected_ok and prompt_ok and app.controller_hotplug_events == 2
+	if not ok:
+		printerr("Controller hot-plug status did not update cleanly")
+	app.queue_free()
+	await process_frame
+	return ok
 
 func _run_keyboard_fallback_flow() -> bool:
 	var packed: PackedScene = load("res://scenes/app_root.tscn")

@@ -13,6 +13,7 @@
 - Current automated exported-app keyboard fallback coverage: `bash scripts/smoke_exported_keyboard_fallback.sh` launches the zipped app and records JSON plus viewport evidence for the same keyboard path.
 - Current automated focus-loss coverage: `stage1_focus_resume` in `src/wildcoil/tools/runtime_test_runner.gd` checks Stage 1 auto-pause on focus loss, visible pause overlay, audio-manager suspend/resume state, return-focus copy, and Esc resume.
 - Current baseline gamepad mapping: left stick/D-pad move, `X` attack, `A` jump/confirm, `Y` or left bumper special, `B` or right bumper dash/cancel, shoulder/D-pad hero selection, `Start` pause/confirm.
+- Current automated controller hot-plug coverage: `controller_hotplug_status` in `src/wildcoil/tools/runtime_test_runner.gd` checks the Godot connection-change handler, connected/disconnected runtime state, and menu prompt status persistence.
 - Current originality rule: all content must be original or clearly marked as original placeholder work, per `docs/game-story.md` and `docs/asset_provenance_register.md`.
 - Current public-claim rule: the first success condition is that Stage 1 feels good, looks alive, and is satisfying to play on the target Mac; market-facing claims come only after playtest evidence.
 
