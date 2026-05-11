@@ -323,6 +323,7 @@ def test_macos_signing_preflight_defines_non_secret_release_inputs(repo_root):
     macos_docs = (repo_root / "docs" / "macos_build_and_distribution.md").read_text()
     security_docs = (repo_root / "docs" / "SECURITY.md").read_text()
     audit = (repo_root / "docs" / "market-readiness-audit-2026-05-10.md").read_text()
+    example_env = (repo_root / "docs" / "macos_release_inputs.example.env").read_text()
 
     assert "RIFT_ROAD_APPLE_TEAM_ID" in script
     assert "RIFT_ROAD_DEVELOPER_ID_APPLICATION" in script
@@ -336,6 +337,12 @@ def test_macos_signing_preflight_defines_non_secret_release_inputs(repo_root):
     assert "scripts/check_macos_signing_env.sh" in macos_docs
     assert "scripts/check_macos_signing_env.sh" in security_docs
     assert "scripts/check_macos_signing_env.sh" in audit
+    assert "docs/macos_release_inputs.example.env" in macos_docs
+    assert "docs/macos_release_inputs.example.env" in security_docs
+    assert "RIFT_ROAD_APPLE_TEAM_ID" in example_env
+    assert "RIFT_ROAD_DEVELOPER_ID_APPLICATION" in example_env
+    assert "RIFT_ROAD_NOTARY_KEYCHAIN_PROFILE" in example_env
+    assert "Do not commit real values" in example_env
 
 
 def test_exported_app_performance_sampler_records_rendered_metrics(repo_root):
