@@ -54,12 +54,14 @@ var last_completed_stage_id := "sunset_overpass"
 var final_ending := "The Sundrifter drives into dawn. The road's open."
 var stage
 var title_layer: CanvasLayer
+var pause_layer: CanvasLayer
 var title_logo_group: Node2D
 var hero_select_header_group: Node2D
 var result_overlay_group: Node2D
 var label: Label
 var controls_label: Label
 var paused_overlay: ColorRect
+var pause_text_label: Label
 var hero_cards: Array = []
 var stage1_demo_active := false
 var render_perf_active := false
@@ -68,6 +70,7 @@ var render_perf_window_size := "1280x720"
 var render_perf_window_mode := "windowed"
 var render_perf_warmup_frames_remaining := RENDER_PERF_WARMUP_FRAMES
 var render_perf_frame_ms: Array[float] = []
+var focus_pause_active := false
 
 func _ready() -> void:
 	DisplayServer.window_set_title("Rift Road: Beasts of the Afterglow")
@@ -97,6 +100,12 @@ func _ready() -> void:
 func _process(delta: float) -> void:
 	if render_perf_active:
 		_tick_render_perf_sample(delta)
+
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_WM_WINDOW_FOCUS_OUT:
+		_handle_focus_lost()
+	elif what == NOTIFICATION_WM_WINDOW_FOCUS_IN:
+		_handle_focus_returned()
 
 func _launch_args() -> PackedStringArray:
 	var args := OS.get_cmdline_user_args()
@@ -872,11 +881,39 @@ func _return_to_title_from_flow() -> void:
 	_show_title()
 
 func _toggle_pause() -> void:
-	get_tree().paused = not get_tree().paused
-	paused_overlay.visible = get_tree().paused
+	_set_pause_state(not get_tree().paused)
+
+func _set_pause_state(should_pause: bool, pause_message := "PAUSED\nEsc / Start to resume") -> void:
+	_ensure_pause_layer()
+	get_tree().paused = should_pause
+	if pause_text_label != null:
+		pause_text_label.text = pause_message
+	if paused_overlay != null:
+		paused_overlay.visible = should_pause
+	if pause_layer != null:
+		pause_layer.visible = should_pause
+	if title_layer != null and mode == "stage":
+		title_layer.visible = false
+	if not should_pause:
+		focus_pause_active = false
+
+func _handle_focus_lost() -> void:
+	if mode != "stage" or get_tree().paused:
+		return
+	focus_pause_active = true
+	_set_pause_state(true, "PAUSED\nWindow focus lost\nEsc / Start to resume")
+
+func _handle_focus_returned() -> void:
+	if mode == "stage" and focus_pause_active and pause_text_label != null:
+		pause_text_label.text = "PAUSED\nEsc / Start to resume"
 
 func _clear_stage() -> void:
 	get_tree().paused = false
+	focus_pause_active = false
+	if pause_layer != null:
+		pause_layer.visible = false
+	if paused_overlay != null:
+		paused_overlay.visible = false
 	if stage != null and is_instance_valid(stage):
 		if stage.has_method("set_demo_autoplay"):
 			stage.set_demo_autoplay(false)
@@ -887,6 +924,7 @@ func _clear_stage() -> void:
 func _ensure_title_layer() -> void:
 	if title_layer != null:
 		title_layer.visible = true
+		_ensure_pause_layer()
 		return
 	title_layer = CanvasLayer.new()
 	title_layer.layer = 60
@@ -915,16 +953,25 @@ func _ensure_title_layer() -> void:
 	title_layer.add_child(controls_label)
 	_build_roster_preview(title_layer)
 	_set_hero_cards_visible(false)
+	_ensure_pause_layer()
+
+func _ensure_pause_layer() -> void:
+	if pause_layer != null:
+		return
+	pause_layer = CanvasLayer.new()
+	pause_layer.layer = 80
+	pause_layer.visible = false
+	add_child(pause_layer)
 	paused_overlay = ColorRect.new()
 	paused_overlay.color = Color(0, 0, 0, 0.62)
 	paused_overlay.size = Vector2(1280, 720)
 	paused_overlay.visible = false
-	title_layer.add_child(paused_overlay)
-	var pause_text := Label.new()
-	pause_text.text = "PAUSED\nEsc / Start to resume"
-	pause_text.position = Vector2(520, 300)
-	pause_text.add_theme_font_size_override("font_size", 30)
-	paused_overlay.add_child(pause_text)
+	pause_layer.add_child(paused_overlay)
+	pause_text_label = Label.new()
+	pause_text_label.text = "PAUSED\nEsc / Start to resume"
+	pause_text_label.position = Vector2(520, 300)
+	pause_text_label.add_theme_font_size_override("font_size", 30)
+	paused_overlay.add_child(pause_text_label)
 
 func _build_title_logo_lockup(parent: Node) -> Node2D:
 	var group := Node2D.new()

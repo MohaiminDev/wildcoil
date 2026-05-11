@@ -154,6 +154,20 @@ def test_keyboard_fallback_title_to_stage_and_action_flow(project_root, godot_ru
     assert "RIFT_ROAD_RUNTIME_OK keyboard_fallback_flow" in result.stdout
 
 
+def test_stage_one_focus_loss_pauses_and_resumes(project_root, godot_runner):
+    result = godot_runner(
+        "--headless",
+        "--script",
+        str(project_root / "tools" / "runtime_test_runner.gd"),
+        "--",
+        "stage1_focus_resume",
+    )
+
+    assert result.returncode == 0, result.stderr + result.stdout
+    assert "RIFT_ROAD_FOCUS_RESUME focus_pause=true overlay=true resume=true" in result.stdout
+    assert "RIFT_ROAD_RUNTIME_OK stage1_focus_resume" in result.stdout
+
+
 def test_stage_one_performance_sample_stays_within_budget(project_root, godot_runner):
     result = godot_runner(
         "--headless",

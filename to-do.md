@@ -43,6 +43,7 @@ The visual target is the approved north-star direction: modern stylized arcade r
 - Second-machine evidence: `bash scripts/check_second_machine_evidence.sh` reads `docs/playtest-captures/second-machine-latest/` and currently reports `RIFT_ROAD_SECOND_MACHINE_EVIDENCE blocked` because no clean-machine proof files have been recorded.
 - Exported-app smoke: `bash scripts/smoke_exported_macos_app.sh` extracts `build/macos/Rift Road.zip`, launches the `.app` with `--rift-road-smoke-stage1` and `--rift-road-smoke-capture-dir=...`, captures title, hero-select, opening story, Stage 1 gameplay, post-intro combat, pickup clarity, road-collapse, Stage Clear, Game Over/retry, and post-retry gameplay viewport screenshots from the running exported app, and reports `RIFT_ROAD_EXPORTED_APP_SMOKE ok`.
 - Exported-app performance: `bash scripts/sample_exported_app_performance.sh` launches the packaged `.app`, records `docs/playtest-captures/exported-app-performance-latest/stage1-exported-performance.json`, and reports `RIFT_ROAD_EXPORTED_PERF stage1` on local Apple Silicon Mac A (`arm64`, `Apple M1`, `iMac21,2`) with latest local 1280x720 windowed steady-state result `avg_ms=7.869`, `max_ms=9.091` after 8 startup/render warmup frames. A local 1920x1080 windowed run records `avg_ms=3.199`, `max_ms=6.652` in `docs/playtest-captures/exported-app-performance-windowed-1080p-latest/stage1-exported-performance.json`, and a local fullscreen run records `avg_ms=1.583`, `max_ms=2.793` in `docs/playtest-captures/exported-app-performance-fullscreen-latest/stage1-exported-performance.json`.
+- Focus-loss/resume: `stage1_focus_resume` in `src/wildcoil/tools/runtime_test_runner.gd` proves Stage 1 pauses on window focus loss, shows the pause overlay while the title layer is otherwise hidden, updates the return-focus message, and resumes cleanly with Esc.
 - Release-candidate gate: `bash scripts/check_release_candidate.sh` combines checks, package, audit, exported-app smoke, exported-app keyboard fallback smoke, and performance sample, then reports `RIFT_ROAD_RELEASE_GATE blocked` until package and player-evidence gates are resolved.
 - Known-tester packet: `bash scripts/prepare_known_tester_packet.sh` creates `build/known-tester-packet/latest/` with the current internal-only zip, manifest, build commit, package SHA-256, validation logs, package audit, smoke captures, keyboard fallback evidence, performance JSON, host profile, and playtest docs for supervised known-tester sessions.
 - Playtest evidence gate: `bash scripts/check_playtest_evidence.sh` reads `docs/playtest_log.md` and currently reports `RIFT_ROAD_PLAYTEST_EVIDENCE blocked` because no external session rows have been recorded.
@@ -112,6 +113,18 @@ The visual target is the approved north-star direction: modern stylized arcade r
 - Dependencies: [RR-PROD-15]
 
 ## DONE
+
+### [RR-PROD-56] Add focus-loss pause/resume runtime smoke
+- Outcome: Stage 1 now auto-pauses on macOS window focus loss with a visible pause overlay, updates the pause copy when focus returns, and resumes cleanly through the existing Esc/Start path.
+- Validation:
+  - [x] Added a failing runtime regression requiring `stage1_focus_resume` to emit `RIFT_ROAD_FOCUS_RESUME focus_pause=true overlay=true resume=true`.
+  - [x] Updated `AppRoot` focus notifications and pause state handling so stage pause uses a dedicated pause overlay while the title layer stays hidden.
+  - [x] Added `stage1_focus_resume` to `src/wildcoil/tools/runtime_test_runner.gd`.
+  - [x] `python3 -m pytest tests/test_runtime_smoke.py::test_stage_one_focus_loss_pauses_and_resumes -q` passes.
+- Progress:
+  - 2026-05-11: Added automated coverage for the macOS focus-loss/resume acceptance row.
+- Dependencies: [RR-PROD-12]
+- Completed: 2026-05-11
 
 ### [RR-PROD-55] Add redacted macOS signing input template
 - Outcome: Added a placeholder-only env template for the macOS signing/notarization preflight inputs so release setup can be repeated locally without committing credentials or account values.

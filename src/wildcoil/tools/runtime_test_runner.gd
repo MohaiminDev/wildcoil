@@ -33,6 +33,8 @@ func _run() -> void:
 		ok = await _run_controller_title_flow()
 	if ok and mode == "keyboard_fallback_flow":
 		ok = await _run_keyboard_fallback_flow()
+	if ok and mode == "stage1_focus_resume":
+		ok = await _run_stage1_focus_resume()
 	if ok and mode == "stage1_performance_sample":
 		ok = await _run_stage1_performance_sample()
 	if ok:
@@ -605,6 +607,47 @@ func _run_keyboard_fallback_flow() -> bool:
 		printerr("Keyboard fallback flow did not cover every required control")
 	paused = false
 	_release_keyboard_keys([KEY_D, KEY_J, KEY_K, KEY_L, KEY_I])
+	app.queue_free()
+	await process_frame
+	return ok
+
+func _run_stage1_focus_resume() -> bool:
+	var packed: PackedScene = load("res://scenes/app_root.tscn")
+	if packed == null:
+		printerr("Could not load app root scene")
+		return false
+	var app = packed.instantiate()
+	root.add_child(app)
+	await process_frame
+	await process_frame
+	app.selected_hero = "raya_flint"
+	app._start_campaign()
+	await process_frame
+	await process_frame
+	if app.mode != "stage" or app.stage == null:
+		printerr("Stage did not start before focus-resume smoke")
+		app.queue_free()
+		return false
+	app._handle_focus_lost()
+	await process_frame
+	var focus_pause: bool = paused
+	var overlay_visible: bool = app.pause_layer != null and app.pause_layer.visible and app.paused_overlay != null and app.paused_overlay.visible and app.title_layer != null and not app.title_layer.visible
+	var focus_message: bool = app.pause_text_label != null and app.pause_text_label.text.contains("Window focus lost")
+	app._handle_focus_returned()
+	await process_frame
+	var returned_message: bool = app.pause_text_label != null and app.pause_text_label.text == "PAUSED\nEsc / Start to resume"
+	_press_keyboard_menu_key(app, KEY_ESCAPE)
+	await process_frame
+	var resume_ok: bool = not paused and app.pause_layer != null and not app.pause_layer.visible and app.paused_overlay != null and not app.paused_overlay.visible and app.title_layer != null and not app.title_layer.visible and app.mode == "stage"
+	print("RIFT_ROAD_FOCUS_RESUME focus_pause=%s overlay=%s resume=%s" % [
+		str(focus_pause and focus_message),
+		str(overlay_visible),
+		str(resume_ok and returned_message)
+	])
+	var ok := focus_pause and overlay_visible and focus_message and returned_message and resume_ok
+	if not ok:
+		printerr("Stage 1 focus-loss pause/resume did not recover cleanly")
+	paused = false
 	app.queue_free()
 	await process_frame
 	return ok
