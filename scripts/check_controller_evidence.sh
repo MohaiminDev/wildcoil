@@ -24,12 +24,43 @@ required_checks = [
     "Pause: `pass`",
     "Cancel/back: `pass`",
 ]
+required_controller_metadata = [
+    "Build",
+    "Device name",
+    "Connection",
+    "Evidence capture",
+    "Blockers",
+]
+required_keyboard_metadata = [
+    "Build",
+    "Evidence capture",
+    "Blockers",
+]
 
 controller_families = set()
 invalid_sessions = []
 
 def has_marker(block, marker):
     return re.search(rf"(?m)^{re.escape(marker)}\s*$", block) is not None
+
+def metadata_issues(block, labels):
+    missing = []
+    placeholders = []
+    for label in labels:
+        match = re.search(rf"(?m)^- {re.escape(label)}: `([^`]+)`\s*$", block)
+        if not match:
+            missing.append(label)
+            continue
+        value = match.group(1).strip()
+        if not value or value.upper() == "TBD":
+            placeholders.append(label)
+
+    issues = []
+    if missing:
+        issues.append("missing metadata: " + ", ".join(missing))
+    if placeholders:
+        issues.append("placeholder metadata: " + ", ".join(placeholders))
+    return issues
 
 for block in re.split(r"(?=### Controller Session:)", text):
     if not has_marker(block, "RIFT_ROAD_CONTROLLER_SESSION ok"):
@@ -43,6 +74,10 @@ for block in re.split(r"(?=### Controller Session:)", text):
     if missing:
         invalid_sessions.append(f"{family} missing checks: {', '.join(missing)}")
         continue
+    metadata_blockers = metadata_issues(block, required_controller_metadata)
+    if metadata_blockers:
+        invalid_sessions.extend(f"{family} {issue}" for issue in metadata_blockers)
+        continue
     controller_families.add(family.lower())
 
 keyboard_fallback_ok = False
@@ -53,8 +88,12 @@ for block in re.split(r"(?=### Keyboard Fallback Session)", text):
     missing = [check for check in required_checks if check not in block]
     if missing:
         keyboard_blockers.append("keyboard fallback missing checks: " + ", ".join(missing))
-    else:
-        keyboard_fallback_ok = True
+        continue
+    metadata_blockers = metadata_issues(block, required_keyboard_metadata)
+    if metadata_blockers:
+        keyboard_blockers.extend(f"keyboard fallback {issue}" for issue in metadata_blockers)
+        continue
+    keyboard_fallback_ok = True
 
 blockers = []
 if len(controller_families) < required_controller_families:

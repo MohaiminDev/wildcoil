@@ -36,7 +36,7 @@ The visual target is the approved north-star direction: modern stylized arcade r
 - Production-grade visual/UI match to north-star images: no.
 - Manual playtest evidence: current Codex run opened the rebuilt exported macOS app through LaunchServices, advanced title -> hero select -> Stage 1 with real key input, and sent movement/attack input while the easier four-enemy opening wave stayed playable with health/HUD visible.
 - Controller/keyboard baseline: simulated Godot runtime smoke covers controller title -> hero select -> Stage 1 and pause/resume; a keyboard-fallback runtime smoke covers title -> hero select -> preview cancel -> Stage 1 plus movement, attack, jump, special, dash, and pause/resume; and the exported-app keyboard smoke records the same keyboard path from the launched zipped app as automated JSON/capture evidence. Gameplay code supports keyboard movement/actions and left stick/D-pad movement plus X/A/Y/B/LB/RB/Start actions. Physical controller devices and manual exported-app keyboard fallback are not tested yet.
-- Controller evidence gate: `bash scripts/check_controller_evidence.sh` reads `docs/controller_validation.md` and currently reports `RIFT_ROAD_CONTROLLER_EVIDENCE blocked` because no physical controller-family sessions have been recorded.
+- Controller evidence gate: `bash scripts/check_controller_evidence.sh` reads `docs/controller_validation.md` and currently reports `RIFT_ROAD_CONTROLLER_EVIDENCE blocked` because no physical controller-family sessions have been recorded. The gate now rejects marked sessions with missing or `TBD` build/device/connection/evidence/blocker metadata so placeholder rows cannot satisfy the manual evidence requirement.
 - Latest capture note: the exported macOS app supports a repeatable launched-app viewport smoke capture path that is not dependent on the current macOS Space being visible to `screencapture`; the latest title smoke capture now shows a branded Rift Road logo lockup and start plate, the latest hero-select smoke capture shows canted arcade cards, selected-card glow, portrait wells, planned-hero silhouettes, stat pips, and a canted arcade header/ribbon instead of plain heading text, the latest opening-story smoke capture shows a short Raya/Nika story panel about drill marks, cages, and route stakes, the latest gameplay capture shows the Stage 1 intro as a centered slim strap above the combatants with non-ellipsized `Free the transport cages` copy plus a slimmer top HUD that exposes more sunset/backdrop area, the latest post-intro combat capture shows the running fight after the intro strap has cleared with a one-line objective rail and no stale center wave notice, the latest pickup smoke capture shows distinct health and luma/meter pickup markers from the launched exported app, the latest road-collapse smoke capture shows luma fractures and the exposed service lane after the opening cage-loading fight, the latest Brask intro smoke capture shows the boss story banner from the launched exported app, the latest Stage Clear smoke capture shows rank, score, luma, and health summary text in the canted arcade result frame, the Game Over/retry smoke capture shows the fail-state result text and controls, and the post-retry smoke capture shows Stage 1 gameplay after restarting from the Game Over path.
 - Package audit: `bash scripts/audit_macos_package.sh` reports `RIFT_ROAD_PACKAGE_AUDIT internal-only`; the bundle signature verifies, but Developer ID authority, Apple Team ID, notarization, Gatekeeper acceptance, and stapled ticket validation are not present.
 - Signing preflight: `bash scripts/check_macos_signing_env.sh` reports `RIFT_ROAD_SIGNING_PREFLIGHT blocked`; required non-secret inputs are `RIFT_ROAD_APPLE_TEAM_ID`, `RIFT_ROAD_DEVELOPER_ID_APPLICATION`, and `RIFT_ROAD_NOTARY_KEYCHAIN_PROFILE`.
@@ -112,6 +112,18 @@ The visual target is the approved north-star direction: modern stylized arcade r
 - Dependencies: [RR-PROD-15]
 
 ## DONE
+
+### [RR-PROD-53] Harden controller evidence metadata gate
+- Outcome: The controller evidence gate now rejects marked controller or keyboard fallback sessions when required build, device, connection, evidence-capture, or blocker metadata is missing or still `TBD`, while still accepting complete non-placeholder evidence rows.
+- Validation:
+  - [x] Added a failing regression proving a fake controller-validation document with two `RIFT_ROAD_CONTROLLER_SESSION ok` rows, one `RIFT_ROAD_KEYBOARD_FALLBACK ok` row, and all controls marked `pass` is still blocked when metadata is placeholder.
+  - [x] Added a positive fixture proving two complete controller-family rows plus one complete keyboard fallback row report `RIFT_ROAD_CONTROLLER_EVIDENCE ok`.
+  - [x] Updated `scripts/check_controller_evidence.sh` to validate required metadata before counting controller families or keyboard fallback evidence.
+  - [x] Updated controller, macOS distribution, market-readiness, and tracker docs with the stricter metadata rule.
+- Progress:
+  - 2026-05-11: Hardened the manual evidence gate so future physical controller sessions need real build/device/evidence details, not just pass strings.
+- Dependencies: [RR-PROD-15]
+- Completed: 2026-05-11
 
 ### [RR-PROD-52] Include keyboard fallback in release packet gates
 - Outcome: The release-candidate gate and known-tester packet now run the exported-app keyboard fallback smoke and preserve its log/evidence alongside the existing launch smoke and performance evidence.

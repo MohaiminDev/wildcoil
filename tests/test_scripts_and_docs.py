@@ -610,6 +610,173 @@ def test_controller_evidence_gate_blocks_without_physical_controller_sessions(re
     assert "keyboard fallback missing checks" not in output
 
 
+def test_controller_evidence_gate_rejects_placeholder_session_metadata(
+    repo_root, tmp_path
+):
+    script_path = repo_root / "scripts" / "check_controller_evidence.sh"
+    fake_doc = tmp_path / "controller_validation.md"
+    fake_doc.write_text(
+        """
+# Controller Validation
+
+### Controller Session: `Placeholder Pad One`
+
+RIFT_ROAD_CONTROLLER_SESSION ok
+
+- Build: `TBD`
+- Controller family: `arcade-pad`
+- Device name: `TBD`
+- Connection: `TBD`
+- Evidence capture: `TBD`
+- Title: `pass`
+- Hero select: `pass`
+- Stage 1 movement: `pass`
+- Attack: `pass`
+- Jump: `pass`
+- Special: `pass`
+- Dash: `pass`
+- Pause: `pass`
+- Cancel/back: `pass`
+- Blockers: `TBD`
+
+### Controller Session: `Placeholder Pad Two`
+
+RIFT_ROAD_CONTROLLER_SESSION ok
+
+- Build: `TBD`
+- Controller family: `console-pad`
+- Device name: `TBD`
+- Connection: `TBD`
+- Evidence capture: `TBD`
+- Title: `pass`
+- Hero select: `pass`
+- Stage 1 movement: `pass`
+- Attack: `pass`
+- Jump: `pass`
+- Special: `pass`
+- Dash: `pass`
+- Pause: `pass`
+- Cancel/back: `pass`
+- Blockers: `TBD`
+
+### Keyboard Fallback Session
+
+RIFT_ROAD_KEYBOARD_FALLBACK ok
+
+- Build: `TBD`
+- Evidence capture: `TBD`
+- Title: `pass`
+- Hero select: `pass`
+- Stage 1 movement: `pass`
+- Attack: `pass`
+- Jump: `pass`
+- Special: `pass`
+- Dash: `pass`
+- Pause: `pass`
+- Cancel/back: `pass`
+- Blockers: `TBD`
+""".strip()
+    )
+
+    result = subprocess.run(
+        ["bash", str(script_path), str(fake_doc)],
+        cwd=repo_root,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert result.returncode == 1
+    output = result.stdout + result.stderr
+    assert "RIFT_ROAD_CONTROLLER_EVIDENCE blocked" in output
+    assert "placeholder metadata" in output
+    assert "Device name" in output
+    assert "Evidence capture" in output
+
+
+def test_controller_evidence_gate_accepts_complete_session_metadata(
+    repo_root, tmp_path
+):
+    script_path = repo_root / "scripts" / "check_controller_evidence.sh"
+    fake_doc = tmp_path / "controller_validation.md"
+    fake_doc.write_text(
+        """
+# Controller Validation
+
+### Controller Session: `Arcade Pad`
+
+RIFT_ROAD_CONTROLLER_SESSION ok
+
+- Build: `759cb78`
+- Controller family: `arcade-pad`
+- Device name: `Example Arcade Pad`
+- Connection: `usb`
+- Evidence capture: `docs/playtest-captures/controller/example-arcade-pad.mov`
+- Title: `pass`
+- Hero select: `pass`
+- Stage 1 movement: `pass`
+- Attack: `pass`
+- Jump: `pass`
+- Special: `pass`
+- Dash: `pass`
+- Pause: `pass`
+- Cancel/back: `pass`
+- Blockers: `none`
+
+### Controller Session: `Console Pad`
+
+RIFT_ROAD_CONTROLLER_SESSION ok
+
+- Build: `759cb78`
+- Controller family: `console-pad`
+- Device name: `Example Console Pad`
+- Connection: `bluetooth`
+- Evidence capture: `docs/playtest-captures/controller/example-console-pad.mov`
+- Title: `pass`
+- Hero select: `pass`
+- Stage 1 movement: `pass`
+- Attack: `pass`
+- Jump: `pass`
+- Special: `pass`
+- Dash: `pass`
+- Pause: `pass`
+- Cancel/back: `pass`
+- Blockers: `none`
+
+### Keyboard Fallback Session
+
+RIFT_ROAD_KEYBOARD_FALLBACK ok
+
+- Build: `759cb78`
+- Evidence capture: `docs/playtest-captures/controller/example-keyboard.mov`
+- Title: `pass`
+- Hero select: `pass`
+- Stage 1 movement: `pass`
+- Attack: `pass`
+- Jump: `pass`
+- Special: `pass`
+- Dash: `pass`
+- Pause: `pass`
+- Cancel/back: `pass`
+- Blockers: `none`
+""".strip()
+    )
+
+    result = subprocess.run(
+        ["bash", str(script_path), str(fake_doc)],
+        cwd=repo_root,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert result.returncode == 0
+    output = result.stdout + result.stderr
+    assert "RIFT_ROAD_CONTROLLER_EVIDENCE ok" in output
+    assert "controller_families=2/2" in output
+    assert "keyboard_fallback=1/1" in output
+
+
 def test_tracker_names_next_runtime_task(repo_root):
     tracker = (repo_root / "to-do.md").read_text()
 
