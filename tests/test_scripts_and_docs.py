@@ -15,6 +15,7 @@ def test_run_and_check_scripts_exist(repo_root):
         "scripts/check_playtest_evidence.sh",
         "scripts/check_second_machine_evidence.sh",
         "scripts/check_controller_evidence.sh",
+        "scripts/smoke_exported_keyboard_fallback.sh",
     ]:
         path = repo_root / relative_path
         assert path.exists()
@@ -240,6 +241,34 @@ def test_exported_app_smoke_script_captures_retry_gameplay_viewport(repo_root):
     assert "mode != \"stage\"" in app_root
     assert "stage1-exported-app-smoke-retry-gameplay.png" in handoff
     assert "stage1-exported-app-smoke-retry-gameplay.png" in audit
+
+
+def test_exported_app_keyboard_fallback_smoke_records_input_artifacts(repo_root):
+    script = (repo_root / "scripts" / "smoke_exported_keyboard_fallback.sh").read_text()
+    app_root = (repo_root / "src" / "wildcoil" / "scripts" / "app_root.gd").read_text()
+    docs = (repo_root / "docs" / "macos_build_and_distribution.md").read_text()
+    handoff = (
+        repo_root
+        / "docs"
+        / "playtest-captures"
+        / "stage1-marketability-handoff-2026-05-10.md"
+    ).read_text()
+    audit = (repo_root / "docs" / "market-readiness-audit-2026-05-10.md").read_text()
+
+    assert "Rift Road.zip" in script
+    assert "open -n" in script
+    assert "--rift-road-keyboard-fallback-smoke" in script
+    assert "--rift-road-keyboard-fallback-output=" in script
+    assert "--rift-road-keyboard-fallback-capture-dir=" in script
+    assert "stage1-exported-app-keyboard-fallback.json" in script
+    assert "stage1-exported-app-keyboard-fallback.png" in script
+    assert "RIFT_ROAD_EXPORTED_KEYBOARD_FALLBACK ok" in script
+    assert "KEYBOARD_FALLBACK_SMOKE_ARG" in app_root
+    assert "_run_exported_keyboard_fallback_smoke" in app_root
+    assert "RIFT_ROAD_EXPORTED_KEYBOARD_FALLBACK" in app_root
+    assert "scripts/smoke_exported_keyboard_fallback.sh" in docs
+    assert "stage1-exported-app-keyboard-fallback.json" in handoff
+    assert "stage1-exported-app-keyboard-fallback.json" in audit
 
 
 def test_public_playtest_gate_packet_defines_evidence_thresholds(repo_root):

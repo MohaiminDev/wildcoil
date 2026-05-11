@@ -4,7 +4,7 @@
 
 - Package: `build/macos/Rift Road.zip`
 - Engine: Godot 4.6.1
-- Validation: `bash scripts/check.sh` passed with 92 tests and Godot runtime smoke.
+- Validation: `bash scripts/check.sh` passed with 93 tests and Godot runtime smoke.
 - Export validation: `bash scripts/package_macos.sh` regenerated `build/macos/Rift Road.zip`; `bash scripts/smoke_exported_macos_app.sh` refreshed the launched-app title, hero-select, opening story, Stage 1 gameplay, post-intro combat, pickup clarity, road-collapse, Brask intro, Stage Clear score/rank summary, Game Over/retry, and post-retry gameplay screenshots.
 - Signing preflight: `bash scripts/check_macos_signing_env.sh` reports `RIFT_ROAD_SIGNING_PREFLIGHT blocked` until real Developer ID/notary configuration exists.
 - Package audit: `bash scripts/audit_macos_package.sh` reports `RIFT_ROAD_PACKAGE_AUDIT internal-only`.
@@ -12,6 +12,7 @@
 - Controller evidence: `bash scripts/check_controller_evidence.sh` currently reports `RIFT_ROAD_CONTROLLER_EVIDENCE blocked` because no physical controller-family sessions have been recorded.
 - Keyboard fallback smoke: `python3 -m pytest tests/test_runtime_smoke.py::test_keyboard_fallback_title_to_stage_and_action_flow -q` proves the headless runtime covers title, hero select, preview cancel, Stage 1 movement, attack, jump, special, dash, and pause/resume through keyboard input. This is automated regression coverage, not a manual exported-app keyboard session.
 - Exported-app smoke: `bash scripts/smoke_exported_macos_app.sh` reports `RIFT_ROAD_EXPORTED_APP_SMOKE ok` when it can launch the zipped app and capture title, hero-select, opening story, Stage 1 gameplay, post-intro combat, pickup clarity, road-collapse, Stage Clear, Game Over/retry, and post-retry gameplay viewports from the running exported app.
+- Exported-app keyboard smoke: `bash scripts/smoke_exported_keyboard_fallback.sh` records `docs/playtest-captures/keyboard-fallback-latest/stage1-exported-app-keyboard-fallback.json` and `stage1-exported-app-keyboard-fallback.png` from the launched zipped app. This is automated exported-app proof, not a manual tester row.
 - Exported-app performance: `bash scripts/sample_exported_app_performance.sh` reports `RIFT_ROAD_EXPORTED_PERF stage1` on local Apple Silicon Mac A (`arm64`, `Apple M1`, `iMac21,2`) with latest local 1280x720 windowed steady-state result `avg_ms=2.187`, `max_ms=5.704`, and writes `docs/playtest-captures/exported-app-performance-latest/stage1-exported-performance.json` after excluding 8 startup/render warmup frames. A local 1920x1080 windowed sample records `avg_ms=3.199`, `max_ms=6.652` under `docs/playtest-captures/exported-app-performance-windowed-1080p-latest/`. A local fullscreen exported-app performance sample records `avg_ms=1.583`, `max_ms=2.793` under `docs/playtest-captures/exported-app-performance-fullscreen-latest/`.
 - Release-candidate gate: `bash scripts/check_release_candidate.sh` reports `RIFT_ROAD_RELEASE_GATE blocked` while package and player-evidence gates remain unresolved.
 - Known-tester packet: `bash scripts/prepare_known_tester_packet.sh` creates `build/known-tester-packet/latest/` with the zip, manifest, logs, docs, controller and second-machine checklists, smoke captures, performance JSON, and host profile for supervised internal sessions.
@@ -36,6 +37,8 @@
 - Repeatable exported-app smoke Stage Clear: `docs/playtest-captures/exported-app-smoke-latest/stage1-exported-app-smoke-stage-clear.png`
 - Repeatable exported-app smoke Game Over/retry: `docs/playtest-captures/exported-app-smoke-latest/stage1-exported-app-smoke-game-over.png`
 - Repeatable exported-app smoke post-retry gameplay: `docs/playtest-captures/exported-app-smoke-latest/stage1-exported-app-smoke-retry-gameplay.png`
+- Repeatable exported-app keyboard fallback JSON: `docs/playtest-captures/keyboard-fallback-latest/stage1-exported-app-keyboard-fallback.json`
+- Repeatable exported-app keyboard fallback capture: `docs/playtest-captures/keyboard-fallback-latest/stage1-exported-app-keyboard-fallback.png`
 - Combat impact: `docs/playtest-captures/stage1-combat-impact-proof.png`
 - Boss HUD: `docs/playtest-captures/stage1-boss-hud-readability-proof.png`
 - Cinematic banner: `docs/playtest-captures/stage1-cinematic-banner-proof.png`
@@ -47,6 +50,7 @@
 - Stage 1 now opens with data-driven short comic-style story panels and in-stage barks for Raya, Nika, the cages, and the route stakes, captured by launched-app smoke without blocking player control.
 - Baseline gamepad support now covers title/hero/start flow, pause, movement, attack, jump, special, dash, and controller-visible prompts.
 - Keyboard fallback now has automated runtime smoke coverage for title, hero select, preview cancel/back, Stage 1 movement, attack, jump, special, dash, and pause/resume.
+- Keyboard fallback now also has an automated launched-export smoke that writes a JSON checklist and viewport capture from the zipped app.
 - Stage 1 has image-backed background and actor art, plus additive ruined signs, cage silhouettes, rubble, luma plants, and readable HUD treatment.
 - The title screen now uses a branded Rift Road logo lockup, rift crack, subtitle ribbon, and start plate in the refreshed launched-app smoke capture.
 - The Stage 1 intro banner now uses a centered 760px by 58px strap above the combatants, so the launched-game gameplay capture preserves more of the combat lane and background silhouettes while the objective text is visible.

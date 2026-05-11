@@ -14,6 +14,10 @@ const SMOKE_BRASK_INTRO_CAPTURE_NAME := "stage1-exported-app-smoke-brask-intro.p
 const SMOKE_STAGE_CLEAR_CAPTURE_NAME := "stage1-exported-app-smoke-stage-clear.png"
 const SMOKE_GAME_OVER_CAPTURE_NAME := "stage1-exported-app-smoke-game-over.png"
 const SMOKE_RETRY_GAMEPLAY_CAPTURE_NAME := "stage1-exported-app-smoke-retry-gameplay.png"
+const KEYBOARD_FALLBACK_SMOKE_ARG := "--rift-road-keyboard-fallback-smoke"
+const KEYBOARD_FALLBACK_OUTPUT_PREFIX := "--rift-road-keyboard-fallback-output="
+const KEYBOARD_FALLBACK_CAPTURE_DIR_PREFIX := "--rift-road-keyboard-fallback-capture-dir="
+const KEYBOARD_FALLBACK_CAPTURE_NAME := "stage1-exported-app-keyboard-fallback.png"
 const HERO_CARD_SIZE := Vector2(284, 198)
 const HERO_CARD_SLANT := 22.0
 const RENDER_PERF_SAMPLE_ARG := "--rift-road-render-perf-sample"
@@ -78,11 +82,15 @@ func _ready() -> void:
 	render_perf_window_size = _launch_arg_value(launch_args, RENDER_PERF_WINDOW_SIZE_PREFIX, render_perf_window_size)
 	render_perf_window_mode = _launch_arg_value(launch_args, RENDER_PERF_WINDOW_MODE_PREFIX, render_perf_window_mode).to_lower()
 	var smoke_capture_dir := _launch_arg_value(launch_args, SMOKE_CAPTURE_DIR_PREFIX)
+	var keyboard_fallback_output_path := _launch_arg_value(launch_args, KEYBOARD_FALLBACK_OUTPUT_PREFIX)
+	var keyboard_fallback_capture_dir := _launch_arg_value(launch_args, KEYBOARD_FALLBACK_CAPTURE_DIR_PREFIX)
 	if render_perf_active:
 		_configure_render_perf_window(render_perf_window_size, render_perf_window_mode)
 	_show_title()
 	if smoke_capture_dir != "":
 		call_deferred("_run_exported_smoke_capture", smoke_capture_dir)
+	elif KEYBOARD_FALLBACK_SMOKE_ARG in launch_args:
+		call_deferred("_run_exported_keyboard_fallback_smoke", keyboard_fallback_output_path, keyboard_fallback_capture_dir)
 	elif render_perf_active or _should_autostart_stage1(launch_args):
 		call_deferred("_start_stage1_demo")
 
@@ -210,6 +218,124 @@ func _run_exported_smoke_capture(capture_dir: String) -> void:
 		get_tree().quit(1)
 		return
 	print("RIFT_ROAD_EXPORTED_APP_SMOKE_CAPTURE ok title_capture=%s hero_select_capture=%s opening_story_capture=%s gameplay_capture=%s combat_capture=%s pickup_capture=%s road_collapse_capture=%s brask_intro_capture=%s stage_clear_capture=%s game_over_capture=%s retry_gameplay_capture=%s" % [title_path, hero_select_path, opening_story_path, gameplay_path, combat_path, pickup_path, road_collapse_path, brask_intro_path, stage_clear_path, game_over_path, retry_gameplay_path])
+	get_tree().quit(0)
+
+func _run_exported_keyboard_fallback_smoke(output_path: String, capture_dir: String) -> void:
+	if output_path == "":
+		push_error("Missing exported keyboard fallback output path")
+		get_tree().quit(1)
+		return
+	var output_dir := output_path.get_base_dir()
+	if output_dir != "":
+		DirAccess.make_dir_recursive_absolute(output_dir)
+	var capture_path := ""
+	if capture_dir != "":
+		DirAccess.make_dir_recursive_absolute(capture_dir)
+		capture_path = capture_dir.path_join(KEYBOARD_FALLBACK_CAPTURE_NAME)
+	await get_tree().process_frame
+	await RenderingServer.frame_post_draw
+	var title_ok: bool = mode == "title" and controls_label.text.contains("Attack J")
+	_press_keyboard_smoke_menu_key(KEY_ENTER)
+	await get_tree().process_frame
+	var hero_select_ok: bool = mode == "character_select"
+	_press_keyboard_smoke_menu_key(KEY_3)
+	await get_tree().process_frame
+	hero_select_ok = hero_select_ok and selected_hero_index == 2 and mode == "hero_preview"
+	_press_keyboard_smoke_menu_key(KEY_ESCAPE)
+	await get_tree().process_frame
+	var cancel_ok: bool = mode == "character_select"
+	_press_keyboard_smoke_menu_key(KEY_ENTER)
+	await get_tree().process_frame
+	_press_keyboard_smoke_menu_key(KEY_ENTER)
+	await get_tree().process_frame
+	await get_tree().process_frame
+	var stage_started := mode == "stage" and stage != null and is_instance_valid(stage) and stage.player != null
+	var movement_ok := false
+	var attack_ok := false
+	var jump_ok := false
+	var special_ok := false
+	var dash_ok := false
+	var pause_ok := false
+	if stage_started:
+		stage.player.max_health = 999
+		stage.player.health = 999
+		var start_position: Vector2 = stage.player.position
+		_set_keyboard_smoke_key_state(KEY_D, true)
+		for _i in range(8):
+			await get_tree().physics_frame
+			await get_tree().process_frame
+		_set_keyboard_smoke_key_state(KEY_D, false)
+		movement_ok = stage.player.position.x > start_position.x + 4.0
+		_set_keyboard_smoke_key_state(KEY_J, true)
+		await get_tree().physics_frame
+		await get_tree().process_frame
+		_set_keyboard_smoke_key_state(KEY_J, false)
+		attack_ok = stage.player.attack_step > 0
+		_set_keyboard_smoke_key_state(KEY_K, true)
+		await get_tree().physics_frame
+		await get_tree().process_frame
+		_set_keyboard_smoke_key_state(KEY_K, false)
+		jump_ok = stage.player.jump_timer > 0.0 or stage.player.fake_height > 0.0
+		stage.player.special_meter = 100
+		stage.player.special_timer = 0.0
+		_set_keyboard_smoke_key_state(KEY_L, true)
+		await get_tree().physics_frame
+		await get_tree().process_frame
+		_set_keyboard_smoke_key_state(KEY_L, false)
+		special_ok = stage.player.special_timer > 0.0 and stage.player.special_meter < 100
+		stage.player.dash_cooldown = 0.0
+		_set_keyboard_smoke_key_state(KEY_I, true)
+		await get_tree().physics_frame
+		await get_tree().process_frame
+		_set_keyboard_smoke_key_state(KEY_I, false)
+		dash_ok = stage.player.dash_timer > 0.0
+		_press_keyboard_smoke_menu_key(KEY_ESCAPE)
+		await get_tree().process_frame
+		pause_ok = get_tree().paused and paused_overlay.visible
+		_press_keyboard_smoke_menu_key(KEY_ESCAPE)
+		await get_tree().process_frame
+		pause_ok = pause_ok and not get_tree().paused and not paused_overlay.visible
+		if stage.combat_fx != null and stage.combat_fx.has_method("_clear_existing_banners"):
+			stage.combat_fx._clear_existing_banners()
+		if stage != null and is_instance_valid(stage) and stage.hud != null:
+			stage.hud.show_notice("Keyboard fallback smoke: move attack jump special dash pause", 2.0)
+	for _i in range(8):
+		await get_tree().process_frame
+	if capture_path != "":
+		await RenderingServer.frame_post_draw
+		if not _save_viewport_png(capture_path):
+			capture_path = ""
+	var payload := {
+		"automated": true,
+		"note": "Automated exported-app keyboard fallback smoke; not manual tester evidence.",
+		"title": title_ok,
+		"hero_select": hero_select_ok,
+		"stage1_movement": movement_ok,
+		"attack": attack_ok,
+		"jump": jump_ok,
+		"special": special_ok,
+		"dash": dash_ok,
+		"pause": pause_ok,
+		"cancel_back": cancel_ok,
+		"capture": capture_path
+	}
+	var output_file := FileAccess.open(output_path, FileAccess.WRITE)
+	if output_file == null:
+		push_error("Unable to write exported keyboard fallback output: %s" % output_path)
+		get_tree().paused = false
+		_release_keyboard_smoke_keys([KEY_D, KEY_J, KEY_K, KEY_L, KEY_I])
+		get_tree().quit(1)
+		return
+	output_file.store_string(JSON.stringify(payload, "\t"))
+	output_file.close()
+	var ok := title_ok and hero_select_ok and movement_ok and attack_ok and jump_ok and special_ok and dash_ok and pause_ok and cancel_ok and capture_path != ""
+	get_tree().paused = false
+	_release_keyboard_smoke_keys([KEY_D, KEY_J, KEY_K, KEY_L, KEY_I])
+	if not ok:
+		push_error("RIFT_ROAD_EXPORTED_KEYBOARD_FALLBACK failed output=%s capture=%s" % [output_path, capture_path])
+		get_tree().quit(1)
+		return
+	print("RIFT_ROAD_EXPORTED_KEYBOARD_FALLBACK ok output=%s capture=%s" % [output_path, capture_path])
 	get_tree().quit(0)
 
 func _show_opening_story_smoke_capture() -> bool:
@@ -549,6 +675,24 @@ func _advance_controller_flow() -> void:
 		_start_next_campaign_stage()
 	elif mode == "game_over" or mode == "complete":
 		_return_to_title_from_flow()
+
+func _press_keyboard_smoke_menu_key(keycode: int) -> void:
+	var event := InputEventKey.new()
+	event.keycode = keycode
+	event.physical_keycode = keycode
+	event.pressed = true
+	_handle_keyboard_input(event)
+
+func _set_keyboard_smoke_key_state(keycode: int, pressed_key: bool) -> void:
+	var event := InputEventKey.new()
+	event.keycode = keycode
+	event.physical_keycode = keycode
+	event.pressed = pressed_key
+	Input.parse_input_event(event)
+
+func _release_keyboard_smoke_keys(keys: Array) -> void:
+	for keycode in keys:
+		_set_keyboard_smoke_key_state(int(keycode), false)
 
 func _back_controller_flow() -> void:
 	if mode == "hero_preview":

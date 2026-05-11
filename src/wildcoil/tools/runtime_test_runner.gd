@@ -529,9 +529,9 @@ func _run_keyboard_fallback_flow() -> bool:
 	_press_keyboard_menu_key(app, KEY_ENTER)
 	await process_frame
 	var hero_select_ok: bool = app.mode == "character_select"
-	_press_keyboard_menu_key(app, KEY_RIGHT)
+	_press_keyboard_menu_key(app, KEY_3)
 	await process_frame
-	hero_select_ok = hero_select_ok and app.selected_hero_index == 1 and app.mode == "hero_preview"
+	hero_select_ok = hero_select_ok and app.selected_hero_index == 2 and app.mode == "hero_preview"
 	if not hero_select_ok:
 		printerr("Keyboard roster key did not open the selected hero preview")
 		app.queue_free()

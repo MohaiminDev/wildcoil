@@ -111,6 +111,7 @@ As of 2026-04-27, the Rift Road prototype uses Godot 4.x under `src/wildcoil`.
 - Check signing/notarization preflight: `bash scripts/check_macos_signing_env.sh`
 - Audit macOS package status: `bash scripts/audit_macos_package.sh`
 - Smoke launched exported app: `bash scripts/smoke_exported_macos_app.sh`
+- Smoke launched exported app keyboard fallback: `bash scripts/smoke_exported_keyboard_fallback.sh`
 - Sample launched-app performance: `bash scripts/sample_exported_app_performance.sh`
 - Prepare known-tester packet: `bash scripts/prepare_known_tester_packet.sh`
 - Check playtest evidence threshold: `bash scripts/check_playtest_evidence.sh`
@@ -137,6 +138,8 @@ The expected current result is `RIFT_ROAD_PACKAGE_AUDIT internal-only`: the buil
 Also on 2026-05-10, `bash scripts/check_macos_signing_env.sh` was added to check non-secret signing prerequisites before external release work: `RIFT_ROAD_APPLE_TEAM_ID`, `RIFT_ROAD_DEVELOPER_ID_APPLICATION`, `RIFT_ROAD_NOTARY_KEYCHAIN_PROFILE`, `security find-identity`, `xcrun notarytool`, and the Godot export-preset signing/notarization fields. The expected current result is `RIFT_ROAD_SIGNING_PREFLIGHT blocked` until real Developer ID and notary configuration exists.
 
 Also on 2026-05-10, `bash scripts/smoke_exported_macos_app.sh` was added as a repeatable local proof that the exported zip can be extracted and launched through LaunchServices with `open -n`. It passes `--rift-road-smoke-capture-dir=...` so the running exported app writes title, hero-select, opening story, Stage 1 gameplay, post-intro combat, pickup clarity, road-collapse, Brask intro, Stage Clear, Game Over/retry, and post-retry gameplay viewport captures even when macOS opens the window in a Space that `screencapture` cannot access. The expected success marker is `RIFT_ROAD_EXPORTED_APP_SMOKE ok`. This is launched-app evidence only; it does not replace human playtest, second-machine install, signing, notarization, or Gatekeeper acceptance.
+
+Also on 2026-05-11, `bash scripts/smoke_exported_keyboard_fallback.sh` was added to extract the exported zip, launch the `.app` through LaunchServices with `--rift-road-keyboard-fallback-smoke`, and record `docs/playtest-captures/keyboard-fallback-latest/stage1-exported-app-keyboard-fallback.json` plus `stage1-exported-app-keyboard-fallback.png`. The expected success marker is `RIFT_ROAD_EXPORTED_KEYBOARD_FALLBACK ok`. This proves automated exported-app keyboard fallback behavior; it does not replace the manual keyboard fallback row or physical controller-family sessions required by `docs/controller_validation.md`.
 
 Also on 2026-05-10, `bash scripts/sample_exported_app_performance.sh` was added to launch the packaged app with `--rift-road-render-perf-sample`, wait for a JSON timing artifact, and report `RIFT_ROAD_EXPORTED_PERF stage1` when the rendered app stays inside the current frame budget. The sampler resolves package/output paths to absolute paths before launching the `.app`, excludes explicit startup/render warmup frames from the steady-state gameplay budget, and accepts `RIFT_ROAD_PERF_WINDOW_SIZE` / `RIFT_ROAD_PERF_WINDOW_MODE` for local window-size and display-mode evidence. Local Apple Silicon Mac A, windowed, and fullscreen samples now exist, but second-machine validation still needs separate proof.
 
