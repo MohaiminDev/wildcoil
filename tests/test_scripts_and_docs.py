@@ -300,6 +300,7 @@ def test_release_candidate_gate_combines_automated_and_manual_blockers(repo_root
     assert "scripts/check_macos_signing_env.sh" in script
     assert "scripts/audit_macos_package.sh" in script
     assert "scripts/smoke_exported_macos_app.sh" in script
+    assert "scripts/smoke_exported_keyboard_fallback.sh" in script
     assert "scripts/sample_exported_app_performance.sh" in script
     assert "scripts/check_playtest_evidence.sh" in script
     assert "scripts/check_second_machine_evidence.sh" in script
@@ -309,6 +310,7 @@ def test_release_candidate_gate_combines_automated_and_manual_blockers(repo_root
     assert "RIFT_ROAD_PLAYTEST_EVIDENCE public-playtest-candidate" in script
     assert "RIFT_ROAD_SECOND_MACHINE_EVIDENCE ok" in script
     assert "RIFT_ROAD_CONTROLLER_EVIDENCE ok" in script
+    assert "RIFT_ROAD_EXPORTED_KEYBOARD_FALLBACK ok" in script
     assert "Public playtest or release-candidate proof" in script
     assert "Player love / commercial viability" in script
     assert "RIFT_ROAD_RELEASE_GATE blocked" in script
@@ -469,16 +471,20 @@ def test_known_tester_packet_script_collects_internal_build_evidence(repo_root):
     assert "scripts/check_macos_signing_env.sh" in script
     assert "scripts/audit_macos_package.sh" in script
     assert "scripts/smoke_exported_macos_app.sh" in script
+    assert "scripts/smoke_exported_keyboard_fallback.sh" in script
     assert "scripts/sample_exported_app_performance.sh" in script
     assert "Rift Road.zip" in script
     assert "docs/public_playtest_gate.md" in script
     assert "exported-app-smoke-latest" in script
+    assert "keyboard-fallback-latest" in script
     assert "exported-app-performance-latest" in script
     assert "exported-app-performance-fullscreen-latest" in script
     assert "performance-host-latest" in script
     assert "printf '-" not in script
     assert "printf -- '- Package: `Rift Road.zip`\\n'" in script
     assert "printf -- '- `logs/check.log`\\n'" in script
+    assert "printf -- '- `logs/exported_app_keyboard_fallback.log`\\n'" in script
+    assert "printf -- '- `evidence/keyboard-fallback-latest/`\\n'" in script
     assert "scripts/prepare_known_tester_packet.sh" in packet
     assert "scripts/prepare_known_tester_packet.sh" in macos_docs
     assert "known-tester packet" in handoff

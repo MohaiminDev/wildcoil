@@ -42,12 +42,12 @@ The visual target is the approved north-star direction: modern stylized arcade r
 - Signing preflight: `bash scripts/check_macos_signing_env.sh` reports `RIFT_ROAD_SIGNING_PREFLIGHT blocked`; required non-secret inputs are `RIFT_ROAD_APPLE_TEAM_ID`, `RIFT_ROAD_DEVELOPER_ID_APPLICATION`, and `RIFT_ROAD_NOTARY_KEYCHAIN_PROFILE`.
 - Second-machine evidence: `bash scripts/check_second_machine_evidence.sh` reads `docs/playtest-captures/second-machine-latest/` and currently reports `RIFT_ROAD_SECOND_MACHINE_EVIDENCE blocked` because no clean-machine proof files have been recorded.
 - Exported-app smoke: `bash scripts/smoke_exported_macos_app.sh` extracts `build/macos/Rift Road.zip`, launches the `.app` with `--rift-road-smoke-stage1` and `--rift-road-smoke-capture-dir=...`, captures title, hero-select, opening story, Stage 1 gameplay, post-intro combat, pickup clarity, road-collapse, Stage Clear, Game Over/retry, and post-retry gameplay viewport screenshots from the running exported app, and reports `RIFT_ROAD_EXPORTED_APP_SMOKE ok`.
-- Exported-app performance: `bash scripts/sample_exported_app_performance.sh` launches the packaged `.app`, records `docs/playtest-captures/exported-app-performance-latest/stage1-exported-performance.json`, and reports `RIFT_ROAD_EXPORTED_PERF stage1` on local Apple Silicon Mac A (`arm64`, `Apple M1`, `iMac21,2`) with latest local 1280x720 windowed steady-state result `avg_ms=2.187`, `max_ms=5.704` after 8 startup/render warmup frames. A local 1920x1080 windowed run records `avg_ms=3.199`, `max_ms=6.652` in `docs/playtest-captures/exported-app-performance-windowed-1080p-latest/stage1-exported-performance.json`, and a local fullscreen run records `avg_ms=1.583`, `max_ms=2.793` in `docs/playtest-captures/exported-app-performance-fullscreen-latest/stage1-exported-performance.json`.
-- Release-candidate gate: `bash scripts/check_release_candidate.sh` combines checks, package, audit, exported-app smoke, and performance sample, then reports `RIFT_ROAD_RELEASE_GATE blocked` until package and player-evidence gates are resolved.
-- Known-tester packet: `bash scripts/prepare_known_tester_packet.sh` creates `build/known-tester-packet/latest/` with the current internal-only zip, manifest, validation logs, package audit, smoke captures, performance JSON, host profile, and playtest docs for supervised known-tester sessions.
+- Exported-app performance: `bash scripts/sample_exported_app_performance.sh` launches the packaged `.app`, records `docs/playtest-captures/exported-app-performance-latest/stage1-exported-performance.json`, and reports `RIFT_ROAD_EXPORTED_PERF stage1` on local Apple Silicon Mac A (`arm64`, `Apple M1`, `iMac21,2`) with latest local 1280x720 windowed steady-state result `avg_ms=7.869`, `max_ms=9.091` after 8 startup/render warmup frames. A local 1920x1080 windowed run records `avg_ms=3.199`, `max_ms=6.652` in `docs/playtest-captures/exported-app-performance-windowed-1080p-latest/stage1-exported-performance.json`, and a local fullscreen run records `avg_ms=1.583`, `max_ms=2.793` in `docs/playtest-captures/exported-app-performance-fullscreen-latest/stage1-exported-performance.json`.
+- Release-candidate gate: `bash scripts/check_release_candidate.sh` combines checks, package, audit, exported-app smoke, exported-app keyboard fallback smoke, and performance sample, then reports `RIFT_ROAD_RELEASE_GATE blocked` until package and player-evidence gates are resolved.
+- Known-tester packet: `bash scripts/prepare_known_tester_packet.sh` creates `build/known-tester-packet/latest/` with the current internal-only zip, manifest, validation logs, package audit, smoke captures, keyboard fallback evidence, performance JSON, host profile, and playtest docs for supervised known-tester sessions.
 - Playtest evidence gate: `bash scripts/check_playtest_evidence.sh` reads `docs/playtest_log.md` and currently reports `RIFT_ROAD_PLAYTEST_EVIDENCE blocked` because no external session rows have been recorded.
 - 2026-05-11 spec/story realignment: [`docs/game_spec.md`](/Users/himu/Desktop/career/personal_projects/wildcoil/docs/game_spec.md) and [`docs/game-story.md`](/Users/himu/Desktop/career/personal_projects/wildcoil/docs/game-story.md) now make the first success condition feel-focused, not market-demand-focused: the Stage 1 slice must feel good, look alive, and be satisfying to replay on an M1 iMac before public-playtest or marketability claims. Current missing spec-critical beats include physical controller/second-machine validation and external playtest evidence.
-- Performance sample: `stage1_performance_sample` reports `RIFT_ROAD_PERF stage1` with latest local result `avg_ms=16.592`, `max_ms=23.251`.
+- Performance sample: `stage1_performance_sample` reports `RIFT_ROAD_PERF stage1` with latest local result `avg_ms=16.726`, `max_ms=40.161`.
 - Public playtest gate: [`docs/public_playtest_gate.md`](/Users/himu/Desktop/career/personal_projects/wildcoil/docs/public_playtest_gate.md) defines the external session protocol and explicitly blocks marketable/player-loved claims until external evidence exists.
 - Market-readiness audit: [`docs/market-readiness-audit-2026-05-10.md`](/Users/himu/Desktop/career/personal_projects/wildcoil/docs/market-readiness-audit-2026-05-10.md) maps every active marketability requirement to evidence and gaps; the active goal is not complete.
 - Current proof artifacts:
@@ -112,6 +112,17 @@ The visual target is the approved north-star direction: modern stylized arcade r
 - Dependencies: [RR-PROD-15]
 
 ## DONE
+
+### [RR-PROD-52] Include keyboard fallback in release packet gates
+- Outcome: The release-candidate gate and known-tester packet now run the exported-app keyboard fallback smoke and preserve its log/evidence alongside the existing launch smoke and performance evidence.
+- Validation:
+  - [x] Added failing script/doc regressions requiring `scripts/check_release_candidate.sh` and `scripts/prepare_known_tester_packet.sh` to reference `scripts/smoke_exported_keyboard_fallback.sh`, `RIFT_ROAD_EXPORTED_KEYBOARD_FALLBACK ok`, `logs/exported_app_keyboard_fallback.log`, and `evidence/keyboard-fallback-latest/`.
+  - [x] Updated `scripts/check_release_candidate.sh` to run the exported-app keyboard fallback smoke and block if its success marker is missing.
+  - [x] Updated `scripts/prepare_known_tester_packet.sh` to run the exported-app keyboard fallback smoke, copy `docs/playtest-captures/keyboard-fallback-latest/`, and list the log/evidence in `manifest.md`.
+- Progress:
+  - 2026-05-11: Wired the keyboard fallback proof into the release and handoff workflows so it travels with the tester packet.
+- Dependencies: [RR-PROD-51]
+- Completed: 2026-05-11
 
 ### [RR-PROD-51] Add exported-app keyboard fallback smoke
 - Outcome: Added a packaged-app keyboard fallback smoke command that extracts `build/macos/Rift Road.zip`, launches the `.app`, exercises keyboard title/hero/stage/action/pause input through the exported runtime, and writes JSON plus viewport evidence.
@@ -521,7 +532,7 @@ The visual target is the approved north-star direction: modern stylized arcade r
   - [x] `scripts/sample_exported_app_performance.sh` accepts `RIFT_ROAD_PERF_WINDOW_SIZE` and `RIFT_ROAD_PERF_WINDOW_MODE`.
   - [x] `AppRoot` supports `--rift-road-render-perf-window-size=...` and `--rift-road-render-perf-window-mode=...`.
   - [x] `stage1-exported-performance.json` includes `window_size` and `window_mode`.
-  - [x] Current 1280x720 windowed result: `avg_ms=2.187`, `max_ms=5.704`, `budget_ms=33.3`, `max_budget_ms=120.0`.
+  - [x] Current 1280x720 windowed result: `avg_ms=7.869`, `max_ms=9.091`, `budget_ms=33.3`, `max_budget_ms=120.0`.
   - [x] Current 1920x1080 windowed result: `avg_ms=3.199`, `max_ms=6.652`, `budget_ms=33.3`, `max_budget_ms=120.0`.
 - Progress:
   - 2026-05-10: Added a local windowed 1080p performance path without claiming fullscreen, target-hardware, or second-machine coverage.
@@ -546,7 +557,7 @@ The visual target is the approved north-star direction: modern stylized arcade r
   - [x] `scripts/sample_exported_app_performance.sh` exists and is executable.
   - [x] `AppRoot` supports `--rift-road-render-perf-sample` and writes a JSON timing artifact through `--rift-road-render-perf-output=...`.
   - [x] The script reports `RIFT_ROAD_EXPORTED_PERF stage1` when the app stays within the current frame budget.
-  - [x] Latest local result: `avg_ms=2.187`, `max_ms=5.704`, `budget_ms=33.3`, `max_budget_ms=120.0`, after 8 startup/render warmup frames.
+  - [x] Latest local result: `avg_ms=7.869`, `max_ms=9.091`, `budget_ms=33.3`, `max_budget_ms=120.0`, after 8 startup/render warmup frames.
   - [x] `scripts/check_release_candidate.sh` includes the exported-app performance sample.
 - Progress:
   - 2026-05-10: Added rendered-app performance evidence path and wired it into the release-candidate gate.
@@ -604,7 +615,7 @@ The visual target is the approved north-star direction: modern stylized arcade r
 - Outcome: Added a Godot runtime performance sample for the Stage 1 autoplay slice and documented the current headless timing budget.
 - Validation:
   - [x] `stage1_performance_sample` emits `RIFT_ROAD_PERF stage1`.
-  - [x] Latest local result: `avg_ms=16.592`, `max_ms=23.251`, `budget_ms=33.3`, `max_budget_ms=120.0`.
+  - [x] Latest local result: `avg_ms=16.726`, `max_ms=40.161`, `budget_ms=33.3`, `max_budget_ms=120.0`.
   - [x] The performance sample exits cleanly without the previous unparented helper leak.
   - [x] `docs/performance_budget.md` records the budget, interpretation, and remaining rendered-app gaps.
 - Progress:
