@@ -9,6 +9,7 @@ const FLOOR_TOP := 330.0
 const FLOOR_BOTTOM := 620.0
 const FLOOR_LEFT := 80.0
 const FLOOR_RIGHT := 1200.0
+const CONTROLLER_DEADZONE := 0.22
 
 var hero_id := "raya_flint"
 var display_name := "Raya Flint"
@@ -80,19 +81,20 @@ func _physics_process(delta: float) -> void:
 			input_vector.y -= 1.0
 		if Input.is_key_pressed(KEY_S) or Input.is_key_pressed(KEY_DOWN):
 			input_vector.y += 1.0
+		input_vector += _read_controller_move()
 	if input_vector.x != 0:
 		facing = sign(input_vector.x)
 
-	var dash_pressed := demo_dash_pressed if demo_control_active else Input.is_key_pressed(KEY_I)
+	var dash_pressed := demo_dash_pressed if demo_control_active else Input.is_key_pressed(KEY_I) or _is_controller_button_pressed([JOY_BUTTON_B, JOY_BUTTON_RIGHT_SHOULDER])
 	if dash_pressed and dash_cooldown <= 0.0:
 		dash_timer = 0.13
 		dash_cooldown = 0.52
 
-	var jump_pressed := demo_jump_pressed if demo_control_active else Input.is_key_pressed(KEY_K)
+	var jump_pressed := demo_jump_pressed if demo_control_active else Input.is_key_pressed(KEY_K) or _is_controller_button_pressed([JOY_BUTTON_A])
 	if jump_pressed and jump_timer <= 0.0 and fake_height <= 0.0:
 		jump_timer = 0.52
 
-	var attack_pressed := demo_attack_pressed if demo_control_active else Input.is_key_pressed(KEY_J)
+	var attack_pressed := demo_attack_pressed if demo_control_active else Input.is_key_pressed(KEY_J) or _is_controller_button_pressed([JOY_BUTTON_X])
 	if attack_pressed and not attack_key_down:
 		if attack_timer <= 0.0:
 			_start_light_attack()
@@ -100,7 +102,7 @@ func _physics_process(delta: float) -> void:
 			attack_buffer_timer = 0.18
 	attack_key_down = attack_pressed
 
-	var special_pressed := demo_special_pressed if demo_control_active else Input.is_key_pressed(KEY_L)
+	var special_pressed := demo_special_pressed if demo_control_active else Input.is_key_pressed(KEY_L) or _is_controller_button_pressed([JOY_BUTTON_Y, JOY_BUTTON_LEFT_SHOULDER])
 	if special_pressed and not special_key_down:
 		if special_timer <= 0.0 and special_meter >= special_cost:
 			_start_special_attack()
@@ -150,6 +152,32 @@ func set_demo_intent(move_vector: Vector2, attack_pressed: bool, dash_pressed :=
 	demo_dash_pressed = dash_pressed
 	demo_special_pressed = special_pressed
 	demo_jump_pressed = jump_pressed
+
+func _read_controller_move() -> Vector2:
+	var move := Vector2.ZERO
+	for joy_id in Input.get_connected_joypads():
+		var axis_x := Input.get_joy_axis(joy_id, JOY_AXIS_LEFT_X)
+		var axis_y := Input.get_joy_axis(joy_id, JOY_AXIS_LEFT_Y)
+		if absf(axis_x) > CONTROLLER_DEADZONE and absf(axis_x) > absf(move.x):
+			move.x = axis_x
+		if absf(axis_y) > CONTROLLER_DEADZONE and absf(axis_y) > absf(move.y):
+			move.y = axis_y
+		if Input.is_joy_button_pressed(joy_id, JOY_BUTTON_DPAD_LEFT):
+			move.x = -1.0
+		elif Input.is_joy_button_pressed(joy_id, JOY_BUTTON_DPAD_RIGHT):
+			move.x = 1.0
+		if Input.is_joy_button_pressed(joy_id, JOY_BUTTON_DPAD_UP):
+			move.y = -1.0
+		elif Input.is_joy_button_pressed(joy_id, JOY_BUTTON_DPAD_DOWN):
+			move.y = 1.0
+	return move.limit_length(1.0)
+
+func _is_controller_button_pressed(buttons: Array) -> bool:
+	for joy_id in Input.get_connected_joypads():
+		for button in buttons:
+			if Input.is_joy_button_pressed(joy_id, int(button)):
+				return true
+	return false
 
 func _tick_timers(delta: float) -> void:
 	dash_timer = maxf(dash_timer - delta, 0.0)
@@ -217,7 +245,8 @@ func heal(amount: int) -> void:
 func _draw() -> void:
 	var alpha := 0.45 if invulnerable_timer > 0.0 else 1.0
 	var bob := _animation_bob()
-	_draw_flat_ellipse(Vector2(0, -2), Vector2(28, 7), Color(0, 0, 0, 0.28))
+	_draw_contact_shadow(alpha)
+	_draw_cinematic_afterimage(alpha)
 	_draw_motion_smear(alpha)
 	if not _draw_visual_sprite(alpha, bob):
 		_draw_sprite_outline(Vector2(0, bob - fake_height), alpha)
@@ -231,6 +260,7 @@ func _draw() -> void:
 			_:
 				_draw_raya(alpha, bob)
 	_draw_combo_charge(alpha)
+	_draw_hero_motion_details(alpha, bob)
 	if is_attack_active():
 		var arc_color := Color(1.0, 0.82, 0.25, 0.38) if attack_step < 3 else Color(1.0, 0.42, 0.18, 0.46)
 		draw_rect(Rect2(Vector2(facing * 18 - 22, -52 - fake_height), Vector2(64 + attack_step * 8, 48)), arc_color)
@@ -240,6 +270,9 @@ func _draw() -> void:
 func _animation_bob() -> float:
 	var movement_factor := 1.0 if velocity.length() > 8.0 else 0.35
 	return sin(animation_time * 11.0) * 3.0 * movement_factor
+
+func _motion_frame(rate: float = 10.0, frames: int = 4) -> int:
+	return int(floor(animation_time * rate)) % maxi(frames, 1)
 
 func _load_visual_sprites() -> void:
 	visual_sprites.clear()
@@ -290,6 +323,47 @@ func _current_visual_sprite_state() -> String:
 	if velocity.length() > 8.0:
 		return "walk"
 	return "idle"
+
+func _draw_contact_shadow(alpha: float) -> void:
+	var squash := 1.0
+	if fake_height > 0.0:
+		squash = 0.72
+	elif attack_lunge_timer > 0.0:
+		squash = 1.18
+	elif velocity.length() > 8.0:
+		squash = 1.0 + absf(sin(animation_time * 12.0)) * 0.08
+	_draw_flat_ellipse(Vector2(0, -2), Vector2(30 * squash, 7), Color(0, 0, 0, 0.30 * alpha))
+
+func _draw_cinematic_afterimage(alpha: float) -> void:
+	if dash_timer <= 0.0 and attack_lunge_timer <= 0.0 and special_timer <= 0.0:
+		return
+	var texture: Texture2D = visual_sprites.get(_current_visual_sprite_state(), visual_sprites.get("idle", null))
+	if texture == null:
+		return
+	var target_size := Vector2(172, 202)
+	var trail_color := Color(1.0, 0.58, 0.24, 0.18 * alpha) if hero_id == "raya_flint" else Color(0.64, 0.28, 1.0, 0.20 * alpha)
+	if is_special_active():
+		trail_color = Color(0.32, 0.9, 1.0, 0.22 * alpha)
+	for i in range(3):
+		var distance := float(i + 1) * (16.0 if dash_timer > 0.0 else 10.0)
+		var draw_pos := Vector2(-target_size.x * 0.5 - float(facing) * distance, -target_size.y + 12 + _animation_bob() * 0.45 - fake_height)
+		var fade := 1.0 - float(i) * 0.28
+		draw_texture_rect(texture, Rect2(draw_pos, target_size), false, Color(trail_color.r, trail_color.g, trail_color.b, trail_color.a * fade))
+
+func _draw_hero_motion_details(alpha: float, bob: float) -> void:
+	var frame := _motion_frame(12.0, 4)
+	if velocity.length() > 8.0 and fake_height <= 0.0:
+		for i in range(2):
+			var foot_x := (-22.0 if i == 0 else 22.0) + sin(float(frame + i) * PI * 0.5) * 5.0
+			draw_line(Vector2(foot_x - 18.0, 2.0), Vector2(foot_x + 12.0, 0.0), Color(0.94, 0.68, 0.36, 0.22 * alpha), 2.0)
+	if is_attack_active():
+		var impact_color := Color(1.0, 0.76, 0.22, 0.58 * alpha)
+		var arc_offset := Vector2(float(facing) * (44.0 + float(frame) * 2.0), -48.0 - fake_height + bob * 0.25)
+		draw_arc(arc_offset, 28.0 + float(attack_step) * 8.0, -0.65, 0.82, 14, impact_color, 5.0)
+		draw_line(Vector2(float(facing) * 20.0, -62.0 - fake_height), Vector2(float(facing) * 76.0, -44.0 - fake_height), Color(1.0, 0.95, 0.62, 0.52 * alpha), 3.0)
+	if is_special_active():
+		var pulse := 0.45 + sin(animation_time * 20.0) * 0.16
+		draw_arc(Vector2(0, -48 - fake_height), 58.0 + float(frame) * 4.0, 0.0, TAU, 32, Color(0.32, 0.92, 1.0, pulse * alpha), 3.0)
 
 func _draw_sprite_outline(offset: Vector2, alpha: float) -> void:
 	var outline := Color(0.02, 0.015, 0.012, alpha)

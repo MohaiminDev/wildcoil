@@ -2,6 +2,10 @@
 
 Use this log for all Phase 1 external tests and any earlier hands-on checks that materially affect a gate decision.
 
+Use [`docs/public_playtest_gate.md`](/Users/himu/Desktop/career/personal_projects/wildcoil/docs/public_playtest_gate.md) as the session protocol before treating feedback as market-readiness evidence.
+
+Run `bash scripts/check_playtest_evidence.sh` after recording external sessions. The current gate only passes when completed session rows show at least 5 sessions, at least one `machine=second-mac` setup, at least two distinct `controller-family=<family>` input entries, and replay intent from most testers.
+
 ## Phase 1 Gate Targets
 
 - First combat interaction within 30 seconds
@@ -16,7 +20,7 @@ Use this log for all Phase 1 external tests and any earlier hands-on checks that
 
 | Date | Build | Tester | Setup | Input method | First-combat time | Wow-moment time | Replay desire | Confusion points | Cheap-damage reports | Key quotes / observations | Follow-up action |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| TBD | TBD | TBD | TBD | TBD | TBD | TBD | TBD | TBD | TBD | TBD | TBD |
+| TBD | TBD | TBD | machine=primary-mac | keyboard; controller-family=<family-if-used> | TBD | TBD | TBD | TBD | TBD | TBD | TBD |
 
 ## Session Notes Template
 

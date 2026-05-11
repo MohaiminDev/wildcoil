@@ -1,4 +1,4 @@
-extends Node
+extends RefCounted
 class_name VisualAssetLoader
 
 const MANIFEST_PATH := "res://data/visual_assets.json"

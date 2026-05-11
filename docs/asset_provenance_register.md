@@ -27,7 +27,7 @@ As of 2026-04-27, the playable prototype uses only programmatically drawn placeh
 | Asset / system | Source | License / provenance | Notes |
 | --- | --- | --- | --- |
 | Raya, Nika, Iron Veil enemies, Brask, pickups, road, crystals, HUD placeholders | Programmatic drawing in `src/wildcoil/scripts/*.gd` | Original placeholder work created in-repo | Replace with original sprite sheets and sounds later |
-| Placeholder audio hooks | Empty local methods in `audio_manager.gd` | Original placeholder code | No sound files included yet |
+| Generated procedural audio tones | Generated in `audio_manager.gd` with local `AudioStreamWAV` tone/chord synthesis | Original placeholder code | No external sound files included yet; replace with final original SFX/music later |
 
 ## Stage 1 Visual Production Addendum
 

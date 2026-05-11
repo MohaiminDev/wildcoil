@@ -2,14 +2,29 @@ extends CanvasLayer
 class_name ArcadeCombatFx
 
 const SCREEN_SIZE := Vector2(1280, 720)
+const STAGE_CARD_WIDTH := 760.0
+const STAGE_CARD_HEIGHT := 58.0
+const STAGE_CARD_FONT_SIZE := 18
+const STAGE_CARD_BODY_LIMIT := 46
+const STAGE_CARD_Y_RATIO := 0.17
+
+var non_bloody_impact_palette := {
+	"spark": Color(1.0, 0.78, 0.20, 0.90),
+	"flash": Color(1.0, 0.96, 0.68, 0.72),
+	"luma": Color(0.25, 1.0, 0.70, 0.42),
+	"smoke": Color(0.06, 0.065, 0.060, 0.26)
+}
 
 func _ready() -> void:
 	layer = 25
 
 func show_stage_card(stage_title: String, objective: String, wave_index: int) -> void:
 	var title := "ROUND %d  |  %s" % [wave_index + 1, stage_title.to_upper()]
-	var body := "%s\nCOMBO hits build special meter. Clear the arena to advance." % objective
-	_flash_banner(title, body, Color(0.05, 0.06, 0.08, 0.86), Color(0.24, 1.0, 0.64), 0.25, 1.75)
+	var body := objective
+	_flash_banner(title, body, Color(0.05, 0.06, 0.08, 0.52), Color(0.24, 1.0, 0.64), STAGE_CARD_Y_RATIO, 1.35, STAGE_CARD_HEIGHT, STAGE_CARD_FONT_SIZE, STAGE_CARD_BODY_LIMIT, STAGE_CARD_WIDTH)
+
+func show_stage_event(title: String, body: String) -> void:
+	_flash_banner(title.to_upper(), body, Color(0.08, 0.035, 0.02, 0.72), Color(0.35, 1.0, 0.72), 0.20, 1.1, 74.0, 21, 58, 820.0)
 
 func show_boss_intro(boss_name: String, hazard: String) -> void:
 	var hazard_text := hazard.replace("_", " ").to_upper()
@@ -39,6 +54,62 @@ func spawn_hit_spark(screen_position: Vector2, color: Color = Color(1.0, 0.78, 0
 	tween.tween_property(root, "scale", Vector2(1.7, 1.7), 0.18)
 	tween.tween_property(root, "modulate:a", 0.0, 0.18)
 	tween.chain().tween_callback(root.queue_free)
+
+func spawn_impact_burst(screen_position: Vector2, facing: int, big: bool = false) -> void:
+	var root := Node2D.new()
+	root.name = "non-bloody-impact-burst"
+	root.position = screen_position
+	add_child(root)
+	_build_hit_stop_flash(root, big)
+	_build_impact_ring(root, big)
+	_build_directional_speed_lines(root, facing, big)
+	var tween := create_tween()
+	tween.set_parallel(true)
+	tween.tween_property(root, "scale", Vector2(1.22, 1.22), 0.16 if big else 0.12)
+	tween.tween_property(root, "modulate:a", 0.0, 0.22 if big else 0.16)
+	tween.chain().tween_callback(root.queue_free)
+
+func _build_hit_stop_flash(root: Node2D, big: bool) -> void:
+	var flash := Polygon2D.new()
+	flash.name = "hit-stop-flash"
+	var radius := 54.0 if big else 34.0
+	flash.polygon = _burst_points(radius)
+	flash.color = non_bloody_impact_palette["flash"]
+	root.add_child(flash)
+	var smoke := Polygon2D.new()
+	smoke.name = "impact-smoke-pop"
+	smoke.polygon = _burst_points(radius * 1.35)
+	smoke.color = non_bloody_impact_palette["smoke"]
+	root.add_child(smoke)
+
+func _build_impact_ring(root: Node2D, big: bool) -> void:
+	var ring := Line2D.new()
+	ring.name = "impact-timing-ring"
+	ring.default_color = non_bloody_impact_palette["luma"] if big else non_bloody_impact_palette["spark"]
+	ring.width = 4.0 if big else 3.0
+	var radius := 48.0 if big else 31.0
+	var points := PackedVector2Array()
+	for i in range(25):
+		var angle := TAU * float(i) / 24.0
+		points.append(Vector2(cos(angle) * radius, sin(angle) * radius * 0.62))
+	ring.points = points
+	root.add_child(ring)
+
+func _build_directional_speed_lines(root: Node2D, facing: int, big: bool) -> void:
+	var direction := 1.0 if facing >= 0 else -1.0
+	var line_count := 7 if big else 5
+	for i in range(line_count):
+		var line := Line2D.new()
+		line.name = "impact-speed-line"
+		line.default_color = Color(1.0, 0.92, 0.52, 0.58)
+		line.width = 4.0 if big else 3.0
+		var y := -30.0 + float(i) * (60.0 / float(maxi(line_count - 1, 1)))
+		var length := 74.0 + float(i % 2) * 22.0
+		line.points = PackedVector2Array([
+			Vector2(-direction * 16.0, y),
+			Vector2(-direction * length, y - 8.0 + float(i % 3) * 8.0)
+		])
+		root.add_child(line)
 
 func spawn_attack_arc(screen_position: Vector2, facing: int, color: Color = Color(1.0, 0.85, 0.24, 0.52)) -> void:
 	var arc := Polygon2D.new()
@@ -90,10 +161,12 @@ func spawn_damage_number(screen_position: Vector2, amount: int, combo_count: int
 	tween.tween_property(number, "modulate:a", 0.0, 0.55)
 	tween.chain().tween_callback(number.queue_free)
 
-func _flash_banner(title: String, body: String, bg_color: Color, accent_color: Color, y_ratio: float, hold: float) -> void:
+func _flash_banner(title: String, body: String, bg_color: Color, accent_color: Color, y_ratio: float, hold: float, banner_height := 132.0, font_size := 27, body_limit := 72, banner_width := 0.0) -> void:
+	var banner_width_resolved := SCREEN_SIZE.x if banner_width <= 0.0 else minf(banner_width, SCREEN_SIZE.x)
 	var group := Control.new()
-	group.position = Vector2(0, SCREEN_SIZE.y * y_ratio)
-	group.size = Vector2(SCREEN_SIZE.x, 132)
+	group.position = Vector2((SCREEN_SIZE.x - banner_width_resolved) * 0.5, SCREEN_SIZE.y * y_ratio)
+	group.size = Vector2(banner_width_resolved, banner_height)
+	group.clip_contents = true
 	add_child(group)
 	var bg := ColorRect.new()
 	bg.color = bg_color
@@ -102,15 +175,15 @@ func _flash_banner(title: String, body: String, bg_color: Color, accent_color: C
 	var accent := ColorRect.new()
 	accent.color = accent_color
 	accent.position = Vector2(0, 0)
-	accent.size = Vector2(SCREEN_SIZE.x, 8)
+	accent.size = Vector2(banner_width_resolved, 5)
 	group.add_child(accent)
 	var label := Label.new()
-	label.position = Vector2(70, 18)
-	label.size = Vector2(1140, 96)
-	label.text = "%s\n%s" % [title, body]
+	label.position = Vector2(28, 7)
+	label.size = Vector2(maxf(banner_width_resolved - 56.0, 160.0), banner_height - 14)
+	label.text = "%s\n%s" % [title, _short_banner_body(body, body_limit)]
 	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	label.add_theme_font_size_override("font_size", 27)
+	label.add_theme_font_size_override("font_size", font_size)
 	label.add_theme_color_override("font_color", Color(1.0, 0.92, 0.66))
 	group.add_child(label)
 	group.modulate.a = 0.0
@@ -119,6 +192,12 @@ func _flash_banner(title: String, body: String, bg_color: Color, accent_color: C
 	tween.tween_interval(hold)
 	tween.tween_property(group, "modulate:a", 0.0, 0.30)
 	tween.tween_callback(group.queue_free)
+
+func _short_banner_body(body: String, limit := 72) -> String:
+	var clean := body.replace("\n", " | ")
+	if clean.length() <= limit:
+		return clean
+	return "%s..." % clean.substr(0, maxi(limit - 3, 1))
 
 func _burst_points(radius: float) -> PackedVector2Array:
 	var points := PackedVector2Array()

@@ -40,6 +40,10 @@ var attack_fx_cooldown := 0.0
 var hit_stop_active := false
 var demo_autoplay_active := false
 var demo_autoplay_time := 0.0
+var road_collapse_triggered := false
+var road_collapse_active := false
+var road_collapse_timer := 0.0
+var road_collapse_group: Node2D
 var biome_palette := {
 	"sky": Color(0.94, 0.46, 0.18),
 	"road": Color(0.16, 0.15, 0.15),
@@ -65,9 +69,14 @@ func _process(delta: float) -> void:
 	_tick_cinematic_stage_motion(delta)
 	_tick_cinematic_camera(delta)
 	_tick_camera_punch(delta)
+	_tick_road_collapse(delta)
 	if complete:
 		if demo_autoplay_active and player != null and player.has_method("set_demo_intent"):
 			player.set_demo_intent(Vector2.ZERO, false)
+		return
+	if road_collapse_active:
+		hud.update_player(player)
+		debug_overlay.update_debug(player, _living_enemy_count(), "road collapse set piece")
 		return
 	if demo_autoplay_active:
 		_tick_demo_autoplay(delta)
@@ -78,7 +87,7 @@ func _process(delta: float) -> void:
 	hud.update_boss(boss)
 	debug_overlay.update_debug(player, _living_enemy_count(), "player + attack + enemy boxes")
 	if _living_enemy_count() == 0 and not boss_started:
-		_start_next_wave()
+		_advance_after_wave()
 	if boss_started and (boss == null or not is_instance_valid(boss)) and not complete:
 		complete = true
 		hud.show_notice(stage_data["ending_cutscene"])
@@ -126,7 +135,171 @@ func _build_background() -> void:
 			crystal.size = Vector2(16, 42)
 			add_child(crystal)
 			animated_art.append({"node": crystal, "kind": "pulse", "base": crystal.position, "speed": 1.5 + j * 0.1, "amount": 8.0})
+	_build_premium_readability_grade()
+	_build_stage1_asset_set_dressing()
 	_build_cinematic_stage_motion()
+
+func _build_premium_readability_grade() -> void:
+	if stage_id != "sunset_overpass":
+		return
+	var sunset_grade := ColorRect.new()
+	sunset_grade.name = "premium-sunset-grade"
+	sunset_grade.position = Vector2(0, 0)
+	sunset_grade.size = Vector2(1280, 360)
+	sunset_grade.color = Color(1.0, 0.34, 0.08, 0.055)
+	sunset_grade.z_index = -94
+	sunset_grade.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(sunset_grade)
+	var fight_plane_shadow := ColorRect.new()
+	fight_plane_shadow.name = "premium-fight-plane-shadow"
+	fight_plane_shadow.position = Vector2(0, 382)
+	fight_plane_shadow.size = Vector2(1280, 226)
+	fight_plane_shadow.color = Color(0.015, 0.018, 0.018, 0.13)
+	fight_plane_shadow.z_index = -93
+	fight_plane_shadow.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(fight_plane_shadow)
+	var luma_rim := ColorRect.new()
+	luma_rim.name = "premium-luma-rim"
+	luma_rim.position = Vector2(0, 592)
+	luma_rim.size = Vector2(1280, 48)
+	luma_rim.color = Color(0.18, 1.0, 0.62, 0.055)
+	luma_rim.z_index = -92
+	luma_rim.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(luma_rim)
+	for i in range(2):
+		var lane := Line2D.new()
+		lane.name = "premium-readability-lane"
+		lane.default_color = Color(1.0, 0.72, 0.32, 0.16)
+		lane.width = 2.0
+		var y := 438.0 + float(i) * 126.0
+		lane.points = PackedVector2Array([Vector2(56, y), Vector2(1224, y - 18.0)])
+		lane.z_index = -91
+		add_child(lane)
+
+func _build_stage1_asset_set_dressing() -> void:
+	if stage_id != "sunset_overpass":
+		return
+	_build_ruined_overpass_sign(Vector2(166, 352), "NORTH PASS", -8.0)
+	_build_ruined_overpass_sign(Vector2(1038, 344), "EMBER REST", 5.0)
+	_build_transport_cage_silhouette(Vector2(798, 366))
+	_build_transport_cage_silhouette(Vector2(900, 378))
+	_build_luma_plant_cluster(Vector2(104, 602), 0.88)
+	_build_luma_plant_cluster(Vector2(1138, 590), 1.08)
+	_build_luma_plant_cluster(Vector2(646, 624), 0.72)
+	_build_road_rubble_cluster(Vector2(230, 612), 1.0)
+	_build_road_rubble_cluster(Vector2(520, 596), 0.82)
+	_build_road_rubble_cluster(Vector2(1004, 610), 1.12)
+
+func _build_ruined_overpass_sign(pos: Vector2, label_text: String, angle: float) -> void:
+	var root := Node2D.new()
+	root.name = "stage1-ruined-signpost"
+	root.position = pos
+	root.rotation_degrees = angle
+	root.z_index = -84
+	add_child(root)
+	var post := Line2D.new()
+	post.default_color = Color(0.12, 0.13, 0.12, 0.78)
+	post.width = 7.0
+	post.points = PackedVector2Array([Vector2(-36, 58), Vector2(-24, -12)])
+	root.add_child(post)
+	var panel := ColorRect.new()
+	panel.position = Vector2(-76, -48)
+	panel.size = Vector2(142, 48)
+	panel.color = Color(0.05, 0.14, 0.13, 0.72)
+	root.add_child(panel)
+	var border := Line2D.new()
+	border.default_color = Color(0.94, 0.62, 0.30, 0.56)
+	border.width = 2.0
+	border.points = PackedVector2Array([Vector2(-76, -48), Vector2(66, -48), Vector2(66, 0), Vector2(-76, 0), Vector2(-76, -48)])
+	root.add_child(border)
+	var label := Label.new()
+	label.text = label_text
+	label.position = Vector2(-67, -39)
+	label.size = Vector2(124, 22)
+	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	label.add_theme_font_size_override("font_size", 13)
+	label.add_theme_color_override("font_color", Color(1.0, 0.86, 0.56, 0.72))
+	label.add_theme_color_override("font_shadow_color", Color(0.0, 0.0, 0.0, 0.95))
+	label.add_theme_constant_override("shadow_offset_x", 1)
+	label.add_theme_constant_override("shadow_offset_y", 1)
+	root.add_child(label)
+	var vine := Line2D.new()
+	vine.default_color = Color(0.12, 0.54, 0.22, 0.50)
+	vine.width = 4.0
+	vine.points = PackedVector2Array([Vector2(-64, -47), Vector2(-46, -16), Vector2(-52, 12)])
+	root.add_child(vine)
+
+func _build_luma_plant_cluster(pos: Vector2, scale_factor: float) -> void:
+	var root := Node2D.new()
+	root.name = "stage1-luma-plant-cluster"
+	root.position = pos
+	root.scale = Vector2(scale_factor, scale_factor)
+	root.z_index = -72
+	add_child(root)
+	for i in range(5):
+		var blade := Polygon2D.new()
+		var x := -26.0 + float(i) * 13.0
+		var h := 28.0 + float(i % 3) * 9.0
+		blade.polygon = PackedVector2Array([Vector2(x, 0), Vector2(x + 7, -h), Vector2(x + 15, 0)])
+		blade.color = Color(0.07, 0.42, 0.18, 0.78)
+		root.add_child(blade)
+	for i in range(3):
+		var crystal := Polygon2D.new()
+		var x2 := -12.0 + float(i) * 13.0
+		crystal.polygon = PackedVector2Array([Vector2(x2, -6), Vector2(x2 + 8, -30), Vector2(x2 + 17, -6), Vector2(x2 + 7, 4)])
+		crystal.color = Color(0.24, 1.0, 0.62, 0.48)
+		root.add_child(crystal)
+	animated_art.append({"node": root, "kind": "pulse", "base": root.position, "speed": 1.7 + scale_factor, "amount": 4.0})
+
+func _build_road_rubble_cluster(pos: Vector2, scale_factor: float) -> void:
+	var root := Node2D.new()
+	root.name = "stage1-road-rubble"
+	root.position = pos
+	root.scale = Vector2(scale_factor, scale_factor)
+	root.z_index = -71
+	add_child(root)
+	for i in range(6):
+		var rock := Polygon2D.new()
+		var x := -44.0 + float(i) * 18.0
+		var y := -float(i % 3) * 4.0
+		rock.polygon = PackedVector2Array([
+			Vector2(x, y),
+			Vector2(x + 16.0, y - 7.0),
+			Vector2(x + 30.0, y + 2.0),
+			Vector2(x + 22.0, y + 12.0),
+			Vector2(x + 4.0, y + 10.0)
+		])
+		rock.color = Color(0.10, 0.095, 0.082, 0.76).lightened(float(i % 3) * 0.05)
+		root.add_child(rock)
+
+func _build_transport_cage_silhouette(pos: Vector2) -> void:
+	var root := Node2D.new()
+	root.name = "stage1-transport-cage-silhouette"
+	root.position = pos
+	root.z_index = -83
+	add_child(root)
+	var frame := ColorRect.new()
+	frame.position = Vector2(-44, -48)
+	frame.size = Vector2(88, 48)
+	frame.color = Color(0.035, 0.04, 0.045, 0.58)
+	root.add_child(frame)
+	var border := Line2D.new()
+	border.default_color = Color(0.84, 0.66, 0.40, 0.38)
+	border.width = 2.0
+	border.points = PackedVector2Array([Vector2(-44, -48), Vector2(44, -48), Vector2(44, 0), Vector2(-44, 0), Vector2(-44, -48)])
+	root.add_child(border)
+	for i in range(5):
+		var bar := Line2D.new()
+		bar.default_color = Color(0.55, 0.56, 0.52, 0.42)
+		bar.width = 3.0
+		var x := -34.0 + float(i) * 17.0
+		bar.points = PackedVector2Array([Vector2(x, -46), Vector2(x + 4, -2)])
+		root.add_child(bar)
+	var eye := ColorRect.new()
+	eye.position = Vector2(-7, -30)
+	eye.size = Vector2(14, 4)
+	eye.color = Color(0.24, 1.0, 0.62, 0.44)
+	root.add_child(eye)
 
 func _register_asset_layer_motion() -> void:
 	for child in get_children():
@@ -470,10 +643,11 @@ func _build_systems() -> void:
 	audio_manager = load("res://scripts/audio_manager.gd").new()
 	add_child(audio_manager)
 	audio_manager.play_stage_music()
+	audio_manager.play_stage_start()
 	debug_overlay = load("res://scripts/debug_overlay.gd").new()
 	add_child(debug_overlay)
 	hud.show_notice(stage_data["opening_cutscene"])
-	hud.update_objective(stage_data.get("scenario_goal", "Win the fight"))
+	hud.update_objective(_stage_hud_goal("Win the fight"))
 
 func _start_next_wave() -> void:
 	wave_index += 1
@@ -489,6 +663,101 @@ func _start_next_wave() -> void:
 		enemy.defeated.connect(_on_enemy_defeated)
 		enemy.attack_landed.connect(_on_enemy_attack)
 	_show_wave_objective(wave_index)
+
+func _advance_after_wave() -> void:
+	if _should_trigger_road_collapse():
+		_trigger_road_collapse()
+		return
+	_start_next_wave()
+
+func _should_trigger_road_collapse() -> bool:
+	if road_collapse_triggered or road_collapse_active:
+		return false
+	for event in stage_data.get("stage_events", []):
+		if event.get("id", "") == "road_collapse" and int(event.get("trigger_after_wave", -1)) == wave_index:
+			return true
+	return false
+
+func _road_collapse_event() -> Dictionary:
+	for event in stage_data.get("stage_events", []):
+		if event.get("id", "") == "road_collapse":
+			return event
+	return {}
+
+func _trigger_road_collapse() -> void:
+	var event := _road_collapse_event()
+	road_collapse_triggered = true
+	road_collapse_active = true
+	road_collapse_timer = 1.55
+	_clear_arena_boundaries()
+	_build_road_collapse_set_piece()
+	_apply_camera_punch(14.0)
+	audio_manager.play_heavy()
+	hud.update_objective("Service lane exposed | Wave %d/%d" % [int(event.get("resume_wave", wave_index + 1)) + 1, stage_data["waves"].size()])
+	hud.show_notice("Road collapse\nRegain the lower lane.", 1.2)
+	combat_fx.show_stage_event(str(event.get("title", "ROAD COLLAPSE")), str(event.get("body", "Service lane exposed.")))
+
+func _tick_road_collapse(delta: float) -> void:
+	if not road_collapse_active:
+		return
+	road_collapse_timer = maxf(road_collapse_timer - delta, 0.0)
+	if road_collapse_timer > 0.0:
+		return
+	road_collapse_active = false
+	if road_collapse_group != null and is_instance_valid(road_collapse_group):
+		road_collapse_group.modulate.a = 0.82
+	_start_next_wave()
+
+func _build_road_collapse_set_piece() -> void:
+	if road_collapse_group != null and is_instance_valid(road_collapse_group):
+		road_collapse_group.queue_free()
+	road_collapse_group = Node2D.new()
+	road_collapse_group.name = "stage1-road-collapse-set-piece"
+	road_collapse_group.z_index = -65
+	add_child(road_collapse_group)
+	var service_lane := Polygon2D.new()
+	service_lane.name = "stage1-service-lane-exposed"
+	service_lane.polygon = PackedVector2Array([
+		Vector2(0, 478),
+		Vector2(1280, 430),
+		Vector2(1280, 642),
+		Vector2(0, 668)
+	])
+	service_lane.color = Color(0.035, 0.050, 0.045, 0.48)
+	road_collapse_group.add_child(service_lane)
+	for i in range(7):
+		var fracture := Line2D.new()
+		fracture.name = "stage1-road-collapse-fracture"
+		fracture.default_color = Color(0.30, 1.0, 0.68, 0.72)
+		fracture.width = 3.0 + float(i % 3)
+		var x := 130.0 + float(i) * 170.0
+		var y := 430.0 + float(i % 2) * 36.0
+		fracture.points = PackedVector2Array([
+			Vector2(x, y),
+			Vector2(x + 48.0, y + 42.0),
+			Vector2(x + 22.0, y + 86.0),
+			Vector2(x + 86.0, y + 126.0)
+		])
+		road_collapse_group.add_child(fracture)
+		animated_art.append({"node": fracture, "kind": "pulse", "base": fracture.position, "speed": 2.4 + float(i) * 0.12, "amount": 2.0})
+	for i in range(4):
+		var slab := Polygon2D.new()
+		slab.name = "stage1-collapsed-road-slab"
+		var x2 := 210.0 + float(i) * 260.0
+		slab.polygon = PackedVector2Array([
+			Vector2(x2, 486),
+			Vector2(x2 + 172, 468 + float(i % 2) * 18.0),
+			Vector2(x2 + 206, 552),
+			Vector2(x2 + 34, 576)
+		])
+		slab.color = Color(0.09, 0.085, 0.074, 0.68)
+		road_collapse_group.add_child(slab)
+	var spike := Line2D.new()
+	spike.name = "stage1-luma-extraction-spike-overload"
+	spike.default_color = Color(0.34, 1.0, 0.72, 0.82)
+	spike.width = 7.0
+	spike.points = PackedVector2Array([Vector2(706, 622), Vector2(682, 442), Vector2(736, 356)])
+	road_collapse_group.add_child(spike)
 
 func _start_boss() -> void:
 	boss_started = true
@@ -589,11 +858,13 @@ func _on_enemy_attack(enemy, amount: int) -> void:
 	player.apply_damage(amount, enemy.position.x)
 	audio_manager.play_heavy()
 	combat_fx.spawn_hit_spark(_world_to_screen(player.position + Vector2(0, -48)), Color(1.0, 0.18, 0.08), false)
+	combat_fx.spawn_impact_burst(_world_to_screen(player.position + Vector2(0, -48)), -player.facing, false)
 	_apply_camera_punch(4.0)
 
 func _on_boss_defeated() -> void:
 	player.score += 1500
 	audio_manager.play_victory()
+	audio_manager.play_stage_clear()
 	boss = null
 
 func _on_boss_move_telegraphed(_move_name: String) -> void:
@@ -666,14 +937,24 @@ func _nearest_demo_target():
 
 func _show_wave_objective(next_wave_index: int) -> void:
 	var objective: String = stage_data.get("scenario_goal", "Defeat the enemy wave")
-	hud.update_objective("%s | Wave %d/%d" % [objective, next_wave_index + 1, stage_data["waves"].size()])
-	hud.show_notice("%s\nWave %d" % [stage_data["title"], next_wave_index + 1])
-	combat_fx.show_stage_card(stage_data["title"], objective, next_wave_index)
+	var hud_goal := _stage_hud_goal("Defeat the enemy wave")
+	var stage_card_goal := _stage_card_goal(objective)
+	hud.update_objective("%s | Wave %d/%d" % [hud_goal, next_wave_index + 1, stage_data["waves"].size()])
+	hud.show_notice("%s\nWave %d" % [stage_data["title"], next_wave_index + 1], 1.25)
+	audio_manager.play_wave_start()
+	combat_fx.show_stage_card(stage_data["title"], stage_card_goal, next_wave_index)
+
+func _stage_hud_goal(default_goal: String) -> String:
+	return stage_data.get("hud_goal", stage_data.get("scenario_goal", default_goal))
+
+func _stage_card_goal(default_goal: String) -> String:
+	return stage_data.get("stage_card_goal", stage_data.get("scenario_goal", default_goal))
 
 func _show_boss_intro() -> void:
 	var boss_goal: String = stage_data.get("win_condition", "Defeat the boss")
 	hud.update_objective(boss_goal)
 	hud.show_notice("%s enters! %s" % [boss.display_name, boss_goal])
+	audio_manager.play_boss_intro()
 	combat_fx.show_boss_intro(boss.display_name, boss.arena_hazard)
 	_apply_camera_punch(9.0)
 
@@ -685,9 +966,10 @@ func _spawn_hit_feedback(world_position: Vector2, damage: int, big: bool) -> voi
 		audio_manager.play_hit()
 	_emit_combat_motion_dust(world_position, big)
 	combat_fx.spawn_hit_spark(screen_position, Color(1.0, 0.76, 0.18), big)
+	combat_fx.spawn_impact_burst(screen_position, player.facing, big)
 	combat_fx.spawn_damage_number(screen_position, damage, player.combo_count)
 	_apply_camera_punch(7.0 if big else 3.0)
-	_apply_hit_stop(0.070 if big else 0.045)
+	_apply_hit_stop(0.085 if big else 0.055)
 
 func _spawn_victory_banner(text: String) -> void:
 	combat_fx.show_victory_banner(text)

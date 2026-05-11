@@ -115,6 +115,8 @@ func apply_damage(amount: int, source_x: float) -> void:
 	queue_redraw()
 
 func _draw() -> void:
+	_draw_contact_shadow()
+	_draw_cinematic_afterimage()
 	if not _draw_visual_sprite():
 		_draw_sprite_outline()
 		if species == "machine":
@@ -126,6 +128,7 @@ func _draw() -> void:
 	elif telegraph_timer > 0.0:
 		draw_rect(Rect2(Vector2(-31, -86), Vector2(62, 88)), Color(1.0, 0.08, 0.04, 0.22))
 	_draw_luma_highlight()
+	_draw_enemy_motion_details()
 
 func _load_visual_sprites() -> void:
 	visual_sprites.clear()
@@ -201,6 +204,9 @@ func _visual_motion_speed() -> float:
 		return 4.0
 	return 6.0
 
+func _motion_frame(rate: float = 9.0, frames: int = 4) -> int:
+	return int(floor(behavior_phase * rate)) % maxi(frames, 1)
+
 func _current_visual_sprite_state() -> String:
 	if hurt_flash > 0.0:
 		return "hurt"
@@ -209,6 +215,51 @@ func _current_visual_sprite_state() -> String:
 	if velocity.length() > 8.0:
 		return "walk"
 	return "idle"
+
+func _draw_contact_shadow() -> void:
+	var base_width := 27.0
+	if enemy_id == "iron_veil_brute":
+		base_width = 42.0
+	elif species == "creature":
+		base_width = 38.0
+	var pulse := 1.0
+	if velocity.length() > 8.0:
+		pulse += absf(sin(behavior_phase * _visual_motion_speed())) * 0.10
+	if telegraph_timer > 0.0:
+		pulse += 0.16
+	_draw_flat_ellipse(Vector2(0, -2), Vector2(base_width * pulse, 7), Color(0.0, 0.0, 0.0, 0.30))
+
+func _draw_cinematic_afterimage() -> void:
+	if not cinematic_entry_active and telegraph_timer <= 0.0 and hurt_flash <= 0.0:
+		return
+	var texture: Texture2D = visual_sprites.get(_current_visual_sprite_state(), visual_sprites.get("idle", null))
+	if texture == null:
+		return
+	var target_size := _visual_target_size()
+	var tint := Color(1.0, 0.42, 0.20, 0.14)
+	if species == "creature":
+		tint = Color(0.28, 1.0, 0.68, 0.12)
+	elif hurt_flash > 0.0:
+		tint = Color(1.0, 0.94, 0.55, 0.18)
+	for i in range(2):
+		var offset := -float(facing) * float(i + 1) * (18.0 if cinematic_entry_active else 11.0)
+		var bob := sin(behavior_phase * _visual_motion_speed()) * _visual_motion_amount() * 0.45
+		var draw_pos := Vector2(-target_size.x * 0.5 + offset, -target_size.y + 7 + bob)
+		var fade := 1.0 - float(i) * 0.35
+		draw_texture_rect(texture, Rect2(draw_pos, target_size), false, Color(tint.r, tint.g, tint.b, tint.a * fade))
+
+func _draw_enemy_motion_details() -> void:
+	var frame := _motion_frame(10.0, 4)
+	if velocity.length() > 8.0:
+		for i in range(2):
+			var y := -2.0 - float(i) * 2.0
+			draw_line(Vector2(-float(facing) * (18.0 + float(frame) * 2.0), y), Vector2(-float(facing) * 44.0, y - 5.0), Color(0.86, 0.62, 0.34, 0.22), 2.0)
+	if telegraph_timer > 0.0:
+		var warning := Color(1.0, 0.18, 0.08, 0.30 + sin(behavior_phase * 22.0) * 0.08)
+		draw_arc(Vector2(0, -48), 42.0 + float(frame) * 3.0, -0.35, PI + 0.35, 20, warning, 4.0)
+		draw_line(Vector2(float(facing) * 18.0, -60.0), Vector2(float(facing) * 64.0, -38.0), Color(1.0, 0.72, 0.24, 0.48), 3.0)
+	if hurt_flash > 0.0:
+		draw_circle(Vector2(0, -58), 26.0 + float(frame) * 2.0, Color(1.0, 0.9, 0.45, 0.16))
 
 func _draw_sprite_outline() -> void:
 	var outline := Color(0.02, 0.015, 0.012, 0.92)

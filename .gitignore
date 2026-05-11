@@ -192,6 +192,8 @@ cython_debug/
 .ruff_cache/
 
 # Godot local/editor state
+.DS_Store
+spikes/
 src/wildcoil/.godot/
 src/wildcoil/**/*.uid
 src/wildcoil/**/*.import

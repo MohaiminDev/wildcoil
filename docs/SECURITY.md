@@ -3,12 +3,15 @@
 ## Secret Handling
 - No committed secret values were found during this migration.
 - `src/wildcoil/export_presets.cfg` contains empty signing fields for `codesign/identity` and `codesign/apple_team_id`.
-- `GODOT_BIN` is the only environment variable discovered in repo scripts and tests; it points to a local Godot executable path and is not a secret by itself.
+- `scripts/check_macos_signing_env.sh` checks only non-secret signing readiness inputs and never requires raw certificate material or notary passwords.
 
 ## Environment Variables
 | Variable | Evidence | Purpose |
 |---|---|---|
 | `GODOT_BIN` | `README.md`, `scripts/*.sh`, `tests/conftest.py` | Override the Godot executable used by local scripts and tests |
+| `RIFT_ROAD_APPLE_TEAM_ID` | `scripts/check_macos_signing_env.sh` | Non-secret Apple team identifier expected by the macOS release preflight |
+| `RIFT_ROAD_DEVELOPER_ID_APPLICATION` | `scripts/check_macos_signing_env.sh` | Name of the Developer ID Application identity expected in the local keychain |
+| `RIFT_ROAD_NOTARY_KEYCHAIN_PROFILE` | `scripts/check_macos_signing_env.sh` | Name of a pre-stored `xcrun notarytool` keychain profile; do not commit notary passwords |
 
 ## Data And PII
 - The repo contains game content JSON, docs, tests, scenes, scripts, and local build guidance.
@@ -25,7 +28,8 @@
 - Raw future save files, crash reports, or telemetry payloads if they can contain user data.
 
 ## Known Gaps
+- Release signing is blocked until `scripts/check_macos_signing_env.sh` reports `RIFT_ROAD_SIGNING_PREFLIGHT ready`.
 - TODO(source-needed): release signing credential storage process.
-- TODO(source-needed): notarization credential process.
+- TODO(source-needed): notarization credential process beyond the non-secret keychain profile name.
 - TODO(source-needed): third-party service credentials, if any are introduced.
 - TODO(source-needed): save-data privacy and retention rules, if save/load is added.

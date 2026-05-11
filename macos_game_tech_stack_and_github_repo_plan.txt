@@ -1,0 +1,368 @@
+TECH STACK AND GITHUB REPOSITORY PLAN
+macOS-first original arcade-heritage action game
+Prepared using current official documentation checked on March 5, 2026
+
+EXECUTIVE RECOMMENDATION
+
+Use Godot 4.6.1 stable as the production engine, keep the project in a single GitHub monorepo, and standardize the team on Apple Silicon Macs.
+
+Recommended stack:
+- Engine: Godot 4.6.1 stable
+- Gameplay scripting: GDScript first
+- Native optimization path: GDExtension/C++ only for proven hotspots
+- Rendering default: Compatibility renderer for prototype and likely MVP
+- Input: Godot InputMap + controller-first validation
+- Art tools: Blender 4.5 LTS + Krita 5.2.x
+- Audio tools: REAPER 7.63
+- CI: GitHub Actions
+- Release signing: self-hosted macOS runner or dedicated release Mac
+- Source control: Git + GitHub + selective Git LFS
+- Distribution path: Developer ID signing + notarization + stapling + ZIP/DMG
+
+WHY THIS STACK
+
+1. Godot is the best fit for this product.
+Godot’s current stable release is 4.6.1. Its macOS export path supports code signing and notarization, official export templates are Universal 2 binaries, controllers are supported on macOS, and the engine is MIT-licensed. That is an unusually strong fit for a macOS-first game that may later be opened to contributors. [R3][R4][R5][R6][R12]
+
+2. GDScript is the right starting language.
+Use GDScript for gameplay, combat, UI, encounter logic, and tool scripts. Do not start with C# unless the team is already heavily .NET-oriented. Godot’s standard editor does not include C# support out of the box, so GDScript keeps onboarding and setup simpler. [R8]
+
+3. Unreal is not the right default here.
+Current Unreal macOS docs recommend Apple Silicon M3, say Lumen hardware ray tracing is not supported on macOS, and say Nanite / Virtual Shadow Maps on macOS are Apple Silicon M2+ with beta support. That is too much rendering and hardware friction for a side-scrolling action brawler whose real success factor is feel and readability. [R17]
+
+4. Unity is the fallback, not the default.
+Unity 6.3 LTS is a legitimate fallback. Its Input System is the recommended default, it supports universal macOS builds, and it documents code signing and notarization on macOS. If you later move toward wider platform ambitions or a larger Unity-heavy hiring plan, Unity is the first fallback to re-evaluate. [R13][R14][R15][R16]
+
+RECOMMENDED PRODUCTION STACK
+
+Engine and runtime
+- Godot 4.6.1 stable
+- No engine fork unless a specific blocker forces it
+- Upgrade engine versions only at milestone boundaries
+
+Scripting
+- GDScript for gameplay
+- GDExtension/C++ only for measured hotspots
+- Avoid C# in phase 1
+
+Rendering
+- Default: Compatibility renderer
+- Visual target: stylized 2.5D, restrained lighting, strong VFX, readable silhouettes
+- Keep Forward+ only as an optional test branch if needed
+
+Input
+- Use InputMap actions from day one
+- Treat controller support as mandatory
+- Keep keyboard first-class
+- Add rumble and advanced controller features later
+
+Art/content tools
+- Blender 4.5 LTS for models, rigs, simple animation work
+- Krita 5.2.x for painted textures, UI, concept paint
+- Keep original working files under /source-assets
+- Use Git LFS only for heavy source files
+
+Audio/content tools
+- REAPER 7.63 for editing, layering, rough mix, export masters
+- Use Godot’s built-in runtime audio stack for prototype and MVP
+- Do not add FMOD or Wwise by default
+
+Build and release
+- CI/debug exports: command-line Godot export on macOS runner
+- Release exports: sign with Developer ID, notarize, staple, package ZIP and optionally DMG
+- Keep certificates only on the release machine or secure release runner
+
+CI/CD
+- GitHub Actions
+- GitHub-hosted macOS runners for unsigned PR/nightly builds
+- Self-hosted macOS runner or dedicated Mac mini for signed release builds
+- GitHub workflow artifacts for CI builds
+- GitHub Releases for milestone and public binaries
+- Optional later hardening: artifact attestations
+
+Source control
+- Git + GitHub
+- Git LFS for heavy source assets only
+- Normal Git for .gd, .tscn, .tres, .shader, docs, json, cfg
+- Never commit build outputs, caches, secrets, signing files
+
+DEVELOPER COMPUTER STANDARD
+
+Hardware
+- Primary dev machines should be Apple Silicon Macs
+- Recommend 32 GB RAM and 1 TB SSD for lead programming/art-heavy contributors
+- Keep one Intel Mac only if you explicitly want Intel compatibility testing
+- Use one dedicated release Mac or Mac mini for certificates and notarization
+
+Software install order
+1. Install current stable macOS
+2. Install Xcode or Xcode Command Line Tools
+3. Install Homebrew
+4. Install Git and Git LFS
+5. Install Godot 4.6.1 stable and export templates
+6. Install Blender 4.5 LTS
+7. Install Krita 5.2.x
+8. Install REAPER 7.63
+9. Install optional editor support after the core stack works
+
+Daily local workflow
+- Open the project from /game/project.godot
+- Run a local playable check before every push
+- Keep short-lived feature branches
+- Do not store build outputs inside the tracked repo tree
+- Keep captures, exports, profiling, and scratch files outside the repo
+
+Recommended local folders
+~/Projects/<game-name>/repo
+~/Projects/<game-name>/captures
+~/Projects/<game-name>/exports
+~/Projects/<game-name>/profiling
+~/Projects/<game-name>/scratch
+
+Release machine rules
+- Only the release machine or secure runner should hold Apple certificates
+- Store notarization credentials outside the repo
+- Use the release machine for tagged builds only
+- Keep a written notarization runbook in docs/tech/notarization.md
+
+GITHUB REPOSITORY PLAN
+
+Repo strategy
+- Use one primary monorepo
+- Do not split code, docs, tools, and runtime assets at project start
+- Split very heavy source-asset storage into a second repo only if LFS cost/size becomes painful
+
+Committed repo tree
+
+repo-root/
+├─ .github/
+│  ├─ workflows/
+│  │  ├─ ci.yml
+│  │  ├─ nightly-macos.yml
+│  │  └─ release-macos.yml
+│  ├─ ISSUE_TEMPLATE/
+│  ├─ PULL_REQUEST_TEMPLATE.md
+│  ├─ CODEOWNERS
+│  └─ labeler.yml
+├─ game/
+│  ├─ project.godot
+│  ├─ export_presets.cfg
+│  ├─ addons/
+│  ├─ autoload/
+│  ├─ scenes/
+│  │  ├─ bootstrap/
+│  │  ├─ characters/
+│  │  ├─ enemies/
+│  │  ├─ bosses/
+│  │  ├─ levels/
+│  │  ├─ ui/
+│  │  └─ fx/
+│  ├─ scripts/
+│  │  ├─ core/
+│  │  ├─ gameplay/
+│  │  ├─ combat/
+│  │  ├─ ai/
+│  │  ├─ ui/
+│  │  └─ debug/
+│  ├─ data/
+│  │  ├─ combat/
+│  │  ├─ enemies/
+│  │  ├─ balance/
+│  │  ├─ input/
+│  │  └─ localization/
+│  ├─ assets/
+│  │  ├─ models/
+│  │  ├─ textures/
+│  │  ├─ materials/
+│  │  ├─ animations/
+│  │  ├─ audio/
+│  │  │  ├─ music/
+│  │  │  ├─ sfx/
+│  │  │  └─ voice/
+│  │  ├─ fonts/
+│  │  ├─ shaders/
+│  │  └─ placeholders/
+│  └─ tests/
+│     ├─ smoke/
+│     ├─ gameplay/
+│     └─ fixtures/
+├─ source-assets/
+│  ├─ blender/
+│  ├─ krita/
+│  ├─ reaper/
+│  ├─ concept/
+│  ├─ references-safe/
+│  └─ licensed-third-party/
+├─ tools/
+│  ├─ build/
+│  ├─ release/
+│  ├─ validation/
+│  ├─ profiling/
+│  └─ repo/
+├─ docs/
+│  ├─ design/
+│  ├─ tech/
+│  ├─ art/
+│  ├─ audio/
+│  ├─ qa/
+│  ├─ production/
+│  └─ opensource/
+├─ third_party/
+│  ├─ licenses/
+│  └─ notices/
+├─ .gitattributes
+├─ .gitignore
+├─ README.md
+├─ CONTRIBUTING.md
+├─ SECURITY.md
+├─ THIRD_PARTY_NOTICES.md
+├─ to-do.md
+└─ LICENSE
+
+What goes where
+- /game: actual Godot project and runtime-shipped resources
+- /source-assets: editable masters, mostly LFS
+- /tools: build/export/release/validation/profiling scripts
+- /docs: design, tech, QA, open-source, production notes
+- /third_party: licenses, notices, manifests
+- /.github: CI, templates, CODEOWNERS, policy automation
+
+Branch and review rules
+- Trunk-based development
+- Protected main branch
+- Pull requests required for merge
+- Required status checks on main
+- CODEOWNERS by discipline
+- Use issue templates and PR template from day one
+
+Git LFS policy
+- LFS-track heavy source files only
+- Do not LFS-track Godot text resources or scripts
+- Review LFS usage monthly because GitHub bills storage and bandwidth separately
+- If needed later, split only the source-asset area into a second repo
+
+Recommended GitHub workflows
+- ci.yml: validate + smoke test + unsigned macOS debug artifact on every PR
+- nightly-macos.yml: clean nightly export + regression checks
+- release-macos.yml: signed/notarized tagged build + ZIP/DMG + GitHub Release
+
+Suggested root files
+README.md
+CONTRIBUTING.md
+SECURITY.md
+THIRD_PARTY_NOTICES.md
+to-do.md
+.gitattributes
+.gitignore
+.github/CODEOWNERS
+.github/PULL_REQUEST_TEMPLATE.md
+.github/ISSUE_TEMPLATE/bug_report.yml
+.github/ISSUE_TEMPLATE/feature_request.yml
+
+FIRST 14 DAYS: CONCRETE SETUP PLAN
+
+1. Create the GitHub repo and protect main
+2. Commit the repo skeleton and workflow files before gameplay code starts
+3. Install the Mac workstation stack on the lead machine and one clean test Mac
+4. Create a blank Godot 4.6.1 project under /game and verify a local unsigned macOS export
+5. Add one CI workflow that opens the project, runs a smoke validation step, and uploads a debug artifact
+6. Build one tiny combat test scene with controller input and one enemy
+7. Stand up the release runner and dry-run signing/notarization before public testing
+
+Success condition after two weeks:
+Any team member can clone the repo, open /game in Godot, run the prototype locally, and obtain a CI-produced macOS artifact without manual heroics.
+
+REFERENCES
+
+[R1] Apple Developer — Notarizing macOS software before distribution
+https://developer.apple.com/documentation/security/notarizing-macos-software-before-distribution
+
+[R2] Apple Developer — Developer ID: Signing your apps for Gatekeeper
+https://developer.apple.com/developer-id/
+
+[R3] Godot official site — current latest download 4.6.1 stable
+https://godotengine.org/
+
+[R4] Godot docs — Exporting for macOS / code signing and notarization
+https://docs.godotengine.org/en/stable/tutorials/export/exporting_for_macos.html
+
+[R5] Godot docs — EditorExportPlatformMacOS / supported architectures and universal templates
+https://docs.godotengine.org/en/stable/classes/class_editorexportplatformmacos.html
+
+[R6] Godot docs — Controllers, gamepads, and joysticks
+https://docs.godotengine.org/en/stable/tutorials/inputs/controllers_gamepads_joysticks.html
+
+[R7] Godot docs — Overview of renderers
+https://docs.godotengine.org/en/stable/tutorials/rendering/renderers.html
+
+[R8] Godot docs — C#/.NET
+https://docs.godotengine.org/en/stable/tutorials/scripting/c_sharp/index.html
+
+[R9] Godot docs — Project organization
+https://docs.godotengine.org/en/stable/tutorials/best_practices/project_organization.html
+
+[R10] Godot docs — Version control systems
+https://docs.godotengine.org/en/stable/tutorials/best_practices/version_control_systems.html
+
+[R11] Godot docs — Command line tutorial / export and headless operation
+https://docs.godotengine.org/en/latest/tutorials/editor/command_line_tutorial.html
+
+[R12] Godot official site — license (MIT)
+https://godotengine.org/license/
+
+[R13] Unity official — Unity 6 support / 6.3 LTS current release
+https://unity.com/releases/unity-6/support
+
+[R14] Unity manual — Input System
+https://docs.unity3d.com/6000.3/Documentation/Manual/Input.html
+
+[R15] Unity manual — Build a macOS application / universal architectures
+https://docs.unity3d.com/6000.3/Documentation/Manual/macos-building.html
+
+[R16] Unity manual — Code sign and notarize your macOS application
+https://docs.unity3d.com/6000.3/Documentation/Manual/macos-building-notarization.html
+
+[R17] Epic docs — macOS development requirements for Unreal Engine
+https://dev.epicgames.com/documentation/en-us/unreal-engine/macos-development-requirements-for-unreal-engine
+
+[R18] GitHub Docs — GitHub-hosted runners
+https://docs.github.com/actions/using-github-hosted-runners/about-github-hosted-runners
+
+[R19] GitHub Docs — Self-hosted runners
+https://docs.github.com/actions/hosting-your-own-runners
+
+[R20] GitHub Docs — Managing a branch protection rule
+https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-protected-branches/managing-a-branch-protection-rule
+
+[R21] GitHub Docs — About code owners
+https://docs.github.com/articles/about-code-owners
+
+[R22] GitHub Docs — About Git Large File Storage
+https://docs.github.com/repositories/working-with-files/managing-large-files/about-git-large-file-storage
+
+[R23] GitHub Docs — About billing for Git Large File Storage
+https://docs.github.com/billing/managing-billing-for-git-large-file-storage/about-billing-for-git-large-file-storage
+
+[R24] GitHub Docs — About releases
+https://docs.github.com/repositories/releasing-projects-on-github/about-releases
+
+[R25] GitHub Docs — Workflow artifacts
+https://docs.github.com/en/actions/concepts/workflows-and-actions/workflow-artifacts
+
+[R26] GitHub Docs — Upload linked artifacts / artifact attestations
+https://docs.github.com/en/code-security/how-tos/secure-your-supply-chain/establish-provenance-and-integrity/upload-linked-artifacts
+
+[R27] Homebrew docs — Installation
+https://docs.brew.sh/Installation
+
+[R28] Blender official — 4.5 LTS
+https://www.blender.org/download/lts/4-5/
+
+[R29] Blender official — Requirements
+https://www.blender.org/download/requirements/
+
+[R30] Krita official — Download / current version
+https://krita.org/en/download/
+
+[R31] REAPER official — Download
+https://www.reaper.fm/download.php

@@ -22,6 +22,18 @@ func play_ui() -> void:
 func play_victory() -> void:
 	_play_tone(440.0, 0.14, 0.12)
 
+func play_stage_start() -> void:
+	_play_chord([220.0, 330.0, 440.0], 0.11, 0.052)
+
+func play_wave_start() -> void:
+	_play_chord([330.0, 494.0], 0.075, 0.046)
+
+func play_boss_intro() -> void:
+	_play_chord([92.0, 138.0, 184.0], 0.16, 0.070)
+
+func play_stage_clear() -> void:
+	_play_chord([330.0, 440.0, 660.0], 0.18, 0.065)
+
 func play_stage_music() -> void:
 	if muted or music_player != null or _audio_disabled_for_headless():
 		return
@@ -43,6 +55,10 @@ func _play_tone(frequency: float, duration: float, volume: float) -> void:
 	var tween := create_tween()
 	tween.tween_interval(duration + 0.04)
 	tween.tween_callback(player.queue_free)
+
+func _play_chord(frequencies: Array, duration: float, volume: float) -> void:
+	for frequency in frequencies:
+		_play_tone(float(frequency), duration, volume)
 
 func _make_tone_stream(frequency: float, duration: float, volume: float) -> AudioStreamWAV:
 	var mix_rate := 22050

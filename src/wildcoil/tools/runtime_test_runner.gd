@@ -1,5 +1,9 @@
 extends SceneTree
 
+const PERFORMANCE_SAMPLE_FRAMES := 240
+const PERFORMANCE_FRAME_BUDGET_MS := 33.3
+const PERFORMANCE_MAX_FRAME_MS := 120.0
+
 func _init() -> void:
 	call_deferred("_run")
 
@@ -13,8 +17,16 @@ func _run() -> void:
 		ok = await _run_stage1_flow()
 	if ok and mode == "stage1_autoplay":
 		ok = await _run_stage1_autoplay()
+	if ok and mode == "stage1_road_collapse":
+		ok = await _run_stage1_road_collapse()
 	if ok and mode == "hero_select_preview":
 		ok = await _run_hero_select_preview()
+	if ok and mode == "stage1_restart_flow":
+		ok = await _run_stage1_restart_flow()
+	if ok and mode == "controller_title_flow":
+		ok = await _run_controller_title_flow()
+	if ok and mode == "stage1_performance_sample":
+		ok = await _run_stage1_performance_sample()
 	if ok:
 		print("RIFT_ROAD_RUNTIME_OK %s" % mode)
 		quit(0)
@@ -63,8 +75,12 @@ func _run_stage1_flow() -> bool:
 	if app.mode != "title":
 		printerr("Expected title mode, got %s" % app.mode)
 		return false
-	if app.label == null or not app.label.text.contains("RIFT ROAD"):
-		printerr("Title label did not expose game title")
+	if app.title_logo_group == null or not app.title_logo_group.visible:
+		printerr("Title logo lockup was not visible")
+		return false
+	var title_logo = app.title_logo_group.get_node_or_null("title-logo-main")
+	if title_logo == null or not title_logo.text.contains("RIFT"):
+		printerr("Title logo did not expose game title")
 		return false
 	if app.controls_label == null or not app.controls_label.text.contains("Attack J"):
 		printerr("Title controls were not visible")
@@ -120,6 +136,15 @@ func _run_stage1_flow() -> bool:
 	if not app.label.text.contains("STAGE CLEAR"):
 		printerr("Stage clear label was not shown")
 		return false
+	if _any_visible_hero_card(app):
+		printerr("Stage clear retained visible hero-select cards")
+		return false
+	if app.stage != null and app.stage.combat_fx != null and app.title_layer.layer <= app.stage.combat_fx.layer:
+		printerr("Stage clear overlay layer is below combat FX")
+		return false
+	if app.label.autowrap_mode == TextServer.AUTOWRAP_OFF or app.label.size.x < 980:
+		printerr("Stage clear label is not configured to wrap long text")
+		return false
 	app.queue_free()
 	await process_frame
 	return true
@@ -151,7 +176,8 @@ func _run_stage1_autoplay() -> bool:
 	var demo_enabled: bool = stage.demo_autoplay_active and stage.player.demo_control_active
 	stage.set_demo_autoplay(false)
 	stage.queue_free()
-	await process_frame
+	for _i in range(5):
+		await process_frame
 	if not demo_enabled:
 		printerr("Stage 1 autoplay did not enable player demo control")
 		return false
@@ -160,6 +186,49 @@ func _run_stage1_autoplay() -> bool:
 		return false
 	if not attacked:
 		printerr("Stage 1 autoplay did not trigger player attacks")
+		return false
+	return true
+
+func _run_stage1_road_collapse() -> bool:
+	var packed: PackedScene = load("res://scenes/stages/sunset_overpass.tscn")
+	if packed == null:
+		printerr("Could not load Stage 1 scene")
+		return false
+	var stage = packed.instantiate()
+	stage.hero_id = "raya_flint"
+	stage.stage_id = "sunset_overpass"
+	root.add_child(stage)
+	await process_frame
+	await process_frame
+	if stage.wave_index != 0:
+		printerr("Expected Stage 1 to start on wave 0, got %d" % stage.wave_index)
+		stage.queue_free()
+		return false
+	_clear_spawned_enemies(stage)
+	stage._advance_after_wave()
+	await process_frame
+	var triggered: bool = stage.road_collapse_triggered and stage.road_collapse_active
+	if not triggered:
+		printerr("Road collapse did not trigger after wave 0")
+		stage.queue_free()
+		return false
+	if stage.get_node_or_null("stage1-road-collapse-set-piece") == null:
+		printerr("Road collapse visual set piece was not created")
+		stage.queue_free()
+		return false
+	for _i in range(40):
+		stage._tick_road_collapse(0.05)
+		await process_frame
+		if not stage.road_collapse_active:
+			break
+	var resumed: bool = (not stage.road_collapse_active) and stage.wave_index == 1 and stage.enemies.size() > 0
+	var triggered_text := "true" if triggered else "false"
+	var resumed_text := "true" if resumed else "false"
+	print("RIFT_ROAD_ROAD_COLLAPSE triggered=%s resumed=%s wave=%d enemies=%d" % [triggered_text, resumed_text, stage.wave_index, stage.enemies.size()])
+	stage.queue_free()
+	await process_frame
+	if not resumed:
+		printerr("Road collapse did not resume into service-lane wave")
 		return false
 	return true
 
@@ -204,8 +273,188 @@ func _run_hero_select_preview() -> bool:
 	await process_frame
 	return true
 
+func _run_stage1_restart_flow() -> bool:
+	var packed: PackedScene = load("res://scenes/app_root.tscn")
+	if packed == null:
+		printerr("Could not load app root scene")
+		return false
+	var app = packed.instantiate()
+	root.add_child(app)
+	await process_frame
+	await process_frame
+	app.selected_hero = "raya_flint"
+	app._start_campaign()
+	await process_frame
+	await process_frame
+	if app.mode != "stage" or app.stage == null:
+		printerr("Stage did not start for restart flow")
+		app.queue_free()
+		return false
+	var first_stage_id: String = app.stage.stage_id
+	app._on_stage_completed("test clear")
+	await process_frame
+	if app.mode != "stage_clear":
+		printerr("Expected stage_clear before restart, got %s" % app.mode)
+		app.queue_free()
+		return false
+	if app.controls_label == null or not app.controls_label.text.contains("Restart Stage") or not app.controls_label.text.contains("Return Title"):
+		printerr("Stage clear controls did not expose restart and title actions")
+		app.queue_free()
+		return false
+	app._restart_last_completed_stage()
+	await process_frame
+	await process_frame
+	if app.mode != "stage" or app.stage == null or app.stage.stage_id != first_stage_id:
+		printerr("Restart last completed stage did not relaunch Stage 1")
+		app.queue_free()
+		return false
+	app._on_game_over()
+	await process_frame
+	if app.mode != "game_over" or not app.controls_label.text.contains("Restart Stage"):
+		printerr("Game over did not expose restart controls")
+		app.queue_free()
+		return false
+	app._restart_current_stage()
+	await process_frame
+	await process_frame
+	if app.mode != "stage" or app.stage == null or app.stage.stage_id != first_stage_id:
+		printerr("Game over restart did not relaunch the current stage")
+		app.queue_free()
+		return false
+	app._return_to_title_from_flow()
+	await process_frame
+	if app.mode != "title" or app.stage != null:
+		printerr("Return-to-title did not clear stage")
+		app.queue_free()
+		return false
+	app.queue_free()
+	await process_frame
+	return true
+
+func _run_controller_title_flow() -> bool:
+	var packed: PackedScene = load("res://scenes/app_root.tscn")
+	if packed == null:
+		printerr("Could not load app root scene")
+		return false
+	var app = packed.instantiate()
+	root.add_child(app)
+	await process_frame
+	await process_frame
+	_press_controller_button(app, JOY_BUTTON_A)
+	await process_frame
+	if app.mode != "character_select":
+		printerr("Controller confirm did not advance title to character select")
+		app.queue_free()
+		return false
+	_press_controller_button(app, JOY_BUTTON_RIGHT_SHOULDER)
+	await process_frame
+	if app.selected_hero_index != 1:
+		printerr("Controller shoulder did not cycle hero selection")
+		app.queue_free()
+		return false
+	_press_controller_button(app, JOY_BUTTON_A)
+	await process_frame
+	if app.mode != "hero_preview":
+		printerr("Controller confirm did not open hero preview")
+		app.queue_free()
+		return false
+	_press_controller_button(app, JOY_BUTTON_B)
+	await process_frame
+	if app.mode != "character_select":
+		printerr("Controller cancel did not return to character select")
+		app.queue_free()
+		return false
+	_press_controller_button(app, JOY_BUTTON_A)
+	await process_frame
+	_press_controller_button(app, JOY_BUTTON_A)
+	await process_frame
+	await process_frame
+	if app.mode != "stage" or app.stage == null:
+		printerr("Controller confirm did not start Stage 1")
+		app.queue_free()
+		return false
+	_press_controller_button(app, JOY_BUTTON_START)
+	await process_frame
+	if not paused or not app.paused_overlay.visible:
+		printerr("Controller start did not pause Stage 1")
+		app.queue_free()
+		return false
+	_press_controller_button(app, JOY_BUTTON_START)
+	await process_frame
+	if paused or app.paused_overlay.visible:
+		printerr("Controller start did not resume Stage 1")
+		app.queue_free()
+		return false
+	app.queue_free()
+	await process_frame
+	return true
+
+func _press_controller_button(app, button_index: int) -> void:
+	var event := InputEventJoypadButton.new()
+	event.button_index = button_index
+	event.pressed = true
+	app._unhandled_input(event)
+
+func _run_stage1_performance_sample() -> bool:
+	var packed: PackedScene = load("res://scenes/stages/sunset_overpass.tscn")
+	if packed == null:
+		printerr("Could not load Stage 1 scene")
+		return false
+	var stage = packed.instantiate()
+	stage.hero_id = "raya_flint"
+	stage.stage_id = "sunset_overpass"
+	root.add_child(stage)
+	await process_frame
+	await process_frame
+	if stage.player == null or not stage.has_method("set_demo_autoplay"):
+		printerr("Stage 1 did not expose performance sample hooks")
+		stage.queue_free()
+		return false
+	stage.player.max_health = 999
+	stage.player.health = 999
+	stage.set_demo_autoplay(true)
+	var total_ms := 0.0
+	var max_ms := 0.0
+	var previous_tick := Time.get_ticks_usec()
+	for _i in range(PERFORMANCE_SAMPLE_FRAMES):
+		await physics_frame
+		await process_frame
+		var current_tick := Time.get_ticks_usec()
+		var frame_ms := float(current_tick - previous_tick) / 1000.0
+		previous_tick = current_tick
+		total_ms += frame_ms
+		max_ms = maxf(max_ms, frame_ms)
+	var avg_ms := total_ms / float(PERFORMANCE_SAMPLE_FRAMES)
+	var alive: bool = stage.player != null and is_instance_valid(stage.player) and stage.player.health > 0
+	stage.set_demo_autoplay(false)
+	stage.queue_free()
+	await process_frame
+	print("RIFT_ROAD_PERF stage1 frames=%d avg_ms=%.3f max_ms=%.3f budget_ms=%.1f max_budget_ms=%.1f" % [
+		PERFORMANCE_SAMPLE_FRAMES,
+		avg_ms,
+		max_ms,
+		PERFORMANCE_FRAME_BUDGET_MS,
+		PERFORMANCE_MAX_FRAME_MS
+	])
+	if not alive:
+		printerr("Stage 1 performance sample killed the player")
+		return false
+	if avg_ms > PERFORMANCE_FRAME_BUDGET_MS:
+		printerr("Stage 1 average frame sample exceeded budget: %.3f" % avg_ms)
+		return false
+	if max_ms > PERFORMANCE_MAX_FRAME_MS:
+		printerr("Stage 1 maximum frame sample exceeded spike budget: %.3f" % max_ms)
+		return false
+	return true
+
 func _clear_spawned_enemies(stage) -> void:
 	for enemy in stage.enemies:
 		if enemy != null and is_instance_valid(enemy):
 			enemy.queue_free()
 	stage.enemies.clear()
+
+func _any_visible_hero_card(app) -> bool:
+	for card in app.hero_cards:
+		if card != null and is_instance_valid(card) and card.visible:
+			return true
+	return false

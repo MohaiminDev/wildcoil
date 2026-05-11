@@ -1,0 +1,1 @@
+{"avg_ms":1.58277563131313,"budget_ms":33.3,"first_12_sample_ms":[1.466,1.464,1.464,1.548,1.501,1.479,1.466,1.47,1.38888888888889,1.38888888888889,1.38888888888889,1.38888888888889],"first_sample_ms":1.466,"frames":240,"max_budget_ms":120.0,"max_frame_index":139,"max_ms":2.793,"warmup_frames":8,"window_mode":"fullscreen","window_size":"1920x1080"}

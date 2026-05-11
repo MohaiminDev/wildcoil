@@ -111,7 +111,8 @@ func apply_damage(amount: int, source_x: float) -> void:
 
 func _draw() -> void:
 	var color := _boss_color() if hurt_flash <= 0.0 else Color(1.0, 0.86, 0.42)
-	_draw_flat_ellipse(Vector2(0, -2), Vector2(58, 10), Color(0, 0, 0, 0.3))
+	_draw_contact_shadow()
+	_draw_cinematic_afterimage(color)
 	if not _draw_visual_sprite(color):
 		draw_line(Vector2(-18, -35), Vector2(-30, 0), Color(0.06, 0.06, 0.07), 12.0)
 		draw_line(Vector2(18, -35), Vector2(30, 0), Color(0.06, 0.06, 0.07), 12.0)
@@ -126,6 +127,7 @@ func _draw() -> void:
 		_draw_move_telegraph()
 	if stunned_timer > 0.0:
 		draw_circle(Vector2(0, -112), 16.0, Color(0.8, 0.92, 1.0, 0.6))
+	_draw_boss_motion_details()
 
 func _load_visual_sprites() -> void:
 	visual_sprites.clear()
@@ -159,6 +161,55 @@ func _current_visual_sprite_state() -> String:
 	if telegraph_timer > 0.0:
 		return "attack"
 	return "idle"
+
+func _motion_frame(rate: float = 8.0, frames: int = 4) -> int:
+	return int(floor(animation_time * rate)) % maxi(frames, 1)
+
+func _draw_contact_shadow() -> void:
+	var width := 60.0
+	if active_move == "charge" and telegraph_timer > 0.0:
+		width = 76.0
+	elif stunned_timer > 0.0:
+		width = 68.0
+	_draw_flat_ellipse(Vector2(0, -2), Vector2(width, 10), Color(0, 0, 0, 0.32))
+
+func _draw_cinematic_afterimage(modulate_color: Color) -> void:
+	if telegraph_timer <= 0.0 and charge_velocity == 0.0 and hurt_flash <= 0.0:
+		return
+	var texture: Texture2D = visual_sprites.get(_current_visual_sprite_state(), visual_sprites.get("idle", null))
+	if texture == null:
+		return
+	var target_size := Vector2(292, 292)
+	var facing := _boss_facing()
+	var tint := Color(modulate_color.r, modulate_color.g, modulate_color.b, 0.18)
+	if active_move == "charge":
+		tint = Color(1.0, 0.34, 0.12, 0.20)
+	elif hurt_flash > 0.0:
+		tint = Color(1.0, 0.92, 0.56, 0.22)
+	for i in range(3):
+		var offset := -facing * float(i + 1) * (18.0 if active_move == "charge" else 10.0)
+		var draw_pos := Vector2(-target_size.x * 0.5 + offset, -target_size.y + 14 + sin(animation_time * 4.8) * 1.2)
+		var fade := 1.0 - float(i) * 0.28
+		draw_set_transform(Vector2.ZERO, 0.0, Vector2(facing, 1.0))
+		draw_texture_rect(texture, Rect2(draw_pos, target_size), false, Color(tint.r, tint.g, tint.b, tint.a * fade))
+		draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+
+func _draw_boss_motion_details() -> void:
+	var frame := _motion_frame(9.0, 4)
+	if telegraph_timer > 0.0:
+		var warning := Color(1.0, 0.38, 0.12, 0.22 + sin(animation_time * 18.0) * 0.08)
+		draw_arc(Vector2(0, -70), 94.0 + float(frame) * 5.0, -0.15, PI + 0.2, 28, warning, 7.0)
+		draw_line(Vector2(-78, -20), Vector2(78, -24), Color(1.0, 0.68, 0.18, 0.30), 4.0)
+	if phase_two:
+		draw_arc(Vector2(0, -74), 118.0, 0.0, TAU, 36, Color(1.0, 0.24, 0.10, 0.18), 5.0)
+	if stunned_timer > 0.0:
+		for i in range(3):
+			draw_circle(Vector2(-26.0 + float(i) * 26.0, -128.0 - float(frame)), 4.0, Color(0.72, 0.92, 1.0, 0.65))
+
+func _boss_facing() -> float:
+	if target != null and target.position.x > position.x:
+		return 1.0
+	return -1.0
 
 func _boss_color() -> Color:
 	match palette:
