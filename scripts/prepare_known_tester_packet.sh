@@ -53,6 +53,8 @@ mkdir -p "$LOG_DIR" "$DOCS_DIR" "$EVIDENCE_DIR"
 
 run_logged check bash "$ROOT_DIR/scripts/check.sh"
 run_logged package bash "$ROOT_DIR/scripts/package_macos.sh"
+BUILD_COMMIT="$(git -C "$ROOT_DIR" rev-parse --short HEAD 2>/dev/null || printf 'unknown')"
+PACKAGE_SHA256="$(shasum -a 256 "$PACKAGE_PATH" | awk '{print $1}')"
 signing_status="ok"
 if ! run_logged_allow_failure signing_preflight bash "$ROOT_DIR/scripts/check_macos_signing_env.sh"; then
   signing_status="blocked"
@@ -86,6 +88,8 @@ copy_if_exists "$ROOT_DIR/docs/playtest-captures/performance-host-latest" "$EVID
 {
   printf '# Rift Road Known-Tester Packet\n\n'
   printf -- '- Package: `Rift Road.zip`\n'
+  printf -- '- Build commit: `%s`\n' "$BUILD_COMMIT"
+  printf -- '- Package SHA256: `%s`\n' "$PACKAGE_SHA256"
   printf -- '- Packet status: `%s`\n' "$packet_status"
   printf -- '- Signing preflight: `%s`\n' "$signing_status"
   printf -- '- Build source: `%s`\n' "$ROOT_DIR"

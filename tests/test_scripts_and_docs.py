@@ -480,8 +480,12 @@ def test_known_tester_packet_script_collects_internal_build_evidence(repo_root):
     assert "exported-app-performance-latest" in script
     assert "exported-app-performance-fullscreen-latest" in script
     assert "performance-host-latest" in script
+    assert "git -C \"$ROOT_DIR\" rev-parse --short HEAD" in script
+    assert "shasum -a 256 \"$PACKAGE_PATH\"" in script
     assert "printf '-" not in script
     assert "printf -- '- Package: `Rift Road.zip`\\n'" in script
+    assert "printf -- '- Build commit: `%s`\\n' \"$BUILD_COMMIT\"" in script
+    assert "printf -- '- Package SHA256: `%s`\\n' \"$PACKAGE_SHA256\"" in script
     assert "printf -- '- `logs/check.log`\\n'" in script
     assert "printf -- '- `logs/exported_app_keyboard_fallback.log`\\n'" in script
     assert "printf -- '- `evidence/keyboard-fallback-latest/`\\n'" in script

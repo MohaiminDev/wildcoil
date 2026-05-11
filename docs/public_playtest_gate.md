@@ -28,7 +28,7 @@ Run and record these before every external-style session:
 
 - [ ] `bash scripts/check.sh` passes.
 - [ ] `bash scripts/package_macos.sh` regenerates `build/macos/Rift Road.zip`.
-- [ ] `bash scripts/prepare_known_tester_packet.sh` creates `build/known-tester-packet/latest/manifest.md` when running supervised known-tester sessions from the internal-only package.
+- [ ] `bash scripts/prepare_known_tester_packet.sh` creates `build/known-tester-packet/latest/manifest.md` with the build commit and package SHA-256 when running supervised known-tester sessions from the internal-only package.
 - [ ] `bash scripts/audit_macos_package.sh` result is recorded, including any `internal-only` warnings.
 - [ ] `bash scripts/smoke_exported_macos_app.sh` captures title, hero-select, Stage 1 gameplay, post-intro combat, Stage Clear, Game Over/retry, and post-retry gameplay viewports from the launched exported app.
 - [ ] The latest `stage1_performance_sample` result is recorded.

@@ -44,7 +44,7 @@ The visual target is the approved north-star direction: modern stylized arcade r
 - Exported-app smoke: `bash scripts/smoke_exported_macos_app.sh` extracts `build/macos/Rift Road.zip`, launches the `.app` with `--rift-road-smoke-stage1` and `--rift-road-smoke-capture-dir=...`, captures title, hero-select, opening story, Stage 1 gameplay, post-intro combat, pickup clarity, road-collapse, Stage Clear, Game Over/retry, and post-retry gameplay viewport screenshots from the running exported app, and reports `RIFT_ROAD_EXPORTED_APP_SMOKE ok`.
 - Exported-app performance: `bash scripts/sample_exported_app_performance.sh` launches the packaged `.app`, records `docs/playtest-captures/exported-app-performance-latest/stage1-exported-performance.json`, and reports `RIFT_ROAD_EXPORTED_PERF stage1` on local Apple Silicon Mac A (`arm64`, `Apple M1`, `iMac21,2`) with latest local 1280x720 windowed steady-state result `avg_ms=7.869`, `max_ms=9.091` after 8 startup/render warmup frames. A local 1920x1080 windowed run records `avg_ms=3.199`, `max_ms=6.652` in `docs/playtest-captures/exported-app-performance-windowed-1080p-latest/stage1-exported-performance.json`, and a local fullscreen run records `avg_ms=1.583`, `max_ms=2.793` in `docs/playtest-captures/exported-app-performance-fullscreen-latest/stage1-exported-performance.json`.
 - Release-candidate gate: `bash scripts/check_release_candidate.sh` combines checks, package, audit, exported-app smoke, exported-app keyboard fallback smoke, and performance sample, then reports `RIFT_ROAD_RELEASE_GATE blocked` until package and player-evidence gates are resolved.
-- Known-tester packet: `bash scripts/prepare_known_tester_packet.sh` creates `build/known-tester-packet/latest/` with the current internal-only zip, manifest, validation logs, package audit, smoke captures, keyboard fallback evidence, performance JSON, host profile, and playtest docs for supervised known-tester sessions.
+- Known-tester packet: `bash scripts/prepare_known_tester_packet.sh` creates `build/known-tester-packet/latest/` with the current internal-only zip, manifest, build commit, package SHA-256, validation logs, package audit, smoke captures, keyboard fallback evidence, performance JSON, host profile, and playtest docs for supervised known-tester sessions.
 - Playtest evidence gate: `bash scripts/check_playtest_evidence.sh` reads `docs/playtest_log.md` and currently reports `RIFT_ROAD_PLAYTEST_EVIDENCE blocked` because no external session rows have been recorded.
 - 2026-05-11 spec/story realignment: [`docs/game_spec.md`](/Users/himu/Desktop/career/personal_projects/wildcoil/docs/game_spec.md) and [`docs/game-story.md`](/Users/himu/Desktop/career/personal_projects/wildcoil/docs/game-story.md) now make the first success condition feel-focused, not market-demand-focused: the Stage 1 slice must feel good, look alive, and be satisfying to replay on an M1 iMac before public-playtest or marketability claims. Current missing spec-critical beats include physical controller/second-machine validation and external playtest evidence.
 - Performance sample: `stage1_performance_sample` reports `RIFT_ROAD_PERF stage1` with latest local result `avg_ms=16.726`, `max_ms=40.161`.
@@ -112,6 +112,17 @@ The visual target is the approved north-star direction: modern stylized arcade r
 - Dependencies: [RR-PROD-15]
 
 ## DONE
+
+### [RR-PROD-54] Fingerprint known-tester packet artifacts
+- Outcome: The known-tester packet manifest now records the git build commit and SHA-256 of `Rift Road.zip`, tying future manual controller/playtest notes to an exact package artifact.
+- Validation:
+  - [x] Added a failing regression requiring `scripts/prepare_known_tester_packet.sh` to collect `git -C "$ROOT_DIR" rev-parse --short HEAD`, hash `Rift Road.zip` with `shasum -a 256`, and write `Build commit` plus `Package SHA256` lines into `manifest.md`.
+  - [x] Updated `scripts/prepare_known_tester_packet.sh` to compute those values after rebuilding the package and before writing the manifest.
+  - [x] Updated public playtest, macOS distribution, market-readiness, and tracker docs with the manifest fingerprint expectation.
+- Progress:
+  - 2026-05-11: Added artifact fingerprinting to make supervised tester evidence traceable to the exact package under test.
+- Dependencies: [RR-PROD-27]
+- Completed: 2026-05-11
 
 ### [RR-PROD-53] Harden controller evidence metadata gate
 - Outcome: The controller evidence gate now rejects marked controller or keyboard fallback sessions when required build, device, connection, evidence-capture, or blocker metadata is missing or still `TBD`, while still accepting complete non-placeholder evidence rows.
