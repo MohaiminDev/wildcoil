@@ -3,6 +3,9 @@ class_name AudioManager
 
 var muted := false
 var music_player: AudioStreamPlayer
+var focus_suspended := false
+var focus_suspend_count := 0
+var focus_resume_count := 0
 
 func play_hit() -> void:
 	_play_tone(260.0, 0.045, 0.11)
@@ -43,6 +46,20 @@ func play_stage_music() -> void:
 	music_player.stream = _make_loop_stream(82.0, 0.32, 0.035)
 	add_child(music_player)
 	music_player.play()
+
+func suspend_for_focus_loss() -> void:
+	focus_suspended = true
+	focus_suspend_count += 1
+	if music_player != null:
+		music_player.stream_paused = true
+
+func resume_after_focus_return() -> void:
+	focus_resume_count += 1
+	if music_player != null:
+		music_player.stream_paused = false
+		if not music_player.playing:
+			music_player.play()
+	focus_suspended = false
 
 func _play_tone(frequency: float, duration: float, volume: float) -> void:
 	if muted or _audio_disabled_for_headless():

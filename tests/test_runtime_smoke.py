@@ -164,7 +164,7 @@ def test_stage_one_focus_loss_pauses_and_resumes(project_root, godot_runner):
     )
 
     assert result.returncode == 0, result.stderr + result.stdout
-    assert "RIFT_ROAD_FOCUS_RESUME focus_pause=true overlay=true resume=true" in result.stdout
+    assert "RIFT_ROAD_FOCUS_RESUME focus_pause=true overlay=true audio=true resume=true" in result.stdout
     assert "RIFT_ROAD_RUNTIME_OK stage1_focus_resume" in result.stdout
 
 

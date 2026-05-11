@@ -901,11 +901,26 @@ func _handle_focus_lost() -> void:
 	if mode != "stage" or get_tree().paused:
 		return
 	focus_pause_active = true
+	_suspend_stage_audio_for_focus_loss()
 	_set_pause_state(true, "PAUSED\nWindow focus lost\nEsc / Start to resume")
 
 func _handle_focus_returned() -> void:
-	if mode == "stage" and focus_pause_active and pause_text_label != null:
-		pause_text_label.text = "PAUSED\nEsc / Start to resume"
+	if mode == "stage" and focus_pause_active:
+		_resume_stage_audio_after_focus_return()
+		if pause_text_label != null:
+			pause_text_label.text = "PAUSED\nEsc / Start to resume"
+
+func _suspend_stage_audio_for_focus_loss() -> void:
+	if stage == null or not is_instance_valid(stage) or stage.audio_manager == null:
+		return
+	if stage.audio_manager.has_method("suspend_for_focus_loss"):
+		stage.audio_manager.suspend_for_focus_loss()
+
+func _resume_stage_audio_after_focus_return() -> void:
+	if stage == null or not is_instance_valid(stage) or stage.audio_manager == null:
+		return
+	if stage.audio_manager.has_method("resume_after_focus_return"):
+		stage.audio_manager.resume_after_focus_return()
 
 func _clear_stage() -> void:
 	get_tree().paused = false

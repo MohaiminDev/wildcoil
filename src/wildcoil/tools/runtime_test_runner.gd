@@ -633,18 +633,21 @@ func _run_stage1_focus_resume() -> bool:
 	var focus_pause: bool = paused
 	var overlay_visible: bool = app.pause_layer != null and app.pause_layer.visible and app.paused_overlay != null and app.paused_overlay.visible and app.title_layer != null and not app.title_layer.visible
 	var focus_message: bool = app.pause_text_label != null and app.pause_text_label.text.contains("Window focus lost")
+	var audio_suspended: bool = app.stage.audio_manager != null and app.stage.audio_manager.focus_suspended and app.stage.audio_manager.focus_suspend_count > 0
 	app._handle_focus_returned()
 	await process_frame
 	var returned_message: bool = app.pause_text_label != null and app.pause_text_label.text == "PAUSED\nEsc / Start to resume"
+	var audio_resumed: bool = app.stage.audio_manager != null and not app.stage.audio_manager.focus_suspended and app.stage.audio_manager.focus_resume_count > 0
 	_press_keyboard_menu_key(app, KEY_ESCAPE)
 	await process_frame
 	var resume_ok: bool = not paused and app.pause_layer != null and not app.pause_layer.visible and app.paused_overlay != null and not app.paused_overlay.visible and app.title_layer != null and not app.title_layer.visible and app.mode == "stage"
-	print("RIFT_ROAD_FOCUS_RESUME focus_pause=%s overlay=%s resume=%s" % [
+	print("RIFT_ROAD_FOCUS_RESUME focus_pause=%s overlay=%s audio=%s resume=%s" % [
 		str(focus_pause and focus_message),
 		str(overlay_visible),
+		str(audio_suspended and audio_resumed),
 		str(resume_ok and returned_message)
 	])
-	var ok := focus_pause and overlay_visible and focus_message and returned_message and resume_ok
+	var ok := focus_pause and overlay_visible and focus_message and audio_suspended and audio_resumed and returned_message and resume_ok
 	if not ok:
 		printerr("Stage 1 focus-loss pause/resume did not recover cleanly")
 	paused = false
