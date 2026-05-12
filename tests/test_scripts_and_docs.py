@@ -489,6 +489,47 @@ def test_focus_audio_evidence_collector_scaffolds_manual_audible_session(
     assert "RIFT_ROAD_FOCUS_AUDIO_EVIDENCE ok" in check_result.stdout
 
 
+def test_focus_audio_evidence_gate_rejects_build_metadata_without_package_sha(
+    repo_root, tmp_path
+):
+    script_path = repo_root / "scripts" / "check_focus_audio_evidence.sh"
+    fake_doc = tmp_path / "focus_audio_validation.md"
+    evidence_path = tmp_path / "focus-audio-evidence.md"
+    evidence_path.write_text("manual audible focus/audio evidence\n")
+    fake_doc.write_text(
+        f"""
+# Focus Audio Validation
+
+### Focus Audio Session: `Manual focus audio`
+
+RIFT_ROAD_FOCUS_AUDIO_SESSION ok
+
+- Build: `759cb78`
+- Output device: `Built-in speakers`
+- Evidence capture: `{evidence_path}`
+- Focus pause overlay: `pass`
+- Audio before focus loss: `pass`
+- Audio quiet during focus pause: `pass`
+- Audio after resume: `pass`
+- Resume control: `pass`
+- Blockers: `none`
+""".strip()
+    )
+
+    result = subprocess.run(
+        ["bash", str(script_path), str(fake_doc)],
+        cwd=repo_root,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert result.returncode == 1
+    output = result.stdout + result.stderr
+    assert "RIFT_ROAD_FOCUS_AUDIO_EVIDENCE blocked" in output
+    assert "Build missing package_sha256" in output
+
+
 def test_exported_app_smoke_script_captures_stage_clear_viewport(repo_root):
     script = (repo_root / "scripts" / "smoke_exported_macos_app.sh").read_text()
     app_root = (repo_root / "src" / "wildcoil" / "scripts" / "app_root.gd").read_text()

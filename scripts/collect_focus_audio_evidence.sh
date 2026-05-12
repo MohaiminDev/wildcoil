@@ -44,7 +44,7 @@ Options:
   --output-device VALUE                      Required; real output device used.
   --blockers VALUE                           Required; use "none" only when true.
   --evidence-dir PATH                        Optional; default docs/playtest-captures/focus-audio.
-  --build VALUE                              Optional; defaults to current commit and package SHA-256.
+  --build VALUE                              Optional; defaults to current commit and package SHA-256. Custom values must include package_sha256=<sha> to pass the gate.
   --session-label VALUE                      Optional label used in the generated heading.
   --confirm-focus-pause-overlay              Confirm focus loss showed the pause overlay.
   --confirm-audio-before-focus-loss          Confirm audio was audible before focus loss.

@@ -55,6 +55,9 @@ def metadata_values_and_issues(block):
     blockers_value = values.get("Blockers", "").strip().lower()
     if blockers_value and blockers_value not in {"none", "no blockers"}:
         issues.append("Blockers must be `none` or `no blockers` for an ok session")
+    build_value = values.get("Build", "").strip()
+    if build_value and build_value.upper() != "TBD" and "package_sha256=" not in build_value:
+        issues.append("Build missing package_sha256")
     return values, issues
 
 
