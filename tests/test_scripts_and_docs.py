@@ -385,6 +385,7 @@ def test_release_candidate_gate_combines_automated_and_manual_blockers(repo_root
     script = (repo_root / "scripts" / "check_release_candidate.sh").read_text()
     docs = (repo_root / "docs" / "macos_build_and_distribution.md").read_text()
     audit = (repo_root / "docs" / "market-readiness-audit-2026-05-10.md").read_text()
+    public_gate = (repo_root / "docs" / "public_playtest_gate.md").read_text()
 
     assert "scripts/check.sh" in script
     assert "scripts/package_macos.sh" in script
@@ -406,9 +407,24 @@ def test_release_candidate_gate_combines_automated_and_manual_blockers(repo_root
     assert "RIFT_ROAD_EXPORTED_FOCUS_RESUME ok" in script
     assert "Public playtest or release-candidate proof" in script
     assert "Player love / commercial viability" in script
+    assert "COMPLETION_AUDIT=\"$LOG_DIR/completion-audit.md\"" in script
+    assert "write_completion_audit" in script
+    assert "Objective Restated" in script
+    assert "Prompt-To-Artifact Checklist" in script
+    assert "Playable Stage 1 vertical slice" in script
+    assert "Production-deployable macOS build path" in script
+    assert "Real launched-game screenshot and playtest evidence" in script
+    assert "Candid market-readiness assessment" in script
+    assert "logs/exported_app_smoke.log" in script
+    assert "logs/playtest_evidence.log" in script
+    assert "logs/controller_evidence.log" in script
+    assert "logs/second_machine_evidence.log" in script
+    assert "completion-audit.md" in script
     assert "RIFT_ROAD_RELEASE_GATE blocked" in script
     assert "scripts/check_release_candidate.sh" in docs
+    assert "completion-audit.md" in docs
     assert "scripts/check_release_candidate.sh" in audit
+    assert "completion-audit.md" in public_gate
 
 
 def test_macos_signing_preflight_defines_non_secret_release_inputs(repo_root):

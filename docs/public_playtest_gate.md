@@ -10,6 +10,7 @@ Use this packet before asking anyone outside the project to judge whether `Rift 
 - Validation command: `bash scripts/check.sh`
 - Package audit command: `bash scripts/audit_macos_package.sh`
 - Release signing/notarization command: `bash scripts/sign_notarize_macos.sh`
+- Release completion audit artifact: `build/release-gate/latest/completion-audit.md`
 - Exported-app focus/resume smoke command: `bash scripts/smoke_exported_focus_resume.sh`
 - Known-tester packet command: `bash scripts/prepare_known_tester_packet.sh`
 - Controller validation checklist: `docs/controller_validation.md`
@@ -34,6 +35,7 @@ Run and record these before every external-style session:
 
 - [ ] `bash scripts/check.sh` passes.
 - [ ] `bash scripts/package_macos.sh` regenerates `build/macos/Rift Road.zip`.
+- [ ] If checking release-candidate status, `bash scripts/check_release_candidate.sh` writes `build/release-gate/latest/completion-audit.md` with a prompt-to-artifact checklist for the active marketability objective.
 - [ ] For any external-distribution candidate, `bash scripts/sign_notarize_macos.sh` produces `build/macos/Rift Road-signed-notarized.zip` and reports `RIFT_ROAD_RELEASE_SIGNING ok`; if it reports `RIFT_ROAD_RELEASE_SIGNING blocked`, keep the session internal-only.
 - [ ] `bash scripts/prepare_known_tester_packet.sh` creates `build/known-tester-packet/latest/manifest.md` with the build commit, package SHA-256, and manual evidence gate statuses/logs when running supervised known-tester sessions from the internal-only package.
 - [ ] `bash scripts/audit_macos_package.sh` result is recorded, including any `internal-only` warnings.
