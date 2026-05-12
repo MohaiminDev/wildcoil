@@ -10,6 +10,7 @@ def test_run_and_check_scripts_exist(repo_root):
         "scripts/smoke_exported_macos_app.sh",
         "scripts/check_release_candidate.sh",
         "scripts/check_macos_signing_env.sh",
+        "scripts/sign_notarize_macos.sh",
         "scripts/sample_exported_app_performance.sh",
         "scripts/prepare_known_tester_packet.sh",
         "scripts/check_playtest_evidence.sh",
@@ -34,6 +35,8 @@ def test_macos_package_audit_surfaces_release_gates(repo_root):
     assert "stapler" in script
     assert "notarization" in script
     assert "internal-only" in script
+    assert "RIFT_ROAD_AUDIT_ARTIFACT_ONLY" in script
+    assert "skipping Godot export preset signing/notarization checks" in script
     assert "scripts/audit_macos_package.sh" in docs
     assert "internal-only" in docs
 
@@ -378,6 +381,62 @@ def test_macos_signing_preflight_defines_non_secret_release_inputs(repo_root):
     assert "RIFT_ROAD_DEVELOPER_ID_APPLICATION" in example_env
     assert "RIFT_ROAD_NOTARY_KEYCHAIN_PROFILE" in example_env
     assert "Do not commit real values" in example_env
+
+
+def test_macos_sign_notarize_script_defines_release_artifact_path(repo_root):
+    script_path = repo_root / "scripts" / "sign_notarize_macos.sh"
+    script = script_path.read_text()
+    docs = (repo_root / "docs" / "macos_build_and_distribution.md").read_text()
+    public_gate = (repo_root / "docs" / "public_playtest_gate.md").read_text()
+    example_env = (repo_root / "docs" / "macos_release_inputs.example.env").read_text()
+    audit = (repo_root / "docs" / "market-readiness-audit-2026-05-10.md").read_text()
+
+    assert "RIFT_ROAD_APPLE_TEAM_ID" in script
+    assert "RIFT_ROAD_DEVELOPER_ID_APPLICATION" in script
+    assert "RIFT_ROAD_NOTARY_KEYCHAIN_PROFILE" in script
+    assert "codesign --force --deep --options runtime --timestamp --sign" in script
+    assert "xcrun notarytool submit" in script
+    assert "--keychain-profile" in script
+    assert "--team-id" in script
+    assert "--wait" in script
+    assert "stapler staple" in script
+    assert "stapler validate" in script
+    assert "spctl -a -vv --type execute" in script
+    assert "RIFT_ROAD_RELEASE_SIGNING blocked" in script
+    assert "RIFT_ROAD_RELEASE_SIGNING ok" in script
+    assert "Rift Road-signed-notarized.zip" in script
+    assert "scripts/audit_macos_package.sh" in script
+    assert "RIFT_ROAD_AUDIT_ARTIFACT_ONLY=1" in script
+    assert "scripts/sign_notarize_macos.sh" in docs
+    assert "scripts/sign_notarize_macos.sh" in public_gate
+    assert "scripts/sign_notarize_macos.sh" in example_env
+    assert "scripts/sign_notarize_macos.sh" in audit
+
+    help_result = subprocess.run(
+        ["bash", str(script_path), "--help"],
+        cwd=repo_root,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert help_result.returncode == 0
+    assert "RIFT_ROAD_DEVELOPER_ID_APPLICATION" in help_result.stdout
+
+    blocked_result = subprocess.run(
+        [
+            "bash",
+            "-c",
+            "unset RIFT_ROAD_APPLE_TEAM_ID RIFT_ROAD_DEVELOPER_ID_APPLICATION RIFT_ROAD_NOTARY_KEYCHAIN_PROFILE; bash scripts/sign_notarize_macos.sh",
+        ],
+        cwd=repo_root,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert blocked_result.returncode == 1
+    blocked_output = blocked_result.stdout + blocked_result.stderr
+    assert "RIFT_ROAD_RELEASE_SIGNING blocked" in blocked_output
+    assert "RIFT_ROAD_APPLE_TEAM_ID" in blocked_output
 
 
 def test_exported_app_performance_sampler_records_rendered_metrics(repo_root):

@@ -4,9 +4,10 @@
 
 - Package: `build/macos/Rift Road.zip`
 - Engine: Godot 4.6.1
-- Validation: `bash scripts/check.sh` passed with 100 tests and Godot runtime smoke; focus-loss smoke now includes audio-manager suspend/resume state, exported-app focus/resume artifact generation, and controller hot-plug status is covered in automation, but audible exported-app focus-loss behavior and physical controller devices still need manual confirmation.
+- Validation: `bash scripts/check.sh` passed with 101 tests and Godot runtime smoke; focus-loss smoke now includes audio-manager suspend/resume state, exported-app focus/resume artifact generation, release signing-script coverage, and controller hot-plug status is covered in automation, but audible exported-app focus-loss behavior and physical controller devices still need manual confirmation.
 - Export validation: `bash scripts/package_macos.sh` regenerated `build/macos/Rift Road.zip`; `bash scripts/smoke_exported_macos_app.sh` refreshed the launched-app title, hero-select, opening story, Stage 1 gameplay, post-intro combat, pickup clarity, road-collapse, Brask intro, Stage Clear score/rank summary, Game Over/retry, and post-retry gameplay screenshots.
 - Signing preflight: `bash scripts/check_macos_signing_env.sh` reports `RIFT_ROAD_SIGNING_PREFLIGHT blocked` until real Developer ID/notary configuration exists.
+- Release signing path: `bash scripts/sign_notarize_macos.sh` can create `build/macos/Rift Road-signed-notarized.zip` only after real Developer ID, notary profile, and local package inputs exist; it currently reports `RIFT_ROAD_RELEASE_SIGNING blocked` without those inputs.
 - Package audit: `bash scripts/audit_macos_package.sh` reports `RIFT_ROAD_PACKAGE_AUDIT internal-only`.
 - Second-machine evidence: `bash scripts/check_second_machine_evidence.sh` currently reports `RIFT_ROAD_SECOND_MACHINE_EVIDENCE blocked` because no clean-machine proof files have been recorded. `bash scripts/collect_second_machine_evidence.sh` is available for known testers to generate those files on the actual second Mac.
 - Controller evidence: `bash scripts/check_controller_evidence.sh` currently reports `RIFT_ROAD_CONTROLLER_EVIDENCE blocked` because no physical controller-family sessions have been recorded. Marked controller or keyboard fallback rows must include complete metadata and point `Evidence capture` at a real non-empty file.
@@ -72,6 +73,7 @@
 - The exported-app smoke path now restarts Stage 1 after the Game Over presentation and captures post-retry gameplay from the running exported app.
 - The macOS zip can be produced locally.
 - The package audit now exposes release blockers instead of allowing the local zip to be mistaken for production-ready distribution.
+- The release signing script now defines the guarded sign, notarize, staple, Gatekeeper-check, and artifact-audit path for a real Developer ID build, while staying blocked without local Apple credentials.
 - The exported-app smoke script can repeatedly extract the zip, launch the app directly into the Stage 1 smoke mode, and capture title, hero-select, opening story, Stage 1 gameplay, post-intro combat, pickup clarity, road-collapse, Stage Clear, Game Over/retry, and post-retry gameplay viewports from the running exported app.
 - Stage 1 now has a repeatable headless performance regression sample.
 - Stage 1 now has a repeatable launched-app performance sample.
@@ -90,7 +92,8 @@
 - The game is not yet proven commercially marketable. There is no external tester evidence that players love it or would buy it.
 - The public playtest gate exists, but no outside sessions have been recorded against it.
 - The exported-app manual input proof and smoke script confirm launch/keyflow and a survivable opening state, but they are still not substitutes for a recorded human playtest session.
-- Signing, notarization, Gatekeeper acceptance, stapled ticket validation, physical controller-device testing, manual exported-app keyboard fallback, second Apple Silicon Mac coverage, and external tester distribution policy remain unresolved.
+- A successful signed/notarized release artifact has not been produced yet.
+- Signing credentials, notarization, Gatekeeper acceptance, stapled ticket validation, physical controller-device testing, manual exported-app keyboard fallback, second Apple Silicon Mac coverage, and external tester distribution policy remain unresolved.
 
 ## Next Gate
 

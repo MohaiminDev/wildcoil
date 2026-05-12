@@ -4,6 +4,7 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 ZIP_PATH="${1:-${ROOT_DIR}/build/macos/Rift Road.zip}"
 EXPORT_PRESET="${ROOT_DIR}/src/wildcoil/export_presets.cfg"
+ARTIFACT_ONLY="${RIFT_ROAD_AUDIT_ARTIFACT_ONLY:-0}"
 
 status="release-candidate"
 
@@ -63,7 +64,9 @@ else
   warn "codesign has no Developer ID authority; package is internal-only"
 fi
 
-if [[ -f "${EXPORT_PRESET}" ]]; then
+if [[ "${ARTIFACT_ONLY}" == "1" ]]; then
+  printf 'audit: artifact-only mode; skipping Godot export preset signing/notarization checks\n'
+elif [[ -f "${EXPORT_PRESET}" ]]; then
   if grep -q 'codesign/apple_team_id=""' "${EXPORT_PRESET}"; then
     warn "Apple Team ID is empty in export preset"
   fi

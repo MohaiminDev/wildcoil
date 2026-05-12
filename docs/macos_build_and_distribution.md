@@ -109,6 +109,7 @@ As of 2026-04-27, the Rift Road prototype uses Godot 4.x under `src/wildcoil`.
 - Run game: `bash scripts/run_game.sh`
 - Package macOS build: `bash scripts/package_macos.sh`
 - Check signing/notarization preflight: `bash scripts/check_macos_signing_env.sh`
+- Sign, notarize, staple, and audit a release artifact: `bash scripts/sign_notarize_macos.sh`
 - Audit macOS package status: `bash scripts/audit_macos_package.sh`
 - Smoke launched exported app: `bash scripts/smoke_exported_macos_app.sh`
 - Smoke launched exported app keyboard fallback: `bash scripts/smoke_exported_keyboard_fallback.sh`
@@ -139,6 +140,8 @@ The expected current result is `RIFT_ROAD_PACKAGE_AUDIT internal-only`: the buil
 Also on 2026-05-10, `bash scripts/check_macos_signing_env.sh` was added to check non-secret signing prerequisites before external release work: `RIFT_ROAD_APPLE_TEAM_ID`, `RIFT_ROAD_DEVELOPER_ID_APPLICATION`, `RIFT_ROAD_NOTARY_KEYCHAIN_PROFILE`, `security find-identity`, `xcrun notarytool`, and the Godot export-preset signing/notarization fields. The expected current result is `RIFT_ROAD_SIGNING_PREFLIGHT blocked` until real Developer ID and notary configuration exists.
 
 Also on 2026-05-11, `docs/macos_release_inputs.example.env` was added as a redacted local template for those signing preflight inputs. Do not commit real values; copy it to an ignored `.env` or set the variables in the shell before running `bash scripts/check_macos_signing_env.sh`.
+
+Also on 2026-05-12, `bash scripts/sign_notarize_macos.sh` was added as the guarded release-artifact path. With real local Developer ID/notary inputs, it extracts `build/macos/Rift Road.zip`, signs the `.app` with the hardened runtime, submits the app zip through `xcrun notarytool`, staples and validates the ticket, checks Gatekeeper with `spctl`, writes `build/macos/Rift Road-signed-notarized.zip`, and audits that signed artifact through `scripts/audit_macos_package.sh` with `RIFT_ROAD_AUDIT_ARTIFACT_ONLY=1`. The expected current result is `RIFT_ROAD_RELEASE_SIGNING blocked` until real Apple signing credentials, keychain identity, notary profile, and a local package are available. A successful script run is still not enough for public distribution unless the package audit, second-machine evidence, controller evidence, and playtest gates pass.
 
 Also on 2026-05-10, `bash scripts/smoke_exported_macos_app.sh` was added as a repeatable local proof that the exported zip can be extracted and launched through LaunchServices with `open -n`. It passes `--rift-road-smoke-capture-dir=...` so the running exported app writes title, hero-select, opening story, Stage 1 gameplay, post-intro combat, pickup clarity, road-collapse, Brask intro, Stage Clear, Game Over/retry, and post-retry gameplay viewport captures even when macOS opens the window in a Space that `screencapture` cannot access. The expected success marker is `RIFT_ROAD_EXPORTED_APP_SMOKE ok`. This is launched-app evidence only; it does not replace human playtest, second-machine install, signing, notarization, or Gatekeeper acceptance.
 
