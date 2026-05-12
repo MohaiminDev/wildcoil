@@ -1,14 +1,14 @@
 {
-	"attack": true,
-	"automated": true,
-	"cancel_back": true,
-	"capture": "/Users/himu/Desktop/career/personal_projects/wildcoil/docs/playtest-captures/keyboard-fallback-latest/stage1-exported-app-keyboard-fallback.png",
-	"dash": true,
-	"hero_select": true,
-	"jump": true,
-	"note": "Automated exported-app keyboard fallback smoke; not manual tester evidence.",
-	"pause": true,
-	"special": true,
-	"stage1_movement": true,
-	"title": true
+  "attack": true,
+  "automated": true,
+  "cancel_back": true,
+  "capture": "/Users/himu/Desktop/career/personal_projects/wildcoil/docs/playtest-captures/keyboard-fallback-latest/stage1-exported-app-keyboard-fallback.png",
+  "dash": true,
+  "hero_select": true,
+  "jump": true,
+  "note": "Automated exported-app keyboard fallback smoke; not manual tester evidence.",
+  "pause": true,
+  "special": true,
+  "stage1_movement": true,
+  "title": true
 }

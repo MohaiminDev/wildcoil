@@ -1,3 +1,4 @@
+import json
 import os
 import subprocess
 import zipfile
@@ -1157,6 +1158,33 @@ def test_performance_docs_record_local_apple_silicon_host(repo_root):
     assert "not second-machine proof" in perf_docs
     assert "local Apple Silicon Mac A" in audit
     assert "local Apple Silicon Mac A" in handoff
+
+
+def test_exported_app_performance_docs_match_latest_json(repo_root):
+    perf_json_path = (
+        repo_root
+        / "docs"
+        / "playtest-captures"
+        / "exported-app-performance-latest"
+        / "stage1-exported-performance.json"
+    )
+    perf_data = json.loads(perf_json_path.read_text())
+    avg_ms = f"{perf_data['avg_ms']:.3f}"
+    max_ms = f"{perf_data['max_ms']:.3f}"
+    perf_docs = (repo_root / "docs" / "performance_budget.md").read_text()
+    audit = (repo_root / "docs" / "market-readiness-audit-2026-05-10.md").read_text()
+    handoff = (
+        repo_root
+        / "docs"
+        / "playtest-captures"
+        / "stage1-marketability-handoff-2026-05-10.md"
+    ).read_text()
+    tracker = (repo_root / "to-do.md").read_text()
+
+    for docs_text in [perf_docs, audit, handoff, tracker]:
+        assert f"`avg_ms={avg_ms}`" in docs_text
+        assert f"`max_ms={max_ms}`" in docs_text
+    assert "### [RR-PROD-79] Refresh release-gate evidence snapshot" in tracker
 
 
 def test_known_tester_packet_script_collects_internal_build_evidence(repo_root):
