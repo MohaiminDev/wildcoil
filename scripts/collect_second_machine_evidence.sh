@@ -26,7 +26,8 @@ The collector writes:
 
 It only writes RIFT_ROAD_SECOND_MACHINE_INSTALL ok when the package audit reports
 RIFT_ROAD_PACKAGE_AUDIT release-candidate, Gatekeeper accepts the app, and the
-launched exported-app smoke captures title and gameplay images.
+launched exported-app smoke captures title and gameplay images. The generated
+host profile and install smoke record the package SHA-256 for the exact zip.
 USAGE
 }
 

@@ -2018,6 +2018,41 @@ def test_second_machine_evidence_gate_blocks_without_clean_machine_proof(repo_ro
     assert "second-machine-latest/install-smoke.md" in output
 
 
+def test_second_machine_evidence_gate_rejects_missing_package_sha(
+    repo_root, tmp_path
+):
+    script_path = repo_root / "scripts" / "check_second_machine_evidence.sh"
+    evidence_dir = tmp_path / "second-machine-latest"
+    evidence_dir.mkdir()
+    (evidence_dir / "host-profile.md").write_text(
+        "# Second-Machine Host Profile\n\n"
+        "- Machine label: `Apple Silicon Mac B`\n"
+        "- Architecture: `arm64`\n"
+    )
+    (evidence_dir / "install-smoke.md").write_text(
+        "# Second-Machine Install Smoke\n\n"
+        "- Package source: `build/macos/Rift Road-signed-notarized.zip`\n"
+        "- Package status: `RIFT_ROAD_PACKAGE_AUDIT release-candidate`\n"
+        "- Gatekeeper result: `accepted`\n\n"
+        "RIFT_ROAD_SECOND_MACHINE_INSTALL ok\n"
+    )
+    (evidence_dir / "stage1-second-machine-title.png").write_bytes(b"title")
+    (evidence_dir / "stage1-second-machine-gameplay.png").write_bytes(b"gameplay")
+
+    result = subprocess.run(
+        ["bash", str(script_path), str(evidence_dir)],
+        cwd=repo_root,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert result.returncode == 1
+    output = result.stdout + result.stderr
+    assert "RIFT_ROAD_SECOND_MACHINE_EVIDENCE blocked" in output
+    assert "install smoke does not record Package SHA256" in output
+
+
 def test_second_machine_evidence_gate_accepts_signed_package_source(repo_root, tmp_path):
     script_path = repo_root / "scripts" / "check_second_machine_evidence.sh"
     evidence_dir = tmp_path / "second-machine-latest"
@@ -2030,6 +2065,7 @@ def test_second_machine_evidence_gate_accepts_signed_package_source(repo_root, t
     (evidence_dir / "install-smoke.md").write_text(
         "# Second-Machine Install Smoke\n\n"
         "- Package source: `build/macos/Rift Road-signed-notarized.zip`\n"
+        "- Package SHA256: `signed123`\n"
         "- Package status: `RIFT_ROAD_PACKAGE_AUDIT release-candidate`\n"
         "- Gatekeeper result: `accepted`\n\n"
         "RIFT_ROAD_SECOND_MACHINE_INSTALL ok\n"
