@@ -13,6 +13,7 @@ Use this packet before asking anyone outside the project to judge whether `Rift 
 - Known-tester packet command: `bash scripts/prepare_known_tester_packet.sh`
 - Controller validation checklist: `docs/controller_validation.md`
 - Second-machine validation checklist: `docs/second_machine_validation.md`
+- Second-machine evidence collector: `scripts/collect_second_machine_evidence.sh`
 - Playtest evidence gate command: `bash scripts/check_playtest_evidence.sh`
 - Second-machine evidence gate command: `bash scripts/check_second_machine_evidence.sh`
 - Controller evidence gate command: `bash scripts/check_controller_evidence.sh`

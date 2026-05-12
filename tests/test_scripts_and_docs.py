@@ -14,6 +14,7 @@ def test_run_and_check_scripts_exist(repo_root):
         "scripts/prepare_known_tester_packet.sh",
         "scripts/check_playtest_evidence.sh",
         "scripts/check_second_machine_evidence.sh",
+        "scripts/collect_second_machine_evidence.sh",
         "scripts/check_controller_evidence.sh",
         "scripts/smoke_exported_keyboard_fallback.sh",
         "scripts/smoke_exported_focus_resume.sh",
@@ -622,6 +623,48 @@ def test_second_machine_evidence_gate_blocks_without_clean_machine_proof(repo_ro
     assert "RIFT_ROAD_SECOND_MACHINE_EVIDENCE blocked" in output
     assert "second-machine-latest/host-profile.md" in output
     assert "second-machine-latest/install-smoke.md" in output
+
+
+def test_second_machine_evidence_collector_is_bundled_for_known_testers(repo_root):
+    script_path = repo_root / "scripts" / "collect_second_machine_evidence.sh"
+    script = script_path.read_text()
+    packet_script = (repo_root / "scripts" / "prepare_known_tester_packet.sh").read_text()
+    docs = (repo_root / "docs" / "second_machine_validation.md").read_text()
+    public_gate = (repo_root / "docs" / "public_playtest_gate.md").read_text()
+    handoff = (
+        repo_root
+        / "docs"
+        / "playtest-captures"
+        / "stage1-marketability-handoff-2026-05-10.md"
+    ).read_text()
+
+    assert "RIFT_ROAD_SECOND_MACHINE_LABEL" in script
+    assert "Apple Silicon Mac B" in script
+    assert "scripts/audit_macos_package.sh" in script
+    assert "scripts/smoke_exported_macos_app.sh" in script
+    assert "stage1-second-machine-title.png" in script
+    assert "stage1-second-machine-gameplay.png" in script
+    assert "RIFT_ROAD_SECOND_MACHINE_INSTALL ok" in script
+    assert "RIFT_ROAD_SECOND_MACHINE_COLLECTOR" in script
+    assert "scripts/collect_second_machine_evidence.sh" in packet_script
+    assert "scripts/audit_macos_package.sh" in packet_script
+    assert "scripts/smoke_exported_macos_app.sh" in packet_script
+    assert "Second-machine evidence collector" in packet_script
+    assert "scripts/collect_second_machine_evidence.sh" in docs
+    assert "scripts/collect_second_machine_evidence.sh" in public_gate
+    assert "second-machine evidence collector" in handoff
+
+    result = subprocess.run(
+        ["bash", str(script_path), "--help"],
+        cwd=repo_root,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert result.returncode == 0
+    assert "RIFT_ROAD_SECOND_MACHINE_LABEL" in result.stdout
+    assert "Apple Silicon Mac B" in result.stdout
 
 
 def test_controller_evidence_gate_blocks_without_physical_controller_sessions(repo_root):

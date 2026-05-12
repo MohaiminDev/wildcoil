@@ -17,6 +17,14 @@ Then run:
 bash scripts/check_second_machine_evidence.sh
 ```
 
+On the actual second Mac, generate the expected host/install/capture files with:
+
+```bash
+RIFT_ROAD_SECOND_MACHINE_LABEL="Apple Silicon Mac B" bash scripts/collect_second_machine_evidence.sh
+```
+
+The collector runs `scripts/audit_macos_package.sh` and `scripts/smoke_exported_macos_app.sh`, writes `package-audit.log` and `exported-app-smoke.log` next to the evidence files, and only records `RIFT_ROAD_SECOND_MACHINE_INSTALL ok` when the package is a release-candidate audit, Gatekeeper accepts it, and launched-app title/gameplay captures are present.
+
 ## Required Host Profile
 
 `host-profile.md` must identify the second machine, not the local development Mac:
