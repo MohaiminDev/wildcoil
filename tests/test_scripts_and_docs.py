@@ -1,5 +1,6 @@
 import os
 import subprocess
+import zipfile
 
 
 def test_run_and_check_scripts_exist(repo_root):
@@ -137,6 +138,136 @@ def test_exported_app_smoke_script_captures_launched_viewport(repo_root):
     assert "RIFT_ROAD_EXPORTED_APP_SMOKE ok" in script
     assert "scripts/smoke_exported_macos_app.sh" in docs
     assert "RIFT_ROAD_EXPORTED_APP_SMOKE ok" in handoff
+
+
+def test_exported_app_smoke_scripts_preserve_evidence_on_launch_failure(
+    repo_root, tmp_path
+):
+    macos_docs = (repo_root / "docs" / "macos_build_and_distribution.md").read_text()
+    handoff = (
+        repo_root
+        / "docs"
+        / "playtest-captures"
+        / "stage1-marketability-handoff-2026-05-10.md"
+    ).read_text()
+    audit = (repo_root / "docs" / "market-readiness-audit-2026-05-10.md").read_text()
+    tracker = (repo_root / "to-do.md").read_text()
+    fake_package = tmp_path / "Rift Road.zip"
+    with zipfile.ZipFile(fake_package, "w") as archive:
+        archive.writestr("Fake.app/Contents/MacOS/Fake", "fake executable")
+
+    fake_bin = tmp_path / "bin"
+    fake_bin.mkdir()
+    fake_open = fake_bin / "open"
+    fake_open.write_text(
+        "#!/usr/bin/env bash\n"
+        "for arg in \"$@\"; do\n"
+        "  case \"$arg\" in\n"
+        "    --rift-road-smoke-capture-dir=*)\n"
+        "      dir=\"${arg#*=}\"\n"
+        "      mkdir -p \"$dir\"\n"
+        "      printf 'partial smoke capture\\n' > \"$dir/stage1-exported-app-smoke-title.png\"\n"
+        "      ;;\n"
+        "    --rift-road-keyboard-fallback-output=*)\n"
+        "      path=\"${arg#*=}\"\n"
+        "      mkdir -p \"$(dirname \"$path\")\"\n"
+        "      printf '{\"partial\": true}\\n' > \"$path\"\n"
+        "      ;;\n"
+        "    --rift-road-keyboard-fallback-capture-dir=*)\n"
+        "      dir=\"${arg#*=}\"\n"
+        "      mkdir -p \"$dir\"\n"
+        "      printf 'partial keyboard capture\\n' > \"$dir/stage1-exported-app-keyboard-fallback.png\"\n"
+        "      ;;\n"
+        "    --rift-road-focus-resume-output=*)\n"
+        "      path=\"${arg#*=}\"\n"
+        "      mkdir -p \"$(dirname \"$path\")\"\n"
+        "      printf '{\"partial\": true}\\n' > \"$path\"\n"
+        "      ;;\n"
+        "    --rift-road-focus-resume-capture-dir=*)\n"
+        "      dir=\"${arg#*=}\"\n"
+        "      mkdir -p \"$dir\"\n"
+        "      printf 'partial focus capture\\n' > \"$dir/stage1-exported-app-focus-resume.png\"\n"
+        "      ;;\n"
+        "  esac\n"
+        "done\n"
+        "echo 'fake open failed' >&2\n"
+        "exit 42\n"
+    )
+    fake_open.chmod(0o755)
+
+    env = {
+        **os.environ,
+        "PATH": f"{fake_bin}{os.pathsep}{os.environ['PATH']}",
+    }
+    cases = [
+        (
+            "smoke_exported_macos_app.sh",
+            "exported-app-smoke",
+            [
+                "stage1-exported-app-smoke-title.png",
+                "stage1-exported-app-smoke-hero-select.png",
+                "stage1-exported-app-smoke-opening-story.png",
+                "stage1-exported-app-smoke-gameplay.png",
+                "stage1-exported-app-smoke-combat.png",
+                "stage1-exported-app-smoke-pickups.png",
+                "stage1-exported-app-smoke-road-collapse.png",
+                "stage1-exported-app-smoke-brask-intro.png",
+                "stage1-exported-app-smoke-stage-clear.png",
+                "stage1-exported-app-smoke-game-over.png",
+                "stage1-exported-app-smoke-retry-gameplay.png",
+            ],
+        ),
+        (
+            "smoke_exported_keyboard_fallback.sh",
+            "keyboard-fallback",
+            [
+                "stage1-exported-app-keyboard-fallback.json",
+                "stage1-exported-app-keyboard-fallback.png",
+            ],
+        ),
+        (
+            "smoke_exported_focus_resume.sh",
+            "focus-resume",
+            [
+                "stage1-exported-app-focus-resume.json",
+                "stage1-exported-app-focus-resume.png",
+            ],
+        ),
+    ]
+
+    for script_name, output_name, artifact_names in cases:
+        output_dir = tmp_path / output_name
+        output_dir.mkdir()
+        original_payloads = {}
+        for artifact_name in artifact_names:
+            artifact_path = output_dir / artifact_name
+            payload = f"preserved {script_name} {artifact_name}\n".encode()
+            artifact_path.write_bytes(payload)
+            original_payloads[artifact_path] = payload
+
+        result = subprocess.run(
+            [
+                "bash",
+                str(repo_root / "scripts" / script_name),
+                str(fake_package),
+                str(output_dir),
+            ],
+            cwd=repo_root,
+            env=env,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+
+        assert result.returncode == 42
+        assert "fake open failed" in result.stderr
+        for artifact_path, payload in original_payloads.items():
+            assert artifact_path.read_bytes() == payload
+
+    assert "staged capture replacement" in macos_docs
+    assert "staged capture replacement" in handoff
+    assert "staged capture replacement" in audit
+    assert "### [RR-PROD-78] Preserve smoke evidence on launch failure" in tracker
 
 
 def test_exported_app_smoke_script_captures_opening_story_viewport(repo_root):

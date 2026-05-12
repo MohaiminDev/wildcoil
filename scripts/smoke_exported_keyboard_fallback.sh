@@ -27,16 +27,20 @@ fi
 
 mkdir -p "$OUTPUT_DIR"
 OUTPUT_DIR="$(cd "$OUTPUT_DIR" && pwd -P)"
-OUTPUT_JSON="$OUTPUT_DIR/stage1-exported-app-keyboard-fallback.json"
-CAPTURE_PATH="$OUTPUT_DIR/stage1-exported-app-keyboard-fallback.png"
-rm -f "$OUTPUT_JSON" "$CAPTURE_PATH"
+FINAL_OUTPUT_JSON="$OUTPUT_DIR/stage1-exported-app-keyboard-fallback.json"
+FINAL_CAPTURE_PATH="$OUTPUT_DIR/stage1-exported-app-keyboard-fallback.png"
 TMP_DIR="$(mktemp -d "${TMPDIR:-/tmp}/rift-road-exported-keyboard.XXXXXX")"
+STAGING_OUTPUT_DIR="$(mktemp -d "$OUTPUT_DIR/staged-keyboard.XXXXXX")"
+OUTPUT_JSON="$STAGING_OUTPUT_DIR/stage1-exported-app-keyboard-fallback.json"
+CAPTURE_PATH="$STAGING_OUTPUT_DIR/stage1-exported-app-keyboard-fallback.png"
+FINAL_OUTPUT_JSON_STAGED="$TMP_DIR/stage1-exported-app-keyboard-fallback.final.json"
 APP_PID=""
 
 cleanup() {
   if [[ -n "$APP_PID" ]]; then
     kill "$APP_PID" >/dev/null 2>&1 || true
   fi
+  rm -rf "$STAGING_OUTPUT_DIR"
   rm -rf "$TMP_DIR"
 }
 trap cleanup EXIT
@@ -90,7 +94,7 @@ assert_capture_size() {
   fi
 }
 
-open -n "$APP_PATH" --args "$SMOKE_ARG" "${OUTPUT_ARG_PREFIX}${OUTPUT_JSON}" "${CAPTURE_ARG_PREFIX}${OUTPUT_DIR}"
+open -n "$APP_PATH" --args "$SMOKE_ARG" "${OUTPUT_ARG_PREFIX}${OUTPUT_JSON}" "${CAPTURE_ARG_PREFIX}${STAGING_OUTPUT_DIR}"
 wait_for_app_process
 wait_for_artifacts
 assert_capture_size "$CAPTURE_PATH"
@@ -126,4 +130,19 @@ if payload.get("automated") is not True:
     sys.exit(1)
 PY
 
-echo "RIFT_ROAD_EXPORTED_KEYBOARD_FALLBACK ok output=$OUTPUT_JSON capture=$CAPTURE_PATH"
+python3 - "$OUTPUT_JSON" "$FINAL_OUTPUT_JSON_STAGED" "$FINAL_CAPTURE_PATH" <<'PY'
+import json
+import sys
+from pathlib import Path
+
+staged_output_path = Path(sys.argv[1])
+final_output_path = Path(sys.argv[2])
+final_capture_path = Path(sys.argv[3])
+payload = json.loads(staged_output_path.read_text())
+payload["capture"] = str(final_capture_path)
+final_output_path.write_text(json.dumps(payload, indent=2) + "\n")
+PY
+mv -f "$CAPTURE_PATH" "$FINAL_CAPTURE_PATH"
+mv -f "$FINAL_OUTPUT_JSON_STAGED" "$FINAL_OUTPUT_JSON"
+
+echo "RIFT_ROAD_EXPORTED_KEYBOARD_FALLBACK ok output=$FINAL_OUTPUT_JSON capture=$FINAL_CAPTURE_PATH"
