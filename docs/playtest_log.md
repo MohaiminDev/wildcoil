@@ -4,9 +4,9 @@ Use this log for all Phase 1 external tests and any earlier hands-on checks that
 
 Use [`docs/public_playtest_gate.md`](/Users/himu/Desktop/career/personal_projects/wildcoil/docs/public_playtest_gate.md) as the session protocol before treating feedback as market-readiness evidence.
 
-Run `bash scripts/check_playtest_evidence.sh` after recording external sessions. The current gate only passes when completed session rows show at least 5 sessions, at least one `machine=second-mac` setup, at least two distinct `controller-family=<family>` input entries, replay intent from most testers, a `Build` value with `package_sha256=<sha>`, and a real non-empty `Evidence capture` file for every counted row.
+Run `bash scripts/check_playtest_evidence.sh` after recording external sessions. The current gate only passes when completed session rows show at least 5 sessions, at least one `machine=second-mac` setup, at least two distinct `controller-family=<family>` input entries, replay intent from most testers, a `Build` value with `package_sha256=<sha>` and `package_source=build/macos/Rift Road-signed-notarized.zip` or `package_source=Rift Road-signed-notarized.zip`, and a real non-empty `Evidence capture` file for every counted row.
 
-Use `bash scripts/collect_playtest_evidence.sh --help` after a real external-style session to generate a non-empty evidence note and a paste-ready row for the table below. The collector uses the selected signed package when available, including `Rift Road-signed-notarized.zip` inside a known-tester packet, then falls back to `Rift Road.zip`, and writes `commit=<short> package_sha256=<sha>` by default. If you override `--build`, keep `package_sha256=<sha>` in the value. It does not append rows automatically; review the note, paste the row, then run the gate.
+Use `bash scripts/collect_playtest_evidence.sh --help` after a real external-style session to generate a non-empty evidence note and a paste-ready row for the table below. The collector uses the selected signed package when available, including `Rift Road-signed-notarized.zip` inside a known-tester packet, then falls back to `Rift Road.zip`, and writes `commit=<short> package_sha256=<sha> package_source=<path>` by default. If you override `--build`, keep `package_sha256=<sha>` and signed `package_source=...Rift Road-signed-notarized.zip` in the value. It does not append rows automatically; review the note, paste the row, then run the gate.
 
 ## Phase 1 Gate Targets
 
@@ -22,7 +22,7 @@ Use `bash scripts/collect_playtest_evidence.sh --help` after a real external-sty
 
 | Date | Build | Evidence capture | Tester | Setup | Input method | First-combat time | Wow-moment time | Replay desire | Confusion points | Cheap-damage reports | Key quotes / observations | Follow-up action |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| TBD | commit=<short> package_sha256=<sha> | TBD | TBD | machine=primary-mac | keyboard; controller-family=<family-if-used> | TBD | TBD | TBD | TBD | TBD | TBD | TBD |
+| TBD | commit=<short> package_sha256=<sha> package_source=build/macos/Rift Road-signed-notarized.zip | TBD | TBD | machine=primary-mac | keyboard; controller-family=<family-if-used> | TBD | TBD | TBD | TBD | TBD | TBD | TBD |
 
 ## Session Notes Template
 

@@ -48,6 +48,15 @@ def resolve_evidence_path(value):
     return value, log_path.parent / path
 
 
+def signed_package_source_issue(build):
+    if "package_source=" not in build:
+        return "Build missing signed package_source"
+    source_value = build.split("package_source=", 1)[1]
+    if "Rift Road-signed-notarized.zip" not in source_value:
+        return "Build missing signed package_source"
+    return ""
+
+
 session_rows = []
 for line in text.splitlines():
     if not line.startswith("|"):
@@ -89,6 +98,10 @@ for cells in session_rows:
 
     if not build or build.upper() == "TBD" or "package_sha256=" not in build:
         blocker_rows.append(f"{cells[0]} {tester}: Build missing package_sha256")
+    else:
+        source_issue = signed_package_source_issue(build)
+        if source_issue:
+            blocker_rows.append(f"{cells[0]} {tester}: {source_issue}")
 
     # Session table convention: setup includes machine=primary-mac or machine=second-mac.
     if "machine=second-mac" in setup:
