@@ -20,6 +20,7 @@ required_checks = [
     "Stage 1 movement: `pass`",
     "Attack: `pass`",
     "Jump: `pass`",
+    "Special meter ready: `pass`",
     "Special: `pass`",
     "Dash: `pass`",
     "Pause: `pass`",

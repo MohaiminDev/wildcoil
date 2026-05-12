@@ -31,14 +31,14 @@ Usage:
     --connection "Bluetooth" \
     --blockers "none" \
     --confirm-title --confirm-hero-select --confirm-movement \
-    --confirm-attack --confirm-jump --confirm-special --confirm-dash \
-    --confirm-pause --confirm-cancel-back
+    --confirm-attack --confirm-jump --confirm-special-ready \
+    --confirm-special --confirm-dash --confirm-pause --confirm-cancel-back
 
   bash scripts/collect_controller_evidence.sh --session-type keyboard \
     --blockers "none" \
     --confirm-title --confirm-hero-select --confirm-movement \
-    --confirm-attack --confirm-jump --confirm-special --confirm-dash \
-    --confirm-pause --confirm-cancel-back
+    --confirm-attack --confirm-jump --confirm-special-ready \
+    --confirm-special --confirm-dash --confirm-pause --confirm-cancel-back
 
 This is a manual evidence collector. Run it only after a real exported-app
 session, then paste the generated snippet into docs/controller_validation.md
@@ -60,6 +60,7 @@ Options:
   --confirm-movement                  Confirm Stage 1 movement worked.
   --confirm-attack                    Confirm attack worked.
   --confirm-jump                      Confirm jump worked.
+  --confirm-special-ready             Confirm luma/special meter was ready before testing special.
   --confirm-special                   Confirm special worked.
   --confirm-dash                      Confirm dash worked.
   --confirm-pause                     Confirm pause worked.
@@ -86,6 +87,7 @@ confirm_hero_select=0
 confirm_movement=0
 confirm_attack=0
 confirm_jump=0
+confirm_special_ready=0
 confirm_special=0
 confirm_dash=0
 confirm_pause=0
@@ -159,6 +161,10 @@ while [[ "$#" -gt 0 ]]; do
       confirm_jump=1
       shift
       ;;
+    --confirm-special-ready)
+      confirm_special_ready=1
+      shift
+      ;;
     --confirm-special)
       confirm_special=1
       shift
@@ -215,6 +221,7 @@ require_confirmation "--confirm-hero-select" "$confirm_hero_select"
 require_confirmation "--confirm-movement" "$confirm_movement"
 require_confirmation "--confirm-attack" "$confirm_attack"
 require_confirmation "--confirm-jump" "$confirm_jump"
+require_confirmation "--confirm-special-ready" "$confirm_special_ready"
 require_confirmation "--confirm-special" "$confirm_special"
 require_confirmation "--confirm-dash" "$confirm_dash"
 require_confirmation "--confirm-pause" "$confirm_pause"
@@ -282,6 +289,7 @@ write_controller_snippet() {
     printf -- '- Stage 1 movement: `pass`\n'
     printf -- '- Attack: `pass`\n'
     printf -- '- Jump: `pass`\n'
+    printf -- '- Special meter ready: `pass`\n'
     printf -- '- Special: `pass`\n'
     printf -- '- Dash: `pass`\n'
     printf -- '- Pause: `pass`\n'
@@ -301,6 +309,7 @@ write_keyboard_snippet() {
     printf -- '- Stage 1 movement: `pass`\n'
     printf -- '- Attack: `pass`\n'
     printf -- '- Jump: `pass`\n'
+    printf -- '- Special meter ready: `pass`\n'
     printf -- '- Special: `pass`\n'
     printf -- '- Dash: `pass`\n'
     printf -- '- Pause: `pass`\n'
@@ -334,6 +343,7 @@ fi
   printf -- '- Stage 1 movement: `pass`\n'
   printf -- '- Attack: `pass`\n'
   printf -- '- Jump: `pass`\n'
+  printf -- '- Special meter ready: `pass`\n'
   printf -- '- Special: `pass`\n'
   printf -- '- Dash: `pass`\n'
   printf -- '- Pause: `pass`\n'

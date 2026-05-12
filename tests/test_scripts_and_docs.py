@@ -1756,6 +1756,7 @@ def test_manual_evidence_collectors_default_to_signed_packet_artifact(
                 "--confirm-movement",
                 "--confirm-attack",
                 "--confirm-jump",
+                "--confirm-special-ready",
                 "--confirm-special",
                 "--confirm-dash",
                 "--confirm-pause",
@@ -1990,6 +1991,7 @@ def test_controller_evidence_collector_scaffolds_real_manual_sessions(repo_root)
     assert "--device-name" in script
     assert "--connection" in script
     assert "--confirm-title" in script
+    assert "--confirm-special-ready" in script
     assert "--confirm-cancel-back" in script
     assert "docs/playtest-captures/controller" in script
     assert "Rift Road-signed-notarized.zip" in script
@@ -1998,6 +2000,7 @@ def test_controller_evidence_collector_scaffolds_real_manual_sessions(repo_root)
     assert "Title: `pass`" in script
     assert "Hero select: `pass`" in script
     assert "Stage 1 movement: `pass`" in script
+    assert "Special meter ready: `pass`" in script
     assert "Cancel/back: `pass`" in script
     assert "scripts/check_controller_evidence.sh" in script
     assert "scripts/collect_controller_evidence.sh" in docs
@@ -2018,6 +2021,7 @@ def test_controller_evidence_collector_scaffolds_real_manual_sessions(repo_root)
     assert help_result.returncode == 0
     assert "--session-type controller" in help_result.stdout
     assert "--session-type keyboard" in help_result.stdout
+    assert "--confirm-special-ready" in help_result.stdout
 
     blocked_result = subprocess.run(
         ["bash", str(script_path)],
@@ -2055,6 +2059,7 @@ RIFT_ROAD_CONTROLLER_SESSION ok
 - Stage 1 movement: `pass`
 - Attack: `pass`
 - Jump: `pass`
+- Special meter ready: `pass`
 - Special: `pass`
 - Dash: `pass`
 - Pause: `pass`
@@ -2075,6 +2080,7 @@ RIFT_ROAD_CONTROLLER_SESSION ok
 - Stage 1 movement: `pass`
 - Attack: `pass`
 - Jump: `pass`
+- Special meter ready: `pass`
 - Special: `pass`
 - Dash: `pass`
 - Pause: `pass`
@@ -2092,6 +2098,7 @@ RIFT_ROAD_KEYBOARD_FALLBACK ok
 - Stage 1 movement: `pass`
 - Attack: `pass`
 - Jump: `pass`
+- Special meter ready: `pass`
 - Special: `pass`
 - Dash: `pass`
 - Pause: `pass`
@@ -2139,6 +2146,7 @@ RIFT_ROAD_CONTROLLER_SESSION ok
 - Stage 1 movement: `pass`
 - Attack: `pass`
 - Jump: `pass`
+- Special meter ready: `pass`
 - Special: `pass`
 - Dash: `pass`
 - Pause: `pass`
@@ -2159,6 +2167,7 @@ RIFT_ROAD_CONTROLLER_SESSION ok
 - Stage 1 movement: `pass`
 - Attack: `pass`
 - Jump: `pass`
+- Special meter ready: `pass`
 - Special: `pass`
 - Dash: `pass`
 - Pause: `pass`
@@ -2176,6 +2185,7 @@ RIFT_ROAD_KEYBOARD_FALLBACK ok
 - Stage 1 movement: `pass`
 - Attack: `pass`
 - Jump: `pass`
+- Special meter ready: `pass`
 - Special: `pass`
 - Dash: `pass`
 - Pause: `pass`
@@ -2200,7 +2210,7 @@ RIFT_ROAD_KEYBOARD_FALLBACK ok
     assert "missing-keyboard.mov" in output
 
 
-def test_controller_evidence_gate_accepts_complete_session_metadata(
+def test_controller_evidence_gate_rejects_missing_special_meter_ready_confirmation(
     repo_root, tmp_path
 ):
     script_path = repo_root / "scripts" / "check_controller_evidence.sh"
@@ -2265,6 +2275,96 @@ RIFT_ROAD_KEYBOARD_FALLBACK ok
 - Stage 1 movement: `pass`
 - Attack: `pass`
 - Jump: `pass`
+- Special: `pass`
+- Dash: `pass`
+- Pause: `pass`
+- Cancel/back: `pass`
+- Blockers: `none`
+""".strip()
+    )
+
+    result = subprocess.run(
+        ["bash", str(script_path), str(fake_doc)],
+        cwd=repo_root,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert result.returncode == 1
+    output = result.stdout + result.stderr
+    assert "RIFT_ROAD_CONTROLLER_EVIDENCE blocked" in output
+    assert "Special meter ready: `pass`" in output
+
+
+def test_controller_evidence_gate_accepts_complete_session_metadata(
+    repo_root, tmp_path
+):
+    script_path = repo_root / "scripts" / "check_controller_evidence.sh"
+    fake_doc = tmp_path / "controller_validation.md"
+    arcade_evidence = tmp_path / "example-arcade-pad.mov"
+    console_evidence = tmp_path / "example-console-pad.mov"
+    keyboard_evidence = tmp_path / "example-keyboard.mov"
+    for evidence_path in [arcade_evidence, console_evidence, keyboard_evidence]:
+        evidence_path.write_bytes(b"evidence")
+    fake_doc.write_text(
+        f"""
+# Controller Validation
+
+### Controller Session: `Arcade Pad`
+
+RIFT_ROAD_CONTROLLER_SESSION ok
+
+- Build: `759cb78`
+- Controller family: `arcade-pad`
+- Device name: `Example Arcade Pad`
+- Connection: `usb`
+- Evidence capture: `{arcade_evidence}`
+- Title: `pass`
+- Hero select: `pass`
+- Stage 1 movement: `pass`
+- Attack: `pass`
+- Jump: `pass`
+- Special meter ready: `pass`
+- Special: `pass`
+- Dash: `pass`
+- Pause: `pass`
+- Cancel/back: `pass`
+- Blockers: `none`
+
+### Controller Session: `Console Pad`
+
+RIFT_ROAD_CONTROLLER_SESSION ok
+
+- Build: `759cb78`
+- Controller family: `console-pad`
+- Device name: `Example Console Pad`
+- Connection: `bluetooth`
+- Evidence capture: `{console_evidence}`
+- Title: `pass`
+- Hero select: `pass`
+- Stage 1 movement: `pass`
+- Attack: `pass`
+- Jump: `pass`
+- Special meter ready: `pass`
+- Special: `pass`
+- Dash: `pass`
+- Pause: `pass`
+- Cancel/back: `pass`
+- Blockers: `none`
+
+### Keyboard Fallback Session
+
+RIFT_ROAD_KEYBOARD_FALLBACK ok
+
+- Build: `759cb78`
+- Evidence capture: `{keyboard_evidence}`
+- Title: `pass`
+- Hero select: `pass`
+- Stage 1 movement: `pass`
+- Attack: `pass`
+- Jump: `pass`
+- Special meter ready: `pass`
 - Special: `pass`
 - Dash: `pass`
 - Pause: `pass`

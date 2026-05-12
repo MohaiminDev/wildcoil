@@ -36,8 +36,8 @@ The visual target is the approved north-star direction: modern stylized arcade r
 - Production-grade visual/UI match to north-star images: no.
 - Manual playtest evidence: current Codex run opened the rebuilt exported macOS app through LaunchServices, advanced title -> hero select -> Stage 1 with real key input, and sent movement/attack input while the easier four-enemy opening wave stayed playable with health/HUD visible.
 - Controller/keyboard baseline: simulated Godot runtime smoke covers controller title -> hero select -> Stage 1 and pause/resume; `controller_hotplug_status` covers the controller connection/disconnection status path; a keyboard-fallback runtime smoke covers title -> hero select -> preview cancel -> Stage 1 plus movement, attack, jump, special, dash, and pause/resume; and the exported-app keyboard smoke records the same keyboard path from the launched zipped app as automated JSON/capture evidence. Gameplay code supports keyboard movement/actions and left stick/D-pad movement plus X/A/Y/B/LB/RB/Start actions. A 2026-05-12 launched-app keyboard menu pass fixed text-style `j` confirm from hero preview to Stage 1, with evidence in `docs/playtest-captures/controller/20260512-keyboard-menu-confirm.md`; physical controller devices and a complete manual exported-app keyboard fallback row are still not tested yet.
-- Controller evidence gate: `bash scripts/check_controller_evidence.sh` reads `docs/controller_validation.md` and currently reports `RIFT_ROAD_CONTROLLER_EVIDENCE blocked` because no physical controller-family sessions have been recorded. The gate now rejects marked sessions with missing or `TBD` build/device/connection/evidence/blocker metadata, and also blocks `Evidence capture` paths that do not point at real non-empty files, so placeholder rows cannot satisfy the manual evidence requirement.
-- Controller evidence collector: `bash scripts/collect_controller_evidence.sh --help` now generates manual evidence notes and paste-ready session snippets for real exported-app controller or keyboard fallback sessions, records the selected signed package when available, but does not turn the gate green without actual tester-confirmed rows.
+- Controller evidence gate: `bash scripts/check_controller_evidence.sh` reads `docs/controller_validation.md` and currently reports `RIFT_ROAD_CONTROLLER_EVIDENCE blocked` because no physical controller-family sessions have been recorded. The gate now rejects marked sessions with missing or `TBD` build/device/connection/evidence/blocker metadata, blocks `Evidence capture` paths that do not point at real non-empty files, and requires a `Special meter ready` pass before `Special` can count, so placeholder or zero-meter rows cannot satisfy the manual evidence requirement.
+- Controller evidence collector: `bash scripts/collect_controller_evidence.sh --help` now generates manual evidence notes and paste-ready session snippets for real exported-app controller or keyboard fallback sessions, records the selected signed package when available, and requires an explicit special-meter-ready confirmation, but does not turn the gate green without actual tester-confirmed rows.
 - Latest capture note: the exported macOS app supports a repeatable launched-app viewport smoke capture path that is not dependent on the current macOS Space being visible to `screencapture`; the latest title smoke capture now shows a branded Rift Road logo lockup and start plate, the latest hero-select smoke capture shows canted arcade cards, selected-card glow, portrait wells, planned-hero silhouettes, stat pips, and a canted arcade header/ribbon instead of plain heading text, the latest opening-story smoke capture shows a short Raya/Nika story panel about drill marks, cages, and route stakes, the latest gameplay capture shows the Stage 1 intro as a centered slim strap above the combatants with non-ellipsized `Free the transport cages` copy plus a slimmer top HUD that exposes more sunset/backdrop area, the latest post-intro combat capture shows the running fight after the intro strap has cleared with a one-line objective rail and no stale center wave notice, the latest pickup smoke capture shows distinct health and luma/meter pickup markers from the launched exported app, the latest road-collapse smoke capture shows luma fractures and the exposed service lane after the opening cage-loading fight, the latest Brask intro smoke capture shows the boss story banner from the launched exported app, the latest Stage Clear smoke capture shows rank, score, luma, and health summary text in the canted arcade result frame, the Game Over/retry smoke capture shows the fail-state result text and controls, and the post-retry smoke capture shows Stage 1 gameplay after restarting from the Game Over path.
 - Package audit: `bash scripts/audit_macos_package.sh` reports `RIFT_ROAD_PACKAGE_AUDIT internal-only`; the bundle signature verifies, but Developer ID authority, Apple Team ID, notarization, Gatekeeper acceptance, and stapled ticket validation are not present.
 - Godot version gate: `bash scripts/check_godot_version.sh` now requires the configured `GODOT_BIN` to report Godot 4.6.x stable before `bash scripts/check.sh` runs tests and runtime smoke.
@@ -104,7 +104,7 @@ The visual target is the approved north-star direction: modern stylized arcade r
 - Outcome: The exported macOS app is tested with at least two controller families plus keyboard fallback, with device names and blockers recorded.
 - Validation:
   - [ ] Record controller family 1 and family 2 in `docs/macos_build_and_distribution.md`.
-  - [ ] Confirm title, hero select, Stage 1 movement, attack, jump, special, dash, pause, and cancel/back on each controller.
+  - [ ] Confirm title, hero select, Stage 1 movement, attack, jump, special-meter readiness, special, dash, pause, and cancel/back on each controller.
   - [ ] Confirm keyboard fallback still completes the same flow.
 - Dependencies: [RR-PROD-12]
 
@@ -117,6 +117,27 @@ The visual target is the approved north-star direction: modern stylized arcade r
 - Dependencies: [RR-PROD-15]
 
 ## DONE
+
+### [RR-PROD-82] Require special-ready manual input evidence
+- Outcome: The controller/keyboard evidence gate now requires manual rows to confirm the luma/special meter was ready before marking `Special` as passed, preventing fresh Stage 1 zero-meter key presses from satisfying controller or keyboard fallback evidence.
+- Validation:
+  - [x] Clean-launched the rebuilt exported app and used Computer Use to verify title -> hero select -> capability preview cancel/back -> Stage 1 -> pause with keyboard input before tightening the evidence gate.
+  - [x] Added a failing regression proving two complete controller-family rows plus one keyboard fallback row are rejected when they omit `Special meter ready: pass`.
+  - [x] Updated `scripts/check_controller_evidence.sh` to require `Special meter ready: pass` for controller and keyboard fallback rows.
+  - [x] Updated `scripts/collect_controller_evidence.sh` to require `--confirm-special-ready` and write the special-meter-ready line into evidence notes/snippets.
+  - [x] Updated controller, public playtest, macOS distribution, market-readiness, handoff, and tracker docs without claiming any physical controller sessions exist.
+  - [x] `python3 -m pytest tests/test_scripts_and_docs.py::test_controller_evidence_collector_scaffolds_real_manual_sessions tests/test_scripts_and_docs.py::test_controller_evidence_gate_rejects_missing_special_meter_ready_confirmation tests/test_scripts_and_docs.py::test_controller_evidence_gate_accepts_complete_session_metadata tests/test_scripts_and_docs.py::test_controller_evidence_gate_rejects_missing_evidence_files tests/test_scripts_and_docs.py::test_controller_evidence_gate_rejects_placeholder_session_metadata -q`
+  - [x] `python3 -m pytest tests/test_scripts_and_docs.py::test_manual_evidence_collectors_default_to_signed_packet_artifact -q`
+  - [x] `bash -n scripts/check_controller_evidence.sh`
+  - [x] `bash -n scripts/collect_controller_evidence.sh`
+  - [x] `python3 scripts/check_agent_docs.py`
+  - [x] `git diff --check`
+  - [x] `bash scripts/check_controller_evidence.sh` still reports `RIFT_ROAD_CONTROLLER_EVIDENCE blocked` for the real remaining `controller families 0/2` and `keyboard fallback 0/1` gaps.
+  - [x] `bash scripts/check.sh` passes with 118 tests and `RIFT_ROAD_RUNTIME_OK smoke`.
+- Progress:
+  - 2026-05-12: Strengthened RR-PROD-15 evidence quality after a clean keyboard run showed special cannot be honestly confirmed from a fresh zero-meter Stage 1 start.
+- Dependencies: [RR-PROD-15]
+- Completed: 2026-05-12
 
 ### [RR-PROD-81] Refresh post-keyboard-fix release-gate evidence
 - Outcome: The release-candidate gate was rerun after RR-PROD-80 so the tracked launched-app smoke, keyboard fallback, focus/resume, and exported-app performance evidence reflect the current keyboard input build while preserving the real release blockers.
