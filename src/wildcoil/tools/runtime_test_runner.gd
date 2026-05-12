@@ -35,6 +35,8 @@ func _run() -> void:
 		ok = await _run_controller_hotplug_status()
 	if ok and mode == "keyboard_fallback_flow":
 		ok = await _run_keyboard_fallback_flow()
+	if ok and mode == "keyboard_text_confirm_flow":
+		ok = await _run_keyboard_text_confirm_flow()
 	if ok and mode == "stage1_focus_resume":
 		ok = await _run_stage1_focus_resume()
 	if ok and mode == "stage1_performance_sample":
@@ -644,6 +646,30 @@ func _run_keyboard_fallback_flow() -> bool:
 	await process_frame
 	return ok
 
+func _run_keyboard_text_confirm_flow() -> bool:
+	var packed: PackedScene = load("res://scenes/app_root.tscn")
+	if packed == null:
+		printerr("Could not load app root scene")
+		return false
+	var app = packed.instantiate()
+	root.add_child(app)
+	await process_frame
+	await process_frame
+	app._show_character_select()
+	app.selected_hero_index = 0
+	app._show_hero_capability_preview()
+	await process_frame
+	_press_text_keyboard_menu_key(app, 0, 106)
+	await process_frame
+	await process_frame
+	var started: bool = app.mode == "stage" and app.stage != null and app.stage.player != null
+	print("RIFT_ROAD_KEYBOARD_TEXT_CONFIRM started=%s" % str(started))
+	if not started:
+		printerr("Keyboard text-style J event did not start Stage 1")
+	app.queue_free()
+	await process_frame
+	return started
+
 func _run_stage1_focus_resume() -> bool:
 	var packed: PackedScene = load("res://scenes/app_root.tscn")
 	if packed == null:
@@ -698,6 +724,14 @@ func _press_keyboard_menu_key(app, keycode: int) -> void:
 	var event := InputEventKey.new()
 	event.keycode = keycode
 	event.physical_keycode = keycode
+	event.pressed = true
+	app._unhandled_input(event)
+
+func _press_text_keyboard_menu_key(app, physical_keycode: int, unicode_value: int) -> void:
+	var event := InputEventKey.new()
+	event.keycode = 0
+	event.physical_keycode = physical_keycode
+	event.unicode = unicode_value
 	event.pressed = true
 	app._unhandled_input(event)
 

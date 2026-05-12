@@ -168,6 +168,20 @@ def test_keyboard_fallback_title_to_stage_and_action_flow(project_root, godot_ru
     assert "RIFT_ROAD_RUNTIME_OK keyboard_fallback_flow" in result.stdout
 
 
+def test_keyboard_text_confirm_event_starts_stage_one(project_root, godot_runner):
+    result = godot_runner(
+        "--headless",
+        "--script",
+        str(project_root / "tools" / "runtime_test_runner.gd"),
+        "--",
+        "keyboard_text_confirm_flow",
+    )
+
+    assert result.returncode == 0, result.stderr + result.stdout
+    assert "RIFT_ROAD_KEYBOARD_TEXT_CONFIRM started=true" in result.stdout
+    assert "RIFT_ROAD_RUNTIME_OK keyboard_text_confirm_flow" in result.stdout
+
+
 def test_stage_one_focus_loss_pauses_and_resumes(project_root, godot_runner):
     result = godot_runner(
         "--headless",

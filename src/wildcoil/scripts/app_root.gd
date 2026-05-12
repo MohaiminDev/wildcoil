@@ -717,10 +717,11 @@ func _unhandled_input(event: InputEvent) -> void:
 func _handle_keyboard_input(event: InputEventKey) -> void:
 	if not event is InputEventKey or not event.pressed or event.echo:
 		return
-	if event.keycode == KEY_F3 and stage != null:
+	var keycode := _normalized_keyboard_keycode(event)
+	if keycode == KEY_F3 and stage != null:
 		stage.debug_overlay.toggle()
 		return
-	if event.keycode == KEY_ESCAPE:
+	if keycode == KEY_ESCAPE:
 		if mode == "stage":
 			_toggle_pause()
 		elif mode == "hero_preview":
@@ -731,32 +732,63 @@ func _handle_keyboard_input(event: InputEventKey) -> void:
 	if mode == "title":
 		_show_character_select()
 	elif mode == "character_select":
-		if _handle_roster_key(event.keycode):
+		if _handle_roster_key(keycode):
 			_show_hero_capability_preview()
-		elif event.keycode == KEY_ENTER or event.keycode == KEY_KP_ENTER:
+		elif keycode == KEY_ENTER or keycode == KEY_KP_ENTER:
 			_show_hero_capability_preview()
 	elif mode == "hero_preview":
-		if _handle_roster_key(event.keycode):
+		if _handle_roster_key(keycode):
 			_show_hero_capability_preview()
-		elif event.keycode == KEY_ENTER or event.keycode == KEY_KP_ENTER or event.keycode == KEY_J:
+		elif keycode == KEY_ENTER or keycode == KEY_KP_ENTER or keycode == KEY_J:
 			_confirm_hero_and_start()
 	elif mode == "stage_clear":
-		if event.keycode == KEY_R:
+		if keycode == KEY_R:
 			_restart_last_completed_stage()
-		elif event.keycode == KEY_T:
+		elif keycode == KEY_T:
 			_return_to_title_from_flow()
-		elif event.keycode == KEY_ENTER or event.keycode == KEY_KP_ENTER or event.keycode == KEY_J:
+		elif keycode == KEY_ENTER or keycode == KEY_KP_ENTER or keycode == KEY_J:
 			_start_next_campaign_stage()
 	elif mode == "game_over":
-		if event.keycode == KEY_R:
+		if keycode == KEY_R:
 			_restart_current_stage()
 		else:
 			_return_to_title_from_flow()
 	elif mode == "complete":
-		if event.keycode == KEY_R:
+		if keycode == KEY_R:
 			_restart_last_completed_stage()
 		else:
 			_return_to_title_from_flow()
+
+func _normalized_keyboard_keycode(event: InputEventKey) -> int:
+	if event.keycode != 0:
+		return event.keycode
+	if event.physical_keycode != 0:
+		return event.physical_keycode
+	return _unicode_keyboard_keycode(event.unicode)
+
+func _unicode_keyboard_keycode(unicode_value: int) -> int:
+	if unicode_value == 49:
+		return KEY_1
+	if unicode_value == 50:
+		return KEY_2
+	if unicode_value == 51:
+		return KEY_3
+	if unicode_value == 52:
+		return KEY_4
+	var lower_unicode := unicode_value
+	if lower_unicode >= 65 and lower_unicode <= 90:
+		lower_unicode += 32
+	if lower_unicode == 106:
+		return KEY_J
+	if lower_unicode == 107:
+		return KEY_K
+	if lower_unicode == 110:
+		return KEY_N
+	if lower_unicode == 114:
+		return KEY_R
+	if lower_unicode == 116:
+		return KEY_T
+	return 0
 
 func _handle_controller_button(event: InputEventJoypadButton) -> void:
 	if not event.pressed:
