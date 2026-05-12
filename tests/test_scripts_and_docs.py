@@ -15,6 +15,7 @@ def test_run_and_check_scripts_exist(repo_root):
         "scripts/prepare_known_tester_packet.sh",
         "scripts/check_playtest_evidence.sh",
         "scripts/collect_playtest_evidence.sh",
+        "scripts/check_focus_audio_evidence.sh",
         "scripts/check_second_machine_evidence.sh",
         "scripts/collect_second_machine_evidence.sh",
         "scripts/check_controller_evidence.sh",
@@ -126,6 +127,58 @@ def test_exported_app_focus_resume_smoke_records_artifacts(repo_root):
     assert "scripts/smoke_exported_focus_resume.sh" in docs
     assert "RIFT_ROAD_EXPORTED_FOCUS_RESUME ok" in handoff
     assert "RIFT_ROAD_EXPORTED_FOCUS_RESUME ok" in audit
+
+
+def test_focus_audio_evidence_gate_blocks_without_manual_audible_confirmation(
+    repo_root,
+):
+    script_path = repo_root / "scripts" / "check_focus_audio_evidence.sh"
+    script = script_path.read_text()
+    docs = (repo_root / "docs" / "focus_audio_validation.md").read_text()
+    release_gate = (repo_root / "scripts" / "check_release_candidate.sh").read_text()
+    packet_script = (repo_root / "scripts" / "prepare_known_tester_packet.sh").read_text()
+    public_gate = (repo_root / "docs" / "public_playtest_gate.md").read_text()
+    macos_docs = (repo_root / "docs" / "macos_build_and_distribution.md").read_text()
+    handoff = (
+        repo_root
+        / "docs"
+        / "playtest-captures"
+        / "stage1-marketability-handoff-2026-05-10.md"
+    ).read_text()
+    audit = (repo_root / "docs" / "market-readiness-audit-2026-05-10.md").read_text()
+
+    assert "RIFT_ROAD_FOCUS_AUDIO_EVIDENCE blocked" in script
+    assert "RIFT_ROAD_FOCUS_AUDIO_EVIDENCE ok" in script
+    assert "RIFT_ROAD_FOCUS_AUDIO_SESSION ok" in script
+    assert "Audio before focus loss: `pass`" in script
+    assert "Audio quiet during focus pause: `pass`" in script
+    assert "Audio after resume: `pass`" in script
+    assert "Evidence capture" in script
+    assert "docs/focus_audio_validation.md" in docs
+    assert "scripts/check_focus_audio_evidence.sh" in docs
+    assert "scripts/check_focus_audio_evidence.sh" in release_gate
+    assert "RIFT_ROAD_FOCUS_AUDIO_EVIDENCE ok" in release_gate
+    assert "scripts/check_focus_audio_evidence.sh" in packet_script
+    assert "run_logged_allow_failure focus_audio_evidence" in packet_script
+    assert "Focus/audio validation checklist" in packet_script
+    assert "printf -- '- Focus/audio evidence: `%s`\\n'" in packet_script
+    assert "scripts/check_focus_audio_evidence.sh" in public_gate
+    assert "scripts/check_focus_audio_evidence.sh" in macos_docs
+    assert "scripts/check_focus_audio_evidence.sh" in handoff
+    assert "scripts/check_focus_audio_evidence.sh" in audit
+
+    result = subprocess.run(
+        ["bash", str(script_path)],
+        cwd=repo_root,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert result.returncode == 1
+    output = result.stdout + result.stderr
+    assert "RIFT_ROAD_FOCUS_AUDIO_EVIDENCE blocked" in output
+    assert "focus_audio_sessions=0/1" in output
 
 
 def test_exported_app_smoke_script_captures_stage_clear_viewport(repo_root):

@@ -55,6 +55,11 @@ run_logged package_audit bash "$ROOT_DIR/scripts/audit_macos_package.sh"
 run_logged exported_app_smoke bash "$ROOT_DIR/scripts/smoke_exported_macos_app.sh"
 run_logged exported_app_keyboard_fallback bash "$ROOT_DIR/scripts/smoke_exported_keyboard_fallback.sh"
 run_logged exported_app_focus_resume bash "$ROOT_DIR/scripts/smoke_exported_focus_resume.sh"
+if ! run_logged_allow_failure focus_audio_evidence bash "$ROOT_DIR/scripts/check_focus_audio_evidence.sh"; then
+  add_blocker "Focus/audio evidence gate is blocked"
+elif ! grep -q "RIFT_ROAD_FOCUS_AUDIO_EVIDENCE ok" "$LOG_DIR/focus_audio_evidence.log"; then
+  add_blocker "Focus/audio evidence gate did not report ok"
+fi
 run_logged exported_app_performance bash "$ROOT_DIR/scripts/sample_exported_app_performance.sh"
 if ! run_logged_allow_failure playtest_evidence bash "$ROOT_DIR/scripts/check_playtest_evidence.sh"; then
   add_blocker "Playtest evidence gate is blocked"

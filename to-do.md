@@ -45,7 +45,8 @@ The visual target is the approved north-star direction: modern stylized arcade r
 - Exported-app smoke: `bash scripts/smoke_exported_macos_app.sh` extracts `build/macos/Rift Road.zip`, launches the `.app` with `--rift-road-smoke-stage1` and `--rift-road-smoke-capture-dir=...`, captures title, hero-select, opening story, Stage 1 gameplay, post-intro combat, pickup clarity, road-collapse, Stage Clear, Game Over/retry, and post-retry gameplay viewport screenshots from the running exported app, and reports `RIFT_ROAD_EXPORTED_APP_SMOKE ok`. `bash scripts/smoke_exported_focus_resume.sh` records automated exported-app focus/resume JSON plus a pause-overlay viewport capture and reports `RIFT_ROAD_EXPORTED_FOCUS_RESUME ok`.
 - Exported-app performance: `bash scripts/sample_exported_app_performance.sh` launches the packaged `.app`, records `docs/playtest-captures/exported-app-performance-latest/stage1-exported-performance.json`, and reports `RIFT_ROAD_EXPORTED_PERF stage1` on local Apple Silicon Mac A (`arm64`, `Apple M1`, `iMac21,2`) with latest local 1280x720 windowed steady-state result `avg_ms=7.869`, `max_ms=9.091` after 8 startup/render warmup frames. A local 1920x1080 windowed run records `avg_ms=3.199`, `max_ms=6.652` in `docs/playtest-captures/exported-app-performance-windowed-1080p-latest/stage1-exported-performance.json`, and a local fullscreen run records `avg_ms=1.583`, `max_ms=2.793` in `docs/playtest-captures/exported-app-performance-fullscreen-latest/stage1-exported-performance.json`.
 - Focus-loss/resume: `stage1_focus_resume` in `src/wildcoil/tools/runtime_test_runner.gd` proves Stage 1 pauses on window focus loss, shows the pause overlay while the title layer is otherwise hidden, suspends/resumes the audio manager focus state, updates the return-focus message, and resumes cleanly with Esc. The exported-app focus/resume smoke proves the same app handler path from the launched zip, but not real audible output.
-- Release-candidate gate: `bash scripts/check_release_candidate.sh` combines checks, package, audit, exported-app smoke, exported-app keyboard fallback smoke, exported-app focus/resume smoke, and performance sample, then reports `RIFT_ROAD_RELEASE_GATE blocked` until package and player-evidence gates are resolved.
+- Focus/audio evidence gate: `bash scripts/check_focus_audio_evidence.sh` reads `docs/focus_audio_validation.md` and currently reports `RIFT_ROAD_FOCUS_AUDIO_EVIDENCE blocked` because no manual audible focus-loss/resume session has been recorded.
+- Release-candidate gate: `bash scripts/check_release_candidate.sh` combines checks, package, audit, exported-app smoke, exported-app keyboard fallback smoke, exported-app focus/resume smoke, manual focus/audio evidence, and performance sample, then reports `RIFT_ROAD_RELEASE_GATE blocked` until package and player-evidence gates are resolved.
 - Known-tester packet: `bash scripts/prepare_known_tester_packet.sh` creates `build/known-tester-packet/latest/` with the current internal-only zip, manifest, build commit, package SHA-256, validation logs, package audit, smoke captures, keyboard fallback evidence, focus/resume evidence, performance JSON, host profile, second-machine evidence collector scripts, and playtest docs for supervised known-tester sessions.
 - Playtest evidence gate: `bash scripts/check_playtest_evidence.sh` reads `docs/playtest_log.md` and currently reports `RIFT_ROAD_PLAYTEST_EVIDENCE blocked` because no external session rows have been recorded.
 - Playtest evidence collector: `bash scripts/collect_playtest_evidence.sh --help` now generates a non-empty session note and paste-ready `docs/playtest_log.md` row after a real external-style session, but it does not append rows or satisfy the gate without actual tester evidence.
@@ -115,6 +116,19 @@ The visual target is the approved north-star direction: modern stylized arcade r
 - Dependencies: [RR-PROD-15]
 
 ## DONE
+
+### [RR-PROD-65] Add manual focus/audio evidence gate
+- Outcome: Added an explicit release-candidate blocker for manual audible focus-loss/resume confirmation so automated focus state proof cannot be mistaken for real output-device evidence.
+- Validation:
+  - [x] Added a failing regression requiring `scripts/check_focus_audio_evidence.sh`, `docs/focus_audio_validation.md`, release-gate integration, known-tester packet references, public gate docs, macOS docs, handoff, and market audit to reference the manual focus/audio gate.
+  - [x] Added `scripts/check_focus_audio_evidence.sh` and `docs/focus_audio_validation.md` with required pass checks for focus overlay, audio before focus loss, quiet/suspended focus pause, audio after resume, resume control, and real evidence capture file.
+  - [x] Updated `scripts/check_release_candidate.sh` so release-candidate status requires `RIFT_ROAD_FOCUS_AUDIO_EVIDENCE ok`.
+  - [x] `python3 -m pytest tests/test_scripts_and_docs.py::test_focus_audio_evidence_gate_blocks_without_manual_audible_confirmation -q` passes.
+  - [x] `bash scripts/check.sh` passes with 104 tests and Godot runtime smoke.
+- Progress:
+  - 2026-05-12: Converted the audible focus-loss gap into a mechanical blocker while preserving the current automated focus/resume smoke.
+- Dependencies: [RR-PROD-59]
+- Completed: 2026-05-12
 
 ### [RR-PROD-64] Add playtest evidence collector
 - Outcome: Added a guarded manual collector for external-style playtest sessions so testers can generate non-empty evidence notes plus paste-ready `docs/playtest_log.md` rows after real runs.

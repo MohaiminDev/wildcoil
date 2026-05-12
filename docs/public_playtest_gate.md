@@ -15,6 +15,7 @@ Use this packet before asking anyone outside the project to judge whether `Rift 
 - Controller validation checklist: `docs/controller_validation.md`
 - Second-machine validation checklist: `docs/second_machine_validation.md`
 - Second-machine evidence collector: `scripts/collect_second_machine_evidence.sh`
+- Focus/audio evidence gate command: `bash scripts/check_focus_audio_evidence.sh`
 - Controller evidence collector: `scripts/collect_controller_evidence.sh`
 - Playtest evidence collector: `scripts/collect_playtest_evidence.sh`
 - Playtest evidence gate command: `bash scripts/check_playtest_evidence.sh`
@@ -40,6 +41,7 @@ Run and record these before every external-style session:
 - [ ] The latest `stage1_performance_sample` result is recorded.
 - [ ] The latest exported-app performance result is recorded; run the windowed 1080p and fullscreen samples when the target session needs display-mode evidence.
 - [ ] The tester knows whether they are playing a signed/notarized build or an internal-only build.
+- [ ] `bash scripts/check_focus_audio_evidence.sh` reports `RIFT_ROAD_FOCUS_AUDIO_EVIDENCE ok` after a human confirms audible output before focus loss, quiet/suspended audio while focus-paused, and audible output after resume.
 - [ ] `bash scripts/check_second_machine_evidence.sh` reports `RIFT_ROAD_SECOND_MACHINE_EVIDENCE ok` before any public-playtest or release-candidate distribution claim.
 - [ ] Use `bash scripts/collect_controller_evidence.sh --help` during manual controller/keyboard sessions to generate evidence notes before updating `docs/controller_validation.md`.
 - [ ] `bash scripts/check_controller_evidence.sh` reports `RIFT_ROAD_CONTROLLER_EVIDENCE ok` after two physical controller-family sessions plus keyboard fallback.

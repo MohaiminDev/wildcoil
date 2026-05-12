@@ -63,6 +63,10 @@ run_logged package_audit bash "$ROOT_DIR/scripts/audit_macos_package.sh"
 run_logged exported_app_smoke bash "$ROOT_DIR/scripts/smoke_exported_macos_app.sh"
 run_logged exported_app_keyboard_fallback bash "$ROOT_DIR/scripts/smoke_exported_keyboard_fallback.sh"
 run_logged exported_app_focus_resume bash "$ROOT_DIR/scripts/smoke_exported_focus_resume.sh"
+focus_audio_status="ok"
+if ! run_logged_allow_failure focus_audio_evidence bash "$ROOT_DIR/scripts/check_focus_audio_evidence.sh"; then
+  focus_audio_status="blocked"
+fi
 run_logged exported_app_performance bash "$ROOT_DIR/scripts/sample_exported_app_performance.sh"
 
 packet_status="internal-only"
@@ -75,6 +79,7 @@ copy_if_exists "$ROOT_DIR/docs/public_playtest_gate.md" "$DOCS_DIR/public_playte
 copy_if_exists "$ROOT_DIR/docs/playtest_log.md" "$DOCS_DIR/playtest_log.md"
 copy_if_exists "$ROOT_DIR/docs/macos_build_and_distribution.md" "$DOCS_DIR/macos_build_and_distribution.md"
 copy_if_exists "$ROOT_DIR/docs/controller_validation.md" "$DOCS_DIR/controller_validation.md"
+copy_if_exists "$ROOT_DIR/docs/focus_audio_validation.md" "$DOCS_DIR/focus_audio_validation.md"
 copy_if_exists "$ROOT_DIR/docs/second_machine_validation.md" "$DOCS_DIR/second_machine_validation.md"
 copy_if_exists "$ROOT_DIR/docs/performance_budget.md" "$DOCS_DIR/performance_budget.md"
 copy_if_exists "$ROOT_DIR/docs/market-readiness-audit-2026-05-10.md" "$DOCS_DIR/market-readiness-audit-2026-05-10.md"
@@ -93,6 +98,7 @@ copy_if_exists "$ROOT_DIR/scripts/collect_controller_evidence.sh" "$OUTPUT_DIR/s
 copy_if_exists "$ROOT_DIR/scripts/check_controller_evidence.sh" "$OUTPUT_DIR/scripts/check_controller_evidence.sh"
 copy_if_exists "$ROOT_DIR/scripts/collect_playtest_evidence.sh" "$OUTPUT_DIR/scripts/collect_playtest_evidence.sh"
 copy_if_exists "$ROOT_DIR/scripts/check_playtest_evidence.sh" "$OUTPUT_DIR/scripts/check_playtest_evidence.sh"
+copy_if_exists "$ROOT_DIR/scripts/check_focus_audio_evidence.sh" "$OUTPUT_DIR/scripts/check_focus_audio_evidence.sh"
 copy_if_exists "$ROOT_DIR/scripts/audit_macos_package.sh" "$OUTPUT_DIR/scripts/audit_macos_package.sh"
 copy_if_exists "$ROOT_DIR/scripts/smoke_exported_macos_app.sh" "$OUTPUT_DIR/scripts/smoke_exported_macos_app.sh"
 
@@ -103,12 +109,14 @@ copy_if_exists "$ROOT_DIR/scripts/smoke_exported_macos_app.sh" "$OUTPUT_DIR/scri
   printf -- '- Package SHA256: `%s`\n' "$PACKAGE_SHA256"
   printf -- '- Packet status: `%s`\n' "$packet_status"
   printf -- '- Signing preflight: `%s`\n' "$signing_status"
+  printf -- '- Focus/audio evidence: `%s`\n' "$focus_audio_status"
   printf -- '- Build source: `%s`\n' "$ROOT_DIR"
   printf -- '- Public playtest protocol: `docs/public_playtest_gate.md`\n'
   printf -- '- Playtest log template: `docs/playtest_log.md`\n\n'
   printf -- '- Playtest evidence collector: `scripts/collect_playtest_evidence.sh`\n'
   printf -- '- Controller validation checklist: `docs/controller_validation.md`\n'
   printf -- '- Controller evidence collector: `scripts/collect_controller_evidence.sh`\n'
+  printf -- '- Focus/audio validation checklist: `docs/focus_audio_validation.md`\n'
   printf -- '- Second-machine validation checklist: `docs/second_machine_validation.md`\n\n'
   printf -- '- Second-machine evidence collector: `scripts/collect_second_machine_evidence.sh`\n\n'
   printf '## Critical Distribution Warning\n\n'
@@ -120,6 +128,7 @@ copy_if_exists "$ROOT_DIR/scripts/smoke_exported_macos_app.sh" "$OUTPUT_DIR/scri
   printf -- '- `logs/exported_app_smoke.log`\n'
   printf -- '- `logs/exported_app_keyboard_fallback.log`\n'
   printf -- '- `logs/exported_app_focus_resume.log`\n'
+  printf -- '- `logs/focus_audio_evidence.log`\n'
   printf -- '- `logs/exported_app_performance.log`\n\n'
   printf '## Evidence\n\n'
   printf -- '- `evidence/exported-app-smoke-latest/`\n'
