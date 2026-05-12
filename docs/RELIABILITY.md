@@ -6,7 +6,7 @@
 - `scripts/check.sh` then runs Godot headlessly with `src/wildcoil/tools/runtime_test_runner.gd -- smoke`.
 - `tests/test_runtime_smoke.py` verifies the Godot project can launch headlessly and emits `RIFT_ROAD_RUNTIME_OK`.
 - `runtime_test_runner.gd` validates required runtime paths and JSON top-level keys.
-- `scripts/check_release_candidate.sh` combines repository validation, packaging, audit, launched-app smoke, performance, and manual evidence gates before reporting `RIFT_ROAD_RELEASE_GATE`.
+- `scripts/check_release_candidate.sh` combines repository validation, packaging, release signing/notarization, audit, launched-app smoke, performance, and manual evidence gates before reporting `RIFT_ROAD_RELEASE_GATE`.
 - `scripts/check_release_candidate.sh` writes `build/release-gate/latest/completion-audit.md` even when a required automated gate command hard-fails before the later manual evidence checks run.
 - `scripts/sample_exported_app_performance.sh` launches the packaged app and records frame-time JSON from the exported `.app`.
 
@@ -34,7 +34,7 @@
 ## Observability Hooks
 - `debug_overlay.gd` provides in-game debug visibility.
 - The headless runner prints pass/fail sentinel text for tests.
-- `build/release-gate/latest/completion-audit.md` records a prompt-to-artifact checklist for release-gate runs, including hard-failure blockers when a required command exits early.
+- `build/release-gate/latest/completion-audit.md` records a prompt-to-artifact checklist for release-gate runs, including `logs/release_signing.log` for signed/notarized release-artifact evidence and hard-failure blockers when a required command exits early.
 - Exported-app and headless frame-time capture exist through `scripts/sample_exported_app_performance.sh` and `stage1_performance_sample`.
 - TODO(source-needed): persistent crash dumps, player-session telemetry, or long-term metrics workflow.
 

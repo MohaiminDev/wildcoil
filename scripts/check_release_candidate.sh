@@ -76,7 +76,8 @@ write_completion_audit() {
   fi
 
   if ! marker_in_log signing_preflight "RIFT_ROAD_SIGNING_PREFLIGHT ok" \
-    || ! marker_in_log package_audit "RIFT_ROAD_PACKAGE_AUDIT release-candidate" \
+    || { ! marker_in_log release_signing "RIFT_ROAD_RELEASE_SIGNING ok" \
+      && ! marker_in_log package_audit "RIFT_ROAD_PACKAGE_AUDIT release-candidate"; } \
     || ! marker_in_log second_machine_evidence "RIFT_ROAD_SECOND_MACHINE_EVIDENCE ok"; then
     package_status="blocked"
   fi
@@ -122,7 +123,7 @@ write_completion_audit() {
     printf '| Requirement | Evidence checked in this run | Status |\n'
     printf '| --- | --- | --- |\n'
     printf '| Playable Stage 1 vertical slice | `logs/check.log`, `logs/exported_app_smoke.log`, `logs/exported_app_keyboard_fallback.log`, `logs/exported_app_focus_resume.log` | `%s` |\n' "$playable_status"
-    printf '| Production-deployable macOS build path | `logs/signing_preflight.log`, `logs/package.log`, `logs/package_audit.log`, `logs/second_machine_evidence.log` | `%s` |\n' "$package_status"
+    printf '| Production-deployable macOS build path | `logs/signing_preflight.log`, `logs/release_signing.log`, `logs/package.log`, `logs/package_audit.log`, `logs/second_machine_evidence.log` | `%s` |\n' "$package_status"
     printf '| Real launched-game screenshot and playtest evidence | `logs/exported_app_smoke.log`, `logs/playtest_evidence.log`, `logs/controller_evidence.log`, `logs/focus_audio_evidence.log` | `%s` |\n' "$screenshot_playtest_status"
     printf '| Godot engine version gate | `logs/check.log` marker `RIFT_ROAD_GODOT_VERSION ok` | `%s` |\n' "$godot_version_status"
     printf '| Current validation results | `logs/check.log`, `logs/exported_app_performance.log`, `logs/performance.log` | `%s` |\n' "$validation_status"
@@ -156,6 +157,11 @@ if ! run_logged_allow_failure signing_preflight bash "$ROOT_DIR/scripts/check_ma
   add_blocker "macOS signing preflight is blocked"
 fi
 run_logged package bash "$ROOT_DIR/scripts/package_macos.sh"
+if ! run_logged_allow_failure release_signing bash "$ROOT_DIR/scripts/sign_notarize_macos.sh"; then
+  add_blocker "macOS release signing/notarization is blocked"
+elif ! grep -q "RIFT_ROAD_RELEASE_SIGNING ok" "$LOG_DIR/release_signing.log"; then
+  add_blocker "macOS release signing/notarization did not report ok"
+fi
 run_logged package_audit bash "$ROOT_DIR/scripts/audit_macos_package.sh"
 run_logged exported_app_smoke bash "$ROOT_DIR/scripts/smoke_exported_macos_app.sh"
 run_logged exported_app_keyboard_fallback bash "$ROOT_DIR/scripts/smoke_exported_keyboard_fallback.sh"
@@ -183,8 +189,9 @@ elif ! grep -q "RIFT_ROAD_CONTROLLER_EVIDENCE ok" "$LOG_DIR/controller_evidence.
 fi
 run_logged performance "$GODOT_BIN" --path "$ROOT_DIR/src/wildcoil" --log-file "$LOG_DIR/godot-performance.log" --headless --script "$ROOT_DIR/src/wildcoil/tools/runtime_test_runner.gd" -- stage1_performance_sample
 
-if ! grep -q "RIFT_ROAD_PACKAGE_AUDIT release-candidate" "$LOG_DIR/package_audit.log"; then
-  add_blocker "macOS package audit is not release-candidate"
+if ! grep -q "RIFT_ROAD_RELEASE_SIGNING ok" "$LOG_DIR/release_signing.log" \
+  && ! grep -q "RIFT_ROAD_PACKAGE_AUDIT release-candidate" "$LOG_DIR/package_audit.log"; then
+  add_blocker "macOS package audit is not release-candidate and no signed/notarized release artifact is available"
 fi
 
 if ! grep -q "RIFT_ROAD_EXPORTED_KEYBOARD_FALLBACK ok" "$LOG_DIR/exported_app_keyboard_fallback.log"; then

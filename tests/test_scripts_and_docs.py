@@ -452,6 +452,7 @@ def test_release_candidate_gate_combines_automated_and_manual_blockers(repo_root
     assert "scripts/check.sh" in script
     assert "scripts/package_macos.sh" in script
     assert "scripts/check_macos_signing_env.sh" in script
+    assert "scripts/sign_notarize_macos.sh" in script
     assert "scripts/audit_macos_package.sh" in script
     assert "scripts/smoke_exported_macos_app.sh" in script
     assert "scripts/smoke_exported_keyboard_fallback.sh" in script
@@ -462,6 +463,7 @@ def test_release_candidate_gate_combines_automated_and_manual_blockers(repo_root
     assert "scripts/check_controller_evidence.sh" in script
     assert "stage1_performance_sample" in script
     assert "RIFT_ROAD_PACKAGE_AUDIT release-candidate" in script
+    assert "RIFT_ROAD_RELEASE_SIGNING ok" in script
     assert "RIFT_ROAD_PLAYTEST_EVIDENCE public-playtest-candidate" in script
     assert "RIFT_ROAD_SECOND_MACHINE_EVIDENCE ok" in script
     assert "RIFT_ROAD_CONTROLLER_EVIDENCE ok" in script
@@ -480,6 +482,7 @@ def test_release_candidate_gate_combines_automated_and_manual_blockers(repo_root
     assert "Real launched-game screenshot and playtest evidence" in script
     assert "Candid market-readiness assessment" in script
     assert "logs/exported_app_smoke.log" in script
+    assert "logs/release_signing.log" in script
     assert "logs/check.log` marker `RIFT_ROAD_GODOT_VERSION ok" in script
     assert "logs/playtest_evidence.log" in script
     assert "logs/controller_evidence.log" in script
@@ -487,6 +490,7 @@ def test_release_candidate_gate_combines_automated_and_manual_blockers(repo_root
     assert "completion-audit.md" in script
     assert "RIFT_ROAD_RELEASE_GATE blocked" in script
     assert "scripts/check_release_candidate.sh" in docs
+    assert "scripts/sign_notarize_macos.sh" in docs
     assert "completion-audit.md" in docs
     assert "Godot version gate" in docs
     assert "scripts/check_release_candidate.sh" in audit
@@ -581,6 +585,119 @@ def test_release_candidate_gate_writes_audit_on_required_command_failure(
     assert "exported_app_performance command failed before all checks completed" in audit
     assert "Godot engine version gate" in audit
     assert "| Current validation results |" in audit
+
+
+def test_release_candidate_gate_uses_signed_release_artifact_when_available(
+    repo_root, tmp_path
+):
+    fake_root = tmp_path / "release-gate-root"
+    scripts_dir = fake_root / "scripts"
+    docs_dir = fake_root / "docs"
+    log_dir = fake_root / "build" / "release-gate" / "latest"
+    godot_bin = fake_root / "fake-godot"
+    scripts_dir.mkdir(parents=True)
+    docs_dir.mkdir()
+    (docs_dir / "market-readiness-audit-2026-05-10.md").write_text(
+        "\n".join(
+            [
+                "# Fake Market Audit",
+                "",
+                "## Objective Restated",
+                "",
+                "## Prompt-To-Artifact Checklist",
+                "",
+                "| Public playtest or release-candidate proof | fake | Not achieved |",
+                "| Player love / commercial viability | fake | Not achieved |",
+            ]
+        )
+    )
+    (scripts_dir / "check_release_candidate.sh").write_text(
+        (repo_root / "scripts" / "check_release_candidate.sh").read_text()
+    )
+    godot_bin.write_text(
+        "#!/usr/bin/env bash\n"
+        "echo 'RIFT_ROAD_PERF stage1 frames=240 avg_ms=16.0 max_ms=40.0'\n"
+    )
+    godot_bin.chmod(0o755)
+
+    def write_fake_script(name, body):
+        path = scripts_dir / name
+        path.write_text("#!/usr/bin/env bash\nset -euo pipefail\n" + body)
+        path.chmod(0o755)
+
+    write_fake_script(
+        "check.sh",
+        "echo 'RIFT_ROAD_GODOT_VERSION ok version=4.6.1.stable.fake expected=4.6.x-stable'\n"
+        "echo 'RIFT_ROAD_RUNTIME_OK smoke'\n",
+    )
+    write_fake_script(
+        "check_macos_signing_env.sh",
+        "echo 'RIFT_ROAD_SIGNING_PREFLIGHT ok'\n",
+    )
+    write_fake_script("package_macos.sh", "echo 'RIFT_ROAD_PACKAGE ok'\n")
+    write_fake_script(
+        "sign_notarize_macos.sh",
+        "echo 'RIFT_ROAD_RELEASE_SIGNING ok output=build/macos/Rift Road-signed-notarized.zip'\n",
+    )
+    write_fake_script(
+        "audit_macos_package.sh",
+        "echo 'RIFT_ROAD_PACKAGE_AUDIT internal-only'\n",
+    )
+    write_fake_script(
+        "smoke_exported_macos_app.sh",
+        "echo 'RIFT_ROAD_EXPORTED_APP_SMOKE ok'\n",
+    )
+    write_fake_script(
+        "smoke_exported_keyboard_fallback.sh",
+        "echo 'RIFT_ROAD_EXPORTED_KEYBOARD_FALLBACK ok'\n",
+    )
+    write_fake_script(
+        "smoke_exported_focus_resume.sh",
+        "echo 'RIFT_ROAD_EXPORTED_FOCUS_RESUME ok'\n",
+    )
+    write_fake_script(
+        "check_focus_audio_evidence.sh",
+        "echo 'RIFT_ROAD_FOCUS_AUDIO_EVIDENCE blocked'\nexit 1\n",
+    )
+    write_fake_script(
+        "sample_exported_app_performance.sh",
+        "echo 'RIFT_ROAD_EXPORTED_PERF stage1 frames=240 avg_ms=10.0 max_ms=22.0'\n",
+    )
+    write_fake_script(
+        "check_playtest_evidence.sh",
+        "echo 'RIFT_ROAD_PLAYTEST_EVIDENCE blocked sessions=0/5'\nexit 1\n",
+    )
+    write_fake_script(
+        "check_second_machine_evidence.sh",
+        "echo 'RIFT_ROAD_SECOND_MACHINE_EVIDENCE blocked'\nexit 1\n",
+    )
+    write_fake_script(
+        "check_controller_evidence.sh",
+        "echo 'RIFT_ROAD_CONTROLLER_EVIDENCE blocked'\nexit 1\n",
+    )
+
+    result = subprocess.run(
+        ["bash", str(scripts_dir / "check_release_candidate.sh"), str(log_dir)],
+        cwd=fake_root,
+        env={**os.environ, "GODOT_BIN": str(godot_bin)},
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    output = result.stdout + result.stderr
+    audit = (log_dir / "completion-audit.md").read_text()
+    assert result.returncode == 1
+    assert "RIFT_ROAD_RELEASE_SIGNING ok" in output
+    assert "logs/release_signing.log" in audit
+    assert "macOS package audit is not release-candidate" not in output
+    assert "macOS package audit is not release-candidate" not in audit
+    assert (
+        "| Production-deployable macOS build path |"
+        " `logs/signing_preflight.log`, `logs/release_signing.log`,"
+        " `logs/package.log`, `logs/package_audit.log`,"
+        " `logs/second_machine_evidence.log` | `blocked` |"
+    ) in audit
 
 
 def test_repo_guidance_tracks_current_release_validation_gates(repo_root):
