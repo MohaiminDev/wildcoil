@@ -4,12 +4,13 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 CONTROLLER_DOC="${1:-"$ROOT_DIR/docs/controller_validation.md"}"
 
-python3 - "$CONTROLLER_DOC" <<'PY'
+python3 - "$CONTROLLER_DOC" "$ROOT_DIR" <<'PY'
 import re
 import sys
 from pathlib import Path
 
 doc_path = Path(sys.argv[1])
+root_dir = Path(sys.argv[2])
 text = doc_path.read_text() if doc_path.exists() else ""
 
 required_controller_families = 2
@@ -43,7 +44,8 @@ invalid_sessions = []
 def has_marker(block, marker):
     return re.search(rf"(?m)^{re.escape(marker)}\s*$", block) is not None
 
-def metadata_issues(block, labels):
+def metadata_values_and_issues(block, labels):
+    values = {}
     missing = []
     placeholders = []
     for label in labels:
@@ -52,6 +54,7 @@ def metadata_issues(block, labels):
             missing.append(label)
             continue
         value = match.group(1).strip()
+        values[label] = value
         if not value or value.upper() == "TBD":
             placeholders.append(label)
 
@@ -60,7 +63,20 @@ def metadata_issues(block, labels):
         issues.append("missing metadata: " + ", ".join(missing))
     if placeholders:
         issues.append("placeholder metadata: " + ", ".join(placeholders))
-    return issues
+    return values, issues
+
+def evidence_capture_issues(values):
+    capture = values.get("Evidence capture", "")
+    if not capture or capture.upper() == "TBD":
+        return []
+    capture_path = Path(capture)
+    if not capture_path.is_absolute():
+        capture_path = root_dir / capture_path
+    if not capture_path.exists() or not capture_path.is_file():
+        return [f"missing evidence file: {capture}"]
+    if capture_path.stat().st_size <= 0:
+        return [f"empty evidence file: {capture}"]
+    return []
 
 for block in re.split(r"(?=### Controller Session:)", text):
     if not has_marker(block, "RIFT_ROAD_CONTROLLER_SESSION ok"):
@@ -74,7 +90,8 @@ for block in re.split(r"(?=### Controller Session:)", text):
     if missing:
         invalid_sessions.append(f"{family} missing checks: {', '.join(missing)}")
         continue
-    metadata_blockers = metadata_issues(block, required_controller_metadata)
+    values, metadata_blockers = metadata_values_and_issues(block, required_controller_metadata)
+    metadata_blockers.extend(evidence_capture_issues(values))
     if metadata_blockers:
         invalid_sessions.extend(f"{family} {issue}" for issue in metadata_blockers)
         continue
@@ -89,7 +106,8 @@ for block in re.split(r"(?=### Keyboard Fallback Session)", text):
     if missing:
         keyboard_blockers.append("keyboard fallback missing checks: " + ", ".join(missing))
         continue
-    metadata_blockers = metadata_issues(block, required_keyboard_metadata)
+    values, metadata_blockers = metadata_values_and_issues(block, required_keyboard_metadata)
+    metadata_blockers.extend(evidence_capture_issues(values))
     if metadata_blockers:
         keyboard_blockers.extend(f"keyboard fallback {issue}" for issue in metadata_blockers)
         continue

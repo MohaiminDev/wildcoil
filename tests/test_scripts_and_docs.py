@@ -743,7 +743,7 @@ RIFT_ROAD_KEYBOARD_FALLBACK ok
     assert "Evidence capture" in output
 
 
-def test_controller_evidence_gate_accepts_complete_session_metadata(
+def test_controller_evidence_gate_rejects_missing_evidence_files(
     repo_root, tmp_path
 ):
     script_path = repo_root / "scripts" / "check_controller_evidence.sh"
@@ -760,7 +760,7 @@ RIFT_ROAD_CONTROLLER_SESSION ok
 - Controller family: `arcade-pad`
 - Device name: `Example Arcade Pad`
 - Connection: `usb`
-- Evidence capture: `docs/playtest-captures/controller/example-arcade-pad.mov`
+- Evidence capture: `docs/playtest-captures/controller/missing-arcade-pad.mov`
 - Title: `pass`
 - Hero select: `pass`
 - Stage 1 movement: `pass`
@@ -780,7 +780,7 @@ RIFT_ROAD_CONTROLLER_SESSION ok
 - Controller family: `console-pad`
 - Device name: `Example Console Pad`
 - Connection: `bluetooth`
-- Evidence capture: `docs/playtest-captures/controller/example-console-pad.mov`
+- Evidence capture: `docs/playtest-captures/controller/missing-console-pad.mov`
 - Title: `pass`
 - Hero select: `pass`
 - Stage 1 movement: `pass`
@@ -797,7 +797,96 @@ RIFT_ROAD_CONTROLLER_SESSION ok
 RIFT_ROAD_KEYBOARD_FALLBACK ok
 
 - Build: `759cb78`
-- Evidence capture: `docs/playtest-captures/controller/example-keyboard.mov`
+- Evidence capture: `docs/playtest-captures/controller/missing-keyboard.mov`
+- Title: `pass`
+- Hero select: `pass`
+- Stage 1 movement: `pass`
+- Attack: `pass`
+- Jump: `pass`
+- Special: `pass`
+- Dash: `pass`
+- Pause: `pass`
+- Cancel/back: `pass`
+- Blockers: `none`
+""".strip()
+    )
+
+    result = subprocess.run(
+        ["bash", str(script_path), str(fake_doc)],
+        cwd=repo_root,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert result.returncode == 1
+    output = result.stdout + result.stderr
+    assert "RIFT_ROAD_CONTROLLER_EVIDENCE blocked" in output
+    assert "missing evidence file" in output
+    assert "missing-arcade-pad.mov" in output
+    assert "missing-keyboard.mov" in output
+
+
+def test_controller_evidence_gate_accepts_complete_session_metadata(
+    repo_root, tmp_path
+):
+    script_path = repo_root / "scripts" / "check_controller_evidence.sh"
+    fake_doc = tmp_path / "controller_validation.md"
+    arcade_evidence = tmp_path / "example-arcade-pad.mov"
+    console_evidence = tmp_path / "example-console-pad.mov"
+    keyboard_evidence = tmp_path / "example-keyboard.mov"
+    for evidence_path in [arcade_evidence, console_evidence, keyboard_evidence]:
+        evidence_path.write_bytes(b"evidence")
+    fake_doc.write_text(
+        f"""
+# Controller Validation
+
+### Controller Session: `Arcade Pad`
+
+RIFT_ROAD_CONTROLLER_SESSION ok
+
+- Build: `759cb78`
+- Controller family: `arcade-pad`
+- Device name: `Example Arcade Pad`
+- Connection: `usb`
+- Evidence capture: `{arcade_evidence}`
+- Title: `pass`
+- Hero select: `pass`
+- Stage 1 movement: `pass`
+- Attack: `pass`
+- Jump: `pass`
+- Special: `pass`
+- Dash: `pass`
+- Pause: `pass`
+- Cancel/back: `pass`
+- Blockers: `none`
+
+### Controller Session: `Console Pad`
+
+RIFT_ROAD_CONTROLLER_SESSION ok
+
+- Build: `759cb78`
+- Controller family: `console-pad`
+- Device name: `Example Console Pad`
+- Connection: `bluetooth`
+- Evidence capture: `{console_evidence}`
+- Title: `pass`
+- Hero select: `pass`
+- Stage 1 movement: `pass`
+- Attack: `pass`
+- Jump: `pass`
+- Special: `pass`
+- Dash: `pass`
+- Pause: `pass`
+- Cancel/back: `pass`
+- Blockers: `none`
+
+### Keyboard Fallback Session
+
+RIFT_ROAD_KEYBOARD_FALLBACK ok
+
+- Build: `759cb78`
+- Evidence capture: `{keyboard_evidence}`
 - Title: `pass`
 - Hero select: `pass`
 - Stage 1 movement: `pass`
