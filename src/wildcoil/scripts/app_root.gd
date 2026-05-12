@@ -18,6 +18,10 @@ const KEYBOARD_FALLBACK_SMOKE_ARG := "--rift-road-keyboard-fallback-smoke"
 const KEYBOARD_FALLBACK_OUTPUT_PREFIX := "--rift-road-keyboard-fallback-output="
 const KEYBOARD_FALLBACK_CAPTURE_DIR_PREFIX := "--rift-road-keyboard-fallback-capture-dir="
 const KEYBOARD_FALLBACK_CAPTURE_NAME := "stage1-exported-app-keyboard-fallback.png"
+const FOCUS_RESUME_SMOKE_ARG := "--rift-road-focus-resume-smoke"
+const FOCUS_RESUME_OUTPUT_PREFIX := "--rift-road-focus-resume-output="
+const FOCUS_RESUME_CAPTURE_DIR_PREFIX := "--rift-road-focus-resume-capture-dir="
+const FOCUS_RESUME_CAPTURE_NAME := "stage1-exported-app-focus-resume.png"
 const HERO_CARD_SIZE := Vector2(284, 198)
 const HERO_CARD_SLANT := 22.0
 const RENDER_PERF_SAMPLE_ARG := "--rift-road-render-perf-sample"
@@ -90,6 +94,8 @@ func _ready() -> void:
 	var smoke_capture_dir := _launch_arg_value(launch_args, SMOKE_CAPTURE_DIR_PREFIX)
 	var keyboard_fallback_output_path := _launch_arg_value(launch_args, KEYBOARD_FALLBACK_OUTPUT_PREFIX)
 	var keyboard_fallback_capture_dir := _launch_arg_value(launch_args, KEYBOARD_FALLBACK_CAPTURE_DIR_PREFIX)
+	var focus_resume_output_path := _launch_arg_value(launch_args, FOCUS_RESUME_OUTPUT_PREFIX)
+	var focus_resume_capture_dir := _launch_arg_value(launch_args, FOCUS_RESUME_CAPTURE_DIR_PREFIX)
 	if render_perf_active:
 		_configure_render_perf_window(render_perf_window_size, render_perf_window_mode)
 	_show_title()
@@ -97,6 +103,8 @@ func _ready() -> void:
 		call_deferred("_run_exported_smoke_capture", smoke_capture_dir)
 	elif KEYBOARD_FALLBACK_SMOKE_ARG in launch_args:
 		call_deferred("_run_exported_keyboard_fallback_smoke", keyboard_fallback_output_path, keyboard_fallback_capture_dir)
+	elif FOCUS_RESUME_SMOKE_ARG in launch_args:
+		call_deferred("_run_exported_focus_resume_smoke", focus_resume_output_path, focus_resume_capture_dir)
 	elif render_perf_active or _should_autostart_stage1(launch_args):
 		call_deferred("_start_stage1_demo")
 
@@ -379,6 +387,77 @@ func _run_exported_keyboard_fallback_smoke(output_path: String, capture_dir: Str
 		get_tree().quit(1)
 		return
 	print("RIFT_ROAD_EXPORTED_KEYBOARD_FALLBACK ok output=%s capture=%s" % [output_path, capture_path])
+	get_tree().quit(0)
+
+func _run_exported_focus_resume_smoke(output_path: String, capture_dir: String) -> void:
+	if output_path == "":
+		push_error("Missing exported focus resume output path")
+		get_tree().quit(1)
+		return
+	var output_dir := output_path.get_base_dir()
+	if output_dir != "":
+		DirAccess.make_dir_recursive_absolute(output_dir)
+	var capture_path := ""
+	if capture_dir != "":
+		DirAccess.make_dir_recursive_absolute(capture_dir)
+		capture_path = capture_dir.path_join(FOCUS_RESUME_CAPTURE_NAME)
+	await get_tree().process_frame
+	await RenderingServer.frame_post_draw
+	selected_hero = "raya_flint"
+	_start_campaign()
+	await get_tree().process_frame
+	await get_tree().process_frame
+	var stage_started: bool = mode == "stage" and stage != null and is_instance_valid(stage) and stage.player != null
+	var focus_pause := false
+	var overlay_visible := false
+	var focus_message := false
+	var audio_suspended := false
+	var returned_message := false
+	var audio_resumed := false
+	var resume_ok := false
+	if stage_started:
+		_handle_focus_lost()
+		await get_tree().process_frame
+		await RenderingServer.frame_post_draw
+		if capture_path != "" and not _save_viewport_png(capture_path):
+			capture_path = ""
+		focus_pause = get_tree().paused and focus_pause_active
+		overlay_visible = pause_layer != null and pause_layer.visible and paused_overlay != null and paused_overlay.visible and title_layer != null and not title_layer.visible
+		focus_message = pause_text_label != null and pause_text_label.text.contains("Window focus lost")
+		audio_suspended = stage.audio_manager != null and stage.audio_manager.focus_suspended and stage.audio_manager.focus_suspend_count > 0
+		_handle_focus_returned()
+		await get_tree().process_frame
+		returned_message = pause_text_label != null and pause_text_label.text == "PAUSED\nEsc / Start to resume"
+		audio_resumed = stage.audio_manager != null and not stage.audio_manager.focus_suspended and stage.audio_manager.focus_resume_count > 0
+		_press_keyboard_smoke_menu_key(KEY_ESCAPE)
+		await get_tree().process_frame
+		resume_ok = not get_tree().paused and pause_layer != null and not pause_layer.visible and paused_overlay != null and not paused_overlay.visible and mode == "stage"
+	var payload := {
+		"automated": true,
+		"note": "Automated exported-app focus/resume smoke; verifies app focus handler state, not audible manual device output.",
+		"stage_started": stage_started,
+		"focus_pause": focus_pause and focus_message,
+		"overlay": overlay_visible,
+		"audio": audio_suspended and audio_resumed,
+		"return_focus": returned_message,
+		"resume": resume_ok,
+		"capture": capture_path
+	}
+	var output_file := FileAccess.open(output_path, FileAccess.WRITE)
+	if output_file == null:
+		push_error("Unable to write exported focus resume output: %s" % output_path)
+		get_tree().paused = false
+		get_tree().quit(1)
+		return
+	output_file.store_string(JSON.stringify(payload, "\t"))
+	output_file.close()
+	var ok := stage_started and focus_pause and focus_message and overlay_visible and audio_suspended and audio_resumed and returned_message and resume_ok and capture_path != ""
+	get_tree().paused = false
+	if not ok:
+		push_error("RIFT_ROAD_EXPORTED_FOCUS_RESUME failed output=%s capture=%s" % [output_path, capture_path])
+		get_tree().quit(1)
+		return
+	print("RIFT_ROAD_EXPORTED_FOCUS_RESUME ok output=%s capture=%s" % [output_path, capture_path])
 	get_tree().quit(0)
 
 func _show_opening_story_smoke_capture() -> bool:

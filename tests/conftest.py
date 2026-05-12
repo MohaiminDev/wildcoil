@@ -25,10 +25,11 @@ def godot_bin() -> str:
 
 
 @pytest.fixture
-def godot_runner(godot_bin):
+def godot_runner(godot_bin, tmp_path):
     def run_godot(*args: str, timeout: int = 20) -> subprocess.CompletedProcess[str]:
+        log_path = tmp_path / "godot.log"
         return subprocess.run(
-            [godot_bin, "--path", str(PROJECT_ROOT), *args],
+            [godot_bin, "--path", str(PROJECT_ROOT), "--log-file", str(log_path), *args],
             cwd=REPO_ROOT,
             text=True,
             capture_output=True,
@@ -37,4 +38,3 @@ def godot_runner(godot_bin):
         )
 
     return run_godot
-

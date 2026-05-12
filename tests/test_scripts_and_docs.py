@@ -16,6 +16,7 @@ def test_run_and_check_scripts_exist(repo_root):
         "scripts/check_second_machine_evidence.sh",
         "scripts/check_controller_evidence.sh",
         "scripts/smoke_exported_keyboard_fallback.sh",
+        "scripts/smoke_exported_focus_resume.sh",
     ]:
         path = repo_root / relative_path
         assert path.exists()
@@ -88,6 +89,37 @@ def test_exported_app_smoke_script_captures_opening_story_viewport(repo_root):
     assert "last_story_beat" in app_root
     assert "stage1-exported-app-smoke-opening-story.png" in handoff
     assert "stage1-exported-app-smoke-opening-story.png" in audit
+
+
+def test_exported_app_focus_resume_smoke_records_artifacts(repo_root):
+    script = (repo_root / "scripts" / "smoke_exported_focus_resume.sh").read_text()
+    app_root = (repo_root / "src" / "wildcoil" / "scripts" / "app_root.gd").read_text()
+    docs = (repo_root / "docs" / "macos_build_and_distribution.md").read_text()
+    handoff = (
+        repo_root
+        / "docs"
+        / "playtest-captures"
+        / "stage1-marketability-handoff-2026-05-10.md"
+    ).read_text()
+    audit = (repo_root / "docs" / "market-readiness-audit-2026-05-10.md").read_text()
+
+    assert "Rift Road.zip" in script
+    assert "open -n" in script
+    assert "--rift-road-focus-resume-smoke" in script
+    assert "--rift-road-focus-resume-output=" in script
+    assert "--rift-road-focus-resume-capture-dir=" in script
+    assert "stage1-exported-app-focus-resume.json" in script
+    assert "stage1-exported-app-focus-resume.png" in script
+    assert "RIFT_ROAD_EXPORTED_FOCUS_RESUME ok" in script
+    assert "FOCUS_RESUME_SMOKE_ARG" in app_root
+    assert "FOCUS_RESUME_OUTPUT_PREFIX" in app_root
+    assert "FOCUS_RESUME_CAPTURE_NAME" in app_root
+    assert "_run_exported_focus_resume_smoke" in app_root
+    assert "focus_pause" in app_root
+    assert "audio" in app_root
+    assert "scripts/smoke_exported_focus_resume.sh" in docs
+    assert "RIFT_ROAD_EXPORTED_FOCUS_RESUME ok" in handoff
+    assert "RIFT_ROAD_EXPORTED_FOCUS_RESUME ok" in audit
 
 
 def test_exported_app_smoke_script_captures_stage_clear_viewport(repo_root):
@@ -301,6 +333,7 @@ def test_release_candidate_gate_combines_automated_and_manual_blockers(repo_root
     assert "scripts/audit_macos_package.sh" in script
     assert "scripts/smoke_exported_macos_app.sh" in script
     assert "scripts/smoke_exported_keyboard_fallback.sh" in script
+    assert "scripts/smoke_exported_focus_resume.sh" in script
     assert "scripts/sample_exported_app_performance.sh" in script
     assert "scripts/check_playtest_evidence.sh" in script
     assert "scripts/check_second_machine_evidence.sh" in script
@@ -311,6 +344,7 @@ def test_release_candidate_gate_combines_automated_and_manual_blockers(repo_root
     assert "RIFT_ROAD_SECOND_MACHINE_EVIDENCE ok" in script
     assert "RIFT_ROAD_CONTROLLER_EVIDENCE ok" in script
     assert "RIFT_ROAD_EXPORTED_KEYBOARD_FALLBACK ok" in script
+    assert "RIFT_ROAD_EXPORTED_FOCUS_RESUME ok" in script
     assert "Public playtest or release-candidate proof" in script
     assert "Player love / commercial viability" in script
     assert "RIFT_ROAD_RELEASE_GATE blocked" in script
@@ -479,11 +513,13 @@ def test_known_tester_packet_script_collects_internal_build_evidence(repo_root):
     assert "scripts/audit_macos_package.sh" in script
     assert "scripts/smoke_exported_macos_app.sh" in script
     assert "scripts/smoke_exported_keyboard_fallback.sh" in script
+    assert "scripts/smoke_exported_focus_resume.sh" in script
     assert "scripts/sample_exported_app_performance.sh" in script
     assert "Rift Road.zip" in script
     assert "docs/public_playtest_gate.md" in script
     assert "exported-app-smoke-latest" in script
     assert "keyboard-fallback-latest" in script
+    assert "focus-resume-latest" in script
     assert "exported-app-performance-latest" in script
     assert "exported-app-performance-fullscreen-latest" in script
     assert "performance-host-latest" in script
@@ -495,7 +531,9 @@ def test_known_tester_packet_script_collects_internal_build_evidence(repo_root):
     assert "printf -- '- Package SHA256: `%s`\\n' \"$PACKAGE_SHA256\"" in script
     assert "printf -- '- `logs/check.log`\\n'" in script
     assert "printf -- '- `logs/exported_app_keyboard_fallback.log`\\n'" in script
+    assert "printf -- '- `logs/exported_app_focus_resume.log`\\n'" in script
     assert "printf -- '- `evidence/keyboard-fallback-latest/`\\n'" in script
+    assert "printf -- '- `evidence/focus-resume-latest/`\\n'" in script
     assert "scripts/prepare_known_tester_packet.sh" in packet
     assert "scripts/prepare_known_tester_packet.sh" in macos_docs
     assert "known-tester packet" in handoff

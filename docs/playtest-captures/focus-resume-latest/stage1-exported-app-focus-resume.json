@@ -1,0 +1,11 @@
+{
+	"audio": true,
+	"automated": true,
+	"capture": "/Users/himu/Desktop/career/personal_projects/wildcoil/docs/playtest-captures/focus-resume-latest/stage1-exported-app-focus-resume.png",
+	"focus_pause": true,
+	"note": "Automated exported-app focus/resume smoke; verifies app focus handler state, not audible manual device output.",
+	"overlay": true,
+	"resume": true,
+	"return_focus": true,
+	"stage_started": true
+}

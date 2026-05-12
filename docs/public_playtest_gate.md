@@ -9,6 +9,7 @@ Use this packet before asking anyone outside the project to judge whether `Rift 
 - Smoke command: `bash scripts/smoke_exported_macos_app.sh`
 - Validation command: `bash scripts/check.sh`
 - Package audit command: `bash scripts/audit_macos_package.sh`
+- Exported-app focus/resume smoke command: `bash scripts/smoke_exported_focus_resume.sh`
 - Known-tester packet command: `bash scripts/prepare_known_tester_packet.sh`
 - Controller validation checklist: `docs/controller_validation.md`
 - Second-machine validation checklist: `docs/second_machine_validation.md`

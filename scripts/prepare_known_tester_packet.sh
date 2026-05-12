@@ -62,6 +62,7 @@ fi
 run_logged package_audit bash "$ROOT_DIR/scripts/audit_macos_package.sh"
 run_logged exported_app_smoke bash "$ROOT_DIR/scripts/smoke_exported_macos_app.sh"
 run_logged exported_app_keyboard_fallback bash "$ROOT_DIR/scripts/smoke_exported_keyboard_fallback.sh"
+run_logged exported_app_focus_resume bash "$ROOT_DIR/scripts/smoke_exported_focus_resume.sh"
 run_logged exported_app_performance bash "$ROOT_DIR/scripts/sample_exported_app_performance.sh"
 
 packet_status="internal-only"
@@ -80,6 +81,7 @@ copy_if_exists "$ROOT_DIR/docs/market-readiness-audit-2026-05-10.md" "$DOCS_DIR/
 copy_if_exists "$ROOT_DIR/docs/playtest-captures/stage1-marketability-handoff-2026-05-10.md" "$DOCS_DIR/stage1-marketability-handoff-2026-05-10.md"
 copy_if_exists "$ROOT_DIR/docs/playtest-captures/exported-app-smoke-latest" "$EVIDENCE_DIR/exported-app-smoke-latest"
 copy_if_exists "$ROOT_DIR/docs/playtest-captures/keyboard-fallback-latest" "$EVIDENCE_DIR/keyboard-fallback-latest"
+copy_if_exists "$ROOT_DIR/docs/playtest-captures/focus-resume-latest" "$EVIDENCE_DIR/focus-resume-latest"
 copy_if_exists "$ROOT_DIR/docs/playtest-captures/exported-app-performance-latest" "$EVIDENCE_DIR/exported-app-performance-latest"
 copy_if_exists "$ROOT_DIR/docs/playtest-captures/exported-app-performance-windowed-1080p-latest" "$EVIDENCE_DIR/exported-app-performance-windowed-1080p-latest"
 copy_if_exists "$ROOT_DIR/docs/playtest-captures/exported-app-performance-fullscreen-latest" "$EVIDENCE_DIR/exported-app-performance-fullscreen-latest"
@@ -105,10 +107,12 @@ copy_if_exists "$ROOT_DIR/docs/playtest-captures/performance-host-latest" "$EVID
   printf -- '- `logs/package_audit.log`\n'
   printf -- '- `logs/exported_app_smoke.log`\n'
   printf -- '- `logs/exported_app_keyboard_fallback.log`\n'
+  printf -- '- `logs/exported_app_focus_resume.log`\n'
   printf -- '- `logs/exported_app_performance.log`\n\n'
   printf '## Evidence\n\n'
   printf -- '- `evidence/exported-app-smoke-latest/`\n'
   printf -- '- `evidence/keyboard-fallback-latest/`\n'
+  printf -- '- `evidence/focus-resume-latest/`\n'
   printf -- '- `evidence/exported-app-performance-latest/`\n'
   printf -- '- `evidence/exported-app-performance-windowed-1080p-latest/`\n'
   printf -- '- `evidence/exported-app-performance-fullscreen-latest/`\n'

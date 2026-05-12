@@ -54,6 +54,7 @@ run_logged package bash "$ROOT_DIR/scripts/package_macos.sh"
 run_logged package_audit bash "$ROOT_DIR/scripts/audit_macos_package.sh"
 run_logged exported_app_smoke bash "$ROOT_DIR/scripts/smoke_exported_macos_app.sh"
 run_logged exported_app_keyboard_fallback bash "$ROOT_DIR/scripts/smoke_exported_keyboard_fallback.sh"
+run_logged exported_app_focus_resume bash "$ROOT_DIR/scripts/smoke_exported_focus_resume.sh"
 run_logged exported_app_performance bash "$ROOT_DIR/scripts/sample_exported_app_performance.sh"
 if ! run_logged_allow_failure playtest_evidence bash "$ROOT_DIR/scripts/check_playtest_evidence.sh"; then
   add_blocker "Playtest evidence gate is blocked"
@@ -70,7 +71,7 @@ if ! run_logged_allow_failure controller_evidence bash "$ROOT_DIR/scripts/check_
 elif ! grep -q "RIFT_ROAD_CONTROLLER_EVIDENCE ok" "$LOG_DIR/controller_evidence.log"; then
   add_blocker "Controller evidence gate did not report ok"
 fi
-run_logged performance "$GODOT_BIN" --path "$ROOT_DIR/src/wildcoil" --headless --script "$ROOT_DIR/src/wildcoil/tools/runtime_test_runner.gd" -- stage1_performance_sample
+run_logged performance "$GODOT_BIN" --path "$ROOT_DIR/src/wildcoil" --log-file "$LOG_DIR/godot-performance.log" --headless --script "$ROOT_DIR/src/wildcoil/tools/runtime_test_runner.gd" -- stage1_performance_sample
 
 if ! grep -q "RIFT_ROAD_PACKAGE_AUDIT release-candidate" "$LOG_DIR/package_audit.log"; then
   add_blocker "macOS package audit is not release-candidate"
@@ -78,6 +79,10 @@ fi
 
 if ! grep -q "RIFT_ROAD_EXPORTED_KEYBOARD_FALLBACK ok" "$LOG_DIR/exported_app_keyboard_fallback.log"; then
   add_blocker "Exported-app keyboard fallback smoke did not report ok"
+fi
+
+if ! grep -q "RIFT_ROAD_EXPORTED_FOCUS_RESUME ok" "$LOG_DIR/exported_app_focus_resume.log"; then
+  add_blocker "Exported-app focus/resume smoke did not report ok"
 fi
 
 if grep -q "| Public playtest or release-candidate proof |.*| Not achieved |" "$MARKET_AUDIT"; then
