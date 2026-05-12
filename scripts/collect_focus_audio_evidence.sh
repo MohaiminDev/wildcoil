@@ -44,7 +44,7 @@ Options:
   --output-device VALUE                      Required; real output device used.
   --blockers VALUE                           Required; use "none" only when true.
   --evidence-dir PATH                        Optional; default docs/playtest-captures/focus-audio.
-  --build VALUE                              Optional; defaults to current commit and package SHA-256. Custom values must include package_sha256=<sha> to pass the gate.
+  --build VALUE                              Optional; defaults to current commit, package SHA-256, and package source. Custom values must include package_sha256=<sha> and package_source=Rift Road-signed-notarized.zip to pass the gate.
   --session-label VALUE                      Optional label used in the generated heading.
   --confirm-focus-pause-overlay              Confirm focus loss showed the pause overlay.
   --confirm-audio-before-focus-loss          Confirm audio was audible before focus loss.
@@ -177,8 +177,12 @@ fi
 
 build_commit="$(git -C "$ROOT_DIR" rev-parse --short HEAD 2>/dev/null || printf 'unknown')"
 package_sha256="$(shasum -a 256 "$PACKAGE_PATH" | awk '{print $1}')"
+package_source="$PACKAGE_PATH"
+if [[ "$package_source" == "$ROOT_DIR/"* ]]; then
+  package_source="${package_source#"$ROOT_DIR/"}"
+fi
 if [[ -z "$build_value" ]]; then
-  build_value="commit=${build_commit} package_sha256=${package_sha256}"
+  build_value="commit=${build_commit} package_sha256=${package_sha256} package_source=${package_source}"
 fi
 
 slugify() {

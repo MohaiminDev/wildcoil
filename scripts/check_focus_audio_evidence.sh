@@ -58,6 +58,13 @@ def metadata_values_and_issues(block):
     build_value = values.get("Build", "").strip()
     if build_value and build_value.upper() != "TBD" and "package_sha256=" not in build_value:
         issues.append("Build missing package_sha256")
+    if build_value and build_value.upper() != "TBD":
+        if "package_source=" not in build_value:
+            issues.append("Build missing signed package_source")
+        else:
+            source_value = build_value.split("package_source=", 1)[1]
+            if "Rift Road-signed-notarized.zip" not in source_value:
+                issues.append("Build missing signed package_source")
     return values, issues
 
 

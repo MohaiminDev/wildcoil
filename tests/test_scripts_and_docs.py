@@ -349,8 +349,10 @@ def test_focus_audio_evidence_gate_blocks_without_manual_audible_confirmation(
     assert "Audio quiet during focus pause: `pass`" in script
     assert "Audio after resume: `pass`" in script
     assert "Evidence capture" in script
+    assert "Build missing signed package_source" in script
     assert "docs/focus_audio_validation.md" in docs
     assert "scripts/check_focus_audio_evidence.sh" in docs
+    assert "package_source=build/macos/Rift Road-signed-notarized.zip" in docs
     assert "scripts/check_focus_audio_evidence.sh" in release_gate
     assert "RIFT_ROAD_FOCUS_AUDIO_EVIDENCE ok" in release_gate
     assert "scripts/check_focus_audio_evidence.sh" in packet_script
@@ -358,9 +360,12 @@ def test_focus_audio_evidence_gate_blocks_without_manual_audible_confirmation(
     assert "Focus/audio validation checklist" in packet_script
     assert "printf -- '- Focus/audio evidence: `%s`\\n'" in packet_script
     assert "scripts/check_focus_audio_evidence.sh" in public_gate
+    assert "signed `package_source=...Rift Road-signed-notarized.zip`" in public_gate
     assert "scripts/check_focus_audio_evidence.sh" in macos_docs
     assert "scripts/check_focus_audio_evidence.sh" in handoff
+    assert "signed package-source metadata" in handoff
     assert "scripts/check_focus_audio_evidence.sh" in audit
+    assert "focus/audio package-SHA and signed-source coverage" in audit
 
     result = subprocess.run(
         ["bash", str(script_path)],
@@ -447,7 +452,7 @@ def test_focus_audio_evidence_collector_scaffolds_manual_audible_session(
             "--evidence-dir",
             str(evidence_dir),
             "--build",
-            "commit=fake package_sha256=fake",
+            "commit=fake package_sha256=fake package_source=build/macos/Rift Road-signed-notarized.zip",
             "--session-label",
             "Manual focus audio",
             "--confirm-focus-pause-overlay",
@@ -528,6 +533,47 @@ RIFT_ROAD_FOCUS_AUDIO_SESSION ok
     output = result.stdout + result.stderr
     assert "RIFT_ROAD_FOCUS_AUDIO_EVIDENCE blocked" in output
     assert "Build missing package_sha256" in output
+
+
+def test_focus_audio_evidence_gate_rejects_unsigned_package_source(
+    repo_root, tmp_path
+):
+    script_path = repo_root / "scripts" / "check_focus_audio_evidence.sh"
+    fake_doc = tmp_path / "focus_audio_validation.md"
+    evidence_path = tmp_path / "focus-audio-evidence.md"
+    evidence_path.write_text("manual audible focus/audio evidence\n")
+    fake_doc.write_text(
+        f"""
+# Focus Audio Validation
+
+### Focus Audio Session: `Manual focus audio`
+
+RIFT_ROAD_FOCUS_AUDIO_SESSION ok
+
+- Build: `commit=759cb78 package_sha256=abc123 package_source=build/macos/Rift Road.zip`
+- Output device: `Built-in speakers`
+- Evidence capture: `{evidence_path}`
+- Focus pause overlay: `pass`
+- Audio before focus loss: `pass`
+- Audio quiet during focus pause: `pass`
+- Audio after resume: `pass`
+- Resume control: `pass`
+- Blockers: `none`
+""".strip()
+    )
+
+    result = subprocess.run(
+        ["bash", str(script_path), str(fake_doc)],
+        cwd=repo_root,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert result.returncode == 1
+    output = result.stdout + result.stderr
+    assert "RIFT_ROAD_FOCUS_AUDIO_EVIDENCE blocked" in output
+    assert "Build missing signed package_source" in output
 
 
 def test_exported_app_smoke_script_captures_stage_clear_viewport(repo_root):

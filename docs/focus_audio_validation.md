@@ -8,9 +8,9 @@ Run the gate after recording a session:
 bash scripts/check_focus_audio_evidence.sh
 ```
 
-Use `bash scripts/collect_focus_audio_evidence.sh --help` during real exported-app sessions to generate a non-empty evidence note and a paste-ready session snippet. The collector uses the selected signed package when available, including `Rift Road-signed-notarized.zip` inside a known-tester packet, then falls back to `Rift Road.zip`, and writes `commit=<short> package_sha256=<sha>` by default. If you override `--build`, keep `package_sha256=<sha>` in the value. The collector still depends on a human confirming real audible output; do not paste its `ok` snippet unless the session actually happened on the exported app.
+Use `bash scripts/collect_focus_audio_evidence.sh --help` during real exported-app sessions to generate a non-empty evidence note and a paste-ready session snippet. The collector uses the selected signed package when available, including `Rift Road-signed-notarized.zip` inside a known-tester packet, then falls back to `Rift Road.zip`, and writes `commit=<short> package_sha256=<sha> package_source=<path>` by default. If you override `--build`, keep `package_sha256=<sha>` and signed `package_source=...Rift Road-signed-notarized.zip` in the value. Unsigned fallback snippets are internal-only notes; they do not satisfy this gate. The collector still depends on a human confirming real audible output; do not paste its `ok` snippet unless the session actually happened on the exported app.
 
-The gate passes only after one completed manual exported-app session confirms the focus pause overlay, audible output before focus loss, quiet/suspended audio while focus-paused, audible output after resume, and resume control. The `Build` field must include `package_sha256=<sha>`, and the `Evidence capture` field must point to a real, non-empty note, screenshot, or video file.
+The gate passes only after one completed manual exported-app session confirms the focus pause overlay, audible output before focus loss, quiet/suspended audio while focus-paused, audible output after resume, and resume control. The `Build` field must include `package_sha256=<sha>` and signed `package_source=build/macos/Rift Road-signed-notarized.zip` or `package_source=Rift Road-signed-notarized.zip`, and the `Evidence capture` field must point to a real, non-empty note, screenshot, or video file.
 
 ## Focus Audio Session Template
 
@@ -18,7 +18,7 @@ Do not add `RIFT_ROAD_FOCUS_AUDIO_SESSION ok` until the exported macOS app has b
 
 ### Focus Audio Session: `TBD`
 
-- Build: `commit=<short> package_sha256=<sha>`
+- Build: `commit=<short> package_sha256=<sha> package_source=build/macos/Rift Road-signed-notarized.zip`
 - Output device: `TBD`
 - Evidence capture: `TBD`
 - Focus pause overlay: `TBD`
