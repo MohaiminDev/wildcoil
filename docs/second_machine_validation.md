@@ -23,7 +23,7 @@ On the actual second Mac, generate the expected host/install/capture files with:
 RIFT_ROAD_SECOND_MACHINE_LABEL="Apple Silicon Mac B" bash scripts/collect_second_machine_evidence.sh
 ```
 
-The collector prefers `build/macos/Rift Road-signed-notarized.zip` or the same file inside a known-tester packet when it is present, then falls back to `build/macos/Rift Road.zip`. It runs `scripts/audit_macos_package.sh` and `scripts/smoke_exported_macos_app.sh`, writes `package-audit.log` and `exported-app-smoke.log` next to the evidence files, records package SHA-256 metadata for the exact zip, and only records `RIFT_ROAD_SECOND_MACHINE_INSTALL ok` when the package is a release-candidate audit, Gatekeeper accepts it, and launched-app title/gameplay captures are present.
+The collector prefers `build/macos/Rift Road-signed-notarized.zip` or the same file inside a known-tester packet when it is present, then falls back to `build/macos/Rift Road.zip` for internal-only handoff evidence. It runs `scripts/audit_macos_package.sh` and `scripts/smoke_exported_macos_app.sh`, writes `package-audit.log` and `exported-app-smoke.log` next to the evidence files, records package SHA-256 metadata for the exact zip, and only records `RIFT_ROAD_SECOND_MACHINE_INSTALL ok` when the package is a release-candidate audit, Gatekeeper accepts it, and launched-app title/gameplay captures are present. `bash scripts/check_second_machine_evidence.sh` only accepts the signed/notarized package source for release evidence.
 
 ## Required Host Profile
 
@@ -49,7 +49,7 @@ The collector prefers `build/macos/Rift Road-signed-notarized.zip` or the same f
 ```markdown
 # Second-Machine Install Smoke
 
-- Package source: `build/macos/Rift Road-signed-notarized.zip` or `build/macos/Rift Road.zip`
+- Package source: `build/macos/Rift Road-signed-notarized.zip`
 - Package SHA256: `TODO`
 - Package status: `RIFT_ROAD_PACKAGE_AUDIT release-candidate`
 - Gatekeeper result: `accepted`
