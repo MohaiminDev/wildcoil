@@ -8,6 +8,8 @@ Run the gate after recording a session:
 bash scripts/check_focus_audio_evidence.sh
 ```
 
+Use `bash scripts/collect_focus_audio_evidence.sh --help` during real exported-app sessions to generate a non-empty evidence note and a paste-ready session snippet. The collector still depends on a human confirming real audible output; do not paste its `ok` snippet unless the session actually happened on the exported app.
+
 The gate passes only after one completed manual exported-app session confirms the focus pause overlay, audible output before focus loss, quiet/suspended audio while focus-paused, audible output after resume, and resume control. The `Evidence capture` field must point to a real, non-empty note, screenshot, or video file.
 
 ## Focus Audio Session Template

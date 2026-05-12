@@ -116,6 +116,7 @@ As of 2026-04-27, the Rift Road prototype uses Godot 4.x under `src/wildcoil`.
 - Smoke launched exported app keyboard fallback: `bash scripts/smoke_exported_keyboard_fallback.sh`
 - Smoke launched exported app focus/resume: `bash scripts/smoke_exported_focus_resume.sh`
 - Check manual focus/audio evidence threshold: `bash scripts/check_focus_audio_evidence.sh`
+- Collect manual focus/audio evidence note: `bash scripts/collect_focus_audio_evidence.sh`
 - Sample launched-app performance: `bash scripts/sample_exported_app_performance.sh`
 - Prepare known-tester packet: `bash scripts/prepare_known_tester_packet.sh`
 - Check playtest evidence threshold: `bash scripts/check_playtest_evidence.sh`
@@ -153,7 +154,7 @@ Also on 2026-05-11, `bash scripts/smoke_exported_keyboard_fallback.sh` was added
 
 Also on 2026-05-11, `bash scripts/smoke_exported_focus_resume.sh` was added to extract the exported zip, launch the `.app` through LaunchServices with `--rift-road-focus-resume-smoke`, and record `docs/playtest-captures/focus-resume-latest/stage1-exported-app-focus-resume.json` plus `stage1-exported-app-focus-resume.png`. The expected success marker is `RIFT_ROAD_EXPORTED_FOCUS_RESUME ok`. This proves the exported app's automated focus pause/resume and audio-manager state path; it does not replace manual audible output confirmation after real OS focus loss.
 
-Also on 2026-05-12, `bash scripts/check_focus_audio_evidence.sh` and `docs/focus_audio_validation.md` were added to block release-candidate claims until a human confirms audible output before focus loss, quiet/suspended audio while focus-paused, audible output after resume, and resume control from the exported macOS app. The expected current result is `RIFT_ROAD_FOCUS_AUDIO_EVIDENCE blocked`.
+Also on 2026-05-12, `bash scripts/check_focus_audio_evidence.sh` and `docs/focus_audio_validation.md` were added to block release-candidate claims until a human confirms audible output before focus loss, quiet/suspended audio while focus-paused, audible output after resume, and resume control from the exported macOS app. `bash scripts/collect_focus_audio_evidence.sh` now generates a non-empty evidence note and paste-ready checklist snippet after a real manual focus/audio session. The expected current result is `RIFT_ROAD_FOCUS_AUDIO_EVIDENCE blocked`.
 
 Also on 2026-05-10, `bash scripts/sample_exported_app_performance.sh` was added to launch the packaged app with `--rift-road-render-perf-sample`, wait for a JSON timing artifact, and report `RIFT_ROAD_EXPORTED_PERF stage1` when the rendered app stays inside the current frame budget. The sampler resolves package/output paths to absolute paths before launching the `.app`, excludes explicit startup/render warmup frames from the steady-state gameplay budget, and accepts `RIFT_ROAD_PERF_WINDOW_SIZE` / `RIFT_ROAD_PERF_WINDOW_MODE` for local window-size and display-mode evidence. Local Apple Silicon Mac A, windowed, and fullscreen samples now exist, but second-machine validation still needs separate proof.
 

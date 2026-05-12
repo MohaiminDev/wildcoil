@@ -18,6 +18,7 @@ def test_run_and_check_scripts_exist(repo_root):
         "scripts/check_playtest_evidence.sh",
         "scripts/collect_playtest_evidence.sh",
         "scripts/check_focus_audio_evidence.sh",
+        "scripts/collect_focus_audio_evidence.sh",
         "scripts/check_second_machine_evidence.sh",
         "scripts/collect_second_machine_evidence.sh",
         "scripts/check_controller_evidence.sh",
@@ -241,6 +242,117 @@ def test_focus_audio_evidence_gate_blocks_without_manual_audible_confirmation(
     output = result.stdout + result.stderr
     assert "RIFT_ROAD_FOCUS_AUDIO_EVIDENCE blocked" in output
     assert "focus_audio_sessions=0/1" in output
+
+
+def test_focus_audio_evidence_collector_scaffolds_manual_audible_session(
+    repo_root, tmp_path
+):
+    script_path = repo_root / "scripts" / "collect_focus_audio_evidence.sh"
+    checker_path = repo_root / "scripts" / "check_focus_audio_evidence.sh"
+    script = script_path.read_text()
+    docs = (repo_root / "docs" / "focus_audio_validation.md").read_text()
+    packet_script = (repo_root / "scripts" / "prepare_known_tester_packet.sh").read_text()
+    public_gate = (repo_root / "docs" / "public_playtest_gate.md").read_text()
+    handoff = (
+        repo_root
+        / "docs"
+        / "playtest-captures"
+        / "stage1-marketability-handoff-2026-05-10.md"
+    ).read_text()
+    audit = (repo_root / "docs" / "market-readiness-audit-2026-05-10.md").read_text()
+
+    assert "RIFT_ROAD_FOCUS_AUDIO_COLLECTOR blocked" in script
+    assert "RIFT_ROAD_FOCUS_AUDIO_COLLECTOR ok" in script
+    assert "--output-device" in script
+    assert "--confirm-focus-pause-overlay" in script
+    assert "--confirm-audio-before-focus-loss" in script
+    assert "--confirm-audio-quiet-during-focus-pause" in script
+    assert "--confirm-audio-after-resume" in script
+    assert "--confirm-resume-control" in script
+    assert "docs/playtest-captures/focus-audio" in script
+    assert "RIFT_ROAD_FOCUS_AUDIO_SESSION ok" in script
+    assert "Audio quiet during focus pause: `pass`" in script
+    assert "scripts/check_focus_audio_evidence.sh" in script
+    assert "scripts/collect_focus_audio_evidence.sh" in docs
+    assert "scripts/collect_focus_audio_evidence.sh" in packet_script
+    assert "Focus/audio evidence collector" in packet_script
+    assert "scripts/collect_focus_audio_evidence.sh" in public_gate
+    assert "focus/audio evidence collector" in handoff
+    assert "scripts/collect_focus_audio_evidence.sh" in audit
+
+    blocked_result = subprocess.run(
+        ["bash", str(script_path)],
+        cwd=repo_root,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    blocked_output = blocked_result.stdout + blocked_result.stderr
+    assert blocked_result.returncode == 1
+    assert "RIFT_ROAD_FOCUS_AUDIO_COLLECTOR blocked" in blocked_output
+    assert "Missing --output-device" in blocked_output
+
+    fake_root = tmp_path / "collector-root"
+    fake_script = fake_root / "scripts" / "collect_focus_audio_evidence.sh"
+    fake_package = fake_root / "build" / "macos" / "Rift Road.zip"
+    evidence_dir = tmp_path / "focus-audio-evidence"
+    fake_script.parent.mkdir(parents=True)
+    fake_package.parent.mkdir(parents=True)
+    fake_script.write_text(script)
+    fake_script.chmod(0o755)
+    fake_package.write_text("fake package\n")
+
+    ok_result = subprocess.run(
+        [
+            "bash",
+            str(fake_script),
+            "--output-device",
+            "Built-in speakers",
+            "--blockers",
+            "none",
+            "--evidence-dir",
+            str(evidence_dir),
+            "--build",
+            "commit=fake package_sha256=fake",
+            "--session-label",
+            "Manual focus audio",
+            "--confirm-focus-pause-overlay",
+            "--confirm-audio-before-focus-loss",
+            "--confirm-audio-quiet-during-focus-pause",
+            "--confirm-audio-after-resume",
+            "--confirm-resume-control",
+        ],
+        cwd=fake_root,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    ok_output = ok_result.stdout + ok_result.stderr
+    assert ok_result.returncode == 0
+    assert "RIFT_ROAD_FOCUS_AUDIO_COLLECTOR ok" in ok_output
+    snippet_path = next(evidence_dir.glob("*-focus-audio-validation-snippet.md"))
+    evidence_path = next(
+        path
+        for path in evidence_dir.glob("*.md")
+        if not path.name.endswith("-focus-audio-validation-snippet.md")
+    )
+    snippet = snippet_path.read_text()
+    assert evidence_path.stat().st_size > 0
+    assert "RIFT_ROAD_FOCUS_AUDIO_SESSION ok" in snippet
+    assert "Audio after resume: `pass`" in snippet
+
+    fake_doc = tmp_path / "focus_audio_validation.md"
+    fake_doc.write_text("# Focus Audio Validation\n\n" + snippet)
+    check_result = subprocess.run(
+        ["bash", str(checker_path), str(fake_doc)],
+        cwd=repo_root,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert check_result.returncode == 0
+    assert "RIFT_ROAD_FOCUS_AUDIO_EVIDENCE ok" in check_result.stdout
 
 
 def test_exported_app_smoke_script_captures_stage_clear_viewport(repo_root):
