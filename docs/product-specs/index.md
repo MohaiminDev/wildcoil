@@ -17,6 +17,7 @@
 - Current automated controller hot-plug coverage: `controller_hotplug_status` in `src/wildcoil/tools/runtime_test_runner.gd` checks the Godot connection-change handler, connected/disconnected runtime state, and menu prompt status persistence.
 - Current originality rule: all content must be original or clearly marked as original placeholder work, per `docs/game-story.md` and `docs/asset_provenance_register.md`.
 - Current public-claim rule: the first success condition is that Stage 1 feels good, looks alive, and is satisfying to play on the target Mac; market-facing claims come only after playtest evidence.
+- Current external-session protocol: `docs/public_playtest_gate.md` defines the public-playtest evidence threshold, while the current package remains internal-only until signing, notarization, Gatekeeper, second-machine, controller, focus/audio, and playtest evidence gates pass.
 
 ## Source Docs
 - `README.md`
@@ -32,4 +33,4 @@
 - TODO(source-needed): save/load behavior requirements.
 - TODO(source-needed): physically tested supported controller list.
 - TODO(source-needed): audio implementation plan.
-- TODO(source-needed): external tester distribution policy.
+- TODO(source-needed): final external tester distribution approval after signing/notarization and evidence gates pass.

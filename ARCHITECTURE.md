@@ -1,10 +1,10 @@
 # Architecture
 
 ## Current Shape
-- Runtime project: Godot 4.x project at `src/wildcoil`, with `src/wildcoil/project.godot` setting `res://scenes/app_root.tscn` as the main scene.
+- Runtime project: Godot 4.6.1-era project at `src/wildcoil`, with `src/wildcoil/project.godot` setting `res://scenes/app_root.tscn` as the main scene.
 - Runtime language: GDScript files under `src/wildcoil/scripts` and `src/wildcoil/tools`.
 - Test harness: Python `pytest` tests under `tests`, with `tests/conftest.py` driving Godot through `GODOT_BIN` or `godot`.
-- Local workflow scripts: `scripts/run_game.sh`, `scripts/check.sh`, and `scripts/package_macos.sh`.
+- Local workflow scripts: `scripts/run_game.sh`, `scripts/check.sh`, `scripts/package_macos.sh`, `scripts/check_release_candidate.sh`, `scripts/sample_exported_app_performance.sh`, and `scripts/check_macos_signing_env.sh`.
 - Product docs: `README.md`, `to-do.md`, `docs/game-story.md`, `docs/game_spec.md`, and related planning docs.
 
 ## Main Components
@@ -43,16 +43,18 @@
 - Python tests: `python3 -m pytest tests -v`
 - Godot smoke runner: `src/wildcoil/tools/runtime_test_runner.gd`
 - macOS packaging: `bash scripts/package_macos.sh`
+- Release-candidate gate: `bash scripts/check_release_candidate.sh`
+- Exported-app performance sample: `bash scripts/sample_exported_app_performance.sh`
+- Signing/notarization preflight: `bash scripts/check_macos_signing_env.sh`
 
 ## Dependency Direction
 - Godot scenes and scripts depend on JSON data in `src/wildcoil/data`.
 - Python tests inspect repo files and invoke Godot headlessly.
-- Shell scripts wrap Python tests, Godot runtime checks, and Godot macOS export.
+- Shell scripts wrap Python tests, Godot runtime checks, Godot macOS export, release-candidate gating, signing/notarization preflight, and launched-app performance/screenshot evidence.
 - No package manager, application framework outside Godot, or CI workflow file was found during inspection.
 
 ## Known Gaps
-- TODO(source-needed): stable Godot version requirement beyond the docs' `Godot 4.x` wording and the historical local packaging note that mentions Godot 4.6.1.
-- TODO(source-needed): release signing and notarization owner/process.
-- TODO(source-needed): target frame-rate validation command or performance budget check.
+- TODO(source-needed): supported Godot version policy beyond the current Godot 4.6.1 local validation/export evidence.
+- TODO(source-needed): release signing and notarization owner/credential process beyond the current non-secret preflight and guarded signing script.
 - TODO(source-needed): lint/type-check command for GDScript or Python.
 - TODO(source-needed): CI provider and required checks.

@@ -427,6 +427,25 @@ def test_release_candidate_gate_combines_automated_and_manual_blockers(repo_root
     assert "completion-audit.md" in public_gate
 
 
+def test_repo_guidance_tracks_current_release_validation_gates(repo_root):
+    architecture = (repo_root / "ARCHITECTURE.md").read_text()
+    reliability = (repo_root / "docs" / "RELIABILITY.md").read_text()
+    product_specs = (repo_root / "docs" / "product-specs" / "index.md").read_text()
+    quality = (repo_root / "docs" / "QUALITY_SCORE.md").read_text()
+
+    assert "Godot 4.6.1" in architecture
+    assert "scripts/check_release_candidate.sh" in architecture
+    assert "scripts/sample_exported_app_performance.sh" in architecture
+    assert "scripts/check_macos_signing_env.sh" in architecture
+    assert "target frame-rate validation command or performance budget check" not in architecture
+    assert "scripts/sample_exported_app_performance.sh" in reliability
+    assert "build/release-gate/latest/completion-audit.md" in reliability
+    assert "docs/public_playtest_gate.md" in product_specs
+    assert "external tester distribution policy" not in product_specs
+    assert "scripts/check_release_candidate.sh" in quality
+    assert "scripts/check_macos_signing_env.sh" in quality
+
+
 def test_macos_signing_preflight_defines_non_secret_release_inputs(repo_root):
     script = (repo_root / "scripts" / "check_macos_signing_env.sh").read_text()
     macos_docs = (repo_root / "docs" / "macos_build_and_distribution.md").read_text()

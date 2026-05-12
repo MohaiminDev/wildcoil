@@ -5,6 +5,8 @@
 - `scripts/check.sh` then runs Godot headlessly with `src/wildcoil/tools/runtime_test_runner.gd -- smoke`.
 - `tests/test_runtime_smoke.py` verifies the Godot project can launch headlessly and emits `RIFT_ROAD_RUNTIME_OK`.
 - `runtime_test_runner.gd` validates required runtime paths and JSON top-level keys.
+- `scripts/check_release_candidate.sh` combines repository validation, packaging, audit, launched-app smoke, performance, and manual evidence gates before reporting `RIFT_ROAD_RELEASE_GATE`.
+- `scripts/sample_exported_app_performance.sh` launches the packaged app and records frame-time JSON from the exported `.app`.
 
 ## Logging Pattern
 - No structured logging framework was found.
@@ -29,9 +31,11 @@
 ## Observability Hooks
 - `debug_overlay.gd` provides in-game debug visibility.
 - The headless runner prints pass/fail sentinel text for tests.
-- TODO(source-needed): persistent logs, crash dumps, metrics, tracing, or frame-time capture workflow.
+- `build/release-gate/latest/completion-audit.md` records a prompt-to-artifact checklist for release-gate runs.
+- Exported-app and headless frame-time capture exist through `scripts/sample_exported_app_performance.sh` and `stage1_performance_sample`.
+- TODO(source-needed): persistent crash dumps, player-session telemetry, or long-term metrics workflow.
 
 ## Next Safe Improvements
-- Add a documented Godot version check once the supported version is confirmed.
-- Add screenshot or replay validation only after an existing deterministic workflow is available.
+- Add a documented Godot version check once the supported version policy is confirmed.
+- Expand screenshot or replay validation only where an existing deterministic workflow is available.
 - Keep `scripts/check.sh` as the single local validation entry point.
