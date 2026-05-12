@@ -22,7 +22,9 @@ run_logged() {
   set -e
 
   if [[ "$command_status" -ne 0 ]]; then
-    printf 'RIFT_ROAD_RELEASE_GATE blocked\n'
+    add_blocker "$name command failed before all checks completed"
+    write_completion_audit "blocked"
+    print_blocked_result
     printf 'ERROR: %s failed; see %s\n' "$name" "$log_path" >&2
     exit "$command_status"
   fi
@@ -140,6 +142,15 @@ write_completion_audit() {
   } > "$COMPLETION_AUDIT"
 }
 
+print_blocked_result() {
+  printf 'Release gate blockers:\n'
+  for blocker in "${blockers[@]}"; do
+    printf -- '- %s\n' "$blocker"
+  done
+  printf 'Completion audit: %s\n' "$COMPLETION_AUDIT"
+  printf 'RIFT_ROAD_RELEASE_GATE blocked\n'
+}
+
 run_logged check bash "$ROOT_DIR/scripts/check.sh"
 if ! run_logged_allow_failure signing_preflight bash "$ROOT_DIR/scripts/check_macos_signing_env.sh"; then
   add_blocker "macOS signing preflight is blocked"
@@ -194,12 +205,7 @@ fi
 
 if [[ "${#blockers[@]}" -gt 0 ]]; then
   write_completion_audit "blocked"
-  printf 'Release gate blockers:\n'
-  for blocker in "${blockers[@]}"; do
-    printf -- '- %s\n' "$blocker"
-  done
-  printf 'Completion audit: %s\n' "$COMPLETION_AUDIT"
-  printf 'RIFT_ROAD_RELEASE_GATE blocked\n'
+  print_blocked_result
   exit 1
 fi
 

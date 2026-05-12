@@ -494,6 +494,95 @@ def test_release_candidate_gate_combines_automated_and_manual_blockers(repo_root
     assert "Godot version gate command" in public_gate
 
 
+def test_release_candidate_gate_writes_audit_on_required_command_failure(
+    repo_root, tmp_path
+):
+    fake_root = tmp_path / "release-gate-root"
+    scripts_dir = fake_root / "scripts"
+    docs_dir = fake_root / "docs"
+    log_dir = fake_root / "build" / "release-gate" / "latest"
+    scripts_dir.mkdir(parents=True)
+    docs_dir.mkdir()
+    (docs_dir / "market-readiness-audit-2026-05-10.md").write_text(
+        "\n".join(
+            [
+                "# Fake Market Audit",
+                "",
+                "## Objective Restated",
+                "",
+                "## Prompt-To-Artifact Checklist",
+                "",
+                "| Public playtest or release-candidate proof | fake | Not achieved |",
+                "| Player love / commercial viability | fake | Not achieved |",
+            ]
+        )
+    )
+    (scripts_dir / "check_release_candidate.sh").write_text(
+        (repo_root / "scripts" / "check_release_candidate.sh").read_text()
+    )
+
+    def write_fake_script(name, body):
+        path = scripts_dir / name
+        path.write_text("#!/usr/bin/env bash\nset -euo pipefail\n" + body)
+        path.chmod(0o755)
+
+    write_fake_script(
+        "check.sh",
+        "echo 'RIFT_ROAD_GODOT_VERSION ok version=4.6.1.stable.fake expected=4.6.x-stable'\n"
+        "echo 'RIFT_ROAD_RUNTIME_OK smoke'\n",
+    )
+    write_fake_script(
+        "check_macos_signing_env.sh",
+        "echo 'RIFT_ROAD_SIGNING_PREFLIGHT blocked'\nexit 1\n",
+    )
+    write_fake_script("package_macos.sh", "echo 'RIFT_ROAD_PACKAGE ok'\n")
+    write_fake_script(
+        "audit_macos_package.sh",
+        "echo 'RIFT_ROAD_PACKAGE_AUDIT internal-only'\n",
+    )
+    write_fake_script(
+        "smoke_exported_macos_app.sh",
+        "echo 'RIFT_ROAD_EXPORTED_APP_SMOKE ok'\n",
+    )
+    write_fake_script(
+        "smoke_exported_keyboard_fallback.sh",
+        "echo 'RIFT_ROAD_EXPORTED_KEYBOARD_FALLBACK ok'\n",
+    )
+    write_fake_script(
+        "smoke_exported_focus_resume.sh",
+        "echo 'RIFT_ROAD_EXPORTED_FOCUS_RESUME ok'\n",
+    )
+    write_fake_script(
+        "check_focus_audio_evidence.sh",
+        "echo 'RIFT_ROAD_FOCUS_AUDIO_EVIDENCE blocked'\nexit 1\n",
+    )
+    write_fake_script(
+        "sample_exported_app_performance.sh",
+        "echo 'forced exported performance failure'\nexit 2\n",
+    )
+
+    result = subprocess.run(
+        ["bash", str(scripts_dir / "check_release_candidate.sh"), str(log_dir)],
+        cwd=fake_root,
+        env={**os.environ, "GODOT_BIN": "fake-godot-not-used"},
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    audit_path = log_dir / "completion-audit.md"
+    assert result.returncode == 2
+    assert audit_path.exists()
+    audit = audit_path.read_text()
+    output = result.stdout + result.stderr
+    assert "forced exported performance failure" in output
+    assert "Completion audit:" in output
+    assert "RIFT_ROAD_RELEASE_GATE blocked" in output
+    assert "exported_app_performance command failed before all checks completed" in audit
+    assert "Godot engine version gate" in audit
+    assert "| Current validation results |" in audit
+
+
 def test_repo_guidance_tracks_current_release_validation_gates(repo_root):
     architecture = (repo_root / "ARCHITECTURE.md").read_text()
     reliability = (repo_root / "docs" / "RELIABILITY.md").read_text()

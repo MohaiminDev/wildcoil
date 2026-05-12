@@ -47,7 +47,7 @@ The visual target is the approved north-star direction: modern stylized arcade r
 - Exported-app performance: `bash scripts/sample_exported_app_performance.sh` launches the packaged `.app`, records `docs/playtest-captures/exported-app-performance-latest/stage1-exported-performance.json`, and reports `RIFT_ROAD_EXPORTED_PERF stage1` on local Apple Silicon Mac A (`arm64`, `Apple M1`, `iMac21,2`) with latest local 1280x720 windowed steady-state result `avg_ms=10.126`, `max_ms=22.409` after 8 startup/render warmup frames. A local 1920x1080 windowed run records `avg_ms=3.199`, `max_ms=6.652` in `docs/playtest-captures/exported-app-performance-windowed-1080p-latest/stage1-exported-performance.json`, and a local fullscreen run records `avg_ms=1.583`, `max_ms=2.793` in `docs/playtest-captures/exported-app-performance-fullscreen-latest/stage1-exported-performance.json`.
 - Focus-loss/resume: `stage1_focus_resume` in `src/wildcoil/tools/runtime_test_runner.gd` proves Stage 1 pauses on window focus loss, shows the pause overlay while the title layer is otherwise hidden, suspends/resumes the audio manager focus state, updates the return-focus message, and resumes cleanly with Esc. The exported-app focus/resume smoke proves the same app handler path from the launched zip, but not real audible output.
 - Focus/audio evidence gate: `bash scripts/check_focus_audio_evidence.sh` reads `docs/focus_audio_validation.md` and currently reports `RIFT_ROAD_FOCUS_AUDIO_EVIDENCE blocked` because no manual audible focus-loss/resume session has been recorded.
-- Release-candidate gate: `bash scripts/check_release_candidate.sh` combines checks, package, audit, exported-app smoke, exported-app keyboard fallback smoke, exported-app focus/resume smoke, manual focus/audio evidence, and performance sample, writes `build/release-gate/latest/completion-audit.md` with an explicit Godot version-gate row from `logs/check.log`, then reports `RIFT_ROAD_RELEASE_GATE blocked` until package and player-evidence gates are resolved.
+- Release-candidate gate: `bash scripts/check_release_candidate.sh` combines checks, package, audit, exported-app smoke, exported-app keyboard fallback smoke, exported-app focus/resume smoke, manual focus/audio evidence, and performance sample, writes `build/release-gate/latest/completion-audit.md` with an explicit Godot version-gate row from `logs/check.log`, then reports `RIFT_ROAD_RELEASE_GATE blocked` until package and player-evidence gates are resolved. If a required automated command hard-fails, the gate now records that command as a blocker and writes the completion audit before exiting with the original failing status.
 - Known-tester packet: `bash scripts/prepare_known_tester_packet.sh` creates `build/known-tester-packet/latest/` with the current internal-only zip, manifest, build commit, package SHA-256, Godot version-gate marker, validation logs, package audit, smoke captures, keyboard fallback evidence, focus/resume evidence, performance JSON, host profile, second-machine evidence collector scripts, playtest docs, and manual gate statuses/logs for supervised known-tester sessions.
 - Playtest evidence gate: `bash scripts/check_playtest_evidence.sh` reads `docs/playtest_log.md` and currently reports `RIFT_ROAD_PLAYTEST_EVIDENCE blocked` because no external session rows have been recorded.
 - Playtest evidence collector: `bash scripts/collect_playtest_evidence.sh --help` now generates a non-empty session note and paste-ready `docs/playtest_log.md` row after a real external-style session, but it does not append rows or satisfy the gate without actual tester evidence.
@@ -117,6 +117,17 @@ The visual target is the approved north-star direction: modern stylized arcade r
 - Dependencies: [RR-PROD-15]
 
 ## DONE
+
+### [RR-PROD-71] Keep release audit on hard gate failures
+- Outcome: The release-candidate gate now writes `build/release-gate/latest/completion-audit.md` even when a required automated command fails before the normal manual-blocker summary.
+- Validation:
+  - [x] Added a failing behavioral regression with a fake release-gate workspace where `scripts/sample_exported_app_performance.sh` exits non-zero before the later evidence gates run.
+  - [x] Updated `scripts/check_release_candidate.sh` so required-command failures add a blocker, write the completion audit, print the audit path, report `RIFT_ROAD_RELEASE_GATE blocked`, and preserve the original failing exit status.
+  - [x] `python3 -m pytest tests/test_scripts_and_docs.py::test_release_candidate_gate_writes_audit_on_required_command_failure -q` passes.
+- Progress:
+  - 2026-05-12: Closed the gap exposed by a transient exported-app performance artifact miss where the release gate could previously stop without producing the objective checklist.
+- Dependencies: [RR-PROD-70]
+- Completed: 2026-05-12
 
 ### [RR-PROD-70] Surface Godot version evidence in release handoff
 - Outcome: Release-candidate and known-tester evidence artifacts now expose the Godot 4.6.x stable version-gate marker directly instead of leaving it implicit inside the validation log.
