@@ -107,6 +107,7 @@ As of 2026-04-27, the Rift Road prototype uses Godot 4.x under `src/wildcoil`.
 
 - Run checks: `bash scripts/check.sh`
 - Run game: `bash scripts/run_game.sh`
+- Check Godot version: `bash scripts/check_godot_version.sh`
 - Package macOS build: `bash scripts/package_macos.sh`
 - Check signing/notarization preflight: `bash scripts/check_macos_signing_env.sh`
 - Sign, notarize, staple, and audit a release artifact: `bash scripts/sign_notarize_macos.sh`
@@ -124,7 +125,7 @@ As of 2026-04-27, the Rift Road prototype uses Godot 4.x under `src/wildcoil`.
 - Collect physical controller or manual keyboard evidence note: `bash scripts/collect_controller_evidence.sh`
 - Check release-candidate gate: `bash scripts/check_release_candidate.sh`
 
-`GODOT_BIN` can point to a custom Godot executable when `godot` is not on `PATH`.
+`GODOT_BIN` can point to a custom Godot executable when `godot` is not on `PATH`. `bash scripts/check_godot_version.sh` requires Godot 4.6.x stable and reports `RIFT_ROAD_GODOT_VERSION ok` before the full validation path continues.
 
 ## Current Packaging State
 

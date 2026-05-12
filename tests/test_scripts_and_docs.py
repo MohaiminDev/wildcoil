@@ -1,3 +1,4 @@
+import os
 import subprocess
 
 
@@ -5,6 +6,7 @@ def test_run_and_check_scripts_exist(repo_root):
     for relative_path in [
         "scripts/run_game.sh",
         "scripts/check.sh",
+        "scripts/check_godot_version.sh",
         "scripts/package_macos.sh",
         "scripts/audit_macos_package.sh",
         "scripts/smoke_exported_macos_app.sh",
@@ -26,6 +28,66 @@ def test_run_and_check_scripts_exist(repo_root):
         path = repo_root / relative_path
         assert path.exists()
         assert path.stat().st_mode & 0o111
+
+
+def test_godot_version_gate_requires_46_stable(repo_root, tmp_path):
+    script_path = repo_root / "scripts" / "check_godot_version.sh"
+    script = script_path.read_text()
+    check_script = (repo_root / "scripts" / "check.sh").read_text()
+    architecture = (repo_root / "ARCHITECTURE.md").read_text()
+    reliability = (repo_root / "docs" / "RELIABILITY.md").read_text()
+    quality = (repo_root / "docs" / "QUALITY_SCORE.md").read_text()
+    macos_docs = (repo_root / "docs" / "macos_build_and_distribution.md").read_text()
+    debt = (repo_root / "docs" / "exec-plans" / "tech-debt-tracker.md").read_text()
+
+    assert "Godot 4.6.x stable" in script
+    assert "RIFT_ROAD_GODOT_VERSION ok" in script
+    assert "RIFT_ROAD_GODOT_VERSION blocked" in script
+    assert "GODOT_BIN" in script
+    assert "scripts/check_godot_version.sh" in check_script
+    assert check_script.index("scripts/check_godot_version.sh") < check_script.index(
+        "python3 -m pytest tests -v"
+    )
+    assert "scripts/check_godot_version.sh" in architecture
+    assert "scripts/check_godot_version.sh" in reliability
+    assert "scripts/check_godot_version.sh" in quality
+    assert "scripts/check_godot_version.sh" in macos_docs
+    assert "| TD-001 |" in debt
+    assert "| Addressed |" in debt
+
+    fake_ok = tmp_path / "godot-ok"
+    fake_ok.write_text("#!/usr/bin/env bash\nprintf '4.6.1.stable.official.test\\n'\n")
+    fake_ok.chmod(0o755)
+
+    ok_result = subprocess.run(
+        ["bash", str(script_path)],
+        cwd=repo_root,
+        env={**os.environ, "GODOT_BIN": str(fake_ok)},
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert ok_result.returncode == 0
+    assert "RIFT_ROAD_GODOT_VERSION ok" in ok_result.stdout
+
+    fake_bad = tmp_path / "godot-bad"
+    fake_bad.write_text("#!/usr/bin/env bash\nprintf '4.5.0.stable.official.test\\n'\n")
+    fake_bad.chmod(0o755)
+
+    blocked_result = subprocess.run(
+        ["bash", str(script_path)],
+        cwd=repo_root,
+        env={**os.environ, "GODOT_BIN": str(fake_bad)},
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert blocked_result.returncode == 1
+    blocked_output = blocked_result.stdout + blocked_result.stderr
+    assert "RIFT_ROAD_GODOT_VERSION blocked" in blocked_output
+    assert "expected=4.6.x-stable" in blocked_output
 
 
 def test_macos_package_audit_surfaces_release_gates(repo_root):

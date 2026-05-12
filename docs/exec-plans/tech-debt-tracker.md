@@ -4,7 +4,7 @@ Track small, verifiable debt items that affect agent readability, runtime confid
 
 | ID | Debt | Evidence | Status | Small next action |
 |---|---|---|---|---|
-| TD-001 | Supported Godot version is not pinned in a machine-checkable way. | `README.md` says Godot 4.x; `docs/macos_build_and_distribution.md` records a historical local Godot 4.6.1 package run. | Open | Confirm supported version and add a docs-only requirement or script check. |
+| TD-001 | Supported Godot version was not pinned in a machine-checkable way. | `scripts/check_godot_version.sh` now requires Godot 4.6.x stable and is called by `scripts/check.sh`. | Addressed | Decide later whether to pin a specific Godot 4.6.x patch release. |
 | TD-002 | No CI workflow is present. | `find .github` returned no directory during migration inspection. | Open | Add CI only after provider and desired gates are confirmed. |
 | TD-003 | No lint/type-check command is discoverable. | No `pyproject.toml`, `ruff`, `mypy`, Godot lint config, Makefile, tox, or nox file was found. | Open | Decide whether a lightweight lint command is worth adding after runtime docs migration. |
 | TD-004 | Packaging depends on local Godot export templates. | `scripts/package_macos.sh`; `docs/macos_build_and_distribution.md` notes export templates are required. | Open | Document exact template installation path once confirmed. |

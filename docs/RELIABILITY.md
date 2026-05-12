@@ -1,6 +1,7 @@
 # Reliability
 
 ## Current Validation
+- `scripts/check_godot_version.sh` verifies the configured `GODOT_BIN` reports Godot 4.6.x stable before the full local check continues.
 - `scripts/check.sh` runs `python3 -m pytest tests -v`.
 - `scripts/check.sh` then runs Godot headlessly with `src/wildcoil/tools/runtime_test_runner.gd -- smoke`.
 - `tests/test_runtime_smoke.py` verifies the Godot project can launch headlessly and emits `RIFT_ROAD_RUNTIME_OK`.
@@ -23,6 +24,7 @@
 
 ## Known Failure Modes
 - `godot` missing from `PATH` unless `GODOT_BIN` is set.
+- Godot version outside the supported 4.6.x stable line.
 - Godot macOS export templates missing when running `scripts/package_macos.sh`.
 - Runtime file or JSON key missing under `src/wildcoil`.
 - Script errors during headless Godot launch.
@@ -36,6 +38,6 @@
 - TODO(source-needed): persistent crash dumps, player-session telemetry, or long-term metrics workflow.
 
 ## Next Safe Improvements
-- Add a documented Godot version check once the supported version policy is confirmed.
+- Decide whether to pin a specific Godot 4.6.x patch release or keep the current 4.6.x stable line.
 - Expand screenshot or replay validation only where an existing deterministic workflow is available.
 - Keep `scripts/check.sh` as the single local validation entry point.

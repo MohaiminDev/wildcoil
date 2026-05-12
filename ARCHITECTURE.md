@@ -4,7 +4,7 @@
 - Runtime project: Godot 4.6.1-era project at `src/wildcoil`, with `src/wildcoil/project.godot` setting `res://scenes/app_root.tscn` as the main scene.
 - Runtime language: GDScript files under `src/wildcoil/scripts` and `src/wildcoil/tools`.
 - Test harness: Python `pytest` tests under `tests`, with `tests/conftest.py` driving Godot through `GODOT_BIN` or `godot`.
-- Local workflow scripts: `scripts/run_game.sh`, `scripts/check.sh`, `scripts/package_macos.sh`, `scripts/check_release_candidate.sh`, `scripts/sample_exported_app_performance.sh`, and `scripts/check_macos_signing_env.sh`.
+- Local workflow scripts: `scripts/run_game.sh`, `scripts/check.sh`, `scripts/check_godot_version.sh`, `scripts/package_macos.sh`, `scripts/check_release_candidate.sh`, `scripts/sample_exported_app_performance.sh`, and `scripts/check_macos_signing_env.sh`.
 - Product docs: `README.md`, `to-do.md`, `docs/game-story.md`, `docs/game_spec.md`, and related planning docs.
 
 ## Main Components
@@ -42,6 +42,7 @@
 - Full local validation: `bash scripts/check.sh`
 - Python tests: `python3 -m pytest tests -v`
 - Godot smoke runner: `src/wildcoil/tools/runtime_test_runner.gd`
+- Godot version gate: `bash scripts/check_godot_version.sh`
 - macOS packaging: `bash scripts/package_macos.sh`
 - Release-candidate gate: `bash scripts/check_release_candidate.sh`
 - Exported-app performance sample: `bash scripts/sample_exported_app_performance.sh`
@@ -54,7 +55,7 @@
 - No package manager, application framework outside Godot, or CI workflow file was found during inspection.
 
 ## Known Gaps
-- TODO(source-needed): supported Godot version policy beyond the current Godot 4.6.1 local validation/export evidence.
+- Supported engine line is mechanically checked as Godot 4.6.x stable by `scripts/check_godot_version.sh`; TODO(source-needed): final patch-level pin or upgrade policy beyond the 4.6.x stable line.
 - TODO(source-needed): release signing and notarization owner/credential process beyond the current non-secret preflight and guarded signing script.
 - TODO(source-needed): lint/type-check command for GDScript or Python.
 - TODO(source-needed): CI provider and required checks.

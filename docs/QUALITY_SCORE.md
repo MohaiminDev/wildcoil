@@ -4,7 +4,7 @@ Scores are current confidence estimates from repository evidence only. `5/5` mea
 
 | Area | Confidence | Evidence | Missing tests | Missing docs | Risk areas | Suggested next action |
 |---|---:|---|---|---|---|---|
-| Runtime launch | 4/5 | `tests/test_runtime_smoke.py`, `runtime_test_runner.gd`, `scripts/check.sh` | Version-specific Godot check | Supported Godot version policy beyond current Godot 4.6.1 local evidence | Local machine may have different Godot/export setup | Confirm and document supported Godot version |
+| Runtime launch | 4/5 | `tests/test_runtime_smoke.py`, `runtime_test_runner.gd`, `scripts/check.sh`, `scripts/check_godot_version.sh` | Patch-specific Godot upgrade policy | Supported 4.6.x stable line is checked; patch-level pin is not decided | Local machine may have different Godot/export setup | Decide whether to pin a specific Godot 4.6.x patch release |
 | Campaign content data | 4/5 | `tests/test_full_campaign.py`, `src/wildcoil/data/*.json` | Schema-level validation beyond asserted fields | Data contract doc beyond architecture summary | JSON shape drift | Add lightweight JSON schema expectations if content grows |
 | Game flow | 3/5 | `app_root.gd`, `stage_manager.gd`, tests for campaign progression strings | End-to-end automated victory path | Full demo flow doc is mostly in `to-do.md` | Manual-only confidence for full playthrough | Record deterministic autoplay path before expanding scope |
 | Combat feel/readability | 2/5 | Runtime scripts and risk register | Automated feel/readability checks are limited | Tuning rationale and acceptance thresholds | Subjective playtest regressions | Add playtest notes and screenshot evidence per task |
