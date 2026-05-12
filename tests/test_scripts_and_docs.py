@@ -14,6 +14,7 @@ def test_run_and_check_scripts_exist(repo_root):
         "scripts/sample_exported_app_performance.sh",
         "scripts/prepare_known_tester_packet.sh",
         "scripts/check_playtest_evidence.sh",
+        "scripts/collect_playtest_evidence.sh",
         "scripts/check_second_machine_evidence.sh",
         "scripts/collect_second_machine_evidence.sh",
         "scripts/check_controller_evidence.sh",
@@ -651,6 +652,67 @@ def test_playtest_evidence_gate_blocks_without_external_sessions(repo_root):
     assert "sessions=0/5" in output
     assert "second_mac=0/1" in output
     assert "controller_families=0/2" in output
+
+
+def test_playtest_evidence_collector_scaffolds_external_session_notes(repo_root):
+    script_path = repo_root / "scripts" / "collect_playtest_evidence.sh"
+    script = script_path.read_text()
+    playtest_log = (repo_root / "docs" / "playtest_log.md").read_text()
+    packet_script = (repo_root / "scripts" / "prepare_known_tester_packet.sh").read_text()
+    public_gate = (repo_root / "docs" / "public_playtest_gate.md").read_text()
+    handoff = (
+        repo_root
+        / "docs"
+        / "playtest-captures"
+        / "stage1-marketability-handoff-2026-05-10.md"
+    ).read_text()
+    audit = (repo_root / "docs" / "market-readiness-audit-2026-05-10.md").read_text()
+
+    assert "RIFT_ROAD_PLAYTEST_COLLECTOR blocked" in script
+    assert "RIFT_ROAD_PLAYTEST_COLLECTOR ok" in script
+    assert "--tester" in script
+    assert "--setup" in script
+    assert "--input-method" in script
+    assert "--first-combat-time" in script
+    assert "--wow-moment-time" in script
+    assert "--replay-desire" in script
+    assert "--confusion-points" in script
+    assert "--cheap-damage-reports" in script
+    assert "--quotes" in script
+    assert "--follow-up-action" in script
+    assert "--confirm-external-session" in script
+    assert "docs/playtest-captures/playtests" in script
+    assert "Session Capture Table Row" in script
+    assert "Session Notes" in script
+    assert "scripts/check_playtest_evidence.sh" in script
+    assert "scripts/collect_playtest_evidence.sh" in playtest_log
+    assert "scripts/collect_playtest_evidence.sh" in packet_script
+    assert "Playtest evidence collector" in packet_script
+    assert "scripts/collect_playtest_evidence.sh" in public_gate
+    assert "playtest evidence collector" in handoff
+    assert "scripts/collect_playtest_evidence.sh" in audit
+
+    help_result = subprocess.run(
+        ["bash", str(script_path), "--help"],
+        cwd=repo_root,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert help_result.returncode == 0
+    assert "--confirm-external-session" in help_result.stdout
+
+    blocked_result = subprocess.run(
+        ["bash", str(script_path)],
+        cwd=repo_root,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert blocked_result.returncode == 1
+    blocked_output = blocked_result.stdout + blocked_result.stderr
+    assert "RIFT_ROAD_PLAYTEST_COLLECTOR blocked" in blocked_output
+    assert "Missing --confirm-external-session" in blocked_output
 
 
 def test_second_machine_evidence_gate_blocks_without_clean_machine_proof(repo_root):

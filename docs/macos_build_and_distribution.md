@@ -117,6 +117,7 @@ As of 2026-04-27, the Rift Road prototype uses Godot 4.x under `src/wildcoil`.
 - Sample launched-app performance: `bash scripts/sample_exported_app_performance.sh`
 - Prepare known-tester packet: `bash scripts/prepare_known_tester_packet.sh`
 - Check playtest evidence threshold: `bash scripts/check_playtest_evidence.sh`
+- Collect external playtest evidence note: `bash scripts/collect_playtest_evidence.sh`
 - Check second-machine evidence threshold: `bash scripts/check_second_machine_evidence.sh`
 - Check physical controller evidence threshold: `bash scripts/check_controller_evidence.sh`
 - Collect physical controller or manual keyboard evidence note: `bash scripts/collect_controller_evidence.sh`
@@ -157,6 +158,8 @@ Also on 2026-05-10, `bash scripts/check_release_candidate.sh` was added to combi
 Also on 2026-05-10, `bash scripts/prepare_known_tester_packet.sh` was added to create `build/known-tester-packet/latest/` with the rebuilt `Rift Road.zip`, validation logs, package audit, exported-app smoke captures, exported-app keyboard fallback evidence, exported-app focus/resume evidence, exported-app performance JSON, host profile, and the current playtest protocol/docs. On 2026-05-11, the packet manifest began recording the build commit and package SHA-256 so tester notes can be tied to the exact zip under test. On 2026-05-12, the packet began bundling `scripts/collect_second_machine_evidence.sh` plus the audit/smoke/check helpers needed to collect second-machine proof on a real Apple Silicon Mac B. The packet is still labeled `internal-only` while signing/notarization and package audit gates are blocked; it exists to make supervised known-tester sessions repeatable, not to approve public distribution.
 
 Also on 2026-05-10, `bash scripts/check_playtest_evidence.sh` was added to read `docs/playtest_log.md` and block public-playtest-candidate status until the log records at least five external sessions, at least one `machine=second-mac` setup, at least two physical `controller-family=<family>` inputs, and majority replay intent. The release-candidate gate now treats this as a blocker while the log has no external rows.
+
+Also on 2026-05-12, `bash scripts/collect_playtest_evidence.sh` was added to generate non-empty session notes and paste-ready `docs/playtest_log.md` table rows after real external-style sessions. It requires an explicit `--confirm-external-session` flag plus the same timing, replay intent, confusion, cheap-damage, quote, and follow-up fields used by the playtest log. It does not append rows automatically or replace the playtest evidence gate.
 
 Also on 2026-05-10, `bash scripts/check_second_machine_evidence.sh` and `docs/second_machine_validation.md` were added to block release-candidate claims until a real second Apple Silicon Mac records host profile, install smoke, Gatekeeper acceptance, and title/gameplay captures under `docs/playtest-captures/second-machine-latest/`. On 2026-05-12, `bash scripts/collect_second_machine_evidence.sh` was added to generate those files on the actual second Mac by reusing the package audit and exported-app smoke. The expected current result is `RIFT_ROAD_SECOND_MACHINE_EVIDENCE blocked`.
 

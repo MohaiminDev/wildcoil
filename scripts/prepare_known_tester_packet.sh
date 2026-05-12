@@ -91,6 +91,8 @@ copy_if_exists "$ROOT_DIR/scripts/collect_second_machine_evidence.sh" "$OUTPUT_D
 copy_if_exists "$ROOT_DIR/scripts/check_second_machine_evidence.sh" "$OUTPUT_DIR/scripts/check_second_machine_evidence.sh"
 copy_if_exists "$ROOT_DIR/scripts/collect_controller_evidence.sh" "$OUTPUT_DIR/scripts/collect_controller_evidence.sh"
 copy_if_exists "$ROOT_DIR/scripts/check_controller_evidence.sh" "$OUTPUT_DIR/scripts/check_controller_evidence.sh"
+copy_if_exists "$ROOT_DIR/scripts/collect_playtest_evidence.sh" "$OUTPUT_DIR/scripts/collect_playtest_evidence.sh"
+copy_if_exists "$ROOT_DIR/scripts/check_playtest_evidence.sh" "$OUTPUT_DIR/scripts/check_playtest_evidence.sh"
 copy_if_exists "$ROOT_DIR/scripts/audit_macos_package.sh" "$OUTPUT_DIR/scripts/audit_macos_package.sh"
 copy_if_exists "$ROOT_DIR/scripts/smoke_exported_macos_app.sh" "$OUTPUT_DIR/scripts/smoke_exported_macos_app.sh"
 
@@ -104,6 +106,7 @@ copy_if_exists "$ROOT_DIR/scripts/smoke_exported_macos_app.sh" "$OUTPUT_DIR/scri
   printf -- '- Build source: `%s`\n' "$ROOT_DIR"
   printf -- '- Public playtest protocol: `docs/public_playtest_gate.md`\n'
   printf -- '- Playtest log template: `docs/playtest_log.md`\n\n'
+  printf -- '- Playtest evidence collector: `scripts/collect_playtest_evidence.sh`\n'
   printf -- '- Controller validation checklist: `docs/controller_validation.md`\n'
   printf -- '- Controller evidence collector: `scripts/collect_controller_evidence.sh`\n'
   printf -- '- Second-machine validation checklist: `docs/second_machine_validation.md`\n\n'

@@ -4,7 +4,7 @@
 
 - Package: `build/macos/Rift Road.zip`
 - Engine: Godot 4.6.1
-- Validation: `bash scripts/check.sh` passed with 102 tests and Godot runtime smoke; focus-loss smoke now includes audio-manager suspend/resume state, exported-app focus/resume artifact generation, release signing-script coverage, controller evidence collector coverage, and controller hot-plug status is covered in automation, but audible exported-app focus-loss behavior and physical controller devices still need manual confirmation.
+- Validation: `bash scripts/check.sh` passed with 103 tests and Godot runtime smoke; focus-loss smoke now includes audio-manager suspend/resume state, exported-app focus/resume artifact generation, release signing-script coverage, controller evidence collector coverage, playtest evidence collector coverage, and controller hot-plug status is covered in automation, but audible exported-app focus-loss behavior and physical controller devices still need manual confirmation.
 - Export validation: `bash scripts/package_macos.sh` regenerated `build/macos/Rift Road.zip`; `bash scripts/smoke_exported_macos_app.sh` refreshed the launched-app title, hero-select, opening story, Stage 1 gameplay, post-intro combat, pickup clarity, road-collapse, Brask intro, Stage Clear score/rank summary, Game Over/retry, and post-retry gameplay screenshots.
 - Signing preflight: `bash scripts/check_macos_signing_env.sh` reports `RIFT_ROAD_SIGNING_PREFLIGHT blocked` until real Developer ID/notary configuration exists.
 - Release signing path: `bash scripts/sign_notarize_macos.sh` can create `build/macos/Rift Road-signed-notarized.zip` only after real Developer ID, notary profile, and local package inputs exist; it currently reports `RIFT_ROAD_RELEASE_SIGNING blocked` without those inputs.
@@ -22,6 +22,7 @@
 - Performance sample: `stage1_performance_sample` reports `RIFT_ROAD_PERF stage1` with latest local result `avg_ms=16.726`, `max_ms=40.161`.
 - Public playtest gate: `docs/public_playtest_gate.md` defines the external session protocol, evidence threshold, and no-claim rules.
 - Playtest evidence gate: `bash scripts/check_playtest_evidence.sh` currently reports `RIFT_ROAD_PLAYTEST_EVIDENCE blocked` because no external session rows have been recorded.
+- Playtest evidence collector: `bash scripts/collect_playtest_evidence.sh --help` is available after real external-style sessions to generate a session note and paste-ready `docs/playtest_log.md` row; it does not replace external tester evidence.
 
 ## Proof Captures
 
@@ -82,6 +83,7 @@
 - There is now a concrete external playtest packet for collecting replay intent, confusion, unfair damage reports, originality concerns, and willingness to pay/share/follow.
 - There is now a known-tester packet command that bundles the current internal-only package, validation logs, controller and second-machine checklists, and evidence for supervised sessions.
 - There is now a playtest evidence gate command that blocks public-playtest-candidate status until the playtest log has enough external sessions, second-Mac coverage, physical controller-family coverage, and replay intent.
+- There is now a playtest evidence collector command that reduces session-log recording friction without turning the evidence gate green by itself.
 - There is now a second-machine evidence gate command that blocks release-candidate status until a real second Apple Silicon Mac records host, install, Gatekeeper, and launched-game capture proof.
 - There is now a second-machine evidence collector command for known testers to generate the required host profile, package audit log, install smoke note, and title/gameplay captures on the actual second Mac.
 - There is now a controller evidence gate command that blocks release-candidate status until two physical controller-family sessions and a manual exported-app keyboard fallback session record detailed control coverage backed by real capture files.

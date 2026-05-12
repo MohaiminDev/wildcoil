@@ -48,6 +48,7 @@ The visual target is the approved north-star direction: modern stylized arcade r
 - Release-candidate gate: `bash scripts/check_release_candidate.sh` combines checks, package, audit, exported-app smoke, exported-app keyboard fallback smoke, exported-app focus/resume smoke, and performance sample, then reports `RIFT_ROAD_RELEASE_GATE blocked` until package and player-evidence gates are resolved.
 - Known-tester packet: `bash scripts/prepare_known_tester_packet.sh` creates `build/known-tester-packet/latest/` with the current internal-only zip, manifest, build commit, package SHA-256, validation logs, package audit, smoke captures, keyboard fallback evidence, focus/resume evidence, performance JSON, host profile, second-machine evidence collector scripts, and playtest docs for supervised known-tester sessions.
 - Playtest evidence gate: `bash scripts/check_playtest_evidence.sh` reads `docs/playtest_log.md` and currently reports `RIFT_ROAD_PLAYTEST_EVIDENCE blocked` because no external session rows have been recorded.
+- Playtest evidence collector: `bash scripts/collect_playtest_evidence.sh --help` now generates a non-empty session note and paste-ready `docs/playtest_log.md` row after a real external-style session, but it does not append rows or satisfy the gate without actual tester evidence.
 - 2026-05-11 spec/story realignment: [`docs/game_spec.md`](/Users/himu/Desktop/career/personal_projects/wildcoil/docs/game_spec.md) and [`docs/game-story.md`](/Users/himu/Desktop/career/personal_projects/wildcoil/docs/game-story.md) now make the first success condition feel-focused, not market-demand-focused: the Stage 1 slice must feel good, look alive, and be satisfying to replay on an M1 iMac before public-playtest or marketability claims. Current missing spec-critical beats include physical controller/second-machine validation and external playtest evidence.
 - Performance sample: `stage1_performance_sample` reports `RIFT_ROAD_PERF stage1` with latest local result `avg_ms=16.726`, `max_ms=40.161`.
 - Public playtest gate: [`docs/public_playtest_gate.md`](/Users/himu/Desktop/career/personal_projects/wildcoil/docs/public_playtest_gate.md) defines the external session protocol and explicitly blocks marketable/player-loved claims until external evidence exists.
@@ -114,6 +115,19 @@ The visual target is the approved north-star direction: modern stylized arcade r
 - Dependencies: [RR-PROD-15]
 
 ## DONE
+
+### [RR-PROD-64] Add playtest evidence collector
+- Outcome: Added a guarded manual collector for external-style playtest sessions so testers can generate non-empty evidence notes plus paste-ready `docs/playtest_log.md` rows after real runs.
+- Validation:
+  - [x] Added a failing regression requiring `scripts/collect_playtest_evidence.sh`, required playtest fields, collector blocked/ok markers, playtest log docs, public gate, known-tester packet, handoff, and market audit to reference the collector.
+  - [x] Added `scripts/collect_playtest_evidence.sh` with `--confirm-external-session`, required timing/replay/confusion/cheap-damage/quote/follow-up fields, and generated note/row files under `docs/playtest-captures/playtests/`.
+  - [x] Updated the known-tester packet to bundle the playtest collector and checker scripts.
+  - [x] `python3 -m pytest tests/test_scripts_and_docs.py::test_playtest_evidence_collector_scaffolds_external_session_notes -q` passes.
+  - [x] `bash scripts/check.sh` passes with 103 tests and Godot runtime smoke.
+- Progress:
+  - 2026-05-12: Reduced external session logging friction while preserving the real playtest-evidence gate.
+- Dependencies: [RR-PROD-14]
+- Completed: 2026-05-12
 
 ### [RR-PROD-63] Add controller evidence collector
 - Outcome: Added a guarded manual collector for exported-app controller and keyboard fallback sessions so testers can generate non-empty evidence notes plus paste-ready `docs/controller_validation.md` snippets after real physical-device runs.
