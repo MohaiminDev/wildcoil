@@ -2483,7 +2483,7 @@ def test_controller_evidence_gate_rejects_missing_evidence_files(
 
 RIFT_ROAD_CONTROLLER_SESSION ok
 
-- Build: `commit=759cb78 package_sha256=arcade123`
+- Build: `commit=759cb78 package_sha256=arcade123 package_source=build/macos/Rift Road-signed-notarized.zip`
 - Controller family: `arcade-pad`
 - Device name: `Example Arcade Pad`
 - Connection: `usb`
@@ -2504,7 +2504,7 @@ RIFT_ROAD_CONTROLLER_SESSION ok
 
 RIFT_ROAD_CONTROLLER_SESSION ok
 
-- Build: `commit=759cb78 package_sha256=console123`
+- Build: `commit=759cb78 package_sha256=console123 package_source=build/macos/Rift Road-signed-notarized.zip`
 - Controller family: `console-pad`
 - Device name: `Example Console Pad`
 - Connection: `bluetooth`
@@ -2525,7 +2525,7 @@ RIFT_ROAD_CONTROLLER_SESSION ok
 
 RIFT_ROAD_KEYBOARD_FALLBACK ok
 
-- Build: `commit=759cb78 package_sha256=keyboard123`
+- Build: `commit=759cb78 package_sha256=keyboard123 package_source=build/macos/Rift Road-signed-notarized.zip`
 - Evidence capture: `docs/playtest-captures/controller/missing-keyboard.mov`
 - Title: `pass`
 - Hero select: `pass`
@@ -2575,7 +2575,7 @@ def test_controller_evidence_gate_rejects_missing_special_meter_ready_confirmati
 
 RIFT_ROAD_CONTROLLER_SESSION ok
 
-- Build: `commit=759cb78 package_sha256=arcade123`
+- Build: `commit=759cb78 package_sha256=arcade123 package_source=build/macos/Rift Road-signed-notarized.zip`
 - Controller family: `arcade-pad`
 - Device name: `Example Arcade Pad`
 - Connection: `usb`
@@ -2595,7 +2595,7 @@ RIFT_ROAD_CONTROLLER_SESSION ok
 
 RIFT_ROAD_CONTROLLER_SESSION ok
 
-- Build: `commit=759cb78 package_sha256=console123`
+- Build: `commit=759cb78 package_sha256=console123 package_source=build/macos/Rift Road-signed-notarized.zip`
 - Controller family: `console-pad`
 - Device name: `Example Console Pad`
 - Connection: `bluetooth`
@@ -2615,7 +2615,7 @@ RIFT_ROAD_CONTROLLER_SESSION ok
 
 RIFT_ROAD_KEYBOARD_FALLBACK ok
 
-- Build: `commit=759cb78 package_sha256=keyboard123`
+- Build: `commit=759cb78 package_sha256=keyboard123 package_source=build/macos/Rift Road-signed-notarized.zip`
 - Evidence capture: `{keyboard_evidence}`
 - Title: `pass`
 - Hero select: `pass`
@@ -2734,7 +2734,7 @@ RIFT_ROAD_KEYBOARD_FALLBACK ok
     assert "Build missing package_sha256" in output
 
 
-def test_controller_evidence_gate_accepts_complete_session_metadata(
+def test_controller_evidence_gate_rejects_unsigned_package_source(
     repo_root, tmp_path
 ):
     script_path = repo_root / "scripts" / "check_controller_evidence.sh"
@@ -2752,7 +2752,7 @@ def test_controller_evidence_gate_accepts_complete_session_metadata(
 
 RIFT_ROAD_CONTROLLER_SESSION ok
 
-- Build: `commit=759cb78 package_sha256=arcade123`
+- Build: `commit=759cb78 package_sha256=arcade123 package_source=build/macos/Rift Road.zip`
 - Controller family: `arcade-pad`
 - Device name: `Example Arcade Pad`
 - Connection: `usb`
@@ -2773,7 +2773,7 @@ RIFT_ROAD_CONTROLLER_SESSION ok
 
 RIFT_ROAD_CONTROLLER_SESSION ok
 
-- Build: `commit=759cb78 package_sha256=console123`
+- Build: `commit=759cb78 package_sha256=console123 package_source=build/macos/Rift Road.zip`
 - Controller family: `console-pad`
 - Device name: `Example Console Pad`
 - Connection: `bluetooth`
@@ -2794,7 +2794,97 @@ RIFT_ROAD_CONTROLLER_SESSION ok
 
 RIFT_ROAD_KEYBOARD_FALLBACK ok
 
-- Build: `commit=759cb78 package_sha256=keyboard123`
+- Build: `commit=759cb78 package_sha256=keyboard123 package_source=build/macos/Rift Road.zip`
+- Evidence capture: `{keyboard_evidence}`
+- Title: `pass`
+- Hero select: `pass`
+- Stage 1 movement: `pass`
+- Attack: `pass`
+- Jump: `pass`
+- Special meter ready: `pass`
+- Special: `pass`
+- Dash: `pass`
+- Pause: `pass`
+- Cancel/back: `pass`
+- Blockers: `none`
+""".strip()
+    )
+
+    result = subprocess.run(
+        ["bash", str(script_path), str(fake_doc)],
+        cwd=repo_root,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert result.returncode == 1
+    output = result.stdout + result.stderr
+    assert "RIFT_ROAD_CONTROLLER_EVIDENCE blocked" in output
+    assert "Build missing signed package_source" in output
+
+
+def test_controller_evidence_gate_accepts_complete_session_metadata(
+    repo_root, tmp_path
+):
+    script_path = repo_root / "scripts" / "check_controller_evidence.sh"
+    fake_doc = tmp_path / "controller_validation.md"
+    arcade_evidence = tmp_path / "example-arcade-pad.mov"
+    console_evidence = tmp_path / "example-console-pad.mov"
+    keyboard_evidence = tmp_path / "example-keyboard.mov"
+    for evidence_path in [arcade_evidence, console_evidence, keyboard_evidence]:
+        evidence_path.write_bytes(b"evidence")
+    fake_doc.write_text(
+        f"""
+# Controller Validation
+
+### Controller Session: `Arcade Pad`
+
+RIFT_ROAD_CONTROLLER_SESSION ok
+
+- Build: `commit=759cb78 package_sha256=arcade123 package_source=build/macos/Rift Road-signed-notarized.zip`
+- Controller family: `arcade-pad`
+- Device name: `Example Arcade Pad`
+- Connection: `usb`
+- Evidence capture: `{arcade_evidence}`
+- Title: `pass`
+- Hero select: `pass`
+- Stage 1 movement: `pass`
+- Attack: `pass`
+- Jump: `pass`
+- Special meter ready: `pass`
+- Special: `pass`
+- Dash: `pass`
+- Pause: `pass`
+- Cancel/back: `pass`
+- Blockers: `none`
+
+### Controller Session: `Console Pad`
+
+RIFT_ROAD_CONTROLLER_SESSION ok
+
+- Build: `commit=759cb78 package_sha256=console123 package_source=build/macos/Rift Road-signed-notarized.zip`
+- Controller family: `console-pad`
+- Device name: `Example Console Pad`
+- Connection: `bluetooth`
+- Evidence capture: `{console_evidence}`
+- Title: `pass`
+- Hero select: `pass`
+- Stage 1 movement: `pass`
+- Attack: `pass`
+- Jump: `pass`
+- Special meter ready: `pass`
+- Special: `pass`
+- Dash: `pass`
+- Pause: `pass`
+- Cancel/back: `pass`
+- Blockers: `none`
+
+### Keyboard Fallback Session
+
+RIFT_ROAD_KEYBOARD_FALLBACK ok
+
+- Build: `commit=759cb78 package_sha256=keyboard123 package_source=build/macos/Rift Road-signed-notarized.zip`
 - Evidence capture: `{keyboard_evidence}`
 - Title: `pass`
 - Hero select: `pass`

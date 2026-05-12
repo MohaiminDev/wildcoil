@@ -83,9 +83,16 @@ def build_metadata_issues(values):
     build = values.get("Build", "")
     if not build or build.upper() == "TBD":
         return []
+    issues = []
     if "package_sha256=" not in build:
-        return ["Build missing package_sha256"]
-    return []
+        issues.append("Build missing package_sha256")
+    if "package_source=" not in build:
+        issues.append("Build missing signed package_source")
+    else:
+        source_value = build.split("package_source=", 1)[1]
+        if "Rift Road-signed-notarized.zip" not in source_value:
+            issues.append("Build missing signed package_source")
+    return issues
 
 for block in re.split(r"(?=### Controller Session:)", text):
     if not has_marker(block, "RIFT_ROAD_CONTROLLER_SESSION ok"):
