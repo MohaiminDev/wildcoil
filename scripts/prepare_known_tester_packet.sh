@@ -63,6 +63,10 @@ signing_status="ok"
 if ! run_logged_allow_failure signing_preflight bash "$ROOT_DIR/scripts/check_macos_signing_env.sh"; then
   signing_status="blocked"
 fi
+release_signing_status="ok"
+if ! run_logged_allow_failure release_signing bash "$ROOT_DIR/scripts/sign_notarize_macos.sh"; then
+  release_signing_status="blocked"
+fi
 run_logged package_audit bash "$ROOT_DIR/scripts/audit_macos_package.sh"
 run_logged exported_app_smoke bash "$ROOT_DIR/scripts/smoke_exported_macos_app.sh"
 run_logged exported_app_keyboard_fallback bash "$ROOT_DIR/scripts/smoke_exported_keyboard_fallback.sh"
@@ -116,6 +120,7 @@ copy_if_exists "$ROOT_DIR/scripts/collect_playtest_evidence.sh" "$OUTPUT_DIR/scr
 copy_if_exists "$ROOT_DIR/scripts/check_playtest_evidence.sh" "$OUTPUT_DIR/scripts/check_playtest_evidence.sh"
 copy_if_exists "$ROOT_DIR/scripts/check_focus_audio_evidence.sh" "$OUTPUT_DIR/scripts/check_focus_audio_evidence.sh"
 copy_if_exists "$ROOT_DIR/scripts/audit_macos_package.sh" "$OUTPUT_DIR/scripts/audit_macos_package.sh"
+copy_if_exists "$ROOT_DIR/scripts/sign_notarize_macos.sh" "$OUTPUT_DIR/scripts/sign_notarize_macos.sh"
 copy_if_exists "$ROOT_DIR/scripts/smoke_exported_macos_app.sh" "$OUTPUT_DIR/scripts/smoke_exported_macos_app.sh"
 
 {
@@ -126,6 +131,7 @@ copy_if_exists "$ROOT_DIR/scripts/smoke_exported_macos_app.sh" "$OUTPUT_DIR/scri
   printf -- '- Godot version gate: `%s`\n' "$GODOT_VERSION_MARKER"
   printf -- '- Packet status: `%s`\n' "$packet_status"
   printf -- '- Signing preflight: `%s`\n' "$signing_status"
+  printf -- '- Release signing: `%s`\n' "$release_signing_status"
   printf -- '- Focus/audio evidence: `%s`\n' "$focus_audio_status"
   printf -- '- Playtest evidence: `%s`\n' "$playtest_status"
   printf -- '- Controller evidence: `%s`\n' "$controller_status"
@@ -144,6 +150,7 @@ copy_if_exists "$ROOT_DIR/scripts/smoke_exported_macos_app.sh" "$OUTPUT_DIR/scri
   printf '## Logs\n\n'
   printf -- '- `logs/check.log`\n'
   printf -- '- `logs/signing_preflight.log`\n'
+  printf -- '- `logs/release_signing.log`\n'
   printf -- '- `logs/package_audit.log`\n'
   printf -- '- `logs/exported_app_smoke.log`\n'
   printf -- '- `logs/exported_app_keyboard_fallback.log`\n'

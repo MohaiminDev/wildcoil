@@ -48,7 +48,7 @@ The visual target is the approved north-star direction: modern stylized arcade r
 - Focus-loss/resume: `stage1_focus_resume` in `src/wildcoil/tools/runtime_test_runner.gd` proves Stage 1 pauses on window focus loss, shows the pause overlay while the title layer is otherwise hidden, suspends/resumes the audio manager focus state, updates the return-focus message, and resumes cleanly with Esc. The exported-app focus/resume smoke proves the same app handler path from the launched zip, but not real audible output.
 - Focus/audio evidence gate: `bash scripts/check_focus_audio_evidence.sh` reads `docs/focus_audio_validation.md` and currently reports `RIFT_ROAD_FOCUS_AUDIO_EVIDENCE blocked` because no manual audible focus-loss/resume session has been recorded.
 - Release-candidate gate: `bash scripts/check_release_candidate.sh` combines checks, package, release signing/notarization, audit, exported-app smoke, exported-app keyboard fallback smoke, exported-app focus/resume smoke, manual focus/audio evidence, and performance sample, writes `build/release-gate/latest/completion-audit.md` with an explicit Godot version-gate row from `logs/check.log`, then reports `RIFT_ROAD_RELEASE_GATE blocked` until package and player-evidence gates are resolved. If a required automated command hard-fails, the gate now records that command as a blocker and writes the completion audit before exiting with the original failing status.
-- Known-tester packet: `bash scripts/prepare_known_tester_packet.sh` creates `build/known-tester-packet/latest/` with the current internal-only zip, manifest, build commit, package SHA-256, Godot version-gate marker, validation logs, package audit, smoke captures, keyboard fallback evidence, focus/resume evidence, performance JSON, host profile, second-machine evidence collector scripts, playtest docs, and manual gate statuses/logs for supervised known-tester sessions.
+- Known-tester packet: `bash scripts/prepare_known_tester_packet.sh` creates `build/known-tester-packet/latest/` with the current internal-only zip, manifest, build commit, package SHA-256, Godot version-gate marker, validation logs, release signing status/log, package audit, smoke captures, keyboard fallback evidence, focus/resume evidence, performance JSON, host profile, second-machine evidence collector scripts, playtest docs, and manual gate statuses/logs for supervised known-tester sessions.
 - Playtest evidence gate: `bash scripts/check_playtest_evidence.sh` reads `docs/playtest_log.md` and currently reports `RIFT_ROAD_PLAYTEST_EVIDENCE blocked` because no external session rows have been recorded.
 - Playtest evidence collector: `bash scripts/collect_playtest_evidence.sh --help` now generates a non-empty session note and paste-ready `docs/playtest_log.md` row after a real external-style session, but it does not append rows or satisfy the gate without actual tester evidence.
 - 2026-05-11 spec/story realignment: [`docs/game_spec.md`](/Users/himu/Desktop/career/personal_projects/wildcoil/docs/game_spec.md) and [`docs/game-story.md`](/Users/himu/Desktop/career/personal_projects/wildcoil/docs/game-story.md) now make the first success condition feel-focused, not market-demand-focused: the Stage 1 slice must feel good, look alive, and be satisfying to replay on an M1 iMac before public-playtest or marketability claims. Current missing spec-critical beats include physical controller/second-machine validation and external playtest evidence.
@@ -117,6 +117,18 @@ The visual target is the approved north-star direction: modern stylized arcade r
 - Dependencies: [RR-PROD-15]
 
 ## DONE
+
+### [RR-PROD-73] Record release signing status in tester packet
+- Outcome: The known-tester packet now runs the guarded release signing/notarization script as an allow-failure gate and records the release signing status plus `logs/release_signing.log` in the manifest.
+- Validation:
+  - [x] Added a failing behavioral regression with a fake packet workspace where `scripts/sign_notarize_macos.sh` reports `RIFT_ROAD_RELEASE_SIGNING blocked`.
+  - [x] Updated `scripts/prepare_known_tester_packet.sh` to run `scripts/sign_notarize_macos.sh`, preserve `logs/release_signing.log`, surface `Release signing: blocked/ok`, and bundle the signing script for supervised tester packets.
+  - [x] `python3 -m pytest tests/test_scripts_and_docs.py::test_known_tester_packet_records_release_signing_status -q` passes.
+  - [x] `bash scripts/check.sh` passes with 109 tests and Godot runtime smoke.
+- Progress:
+  - 2026-05-12: Closed the packet evidence gap left after the release-candidate gate began using the signed/notarized artifact path.
+- Dependencies: [RR-PROD-72]
+- Completed: 2026-05-12
 
 ### [RR-PROD-72] Gate release candidates on signed artifact path
 - Outcome: The release-candidate gate now executes the guarded signing/notarization script and accepts `RIFT_ROAD_RELEASE_SIGNING ok` as release-artifact evidence instead of only inspecting the unsigned internal zip.

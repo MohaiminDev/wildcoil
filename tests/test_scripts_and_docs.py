@@ -933,6 +933,7 @@ def test_known_tester_packet_script_collects_internal_build_evidence(repo_root):
     assert "scripts/check.sh" in script
     assert "scripts/package_macos.sh" in script
     assert "scripts/check_macos_signing_env.sh" in script
+    assert "scripts/sign_notarize_macos.sh" in script
     assert "scripts/audit_macos_package.sh" in script
     assert "scripts/smoke_exported_macos_app.sh" in script
     assert "scripts/smoke_exported_keyboard_fallback.sh" in script
@@ -957,10 +958,13 @@ def test_known_tester_packet_script_collects_internal_build_evidence(repo_root):
     assert "run_logged_allow_failure playtest_evidence bash \"$ROOT_DIR/scripts/check_playtest_evidence.sh\"" in script
     assert "run_logged_allow_failure controller_evidence bash \"$ROOT_DIR/scripts/check_controller_evidence.sh\"" in script
     assert "run_logged_allow_failure second_machine_evidence bash \"$ROOT_DIR/scripts/check_second_machine_evidence.sh\"" in script
+    assert "run_logged_allow_failure release_signing bash \"$ROOT_DIR/scripts/sign_notarize_macos.sh\"" in script
+    assert "printf -- '- Release signing: `%s`\\n' \"$release_signing_status\"" in script
     assert "printf -- '- Playtest evidence: `%s`\\n' \"$playtest_status\"" in script
     assert "printf -- '- Controller evidence: `%s`\\n' \"$controller_status\"" in script
     assert "printf -- '- Second-machine evidence: `%s`\\n' \"$second_machine_status\"" in script
     assert "printf -- '- `logs/check.log`\\n'" in script
+    assert "printf -- '- `logs/release_signing.log`\\n'" in script
     assert "printf -- '- `logs/exported_app_keyboard_fallback.log`\\n'" in script
     assert "printf -- '- `logs/exported_app_focus_resume.log`\\n'" in script
     assert "printf -- '- `logs/playtest_evidence.log`\\n'" in script
@@ -971,10 +975,103 @@ def test_known_tester_packet_script_collects_internal_build_evidence(repo_root):
     assert "scripts/prepare_known_tester_packet.sh" in packet
     assert "scripts/prepare_known_tester_packet.sh" in macos_docs
     assert "Godot version gate" in macos_docs
+    assert "release signing status" in macos_docs
     assert "manual gate statuses" in macos_docs
+    assert "release signing status" in handoff
     assert "manual gate statuses" in handoff
     assert "### [RR-PROD-27] Add known-tester packet command" in tracker
     assert "### [RR-PROD-66] Record manual gate statuses in tester packet" in tracker
+    assert "### [RR-PROD-73] Record release signing status in tester packet" in tracker
+
+
+def test_known_tester_packet_records_release_signing_status(repo_root, tmp_path):
+    fake_root = tmp_path / "packet-root"
+    scripts_dir = fake_root / "scripts"
+    package_dir = fake_root / "build" / "macos"
+    output_dir = fake_root / "build" / "known-tester-packet" / "latest"
+    scripts_dir.mkdir(parents=True)
+    package_dir.mkdir(parents=True)
+    (scripts_dir / "prepare_known_tester_packet.sh").write_text(
+        (repo_root / "scripts" / "prepare_known_tester_packet.sh").read_text()
+    )
+    (package_dir / "Rift Road.zip").write_text("unsigned package\n")
+
+    def write_fake_script(name, body):
+        path = scripts_dir / name
+        path.write_text("#!/usr/bin/env bash\nset -euo pipefail\n" + body)
+        path.chmod(0o755)
+
+    write_fake_script(
+        "check.sh",
+        "echo 'RIFT_ROAD_GODOT_VERSION ok version=4.6.1.stable.fake expected=4.6.x-stable'\n"
+        "echo 'RIFT_ROAD_RUNTIME_OK smoke'\n",
+    )
+    write_fake_script(
+        "package_macos.sh",
+        "mkdir -p build/macos\n"
+        "printf 'unsigned package\\n' > 'build/macos/Rift Road.zip'\n"
+        "echo 'RIFT_ROAD_PACKAGE ok'\n",
+    )
+    write_fake_script(
+        "check_macos_signing_env.sh",
+        "echo 'RIFT_ROAD_SIGNING_PREFLIGHT ok'\n",
+    )
+    write_fake_script(
+        "sign_notarize_macos.sh",
+        "echo 'RIFT_ROAD_RELEASE_SIGNING blocked'\nexit 1\n",
+    )
+    write_fake_script(
+        "audit_macos_package.sh",
+        "echo 'RIFT_ROAD_PACKAGE_AUDIT internal-only'\n",
+    )
+    write_fake_script(
+        "smoke_exported_macos_app.sh",
+        "echo 'RIFT_ROAD_EXPORTED_APP_SMOKE ok'\n",
+    )
+    write_fake_script(
+        "smoke_exported_keyboard_fallback.sh",
+        "echo 'RIFT_ROAD_EXPORTED_KEYBOARD_FALLBACK ok'\n",
+    )
+    write_fake_script(
+        "smoke_exported_focus_resume.sh",
+        "echo 'RIFT_ROAD_EXPORTED_FOCUS_RESUME ok'\n",
+    )
+    write_fake_script(
+        "check_focus_audio_evidence.sh",
+        "echo 'RIFT_ROAD_FOCUS_AUDIO_EVIDENCE blocked'\nexit 1\n",
+    )
+    write_fake_script(
+        "check_playtest_evidence.sh",
+        "echo 'RIFT_ROAD_PLAYTEST_EVIDENCE blocked sessions=0/5'\nexit 1\n",
+    )
+    write_fake_script(
+        "check_controller_evidence.sh",
+        "echo 'RIFT_ROAD_CONTROLLER_EVIDENCE blocked'\nexit 1\n",
+    )
+    write_fake_script(
+        "check_second_machine_evidence.sh",
+        "echo 'RIFT_ROAD_SECOND_MACHINE_EVIDENCE blocked'\nexit 1\n",
+    )
+    write_fake_script(
+        "sample_exported_app_performance.sh",
+        "echo 'RIFT_ROAD_EXPORTED_PERF stage1 frames=240 avg_ms=10.0 max_ms=22.0'\n",
+    )
+
+    result = subprocess.run(
+        ["bash", str(scripts_dir / "prepare_known_tester_packet.sh"), str(output_dir)],
+        cwd=fake_root,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    manifest = (output_dir / "manifest.md").read_text()
+    release_signing_log = (output_dir / "logs" / "release_signing.log").read_text()
+    assert result.returncode == 0
+    assert "RIFT_ROAD_KNOWN_TESTER_PACKET internal-only" in result.stdout
+    assert "- Release signing: `blocked`" in manifest
+    assert "- `logs/release_signing.log`" in manifest
+    assert "RIFT_ROAD_RELEASE_SIGNING blocked" in release_signing_log
 
 
 def test_known_tester_packet_includes_manual_gate_checklists(repo_root):
