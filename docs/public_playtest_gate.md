@@ -51,7 +51,7 @@ Run and record these before every external-style session:
 - [ ] Use `bash scripts/collect_controller_evidence.sh --help` during manual controller/keyboard sessions to generate evidence notes before updating `docs/controller_validation.md`; inside a signed known-tester packet, the collector records the selected signed artifact by default.
 - [ ] `bash scripts/check_controller_evidence.sh` reports `RIFT_ROAD_CONTROLLER_EVIDENCE ok` after two physical controller-family sessions plus keyboard fallback.
 - [ ] Use `bash scripts/collect_playtest_evidence.sh --help` after each external-style session to generate a session note and paste-ready log row; inside a signed known-tester packet, the collector records the selected signed artifact by default.
-- [ ] After adding session rows to `docs/playtest_log.md`, `bash scripts/check_playtest_evidence.sh` reports `RIFT_ROAD_PLAYTEST_EVIDENCE public-playtest-candidate` before making any public-playtest-candidate claim.
+- [ ] After adding session rows to `docs/playtest_log.md`, every row has a real non-empty `Evidence capture` file and `bash scripts/check_playtest_evidence.sh` reports `RIFT_ROAD_PLAYTEST_EVIDENCE public-playtest-candidate` before making any public-playtest-candidate claim.
 
 ## Session Flow
 

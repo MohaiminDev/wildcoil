@@ -240,7 +240,13 @@ mkdir -p "$evidence_dir"
 evidence_path="$evidence_dir/${session_id}.md"
 row_path="$evidence_dir/${session_id}-playtest-log-row.md"
 
-table_row="| ${date_value} | ${build_value} | ${tester} | ${setup} | ${input_method} | ${first_combat_time} | ${wow_moment_time} | ${replay_desire} | ${confusion_points} | ${cheap_damage_reports} | ${quotes} | ${follow_up_action} |"
+if [[ "$evidence_path" == "$ROOT_DIR/"* ]]; then
+  evidence_ref="${evidence_path#"$ROOT_DIR/"}"
+else
+  evidence_ref="$evidence_path"
+fi
+
+table_row="| ${date_value} | ${build_value} | ${evidence_ref} | ${tester} | ${setup} | ${input_method} | ${first_combat_time} | ${wow_moment_time} | ${replay_desire} | ${confusion_points} | ${cheap_damage_reports} | ${quotes} | ${follow_up_action} |"
 
 {
   printf '# Rift Road Playtest Evidence\n\n'
@@ -249,6 +255,7 @@ table_row="| ${date_value} | ${build_value} | ${tester} | ${setup} | ${input_met
   printf '## Session Notes\n\n'
   printf '### Session ID: `%s`\n\n' "$session_id"
   printf -- '- Build identifier: `%s`\n' "$build_value"
+  printf -- '- Evidence capture: `%s`\n' "$evidence_ref"
   printf -- '- Package: `%s`\n' "$PACKAGE_PATH"
   printf -- '- Engine / branch: `Godot 4.6.1 / codex/stage1-visual-north-star`\n'
   printf -- '- Tester: `%s`\n' "$tester"

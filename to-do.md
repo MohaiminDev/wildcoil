@@ -49,7 +49,7 @@ The visual target is the approved north-star direction: modern stylized arcade r
 - Focus/audio evidence gate: `bash scripts/check_focus_audio_evidence.sh` reads `docs/focus_audio_validation.md` and currently reports `RIFT_ROAD_FOCUS_AUDIO_EVIDENCE blocked` because no manual audible focus-loss/resume session has been recorded. `bash scripts/collect_focus_audio_evidence.sh --help` now generates manual evidence notes and paste-ready session snippets for real exported-app focus/audio sessions, records the selected signed package when available, but it does not turn the gate green without actual human-confirmed audible output.
 - Release-candidate gate: `bash scripts/check_release_candidate.sh` combines checks, package, release signing/notarization, audit, exported-app smoke, exported-app keyboard fallback smoke, exported-app focus/resume smoke, manual focus/audio evidence, and performance sample, writes `build/release-gate/latest/completion-audit.md` with an explicit Godot version-gate row from `logs/check.log`, then reports `RIFT_ROAD_RELEASE_GATE blocked` until package and player-evidence gates are resolved. If a required automated command hard-fails, the gate now records that command as a blocker and writes the completion audit before exiting with the original failing status.
 - Known-tester packet: `bash scripts/prepare_known_tester_packet.sh` creates `build/known-tester-packet/latest/` with the selected zip, manifest, build commit, package SHA-256, Godot version-gate marker, validation logs, release signing status/log, package audit, smoke captures, keyboard fallback evidence, focus/resume evidence, performance JSON, host profile, second-machine evidence collector scripts, focus/audio evidence collector scripts, playtest docs, and manual gate statuses/logs for supervised known-tester sessions. It copies `Rift Road-signed-notarized.zip` when release signing succeeds and the artifact exists; otherwise it keeps using the current internal-only `Rift Road.zip`.
-- Playtest evidence gate: `bash scripts/check_playtest_evidence.sh` reads `docs/playtest_log.md` and currently reports `RIFT_ROAD_PLAYTEST_EVIDENCE blocked` because no external session rows have been recorded.
+- Playtest evidence gate: `bash scripts/check_playtest_evidence.sh` reads `docs/playtest_log.md` and currently reports `RIFT_ROAD_PLAYTEST_EVIDENCE blocked` because no external session rows have been recorded. The gate now rejects counted rows unless their `Evidence capture` path points at a real, non-empty file.
 - Playtest evidence collector: `bash scripts/collect_playtest_evidence.sh --help` now generates a non-empty session note and paste-ready `docs/playtest_log.md` row after a real external-style session, records the selected signed package when available, but it does not append rows or satisfy the gate without actual tester evidence.
 - 2026-05-11 spec/story realignment: [`docs/game_spec.md`](/Users/himu/Desktop/career/personal_projects/wildcoil/docs/game_spec.md) and [`docs/game-story.md`](/Users/himu/Desktop/career/personal_projects/wildcoil/docs/game-story.md) now make the first success condition feel-focused, not market-demand-focused: the Stage 1 slice must feel good, look alive, and be satisfying to replay on an M1 iMac before public-playtest or marketability claims. Current missing spec-critical beats include physical controller/second-machine validation and external playtest evidence.
 - Performance sample: `stage1_performance_sample` reports `RIFT_ROAD_PERF stage1` with latest local result `avg_ms=16.726`, `max_ms=40.161`.
@@ -117,6 +117,23 @@ The visual target is the approved north-star direction: modern stylized arcade r
 - Dependencies: [RR-PROD-15]
 
 ## DONE
+
+### [RR-PROD-77] Require evidence files for playtest rows
+- Outcome: The playtest evidence gate now requires every counted external session row to include an `Evidence capture` path that resolves to a real, non-empty note, screenshot, or video file, so public-playtest-candidate status cannot be reached from pasted table rows alone.
+- Validation:
+  - [x] Added a failing behavioral regression with a fake five-session playtest log that otherwise satisfies session count, second-Mac, controller-family, and replay-intent thresholds but has one missing evidence capture file.
+  - [x] Updated `scripts/check_playtest_evidence.sh` to parse the `Evidence capture` column, resolve absolute and repo-relative paths, report `missing or empty evidence capture` blockers, and include evidence capture counts in its summary.
+  - [x] Updated `scripts/collect_playtest_evidence.sh` and `docs/playtest_log.md` so generated rows include the session note as the evidence capture.
+  - [x] Updated public playtest, macOS distribution, handoff, audit, and tracker docs to describe the stronger evidence-file requirement without claiming external sessions exist.
+  - [x] `python3 -m pytest tests/test_scripts_and_docs.py::test_playtest_evidence_gate_blocks_without_external_sessions tests/test_scripts_and_docs.py::test_playtest_evidence_gate_requires_real_evidence_capture_files tests/test_scripts_and_docs.py::test_playtest_evidence_collector_scaffolds_external_session_notes -q` passes.
+  - [x] `bash -n scripts/check_playtest_evidence.sh` and `bash -n scripts/collect_playtest_evidence.sh` pass.
+  - [x] `python3 scripts/check_agent_docs.py` passes.
+  - [x] `git diff --check` passes.
+  - [x] `bash scripts/check.sh` passes with 114 tests and Godot runtime smoke.
+- Progress:
+  - 2026-05-12: Hardened the public-playtest evidence gate against row-only proof while keeping the current build blocked until real tester evidence exists.
+- Dependencies: [RR-PROD-76]
+- Completed: 2026-05-12
 
 ### [RR-PROD-76] Use selected package in manual evidence collectors
 - Outcome: Manual controller, focus/audio, and playtest collectors now prefer the selected signed package when one exists in a build or known-tester packet, fall back to the unsigned zip, and record the package path/SHA in generated evidence notes.

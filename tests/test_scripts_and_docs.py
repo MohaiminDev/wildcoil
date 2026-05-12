@@ -1330,8 +1330,11 @@ def test_playtest_evidence_gate_blocks_without_external_sessions(repo_root):
     assert "RIFT_ROAD_PLAYTEST_EVIDENCE public-playtest-candidate" in script
     assert "controller-family=" in script
     assert "machine=second-mac" in script
+    assert "Evidence capture" in script
+    assert "missing or empty evidence capture" in script
     assert "scripts/check_playtest_evidence.sh" in packet
     assert "scripts/check_playtest_evidence.sh" in playtest_log
+    assert "Evidence capture" in playtest_log
     assert "scripts/check_playtest_evidence.sh" in audit
 
     result = subprocess.run(
@@ -1348,6 +1351,145 @@ def test_playtest_evidence_gate_blocks_without_external_sessions(repo_root):
     assert "sessions=0/5" in output
     assert "second_mac=0/1" in output
     assert "controller_families=0/2" in output
+
+
+def test_playtest_evidence_gate_requires_real_evidence_capture_files(
+    repo_root, tmp_path
+):
+    script_path = repo_root / "scripts" / "check_playtest_evidence.sh"
+    fake_log = tmp_path / "playtest_log.md"
+    evidence_dir = tmp_path / "playtest-captures"
+    evidence_dir.mkdir()
+    evidence_paths = []
+    for index in range(5):
+        evidence_path = evidence_dir / f"session-{index + 1}.md"
+        evidence_path.write_text(f"session {index + 1}\n")
+        evidence_paths.append(evidence_path)
+
+    rows = [
+        (
+            "2026-05-12",
+            "commit=fake package_sha256=fake",
+            str(evidence_paths[0]),
+            "tester-01",
+            "machine=second-mac",
+            "keyboard; controller-family=xbox",
+            "00:24",
+            "02:10",
+            "yes - asked again",
+            "none",
+            "none",
+            "The road collapse looked cool.",
+            "none",
+        ),
+        (
+            "2026-05-12",
+            "commit=fake package_sha256=fake",
+            str(evidence_paths[1]),
+            "tester-02",
+            "machine=primary-mac",
+            "keyboard; controller-family=dualshock",
+            "00:26",
+            "02:12",
+            "yes",
+            "none",
+            "none",
+            "The hit pause felt good.",
+            "none",
+        ),
+        (
+            "2026-05-12",
+            "commit=fake package_sha256=fake",
+            str(evidence_paths[2]),
+            "tester-03",
+            "machine=primary-mac",
+            "keyboard",
+            "00:25",
+            "02:20",
+            "yes",
+            "none",
+            "none",
+            "The boss warning was readable.",
+            "none",
+        ),
+        (
+            "2026-05-12",
+            "commit=fake package_sha256=fake",
+            str(evidence_paths[3]),
+            "tester-04",
+            "machine=primary-mac",
+            "keyboard",
+            "00:24",
+            "02:05",
+            "no",
+            "none",
+            "none",
+            "Wanted clearer pickup text.",
+            "none",
+        ),
+        (
+            "2026-05-12",
+            "commit=fake package_sha256=fake",
+            str(evidence_paths[4]),
+            "tester-05",
+            "machine=primary-mac",
+            "keyboard",
+            "00:23",
+            "02:09",
+            "yes",
+            "none",
+            "none",
+            "Wanted another run.",
+            "none",
+        ),
+    ]
+
+    def write_log(row_values):
+        fake_log.write_text(
+            "\n".join(
+                [
+                    "# Playtest Log",
+                    "",
+                    "| Date | Build | Evidence capture | Tester | Setup | Input method | First-combat time | Wow-moment time | Replay desire | Confusion points | Cheap-damage reports | Key quotes / observations | Follow-up action |",
+                    "| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |",
+                    *["| " + " | ".join(row) + " |" for row in row_values],
+                    "",
+                ]
+            )
+        )
+
+    rows_with_missing_evidence = list(rows)
+    rows_with_missing_evidence[2] = (
+        *rows_with_missing_evidence[2][:2],
+        str(evidence_dir / "missing-session.md"),
+        *rows_with_missing_evidence[2][3:],
+    )
+    write_log(rows_with_missing_evidence)
+
+    blocked_result = subprocess.run(
+        ["bash", str(script_path), str(fake_log)],
+        cwd=repo_root,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert blocked_result.returncode == 1
+    blocked_output = blocked_result.stdout + blocked_result.stderr
+    assert "missing or empty evidence capture" in blocked_output
+    assert "RIFT_ROAD_PLAYTEST_EVIDENCE blocked" in blocked_output
+
+    write_log(rows)
+    ok_result = subprocess.run(
+        ["bash", str(script_path), str(fake_log)],
+        cwd=repo_root,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert ok_result.returncode == 0
+    assert "RIFT_ROAD_PLAYTEST_EVIDENCE public-playtest-candidate" in ok_result.stdout
 
 
 def test_playtest_evidence_collector_scaffolds_external_session_notes(repo_root):
@@ -1380,15 +1522,18 @@ def test_playtest_evidence_collector_scaffolds_external_session_notes(repo_root)
     assert "docs/playtest-captures/playtests" in script
     assert "Rift Road-signed-notarized.zip" in script
     assert "Session Capture Table Row" in script
+    assert "Evidence capture" in script
     assert "Session Notes" in script
     assert "scripts/check_playtest_evidence.sh" in script
     assert "scripts/collect_playtest_evidence.sh" in playtest_log
     assert "selected signed package when available" in playtest_log
+    assert "Evidence capture" in playtest_log
     assert "scripts/collect_playtest_evidence.sh" in packet_script
     assert "Playtest evidence collector" in packet_script
     assert "scripts/collect_playtest_evidence.sh" in public_gate
     assert "playtest evidence collector" in handoff
     assert "scripts/collect_playtest_evidence.sh" in audit
+    assert "### [RR-PROD-77] Require evidence files for playtest rows" in (repo_root / "to-do.md").read_text()
 
     help_result = subprocess.run(
         ["bash", str(script_path), "--help"],
