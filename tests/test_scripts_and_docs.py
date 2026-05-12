@@ -1066,6 +1066,7 @@ def test_macos_signing_preflight_defines_non_secret_release_inputs(repo_root):
     assert "xcrun" in script
     assert "notarytool" in script
     assert "RIFT_ROAD_SIGNING_PREFLIGHT blocked" in script
+    assert "RIFT_ROAD_SIGNING_PREFLIGHT ok" in script
     assert "codesign/apple_team_id" in script
     assert "notarization/notarization=0" in script
     assert "scripts/check_macos_signing_env.sh" in macos_docs
@@ -1077,6 +1078,67 @@ def test_macos_signing_preflight_defines_non_secret_release_inputs(repo_root):
     assert "RIFT_ROAD_DEVELOPER_ID_APPLICATION" in example_env
     assert "RIFT_ROAD_NOTARY_KEYCHAIN_PROFILE" in example_env
     assert "Do not commit real values" in example_env
+
+
+def test_macos_signing_preflight_success_marker_matches_release_gate(
+    repo_root, tmp_path
+):
+    script = (repo_root / "scripts" / "check_macos_signing_env.sh").read_text()
+    release_gate = (repo_root / "scripts" / "check_release_candidate.sh").read_text()
+    fake_root = tmp_path / "preflight-root"
+    fake_script = fake_root / "scripts" / "check_macos_signing_env.sh"
+    fake_preset = fake_root / "src" / "wildcoil" / "export_presets.cfg"
+    fake_bin = tmp_path / "bin"
+
+    fake_script.parent.mkdir(parents=True)
+    fake_preset.parent.mkdir(parents=True)
+    fake_bin.mkdir()
+    fake_script.write_text(script)
+    fake_script.chmod(0o755)
+    fake_preset.write_text(
+        """
+codesign/apple_team_id="TEAMID"
+codesign/identity="Developer ID Application: Example Studio (TEAMID)"
+notarization/notarization=1
+""".strip()
+    )
+
+    fake_commands = {
+        "security": (
+            "#!/usr/bin/env bash\n"
+            "printf '  1) ABCDEF \"Developer ID Application: Example Studio (TEAMID)\"\\n'\n"
+        ),
+        "xcrun": "#!/usr/bin/env bash\n[[ \"$1\" == \"notarytool\" && \"$2\" == \"--help\" ]]\n",
+        "codesign": "#!/usr/bin/env bash\nexit 0\n",
+        "spctl": "#!/usr/bin/env bash\nexit 0\n",
+        "stapler": "#!/usr/bin/env bash\nexit 0\n",
+    }
+    for name, body in fake_commands.items():
+        fake_command = fake_bin / name
+        fake_command.write_text(body)
+        fake_command.chmod(0o755)
+
+    result = subprocess.run(
+        ["bash", str(fake_script)],
+        cwd=fake_root,
+        env={
+            **os.environ,
+            "PATH": f"{fake_bin}{os.pathsep}{os.environ['PATH']}",
+            "RIFT_ROAD_APPLE_TEAM_ID": "TEAMID",
+            "RIFT_ROAD_DEVELOPER_ID_APPLICATION": (
+                "Developer ID Application: Example Studio (TEAMID)"
+            ),
+            "RIFT_ROAD_NOTARY_KEYCHAIN_PROFILE": "rift-road-notary",
+        },
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert "RIFT_ROAD_SIGNING_PREFLIGHT ok" in release_gate
+    assert result.returncode == 0, result.stdout + result.stderr
+    assert "RIFT_ROAD_SIGNING_PREFLIGHT ok" in result.stdout
+    assert "RIFT_ROAD_SIGNING_PREFLIGHT ready" not in result.stdout
 
 
 def test_macos_sign_notarize_script_defines_release_artifact_path(repo_root):

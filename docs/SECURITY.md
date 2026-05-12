@@ -31,7 +31,7 @@ Use `docs/macos_release_inputs.example.env` as the redacted template for local r
 - Raw future save files, crash reports, or telemetry payloads if they can contain user data.
 
 ## Known Gaps
-- Release signing is blocked until `scripts/check_macos_signing_env.sh` reports `RIFT_ROAD_SIGNING_PREFLIGHT ready`.
+- Release signing is blocked until `scripts/check_macos_signing_env.sh` reports `RIFT_ROAD_SIGNING_PREFLIGHT ok`.
 - TODO(source-needed): release signing credential storage process.
 - TODO(source-needed): notarization credential process beyond the non-secret keychain profile name.
 - TODO(source-needed): third-party service credentials, if any are introduced.

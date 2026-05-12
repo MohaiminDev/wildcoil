@@ -118,6 +118,21 @@ The visual target is the approved north-star direction: modern stylized arcade r
 
 ## DONE
 
+### [RR-PROD-93] Align signing preflight success marker with release gate
+- Outcome: `scripts/check_macos_signing_env.sh` now reports the same `RIFT_ROAD_SIGNING_PREFLIGHT ok` success marker that `scripts/check_release_candidate.sh` expects, so a future successful signing preflight will not be marked blocked in the completion audit due to marker drift.
+- Validation:
+  - [x] Added a failing regression that runs the signing preflight with fake local signing commands, non-secret environment values, and non-empty export preset fields, then requires `RIFT_ROAD_SIGNING_PREFLIGHT ok`.
+  - [x] Updated `scripts/check_macos_signing_env.sh` to emit `RIFT_ROAD_SIGNING_PREFLIGHT ok` on success.
+  - [x] Updated `docs/SECURITY.md` to name the `ok` marker.
+  - [x] `python3 -m pytest tests/test_scripts_and_docs.py::test_macos_signing_preflight_defines_non_secret_release_inputs tests/test_scripts_and_docs.py::test_macos_signing_preflight_success_marker_matches_release_gate tests/test_scripts_and_docs.py::test_release_candidate_gate_combines_automated_and_manual_blockers -q`
+  - [x] `python3 scripts/check_agent_docs.py`
+  - [x] `git diff --check`
+  - [x] `bash scripts/check.sh` passes with 127 tests and `RIFT_ROAD_RUNTIME_OK smoke`.
+- Progress:
+  - 2026-05-12: Fixed signing-preflight success-marker drift before real Developer ID/notary inputs are available.
+- Dependencies: [RR-PROD-92]
+- Completed: 2026-05-12
+
 ### [RR-PROD-92] Refresh release-gate snapshot after focus/audio signed-source hardening
 - Outcome: The release-candidate gate was rerun after the focus/audio signed-source evidence hardening, refreshing tracked launched-app smoke, keyboard fallback, focus/resume, and exported-app performance evidence while preserving the real release blockers.
 - Validation:

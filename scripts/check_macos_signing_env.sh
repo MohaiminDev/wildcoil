@@ -75,4 +75,4 @@ if [[ "${#blockers[@]}" -gt 0 ]]; then
   exit 1
 fi
 
-printf 'RIFT_ROAD_SIGNING_PREFLIGHT ready\n'
+printf 'RIFT_ROAD_SIGNING_PREFLIGHT ok\n'
