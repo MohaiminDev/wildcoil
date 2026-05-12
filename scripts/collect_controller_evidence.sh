@@ -53,7 +53,7 @@ Options:
   --connection VALUE                  Required for controller sessions.
   --blockers VALUE                    Required; use "none" only when true.
   --evidence-dir PATH                 Optional; default docs/playtest-captures/controller.
-  --build VALUE                       Optional; defaults to current commit and package SHA-256.
+  --build VALUE                       Optional; defaults to current commit and package SHA-256. Custom values must include package_sha256=<sha> to pass the gate.
   --session-label VALUE               Optional label used in the generated heading.
   --confirm-title                     Confirm title input worked.
   --confirm-hero-select               Confirm hero select input worked.

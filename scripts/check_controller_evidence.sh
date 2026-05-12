@@ -79,6 +79,14 @@ def evidence_capture_issues(values):
         return [f"empty evidence file: {capture}"]
     return []
 
+def build_metadata_issues(values):
+    build = values.get("Build", "")
+    if not build or build.upper() == "TBD":
+        return []
+    if "package_sha256=" not in build:
+        return ["Build missing package_sha256"]
+    return []
+
 for block in re.split(r"(?=### Controller Session:)", text):
     if not has_marker(block, "RIFT_ROAD_CONTROLLER_SESSION ok"):
         continue
@@ -92,6 +100,7 @@ for block in re.split(r"(?=### Controller Session:)", text):
         invalid_sessions.append(f"{family} missing checks: {', '.join(missing)}")
         continue
     values, metadata_blockers = metadata_values_and_issues(block, required_controller_metadata)
+    metadata_blockers.extend(build_metadata_issues(values))
     metadata_blockers.extend(evidence_capture_issues(values))
     if metadata_blockers:
         invalid_sessions.extend(f"{family} {issue}" for issue in metadata_blockers)
@@ -108,6 +117,7 @@ for block in re.split(r"(?=### Keyboard Fallback Session)", text):
         keyboard_blockers.append("keyboard fallback missing checks: " + ", ".join(missing))
         continue
     values, metadata_blockers = metadata_values_and_issues(block, required_keyboard_metadata)
+    metadata_blockers.extend(build_metadata_issues(values))
     metadata_blockers.extend(evidence_capture_issues(values))
     if metadata_blockers:
         keyboard_blockers.extend(f"keyboard fallback {issue}" for issue in metadata_blockers)
