@@ -69,6 +69,7 @@ blocker_rows = []
 evidence_capture_count = 0
 
 for cells in session_rows:
+    build = clean_cell(cells[1])
     evidence_capture = cells[2]
     tester = cells[3]
     setup = cells[4].lower()
@@ -85,6 +86,9 @@ for cells in session_rows:
         )
     else:
         evidence_capture_count += 1
+
+    if not build or build.upper() == "TBD" or "package_sha256=" not in build:
+        blocker_rows.append(f"{cells[0]} {tester}: Build missing package_sha256")
 
     # Session table convention: setup includes machine=primary-mac or machine=second-mac.
     if "machine=second-mac" in setup:

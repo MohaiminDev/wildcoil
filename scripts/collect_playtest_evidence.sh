@@ -57,7 +57,7 @@ Options:
   --cheap-damage-reports VALUE    Required; use "none" only when true.
   --quotes VALUE                  Required; concise quote or observation.
   --follow-up-action VALUE        Required.
-  --build VALUE                   Optional; defaults to current commit and package SHA-256.
+  --build VALUE                   Optional; defaults to current commit and package SHA-256. Custom values must include package_sha256=<sha> to pass the gate.
   --session-id VALUE              Optional; defaults to timestamped tester id.
   --evidence-dir PATH             Optional; default docs/playtest-captures/playtests.
 

@@ -1651,6 +1651,123 @@ def test_playtest_evidence_gate_requires_real_evidence_capture_files(
     assert "RIFT_ROAD_PLAYTEST_EVIDENCE public-playtest-candidate" in ok_result.stdout
 
 
+def test_playtest_evidence_gate_rejects_build_metadata_without_package_sha(
+    repo_root, tmp_path
+):
+    script_path = repo_root / "scripts" / "check_playtest_evidence.sh"
+    fake_log = tmp_path / "playtest_log.md"
+    evidence_dir = tmp_path / "playtest-captures"
+    evidence_dir.mkdir()
+    evidence_paths = []
+    for index in range(5):
+        evidence_path = evidence_dir / f"session-{index + 1}.md"
+        evidence_path.write_text(f"session {index + 1}\n")
+        evidence_paths.append(evidence_path)
+
+    rows = [
+        (
+            "2026-05-12",
+            "759cb78",
+            str(evidence_paths[0]),
+            "tester-01",
+            "machine=second-mac",
+            "keyboard; controller-family=xbox",
+            "00:24",
+            "02:10",
+            "yes - asked again",
+            "none",
+            "none",
+            "The road collapse looked cool.",
+            "none",
+        ),
+        (
+            "2026-05-12",
+            "759cb78",
+            str(evidence_paths[1]),
+            "tester-02",
+            "machine=primary-mac",
+            "keyboard; controller-family=dualshock",
+            "00:26",
+            "02:12",
+            "yes",
+            "none",
+            "none",
+            "The hit pause felt good.",
+            "none",
+        ),
+        (
+            "2026-05-12",
+            "759cb78",
+            str(evidence_paths[2]),
+            "tester-03",
+            "machine=primary-mac",
+            "keyboard",
+            "00:25",
+            "02:20",
+            "yes",
+            "none",
+            "none",
+            "The boss warning was readable.",
+            "none",
+        ),
+        (
+            "2026-05-12",
+            "759cb78",
+            str(evidence_paths[3]),
+            "tester-04",
+            "machine=primary-mac",
+            "keyboard",
+            "00:24",
+            "02:05",
+            "no",
+            "none",
+            "none",
+            "Wanted clearer pickup text.",
+            "none",
+        ),
+        (
+            "2026-05-12",
+            "759cb78",
+            str(evidence_paths[4]),
+            "tester-05",
+            "machine=primary-mac",
+            "keyboard",
+            "00:23",
+            "02:09",
+            "yes",
+            "none",
+            "none",
+            "Wanted another run.",
+            "none",
+        ),
+    ]
+    fake_log.write_text(
+        "\n".join(
+            [
+                "# Playtest Log",
+                "",
+                "| Date | Build | Evidence capture | Tester | Setup | Input method | First-combat time | Wow-moment time | Replay desire | Confusion points | Cheap-damage reports | Key quotes / observations | Follow-up action |",
+                "| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |",
+                *["| " + " | ".join(row) + " |" for row in rows],
+                "",
+            ]
+        )
+    )
+
+    result = subprocess.run(
+        ["bash", str(script_path), str(fake_log)],
+        cwd=repo_root,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert result.returncode == 1
+    output = result.stdout + result.stderr
+    assert "RIFT_ROAD_PLAYTEST_EVIDENCE blocked" in output
+    assert "Build missing package_sha256" in output
+
+
 def test_playtest_evidence_collector_scaffolds_external_session_notes(repo_root):
     script_path = repo_root / "scripts" / "collect_playtest_evidence.sh"
     script = script_path.read_text()
