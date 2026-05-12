@@ -89,6 +89,8 @@ copy_if_exists "$ROOT_DIR/docs/playtest-captures/performance-host-latest" "$EVID
 mkdir -p "$OUTPUT_DIR/scripts"
 copy_if_exists "$ROOT_DIR/scripts/collect_second_machine_evidence.sh" "$OUTPUT_DIR/scripts/collect_second_machine_evidence.sh"
 copy_if_exists "$ROOT_DIR/scripts/check_second_machine_evidence.sh" "$OUTPUT_DIR/scripts/check_second_machine_evidence.sh"
+copy_if_exists "$ROOT_DIR/scripts/collect_controller_evidence.sh" "$OUTPUT_DIR/scripts/collect_controller_evidence.sh"
+copy_if_exists "$ROOT_DIR/scripts/check_controller_evidence.sh" "$OUTPUT_DIR/scripts/check_controller_evidence.sh"
 copy_if_exists "$ROOT_DIR/scripts/audit_macos_package.sh" "$OUTPUT_DIR/scripts/audit_macos_package.sh"
 copy_if_exists "$ROOT_DIR/scripts/smoke_exported_macos_app.sh" "$OUTPUT_DIR/scripts/smoke_exported_macos_app.sh"
 
@@ -103,6 +105,7 @@ copy_if_exists "$ROOT_DIR/scripts/smoke_exported_macos_app.sh" "$OUTPUT_DIR/scri
   printf -- '- Public playtest protocol: `docs/public_playtest_gate.md`\n'
   printf -- '- Playtest log template: `docs/playtest_log.md`\n\n'
   printf -- '- Controller validation checklist: `docs/controller_validation.md`\n'
+  printf -- '- Controller evidence collector: `scripts/collect_controller_evidence.sh`\n'
   printf -- '- Second-machine validation checklist: `docs/second_machine_validation.md`\n\n'
   printf -- '- Second-machine evidence collector: `scripts/collect_second_machine_evidence.sh`\n\n'
   printf '## Critical Distribution Warning\n\n'

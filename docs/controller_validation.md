@@ -8,6 +8,8 @@ Run the gate after recording sessions:
 bash scripts/check_controller_evidence.sh
 ```
 
+Use `bash scripts/collect_controller_evidence.sh --help` during real exported-app sessions to generate a non-empty evidence note and a paste-ready session snippet. The collector still depends on manual, physical testing; do not use its `ok` marker unless the tester actually completed the flow on the exported app.
+
 The gate passes only after two distinct completed physical controller-family sessions and one completed keyboard fallback session are recorded with every required control marked `pass`.
 
 For any section marked `RIFT_ROAD_CONTROLLER_SESSION ok` or `RIFT_ROAD_KEYBOARD_FALLBACK ok`, do not leave metadata fields as `TBD`. The `Evidence capture` field must point to a real, non-empty file, preferably under `docs/playtest-captures/controller/`. The gate rejects placeholder or missing build, evidence, blocker, and controller device metadata so a session cannot pass on control-check strings alone.

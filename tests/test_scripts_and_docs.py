@@ -17,6 +17,7 @@ def test_run_and_check_scripts_exist(repo_root):
         "scripts/check_second_machine_evidence.sh",
         "scripts/collect_second_machine_evidence.sh",
         "scripts/check_controller_evidence.sh",
+        "scripts/collect_controller_evidence.sh",
         "scripts/smoke_exported_keyboard_fallback.sh",
         "scripts/smoke_exported_focus_resume.sh",
     ]:
@@ -759,6 +760,67 @@ def test_controller_evidence_gate_blocks_without_physical_controller_sessions(re
     assert "keyboard_fallback=0/1" in output
     assert "controller session missing Controller family" not in output
     assert "keyboard fallback missing checks" not in output
+
+
+def test_controller_evidence_collector_scaffolds_real_manual_sessions(repo_root):
+    script_path = repo_root / "scripts" / "collect_controller_evidence.sh"
+    script = script_path.read_text()
+    docs = (repo_root / "docs" / "controller_validation.md").read_text()
+    packet_script = (repo_root / "scripts" / "prepare_known_tester_packet.sh").read_text()
+    public_gate = (repo_root / "docs" / "public_playtest_gate.md").read_text()
+    handoff = (
+        repo_root
+        / "docs"
+        / "playtest-captures"
+        / "stage1-marketability-handoff-2026-05-10.md"
+    ).read_text()
+    audit = (repo_root / "docs" / "market-readiness-audit-2026-05-10.md").read_text()
+
+    assert "RIFT_ROAD_CONTROLLER_EVIDENCE_COLLECTOR blocked" in script
+    assert "RIFT_ROAD_CONTROLLER_EVIDENCE_COLLECTOR ok" in script
+    assert "--session-type" in script
+    assert "--controller-family" in script
+    assert "--device-name" in script
+    assert "--connection" in script
+    assert "--confirm-title" in script
+    assert "--confirm-cancel-back" in script
+    assert "docs/playtest-captures/controller" in script
+    assert "RIFT_ROAD_CONTROLLER_SESSION ok" in script
+    assert "RIFT_ROAD_KEYBOARD_FALLBACK ok" in script
+    assert "Title: `pass`" in script
+    assert "Hero select: `pass`" in script
+    assert "Stage 1 movement: `pass`" in script
+    assert "Cancel/back: `pass`" in script
+    assert "scripts/check_controller_evidence.sh" in script
+    assert "scripts/collect_controller_evidence.sh" in docs
+    assert "scripts/collect_controller_evidence.sh" in packet_script
+    assert "Controller evidence collector" in packet_script
+    assert "scripts/collect_controller_evidence.sh" in public_gate
+    assert "controller evidence collector" in handoff
+    assert "scripts/collect_controller_evidence.sh" in audit
+
+    help_result = subprocess.run(
+        ["bash", str(script_path), "--help"],
+        cwd=repo_root,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert help_result.returncode == 0
+    assert "--session-type controller" in help_result.stdout
+    assert "--session-type keyboard" in help_result.stdout
+
+    blocked_result = subprocess.run(
+        ["bash", str(script_path)],
+        cwd=repo_root,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert blocked_result.returncode == 1
+    blocked_output = blocked_result.stdout + blocked_result.stderr
+    assert "RIFT_ROAD_CONTROLLER_EVIDENCE_COLLECTOR blocked" in blocked_output
+    assert "Missing --session-type controller|keyboard" in blocked_output
 
 
 def test_controller_evidence_gate_rejects_placeholder_session_metadata(
