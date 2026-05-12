@@ -3,7 +3,24 @@ set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 DEFAULT_EVIDENCE_DIR="$ROOT_DIR/docs/playtest-captures/playtests"
-PACKAGE_PATH="$ROOT_DIR/build/macos/Rift Road.zip"
+SIGNED_PACKAGE_PATH="$ROOT_DIR/build/macos/Rift Road-signed-notarized.zip"
+UNSIGNED_PACKAGE_PATH="$ROOT_DIR/build/macos/Rift Road.zip"
+PACKET_SIGNED_PACKAGE_PATH="$ROOT_DIR/Rift Road-signed-notarized.zip"
+PACKET_UNSIGNED_PACKAGE_PATH="$ROOT_DIR/Rift Road.zip"
+PACKAGE_PATH="${RIFT_ROAD_PACKAGE_PATH:-}"
+if [[ -z "$PACKAGE_PATH" ]]; then
+  if [[ -f "$SIGNED_PACKAGE_PATH" ]]; then
+    PACKAGE_PATH="$SIGNED_PACKAGE_PATH"
+  elif [[ -f "$UNSIGNED_PACKAGE_PATH" ]]; then
+    PACKAGE_PATH="$UNSIGNED_PACKAGE_PATH"
+  elif [[ -f "$PACKET_SIGNED_PACKAGE_PATH" ]]; then
+    PACKAGE_PATH="$PACKET_SIGNED_PACKAGE_PATH"
+  elif [[ -f "$PACKET_UNSIGNED_PACKAGE_PATH" ]]; then
+    PACKAGE_PATH="$PACKET_UNSIGNED_PACKAGE_PATH"
+  else
+    PACKAGE_PATH="$UNSIGNED_PACKAGE_PATH"
+  fi
+fi
 
 usage() {
   cat <<'EOF'
@@ -43,6 +60,11 @@ Options:
   --build VALUE                   Optional; defaults to current commit and package SHA-256.
   --session-id VALUE              Optional; defaults to timestamped tester id.
   --evidence-dir PATH             Optional; default docs/playtest-captures/playtests.
+
+Package default:
+  Uses RIFT_ROAD_PACKAGE_PATH when set. Otherwise prefers
+  build/macos/Rift Road-signed-notarized.zip or ./Rift Road-signed-notarized.zip
+  when present, then falls back to the unsigned Rift Road.zip.
 EOF
 }
 
@@ -227,6 +249,7 @@ table_row="| ${date_value} | ${build_value} | ${tester} | ${setup} | ${input_met
   printf '## Session Notes\n\n'
   printf '### Session ID: `%s`\n\n' "$session_id"
   printf -- '- Build identifier: `%s`\n' "$build_value"
+  printf -- '- Package: `%s`\n' "$PACKAGE_PATH"
   printf -- '- Engine / branch: `Godot 4.6.1 / codex/stage1-visual-north-star`\n'
   printf -- '- Tester: `%s`\n' "$tester"
   printf -- '- Hardware: `%s`\n' "$setup"

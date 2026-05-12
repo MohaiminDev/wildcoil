@@ -270,10 +270,12 @@ def test_focus_audio_evidence_collector_scaffolds_manual_audible_session(
     assert "--confirm-audio-after-resume" in script
     assert "--confirm-resume-control" in script
     assert "docs/playtest-captures/focus-audio" in script
+    assert "Rift Road-signed-notarized.zip" in script
     assert "RIFT_ROAD_FOCUS_AUDIO_SESSION ok" in script
     assert "Audio quiet during focus pause: `pass`" in script
     assert "scripts/check_focus_audio_evidence.sh" in script
     assert "scripts/collect_focus_audio_evidence.sh" in docs
+    assert "selected signed package when available" in docs
     assert "scripts/collect_focus_audio_evidence.sh" in packet_script
     assert "Focus/audio evidence collector" in packet_script
     assert "scripts/collect_focus_audio_evidence.sh" in public_gate
@@ -1100,6 +1102,7 @@ def test_known_tester_packet_script_collects_internal_build_evidence(repo_root):
     assert "### [RR-PROD-66] Record manual gate statuses in tester packet" in tracker
     assert "### [RR-PROD-73] Record release signing status in tester packet" in tracker
     assert "### [RR-PROD-75] Use signed artifact in tester packet" in tracker
+    assert "### [RR-PROD-76] Use selected package in manual evidence collectors" in tracker
 
 
 def test_known_tester_packet_records_release_signing_status(repo_root, tmp_path):
@@ -1375,10 +1378,12 @@ def test_playtest_evidence_collector_scaffolds_external_session_notes(repo_root)
     assert "--follow-up-action" in script
     assert "--confirm-external-session" in script
     assert "docs/playtest-captures/playtests" in script
+    assert "Rift Road-signed-notarized.zip" in script
     assert "Session Capture Table Row" in script
     assert "Session Notes" in script
     assert "scripts/check_playtest_evidence.sh" in script
     assert "scripts/collect_playtest_evidence.sh" in playtest_log
+    assert "selected signed package when available" in playtest_log
     assert "scripts/collect_playtest_evidence.sh" in packet_script
     assert "Playtest evidence collector" in packet_script
     assert "scripts/collect_playtest_evidence.sh" in public_gate
@@ -1406,6 +1411,116 @@ def test_playtest_evidence_collector_scaffolds_external_session_notes(repo_root)
     blocked_output = blocked_result.stdout + blocked_result.stderr
     assert "RIFT_ROAD_PLAYTEST_COLLECTOR blocked" in blocked_output
     assert "Missing --confirm-external-session" in blocked_output
+
+
+def test_manual_evidence_collectors_default_to_signed_packet_artifact(
+    repo_root, tmp_path
+):
+    fake_root = tmp_path / "packet-root"
+    scripts_dir = fake_root / "scripts"
+    scripts_dir.mkdir(parents=True)
+    signed_package = fake_root / "Rift Road-signed-notarized.zip"
+    signed_package.write_text("signed package\n")
+    signed_sha = subprocess.run(
+        ["shasum", "-a", "256", str(signed_package)],
+        capture_output=True,
+        text=True,
+        check=True,
+    ).stdout.split()[0]
+
+    for script_name in [
+        "collect_controller_evidence.sh",
+        "collect_focus_audio_evidence.sh",
+        "collect_playtest_evidence.sh",
+    ]:
+        fake_script = scripts_dir / script_name
+        fake_script.write_text((repo_root / "scripts" / script_name).read_text())
+        fake_script.chmod(0o755)
+
+    collector_runs = [
+        (
+            "collect_controller_evidence.sh",
+            [
+                "--session-type",
+                "keyboard",
+                "--blockers",
+                "none",
+                "--evidence-dir",
+                str(tmp_path / "controller-evidence"),
+                "--confirm-title",
+                "--confirm-hero-select",
+                "--confirm-movement",
+                "--confirm-attack",
+                "--confirm-jump",
+                "--confirm-special",
+                "--confirm-dash",
+                "--confirm-pause",
+                "--confirm-cancel-back",
+            ],
+            tmp_path / "controller-evidence",
+        ),
+        (
+            "collect_focus_audio_evidence.sh",
+            [
+                "--output-device",
+                "Built-in speakers",
+                "--blockers",
+                "none",
+                "--evidence-dir",
+                str(tmp_path / "focus-audio-evidence"),
+                "--confirm-focus-pause-overlay",
+                "--confirm-audio-before-focus-loss",
+                "--confirm-audio-quiet-during-focus-pause",
+                "--confirm-audio-after-resume",
+                "--confirm-resume-control",
+            ],
+            tmp_path / "focus-audio-evidence",
+        ),
+        (
+            "collect_playtest_evidence.sh",
+            [
+                "--confirm-external-session",
+                "--tester",
+                "tester-signed-packet",
+                "--setup",
+                "machine=second-mac; signed packet",
+                "--input-method",
+                "keyboard",
+                "--first-combat-time",
+                "00:24",
+                "--wow-moment-time",
+                "02:10",
+                "--replay-desire",
+                "yes",
+                "--confusion-points",
+                "none",
+                "--cheap-damage-reports",
+                "none",
+                "--quotes",
+                "The road collapse looked cool.",
+                "--follow-up-action",
+                "none",
+                "--evidence-dir",
+                str(tmp_path / "playtest-evidence"),
+            ],
+            tmp_path / "playtest-evidence",
+        ),
+    ]
+
+    for script_name, script_args, evidence_dir in collector_runs:
+        result = subprocess.run(
+            ["bash", str(scripts_dir / script_name), *script_args],
+            cwd=fake_root,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        assert result.returncode == 0, result.stdout + result.stderr
+        generated_text = "\n".join(
+            path.read_text() for path in sorted(evidence_dir.glob("*.md"))
+        )
+        assert "Rift Road-signed-notarized.zip" in generated_text
+        assert f"package_sha256={signed_sha}" in generated_text
 
 
 def test_second_machine_evidence_gate_blocks_without_clean_machine_proof(repo_root):
@@ -1573,6 +1688,7 @@ def test_controller_evidence_collector_scaffolds_real_manual_sessions(repo_root)
     assert "--confirm-title" in script
     assert "--confirm-cancel-back" in script
     assert "docs/playtest-captures/controller" in script
+    assert "Rift Road-signed-notarized.zip" in script
     assert "RIFT_ROAD_CONTROLLER_SESSION ok" in script
     assert "RIFT_ROAD_KEYBOARD_FALLBACK ok" in script
     assert "Title: `pass`" in script
@@ -1581,6 +1697,7 @@ def test_controller_evidence_collector_scaffolds_real_manual_sessions(repo_root)
     assert "Cancel/back: `pass`" in script
     assert "scripts/check_controller_evidence.sh" in script
     assert "scripts/collect_controller_evidence.sh" in docs
+    assert "selected signed package when available" in docs
     assert "scripts/collect_controller_evidence.sh" in packet_script
     assert "Controller evidence collector" in packet_script
     assert "scripts/collect_controller_evidence.sh" in public_gate

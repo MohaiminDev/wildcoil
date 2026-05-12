@@ -8,7 +8,7 @@ Run the gate after recording sessions:
 bash scripts/check_controller_evidence.sh
 ```
 
-Use `bash scripts/collect_controller_evidence.sh --help` during real exported-app sessions to generate a non-empty evidence note and a paste-ready session snippet. The collector still depends on manual, physical testing; do not use its `ok` marker unless the tester actually completed the flow on the exported app.
+Use `bash scripts/collect_controller_evidence.sh --help` during real exported-app sessions to generate a non-empty evidence note and a paste-ready session snippet. The collector uses the selected signed package when available, including `Rift Road-signed-notarized.zip` inside a known-tester packet, then falls back to `Rift Road.zip`. The collector still depends on manual, physical testing; do not use its `ok` marker unless the tester actually completed the flow on the exported app.
 
 The gate passes only after two distinct completed physical controller-family sessions and one completed keyboard fallback session are recorded with every required control marked `pass`.
 

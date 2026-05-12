@@ -3,7 +3,24 @@ set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 DEFAULT_EVIDENCE_DIR="$ROOT_DIR/docs/playtest-captures/controller"
-PACKAGE_PATH="$ROOT_DIR/build/macos/Rift Road.zip"
+SIGNED_PACKAGE_PATH="$ROOT_DIR/build/macos/Rift Road-signed-notarized.zip"
+UNSIGNED_PACKAGE_PATH="$ROOT_DIR/build/macos/Rift Road.zip"
+PACKET_SIGNED_PACKAGE_PATH="$ROOT_DIR/Rift Road-signed-notarized.zip"
+PACKET_UNSIGNED_PACKAGE_PATH="$ROOT_DIR/Rift Road.zip"
+PACKAGE_PATH="${RIFT_ROAD_PACKAGE_PATH:-}"
+if [[ -z "$PACKAGE_PATH" ]]; then
+  if [[ -f "$SIGNED_PACKAGE_PATH" ]]; then
+    PACKAGE_PATH="$SIGNED_PACKAGE_PATH"
+  elif [[ -f "$UNSIGNED_PACKAGE_PATH" ]]; then
+    PACKAGE_PATH="$UNSIGNED_PACKAGE_PATH"
+  elif [[ -f "$PACKET_SIGNED_PACKAGE_PATH" ]]; then
+    PACKAGE_PATH="$PACKET_SIGNED_PACKAGE_PATH"
+  elif [[ -f "$PACKET_UNSIGNED_PACKAGE_PATH" ]]; then
+    PACKAGE_PATH="$PACKET_UNSIGNED_PACKAGE_PATH"
+  else
+    PACKAGE_PATH="$UNSIGNED_PACKAGE_PATH"
+  fi
+fi
 
 usage() {
   cat <<'EOF'
@@ -47,6 +64,11 @@ Options:
   --confirm-dash                      Confirm dash worked.
   --confirm-pause                     Confirm pause worked.
   --confirm-cancel-back               Confirm cancel/back worked.
+
+Package default:
+  Uses RIFT_ROAD_PACKAGE_PATH when set. Otherwise prefers
+  build/macos/Rift Road-signed-notarized.zip or ./Rift Road-signed-notarized.zip
+  when present, then falls back to the unsigned Rift Road.zip.
 EOF
 }
 

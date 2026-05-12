@@ -45,12 +45,12 @@ Run and record these before every external-style session:
 - [ ] The latest `stage1_performance_sample` result is recorded.
 - [ ] The latest exported-app performance result is recorded; run the windowed 1080p and fullscreen samples when the target session needs display-mode evidence.
 - [ ] The tester knows whether they are playing a signed/notarized build or an internal-only build.
-- [ ] Use `bash scripts/collect_focus_audio_evidence.sh --help` during manual focus/audio sessions to generate evidence notes before updating `docs/focus_audio_validation.md`.
+- [ ] Use `bash scripts/collect_focus_audio_evidence.sh --help` during manual focus/audio sessions to generate evidence notes before updating `docs/focus_audio_validation.md`; inside a signed known-tester packet, the collector records the selected signed artifact by default.
 - [ ] `bash scripts/check_focus_audio_evidence.sh` reports `RIFT_ROAD_FOCUS_AUDIO_EVIDENCE ok` after a human confirms audible output before focus loss, quiet/suspended audio while focus-paused, and audible output after resume.
 - [ ] `bash scripts/check_second_machine_evidence.sh` reports `RIFT_ROAD_SECOND_MACHINE_EVIDENCE ok` before any public-playtest or release-candidate distribution claim.
-- [ ] Use `bash scripts/collect_controller_evidence.sh --help` during manual controller/keyboard sessions to generate evidence notes before updating `docs/controller_validation.md`.
+- [ ] Use `bash scripts/collect_controller_evidence.sh --help` during manual controller/keyboard sessions to generate evidence notes before updating `docs/controller_validation.md`; inside a signed known-tester packet, the collector records the selected signed artifact by default.
 - [ ] `bash scripts/check_controller_evidence.sh` reports `RIFT_ROAD_CONTROLLER_EVIDENCE ok` after two physical controller-family sessions plus keyboard fallback.
-- [ ] Use `bash scripts/collect_playtest_evidence.sh --help` after each external-style session to generate a session note and paste-ready log row.
+- [ ] Use `bash scripts/collect_playtest_evidence.sh --help` after each external-style session to generate a session note and paste-ready log row; inside a signed known-tester packet, the collector records the selected signed artifact by default.
 - [ ] After adding session rows to `docs/playtest_log.md`, `bash scripts/check_playtest_evidence.sh` reports `RIFT_ROAD_PLAYTEST_EVIDENCE public-playtest-candidate` before making any public-playtest-candidate claim.
 
 ## Session Flow

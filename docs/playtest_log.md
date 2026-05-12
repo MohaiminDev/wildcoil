@@ -6,7 +6,7 @@ Use [`docs/public_playtest_gate.md`](/Users/himu/Desktop/career/personal_project
 
 Run `bash scripts/check_playtest_evidence.sh` after recording external sessions. The current gate only passes when completed session rows show at least 5 sessions, at least one `machine=second-mac` setup, at least two distinct `controller-family=<family>` input entries, and replay intent from most testers.
 
-Use `bash scripts/collect_playtest_evidence.sh --help` after a real external-style session to generate a non-empty evidence note and a paste-ready row for the table below. The collector does not append rows automatically; review the note, paste the row, then run the gate.
+Use `bash scripts/collect_playtest_evidence.sh --help` after a real external-style session to generate a non-empty evidence note and a paste-ready row for the table below. The collector uses the selected signed package when available, including `Rift Road-signed-notarized.zip` inside a known-tester packet, then falls back to `Rift Road.zip`. It does not append rows automatically; review the note, paste the row, then run the gate.
 
 ## Phase 1 Gate Targets
 
