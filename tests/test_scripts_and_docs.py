@@ -644,15 +644,26 @@ def test_known_tester_packet_script_collects_internal_build_evidence(repo_root):
     assert "printf -- '- Package: `Rift Road.zip`\\n'" in script
     assert "printf -- '- Build commit: `%s`\\n' \"$BUILD_COMMIT\"" in script
     assert "printf -- '- Package SHA256: `%s`\\n' \"$PACKAGE_SHA256\"" in script
+    assert "run_logged_allow_failure playtest_evidence bash \"$ROOT_DIR/scripts/check_playtest_evidence.sh\"" in script
+    assert "run_logged_allow_failure controller_evidence bash \"$ROOT_DIR/scripts/check_controller_evidence.sh\"" in script
+    assert "run_logged_allow_failure second_machine_evidence bash \"$ROOT_DIR/scripts/check_second_machine_evidence.sh\"" in script
+    assert "printf -- '- Playtest evidence: `%s`\\n' \"$playtest_status\"" in script
+    assert "printf -- '- Controller evidence: `%s`\\n' \"$controller_status\"" in script
+    assert "printf -- '- Second-machine evidence: `%s`\\n' \"$second_machine_status\"" in script
     assert "printf -- '- `logs/check.log`\\n'" in script
     assert "printf -- '- `logs/exported_app_keyboard_fallback.log`\\n'" in script
     assert "printf -- '- `logs/exported_app_focus_resume.log`\\n'" in script
+    assert "printf -- '- `logs/playtest_evidence.log`\\n'" in script
+    assert "printf -- '- `logs/controller_evidence.log`\\n'" in script
+    assert "printf -- '- `logs/second_machine_evidence.log`\\n'" in script
     assert "printf -- '- `evidence/keyboard-fallback-latest/`\\n'" in script
     assert "printf -- '- `evidence/focus-resume-latest/`\\n'" in script
     assert "scripts/prepare_known_tester_packet.sh" in packet
     assert "scripts/prepare_known_tester_packet.sh" in macos_docs
-    assert "known-tester packet" in handoff
+    assert "manual gate statuses" in macos_docs
+    assert "manual gate statuses" in handoff
     assert "### [RR-PROD-27] Add known-tester packet command" in tracker
+    assert "### [RR-PROD-66] Record manual gate statuses in tester packet" in tracker
 
 
 def test_known_tester_packet_includes_manual_gate_checklists(repo_root):

@@ -47,7 +47,7 @@ The visual target is the approved north-star direction: modern stylized arcade r
 - Focus-loss/resume: `stage1_focus_resume` in `src/wildcoil/tools/runtime_test_runner.gd` proves Stage 1 pauses on window focus loss, shows the pause overlay while the title layer is otherwise hidden, suspends/resumes the audio manager focus state, updates the return-focus message, and resumes cleanly with Esc. The exported-app focus/resume smoke proves the same app handler path from the launched zip, but not real audible output.
 - Focus/audio evidence gate: `bash scripts/check_focus_audio_evidence.sh` reads `docs/focus_audio_validation.md` and currently reports `RIFT_ROAD_FOCUS_AUDIO_EVIDENCE blocked` because no manual audible focus-loss/resume session has been recorded.
 - Release-candidate gate: `bash scripts/check_release_candidate.sh` combines checks, package, audit, exported-app smoke, exported-app keyboard fallback smoke, exported-app focus/resume smoke, manual focus/audio evidence, and performance sample, then reports `RIFT_ROAD_RELEASE_GATE blocked` until package and player-evidence gates are resolved.
-- Known-tester packet: `bash scripts/prepare_known_tester_packet.sh` creates `build/known-tester-packet/latest/` with the current internal-only zip, manifest, build commit, package SHA-256, validation logs, package audit, smoke captures, keyboard fallback evidence, focus/resume evidence, performance JSON, host profile, second-machine evidence collector scripts, and playtest docs for supervised known-tester sessions.
+- Known-tester packet: `bash scripts/prepare_known_tester_packet.sh` creates `build/known-tester-packet/latest/` with the current internal-only zip, manifest, build commit, package SHA-256, validation logs, package audit, smoke captures, keyboard fallback evidence, focus/resume evidence, performance JSON, host profile, second-machine evidence collector scripts, playtest docs, and manual gate statuses/logs for supervised known-tester sessions.
 - Playtest evidence gate: `bash scripts/check_playtest_evidence.sh` reads `docs/playtest_log.md` and currently reports `RIFT_ROAD_PLAYTEST_EVIDENCE blocked` because no external session rows have been recorded.
 - Playtest evidence collector: `bash scripts/collect_playtest_evidence.sh --help` now generates a non-empty session note and paste-ready `docs/playtest_log.md` row after a real external-style session, but it does not append rows or satisfy the gate without actual tester evidence.
 - 2026-05-11 spec/story realignment: [`docs/game_spec.md`](/Users/himu/Desktop/career/personal_projects/wildcoil/docs/game_spec.md) and [`docs/game-story.md`](/Users/himu/Desktop/career/personal_projects/wildcoil/docs/game-story.md) now make the first success condition feel-focused, not market-demand-focused: the Stage 1 slice must feel good, look alive, and be satisfying to replay on an M1 iMac before public-playtest or marketability claims. Current missing spec-critical beats include physical controller/second-machine validation and external playtest evidence.
@@ -116,6 +116,19 @@ The visual target is the approved north-star direction: modern stylized arcade r
 - Dependencies: [RR-PROD-15]
 
 ## DONE
+
+### [RR-PROD-66] Record manual gate statuses in tester packet
+- Outcome: The known-tester packet now records the current focus/audio, playtest, controller, and second-machine evidence gate statuses plus logs, so supervised sessions can see which manual blockers remain without rerunning every checker by hand.
+- Validation:
+  - [x] Added a failing regression requiring `scripts/prepare_known_tester_packet.sh` to run `scripts/check_playtest_evidence.sh`, `scripts/check_controller_evidence.sh`, and `scripts/check_second_machine_evidence.sh` in allow-failure mode, then write their statuses and logs into the packet manifest.
+  - [x] Updated `scripts/prepare_known_tester_packet.sh` to preserve `logs/playtest_evidence.log`, `logs/controller_evidence.log`, and `logs/second_machine_evidence.log` while keeping the packet command usable when those evidence gates are blocked.
+  - [x] Updated macOS distribution docs and the handoff note to state that the known-tester packet records manual gate statuses.
+  - [x] `python3 -m pytest tests/test_scripts_and_docs.py::test_known_tester_packet_script_collects_internal_build_evidence -q` passes.
+  - [x] `bash scripts/check.sh` passes with 104 tests and Godot runtime smoke.
+- Progress:
+  - 2026-05-12: Made the internal packet a clearer evidence handoff by surfacing each remaining manual gate status directly in `manifest.md`.
+- Dependencies: [RR-PROD-14], [RR-PROD-15]
+- Completed: 2026-05-12
 
 ### [RR-PROD-65] Add manual focus/audio evidence gate
 - Outcome: Added an explicit release-candidate blocker for manual audible focus-loss/resume confirmation so automated focus state proof cannot be mistaken for real output-device evidence.

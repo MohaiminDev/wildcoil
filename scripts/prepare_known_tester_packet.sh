@@ -67,6 +67,18 @@ focus_audio_status="ok"
 if ! run_logged_allow_failure focus_audio_evidence bash "$ROOT_DIR/scripts/check_focus_audio_evidence.sh"; then
   focus_audio_status="blocked"
 fi
+playtest_status="ok"
+if ! run_logged_allow_failure playtest_evidence bash "$ROOT_DIR/scripts/check_playtest_evidence.sh"; then
+  playtest_status="blocked"
+fi
+controller_status="ok"
+if ! run_logged_allow_failure controller_evidence bash "$ROOT_DIR/scripts/check_controller_evidence.sh"; then
+  controller_status="blocked"
+fi
+second_machine_status="ok"
+if ! run_logged_allow_failure second_machine_evidence bash "$ROOT_DIR/scripts/check_second_machine_evidence.sh"; then
+  second_machine_status="blocked"
+fi
 run_logged exported_app_performance bash "$ROOT_DIR/scripts/sample_exported_app_performance.sh"
 
 packet_status="internal-only"
@@ -110,6 +122,9 @@ copy_if_exists "$ROOT_DIR/scripts/smoke_exported_macos_app.sh" "$OUTPUT_DIR/scri
   printf -- '- Packet status: `%s`\n' "$packet_status"
   printf -- '- Signing preflight: `%s`\n' "$signing_status"
   printf -- '- Focus/audio evidence: `%s`\n' "$focus_audio_status"
+  printf -- '- Playtest evidence: `%s`\n' "$playtest_status"
+  printf -- '- Controller evidence: `%s`\n' "$controller_status"
+  printf -- '- Second-machine evidence: `%s`\n' "$second_machine_status"
   printf -- '- Build source: `%s`\n' "$ROOT_DIR"
   printf -- '- Public playtest protocol: `docs/public_playtest_gate.md`\n'
   printf -- '- Playtest log template: `docs/playtest_log.md`\n\n'
@@ -129,6 +144,9 @@ copy_if_exists "$ROOT_DIR/scripts/smoke_exported_macos_app.sh" "$OUTPUT_DIR/scri
   printf -- '- `logs/exported_app_keyboard_fallback.log`\n'
   printf -- '- `logs/exported_app_focus_resume.log`\n'
   printf -- '- `logs/focus_audio_evidence.log`\n'
+  printf -- '- `logs/playtest_evidence.log`\n'
+  printf -- '- `logs/controller_evidence.log`\n'
+  printf -- '- `logs/second_machine_evidence.log`\n'
   printf -- '- `logs/exported_app_performance.log`\n\n'
   printf '## Evidence\n\n'
   printf -- '- `evidence/exported-app-smoke-latest/`\n'
