@@ -9,7 +9,7 @@ This file records the current performance gate for the Rift Road Stage 1 vertica
 - Runtime marker: `RIFT_ROAD_PERF stage1`
 - Sample length: 240 physics/process frame pairs.
 - Current automated budget: average frame sample at or below `PERFORMANCE_FRAME_BUDGET_MS` and no spike above `PERFORMANCE_MAX_FRAME_MS`.
-- Latest local result on 2026-05-12: `avg_ms=16.687`, `max_ms=25.636`, `budget_ms=33.3`, `max_budget_ms=120.0`.
+- Latest local result on 2026-05-12: `avg_ms=16.828`, `max_ms=49.411`, `budget_ms=33.3`, `max_budget_ms=120.0`.
 
 ## Exported App Render Sample
 
@@ -20,7 +20,7 @@ This file records the current performance gate for the Rift Road Stage 1 vertica
 - Purpose: capture frame timing from the real launched macOS `.app`, not only the headless Godot runner.
 - Sampling discards the first startup/render warmup frames after Stage 1 autoplay begins so the strict spike budget measures steady-state gameplay frame pacing, not one-time app launch and scene setup.
 - Current host: local Apple Silicon Mac A, `arm64`, `Apple M1`, `iMac21,2`, `16 GB`, macOS `26.5`; this is not second-machine proof.
-- Latest local exported-app result on 2026-05-12: `avg_ms=13.882`, `max_ms=35.522`, `budget_ms=33.3`, `max_budget_ms=120.0`, `window_size=1280x720`, `window_mode=windowed`, with 8 warmup frames excluded.
+- Latest local exported-app result on 2026-05-12: `avg_ms=14.560`, `max_ms=35.960`, `budget_ms=33.3`, `max_budget_ms=120.0`, `window_size=1280x720`, `window_mode=windowed`, with 8 warmup frames excluded.
 - Optional local windowed 1080p sample: `RIFT_ROAD_PERF_WINDOW_SIZE=1920x1080 RIFT_ROAD_PERF_WINDOW_MODE=windowed bash scripts/sample_exported_app_performance.sh build/macos/Rift\ Road.zip docs/playtest-captures/exported-app-performance-windowed-1080p-latest`
 - Latest local windowed 1080p result on 2026-05-10: `avg_ms=3.199`, `max_ms=6.652`, `budget_ms=33.3`, `max_budget_ms=120.0`, `window_size=1920x1080`, `window_mode=windowed`, with 8 warmup frames excluded.
 - Optional local fullscreen sample: `RIFT_ROAD_PERF_WINDOW_SIZE=1920x1080 RIFT_ROAD_PERF_WINDOW_MODE=fullscreen bash scripts/sample_exported_app_performance.sh build/macos/Rift\ Road.zip docs/playtest-captures/exported-app-performance-fullscreen-latest`
