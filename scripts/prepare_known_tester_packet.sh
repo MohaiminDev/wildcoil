@@ -52,6 +52,10 @@ rm -rf "$OUTPUT_DIR"
 mkdir -p "$LOG_DIR" "$DOCS_DIR" "$EVIDENCE_DIR"
 
 run_logged check bash "$ROOT_DIR/scripts/check.sh"
+GODOT_VERSION_MARKER="$(grep 'RIFT_ROAD_GODOT_VERSION ok' "$LOG_DIR/check.log" | tail -n 1 || true)"
+if [[ -z "$GODOT_VERSION_MARKER" ]]; then
+  GODOT_VERSION_MARKER="RIFT_ROAD_GODOT_VERSION blocked"
+fi
 run_logged package bash "$ROOT_DIR/scripts/package_macos.sh"
 BUILD_COMMIT="$(git -C "$ROOT_DIR" rev-parse --short HEAD 2>/dev/null || printf 'unknown')"
 PACKAGE_SHA256="$(shasum -a 256 "$PACKAGE_PATH" | awk '{print $1}')"
@@ -119,6 +123,7 @@ copy_if_exists "$ROOT_DIR/scripts/smoke_exported_macos_app.sh" "$OUTPUT_DIR/scri
   printf -- '- Package: `Rift Road.zip`\n'
   printf -- '- Build commit: `%s`\n' "$BUILD_COMMIT"
   printf -- '- Package SHA256: `%s`\n' "$PACKAGE_SHA256"
+  printf -- '- Godot version gate: `%s`\n' "$GODOT_VERSION_MARKER"
   printf -- '- Packet status: `%s`\n' "$packet_status"
   printf -- '- Signing preflight: `%s`\n' "$signing_status"
   printf -- '- Focus/audio evidence: `%s`\n' "$focus_audio_status"

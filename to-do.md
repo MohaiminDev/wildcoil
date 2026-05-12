@@ -44,11 +44,11 @@ The visual target is the approved north-star direction: modern stylized arcade r
 - Signing preflight/release script: `bash scripts/check_macos_signing_env.sh` reports `RIFT_ROAD_SIGNING_PREFLIGHT blocked`; required non-secret inputs are `RIFT_ROAD_APPLE_TEAM_ID`, `RIFT_ROAD_DEVELOPER_ID_APPLICATION`, and `RIFT_ROAD_NOTARY_KEYCHAIN_PROFILE`. `docs/macos_release_inputs.example.env` now provides a redacted local setup template; real values must stay outside version control. `bash scripts/sign_notarize_macos.sh` now defines the guarded `build/macos/Rift Road-signed-notarized.zip` path, but currently reports `RIFT_ROAD_RELEASE_SIGNING blocked` until real local Apple signing/notary inputs exist.
 - Second-machine evidence: `bash scripts/check_second_machine_evidence.sh` reads `docs/playtest-captures/second-machine-latest/` and currently reports `RIFT_ROAD_SECOND_MACHINE_EVIDENCE blocked` because no clean-machine proof files have been recorded. `bash scripts/collect_second_machine_evidence.sh` is now bundled for known testers so the real second Mac can generate the expected host profile, package audit log, install-smoke note, and title/gameplay captures, but it still requires actual second-machine execution and release-candidate package/Gatekeeper evidence.
 - Exported-app smoke: `bash scripts/smoke_exported_macos_app.sh` extracts `build/macos/Rift Road.zip`, launches the `.app` with `--rift-road-smoke-stage1` and `--rift-road-smoke-capture-dir=...`, captures title, hero-select, opening story, Stage 1 gameplay, post-intro combat, pickup clarity, road-collapse, Stage Clear, Game Over/retry, and post-retry gameplay viewport screenshots from the running exported app, and reports `RIFT_ROAD_EXPORTED_APP_SMOKE ok`. `bash scripts/smoke_exported_focus_resume.sh` records automated exported-app focus/resume JSON plus a pause-overlay viewport capture and reports `RIFT_ROAD_EXPORTED_FOCUS_RESUME ok`.
-- Exported-app performance: `bash scripts/sample_exported_app_performance.sh` launches the packaged `.app`, records `docs/playtest-captures/exported-app-performance-latest/stage1-exported-performance.json`, and reports `RIFT_ROAD_EXPORTED_PERF stage1` on local Apple Silicon Mac A (`arm64`, `Apple M1`, `iMac21,2`) with latest local 1280x720 windowed steady-state result `avg_ms=12.523`, `max_ms=30.123` after 8 startup/render warmup frames. A local 1920x1080 windowed run records `avg_ms=3.199`, `max_ms=6.652` in `docs/playtest-captures/exported-app-performance-windowed-1080p-latest/stage1-exported-performance.json`, and a local fullscreen run records `avg_ms=1.583`, `max_ms=2.793` in `docs/playtest-captures/exported-app-performance-fullscreen-latest/stage1-exported-performance.json`.
+- Exported-app performance: `bash scripts/sample_exported_app_performance.sh` launches the packaged `.app`, records `docs/playtest-captures/exported-app-performance-latest/stage1-exported-performance.json`, and reports `RIFT_ROAD_EXPORTED_PERF stage1` on local Apple Silicon Mac A (`arm64`, `Apple M1`, `iMac21,2`) with latest local 1280x720 windowed steady-state result `avg_ms=10.126`, `max_ms=22.409` after 8 startup/render warmup frames. A local 1920x1080 windowed run records `avg_ms=3.199`, `max_ms=6.652` in `docs/playtest-captures/exported-app-performance-windowed-1080p-latest/stage1-exported-performance.json`, and a local fullscreen run records `avg_ms=1.583`, `max_ms=2.793` in `docs/playtest-captures/exported-app-performance-fullscreen-latest/stage1-exported-performance.json`.
 - Focus-loss/resume: `stage1_focus_resume` in `src/wildcoil/tools/runtime_test_runner.gd` proves Stage 1 pauses on window focus loss, shows the pause overlay while the title layer is otherwise hidden, suspends/resumes the audio manager focus state, updates the return-focus message, and resumes cleanly with Esc. The exported-app focus/resume smoke proves the same app handler path from the launched zip, but not real audible output.
 - Focus/audio evidence gate: `bash scripts/check_focus_audio_evidence.sh` reads `docs/focus_audio_validation.md` and currently reports `RIFT_ROAD_FOCUS_AUDIO_EVIDENCE blocked` because no manual audible focus-loss/resume session has been recorded.
-- Release-candidate gate: `bash scripts/check_release_candidate.sh` combines checks, package, audit, exported-app smoke, exported-app keyboard fallback smoke, exported-app focus/resume smoke, manual focus/audio evidence, and performance sample, writes `build/release-gate/latest/completion-audit.md`, then reports `RIFT_ROAD_RELEASE_GATE blocked` until package and player-evidence gates are resolved.
-- Known-tester packet: `bash scripts/prepare_known_tester_packet.sh` creates `build/known-tester-packet/latest/` with the current internal-only zip, manifest, build commit, package SHA-256, validation logs, package audit, smoke captures, keyboard fallback evidence, focus/resume evidence, performance JSON, host profile, second-machine evidence collector scripts, playtest docs, and manual gate statuses/logs for supervised known-tester sessions.
+- Release-candidate gate: `bash scripts/check_release_candidate.sh` combines checks, package, audit, exported-app smoke, exported-app keyboard fallback smoke, exported-app focus/resume smoke, manual focus/audio evidence, and performance sample, writes `build/release-gate/latest/completion-audit.md` with an explicit Godot version-gate row from `logs/check.log`, then reports `RIFT_ROAD_RELEASE_GATE blocked` until package and player-evidence gates are resolved.
+- Known-tester packet: `bash scripts/prepare_known_tester_packet.sh` creates `build/known-tester-packet/latest/` with the current internal-only zip, manifest, build commit, package SHA-256, Godot version-gate marker, validation logs, package audit, smoke captures, keyboard fallback evidence, focus/resume evidence, performance JSON, host profile, second-machine evidence collector scripts, playtest docs, and manual gate statuses/logs for supervised known-tester sessions.
 - Playtest evidence gate: `bash scripts/check_playtest_evidence.sh` reads `docs/playtest_log.md` and currently reports `RIFT_ROAD_PLAYTEST_EVIDENCE blocked` because no external session rows have been recorded.
 - Playtest evidence collector: `bash scripts/collect_playtest_evidence.sh --help` now generates a non-empty session note and paste-ready `docs/playtest_log.md` row after a real external-style session, but it does not append rows or satisfy the gate without actual tester evidence.
 - 2026-05-11 spec/story realignment: [`docs/game_spec.md`](/Users/himu/Desktop/career/personal_projects/wildcoil/docs/game_spec.md) and [`docs/game-story.md`](/Users/himu/Desktop/career/personal_projects/wildcoil/docs/game-story.md) now make the first success condition feel-focused, not market-demand-focused: the Stage 1 slice must feel good, look alive, and be satisfying to replay on an M1 iMac before public-playtest or marketability claims. Current missing spec-critical beats include physical controller/second-machine validation and external playtest evidence.
@@ -117,6 +117,18 @@ The visual target is the approved north-star direction: modern stylized arcade r
 - Dependencies: [RR-PROD-15]
 
 ## DONE
+
+### [RR-PROD-70] Surface Godot version evidence in release handoff
+- Outcome: Release-candidate and known-tester evidence artifacts now expose the Godot 4.6.x stable version-gate marker directly instead of leaving it implicit inside the validation log.
+- Validation:
+  - [x] Added a failing regression requiring `scripts/check_release_candidate.sh` and `scripts/prepare_known_tester_packet.sh` to surface `RIFT_ROAD_GODOT_VERSION ok` in release/packet evidence.
+  - [x] Updated `build/release-gate/latest/completion-audit.md` generation to include a `Godot engine version gate` row backed by `logs/check.log`.
+  - [x] Updated the known-tester packet manifest to print the exact `RIFT_ROAD_GODOT_VERSION ok` marker from `logs/check.log`.
+  - [x] Updated public playtest and macOS distribution guidance so testers know where the version gate is recorded.
+- Progress:
+  - 2026-05-12: Made the just-added Godot version gate visible in the two main release-handoff artifacts without changing the remaining manual blockers.
+- Dependencies: [RR-PROD-69]
+- Completed: 2026-05-12
 
 ### [RR-PROD-69] Add Godot version validation gate
 - Outcome: Local validation now checks the configured Godot executable is on the supported Godot 4.6.x stable line before running the Python suite and runtime smoke.
@@ -753,7 +765,7 @@ The visual target is the approved north-star direction: modern stylized arcade r
   - [x] `scripts/sample_exported_app_performance.sh` accepts `RIFT_ROAD_PERF_WINDOW_SIZE` and `RIFT_ROAD_PERF_WINDOW_MODE`.
   - [x] `AppRoot` supports `--rift-road-render-perf-window-size=...` and `--rift-road-render-perf-window-mode=...`.
   - [x] `stage1-exported-performance.json` includes `window_size` and `window_mode`.
-  - [x] Current 1280x720 windowed result: `avg_ms=12.523`, `max_ms=30.123`, `budget_ms=33.3`, `max_budget_ms=120.0`.
+  - [x] Current 1280x720 windowed result: `avg_ms=10.126`, `max_ms=22.409`, `budget_ms=33.3`, `max_budget_ms=120.0`.
   - [x] Current 1920x1080 windowed result: `avg_ms=3.199`, `max_ms=6.652`, `budget_ms=33.3`, `max_budget_ms=120.0`.
 - Progress:
   - 2026-05-10: Added a local windowed 1080p performance path without claiming fullscreen, target-hardware, or second-machine coverage.
@@ -778,7 +790,7 @@ The visual target is the approved north-star direction: modern stylized arcade r
   - [x] `scripts/sample_exported_app_performance.sh` exists and is executable.
   - [x] `AppRoot` supports `--rift-road-render-perf-sample` and writes a JSON timing artifact through `--rift-road-render-perf-output=...`.
   - [x] The script reports `RIFT_ROAD_EXPORTED_PERF stage1` when the app stays within the current frame budget.
-  - [x] Latest local result: `avg_ms=12.523`, `max_ms=30.123`, `budget_ms=33.3`, `max_budget_ms=120.0`, after 8 startup/render warmup frames.
+  - [x] Latest local result: `avg_ms=10.126`, `max_ms=22.409`, `budget_ms=33.3`, `max_budget_ms=120.0`, after 8 startup/render warmup frames.
   - [x] `scripts/check_release_candidate.sh` includes the exported-app performance sample.
 - Progress:
   - 2026-05-10: Added rendered-app performance evidence path and wired it into the release-candidate gate.

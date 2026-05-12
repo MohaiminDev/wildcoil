@@ -60,6 +60,7 @@ write_completion_audit() {
   local playable_status="checked"
   local package_status="checked"
   local screenshot_playtest_status="checked"
+  local godot_version_status="checked"
   local validation_status="checked"
   local assessment_status="checked"
   local public_status="checked"
@@ -85,7 +86,12 @@ write_completion_audit() {
     screenshot_playtest_status="blocked"
   fi
 
-  if ! marker_in_log check "RIFT_ROAD_RUNTIME_OK smoke" \
+  if ! marker_in_log check "RIFT_ROAD_GODOT_VERSION ok"; then
+    godot_version_status="blocked"
+  fi
+
+  if ! marker_in_log check "RIFT_ROAD_GODOT_VERSION ok" \
+    || ! marker_in_log check "RIFT_ROAD_RUNTIME_OK smoke" \
     || ! marker_in_log exported_app_performance "RIFT_ROAD_EXPORTED_PERF stage1" \
     || ! marker_in_log performance "RIFT_ROAD_PERF stage1"; then
     validation_status="blocked"
@@ -116,6 +122,7 @@ write_completion_audit() {
     printf '| Playable Stage 1 vertical slice | `logs/check.log`, `logs/exported_app_smoke.log`, `logs/exported_app_keyboard_fallback.log`, `logs/exported_app_focus_resume.log` | `%s` |\n' "$playable_status"
     printf '| Production-deployable macOS build path | `logs/signing_preflight.log`, `logs/package.log`, `logs/package_audit.log`, `logs/second_machine_evidence.log` | `%s` |\n' "$package_status"
     printf '| Real launched-game screenshot and playtest evidence | `logs/exported_app_smoke.log`, `logs/playtest_evidence.log`, `logs/controller_evidence.log`, `logs/focus_audio_evidence.log` | `%s` |\n' "$screenshot_playtest_status"
+    printf '| Godot engine version gate | `logs/check.log` marker `RIFT_ROAD_GODOT_VERSION ok` | `%s` |\n' "$godot_version_status"
     printf '| Current validation results | `logs/check.log`, `logs/exported_app_performance.log`, `logs/performance.log` | `%s` |\n' "$validation_status"
     printf '| Candid market-readiness assessment | `docs/market-readiness-audit-2026-05-10.md` | `%s` |\n' "$assessment_status"
     printf '| Public playtest or release-candidate proof | release-gate blockers plus `docs/public_playtest_gate.md` | `%s` |\n' "$public_status"

@@ -467,6 +467,8 @@ def test_release_candidate_gate_combines_automated_and_manual_blockers(repo_root
     assert "RIFT_ROAD_CONTROLLER_EVIDENCE ok" in script
     assert "RIFT_ROAD_EXPORTED_KEYBOARD_FALLBACK ok" in script
     assert "RIFT_ROAD_EXPORTED_FOCUS_RESUME ok" in script
+    assert "RIFT_ROAD_GODOT_VERSION ok" in script
+    assert "Godot engine version gate" in script
     assert "Public playtest or release-candidate proof" in script
     assert "Player love / commercial viability" in script
     assert "COMPLETION_AUDIT=\"$LOG_DIR/completion-audit.md\"" in script
@@ -478,6 +480,7 @@ def test_release_candidate_gate_combines_automated_and_manual_blockers(repo_root
     assert "Real launched-game screenshot and playtest evidence" in script
     assert "Candid market-readiness assessment" in script
     assert "logs/exported_app_smoke.log" in script
+    assert "logs/check.log` marker `RIFT_ROAD_GODOT_VERSION ok" in script
     assert "logs/playtest_evidence.log" in script
     assert "logs/controller_evidence.log" in script
     assert "logs/second_machine_evidence.log" in script
@@ -485,8 +488,10 @@ def test_release_candidate_gate_combines_automated_and_manual_blockers(repo_root
     assert "RIFT_ROAD_RELEASE_GATE blocked" in script
     assert "scripts/check_release_candidate.sh" in docs
     assert "completion-audit.md" in docs
+    assert "Godot version gate" in docs
     assert "scripts/check_release_candidate.sh" in audit
     assert "completion-audit.md" in public_gate
+    assert "Godot version gate command" in public_gate
 
 
 def test_repo_guidance_tracks_current_release_validation_gates(repo_root):
@@ -737,6 +742,8 @@ def test_known_tester_packet_script_collects_internal_build_evidence(repo_root):
     assert "performance-host-latest" in script
     assert "git -C \"$ROOT_DIR\" rev-parse --short HEAD" in script
     assert "shasum -a 256 \"$PACKAGE_PATH\"" in script
+    assert "RIFT_ROAD_GODOT_VERSION ok" in script
+    assert "Godot version gate: `%s`" in script
     assert "printf '-" not in script
     assert "printf -- '- Package: `Rift Road.zip`\\n'" in script
     assert "printf -- '- Build commit: `%s`\\n' \"$BUILD_COMMIT\"" in script
@@ -757,6 +764,7 @@ def test_known_tester_packet_script_collects_internal_build_evidence(repo_root):
     assert "printf -- '- `evidence/focus-resume-latest/`\\n'" in script
     assert "scripts/prepare_known_tester_packet.sh" in packet
     assert "scripts/prepare_known_tester_packet.sh" in macos_docs
+    assert "Godot version gate" in macos_docs
     assert "manual gate statuses" in macos_docs
     assert "manual gate statuses" in handoff
     assert "### [RR-PROD-27] Add known-tester packet command" in tracker

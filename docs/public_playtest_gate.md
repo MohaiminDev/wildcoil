@@ -8,6 +8,7 @@ Use this packet before asking anyone outside the project to judge whether `Rift 
 - Current package status: `RIFT_ROAD_PACKAGE_AUDIT internal-only`
 - Smoke command: `bash scripts/smoke_exported_macos_app.sh`
 - Validation command: `bash scripts/check.sh`
+- Godot version gate command: `bash scripts/check_godot_version.sh`
 - Package audit command: `bash scripts/audit_macos_package.sh`
 - Release signing/notarization command: `bash scripts/sign_notarize_macos.sh`
 - Release completion audit artifact: `build/release-gate/latest/completion-audit.md`
@@ -34,8 +35,9 @@ Do not distribute this as a public build until the macOS signing, notarization, 
 Run and record these before every external-style session:
 
 - [ ] `bash scripts/check.sh` passes.
+- [ ] `bash scripts/check_godot_version.sh` reports `RIFT_ROAD_GODOT_VERSION ok` for the configured Godot 4.6.x stable executable.
 - [ ] `bash scripts/package_macos.sh` regenerates `build/macos/Rift Road.zip`.
-- [ ] If checking release-candidate status, `bash scripts/check_release_candidate.sh` writes `build/release-gate/latest/completion-audit.md` with a prompt-to-artifact checklist for the active marketability objective.
+- [ ] If checking release-candidate status, `bash scripts/check_release_candidate.sh` writes `build/release-gate/latest/completion-audit.md` with a prompt-to-artifact checklist and Godot engine version-gate row for the active marketability objective.
 - [ ] For any external-distribution candidate, `bash scripts/sign_notarize_macos.sh` produces `build/macos/Rift Road-signed-notarized.zip` and reports `RIFT_ROAD_RELEASE_SIGNING ok`; if it reports `RIFT_ROAD_RELEASE_SIGNING blocked`, keep the session internal-only.
 - [ ] `bash scripts/prepare_known_tester_packet.sh` creates `build/known-tester-packet/latest/manifest.md` with the build commit, package SHA-256, and manual evidence gate statuses/logs when running supervised known-tester sessions from the internal-only package.
 - [ ] `bash scripts/audit_macos_package.sh` result is recorded, including any `internal-only` warnings.
