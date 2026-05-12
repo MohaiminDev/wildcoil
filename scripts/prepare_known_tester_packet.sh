@@ -3,7 +3,10 @@ set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 OUTPUT_DIR="${1:-"$ROOT_DIR/build/known-tester-packet/latest"}"
-PACKAGE_PATH="$ROOT_DIR/build/macos/Rift Road.zip"
+UNSIGNED_PACKAGE_PATH="$ROOT_DIR/build/macos/Rift Road.zip"
+SIGNED_PACKAGE_PATH="$ROOT_DIR/build/macos/Rift Road-signed-notarized.zip"
+PACKAGE_PATH="$UNSIGNED_PACKAGE_PATH"
+PACKET_PACKAGE_NAME="$(basename "$PACKAGE_PATH")"
 LOG_DIR="$OUTPUT_DIR/logs"
 DOCS_DIR="$OUTPUT_DIR/docs"
 EVIDENCE_DIR="$OUTPUT_DIR/evidence"
@@ -58,7 +61,6 @@ if [[ -z "$GODOT_VERSION_MARKER" ]]; then
 fi
 run_logged package bash "$ROOT_DIR/scripts/package_macos.sh"
 BUILD_COMMIT="$(git -C "$ROOT_DIR" rev-parse --short HEAD 2>/dev/null || printf 'unknown')"
-PACKAGE_SHA256="$(shasum -a 256 "$PACKAGE_PATH" | awk '{print $1}')"
 signing_status="ok"
 if ! run_logged_allow_failure signing_preflight bash "$ROOT_DIR/scripts/check_macos_signing_env.sh"; then
   signing_status="blocked"
@@ -67,10 +69,20 @@ release_signing_status="ok"
 if ! run_logged_allow_failure release_signing bash "$ROOT_DIR/scripts/sign_notarize_macos.sh"; then
   release_signing_status="blocked"
 fi
-run_logged package_audit bash "$ROOT_DIR/scripts/audit_macos_package.sh"
-run_logged exported_app_smoke bash "$ROOT_DIR/scripts/smoke_exported_macos_app.sh"
-run_logged exported_app_keyboard_fallback bash "$ROOT_DIR/scripts/smoke_exported_keyboard_fallback.sh"
-run_logged exported_app_focus_resume bash "$ROOT_DIR/scripts/smoke_exported_focus_resume.sh"
+if [[ "$release_signing_status" == "ok" ]]; then
+  if [[ -f "$SIGNED_PACKAGE_PATH" ]]; then
+    PACKAGE_PATH="$SIGNED_PACKAGE_PATH"
+    PACKET_PACKAGE_NAME="$(basename "$PACKAGE_PATH")"
+  else
+    release_signing_status="blocked"
+    printf 'RIFT_ROAD_RELEASE_SIGNING blocked reason=signed_artifact_missing expected=%s\n' "$SIGNED_PACKAGE_PATH" >> "$LOG_DIR/release_signing.log"
+  fi
+fi
+PACKAGE_SHA256="$(shasum -a 256 "$PACKAGE_PATH" | awk '{print $1}')"
+run_logged package_audit bash "$ROOT_DIR/scripts/audit_macos_package.sh" "$PACKAGE_PATH"
+run_logged exported_app_smoke bash "$ROOT_DIR/scripts/smoke_exported_macos_app.sh" "$PACKAGE_PATH"
+run_logged exported_app_keyboard_fallback bash "$ROOT_DIR/scripts/smoke_exported_keyboard_fallback.sh" "$PACKAGE_PATH"
+run_logged exported_app_focus_resume bash "$ROOT_DIR/scripts/smoke_exported_focus_resume.sh" "$PACKAGE_PATH"
 focus_audio_status="ok"
 if ! run_logged_allow_failure focus_audio_evidence bash "$ROOT_DIR/scripts/check_focus_audio_evidence.sh"; then
   focus_audio_status="blocked"
@@ -87,14 +99,17 @@ second_machine_status="ok"
 if ! run_logged_allow_failure second_machine_evidence bash "$ROOT_DIR/scripts/check_second_machine_evidence.sh"; then
   second_machine_status="blocked"
 fi
-run_logged exported_app_performance bash "$ROOT_DIR/scripts/sample_exported_app_performance.sh"
+run_logged exported_app_performance bash "$ROOT_DIR/scripts/sample_exported_app_performance.sh" "$PACKAGE_PATH"
 
 packet_status="internal-only"
+if [[ "$PACKET_PACKAGE_NAME" == "Rift Road-signed-notarized.zip" ]]; then
+  packet_status="signed-release-artifact"
+fi
 if grep -q "RIFT_ROAD_PACKAGE_AUDIT release-candidate" "$LOG_DIR/package_audit.log"; then
   packet_status="release-candidate-audit"
 fi
 
-cp "$PACKAGE_PATH" "$OUTPUT_DIR/Rift Road.zip"
+cp "$PACKAGE_PATH" "$OUTPUT_DIR/$PACKET_PACKAGE_NAME"
 copy_if_exists "$ROOT_DIR/docs/public_playtest_gate.md" "$DOCS_DIR/public_playtest_gate.md"
 copy_if_exists "$ROOT_DIR/docs/playtest_log.md" "$DOCS_DIR/playtest_log.md"
 copy_if_exists "$ROOT_DIR/docs/macos_build_and_distribution.md" "$DOCS_DIR/macos_build_and_distribution.md"
@@ -126,7 +141,7 @@ copy_if_exists "$ROOT_DIR/scripts/smoke_exported_macos_app.sh" "$OUTPUT_DIR/scri
 
 {
   printf '# Rift Road Known-Tester Packet\n\n'
-  printf -- '- Package: `Rift Road.zip`\n'
+  printf -- '- Package: `%s`\n' "$PACKET_PACKAGE_NAME"
   printf -- '- Build commit: `%s`\n' "$BUILD_COMMIT"
   printf -- '- Package SHA256: `%s`\n' "$PACKAGE_SHA256"
   printf -- '- Godot version gate: `%s`\n' "$GODOT_VERSION_MARKER"
@@ -148,7 +163,7 @@ copy_if_exists "$ROOT_DIR/scripts/smoke_exported_macos_app.sh" "$OUTPUT_DIR/scri
   printf -- '- Second-machine validation checklist: `docs/second_machine_validation.md`\n\n'
   printf -- '- Second-machine evidence collector: `scripts/collect_second_machine_evidence.sh`\n\n'
   printf '## Critical Distribution Warning\n\n'
-  printf 'This packet is for supervised internal or known-tester sessions only while the package audit remains `internal-only`. It is not a public build, not notarized release evidence, and not a marketability claim.\n\n'
+  printf 'This packet is for supervised internal or known-tester sessions until release signing, second-machine, controller, focus/audio, and playtest evidence gates pass. Its status line describes the package artifact; it is not by itself a public build or marketability claim.\n\n'
   printf '## Logs\n\n'
   printf -- '- `logs/check.log`\n'
   printf -- '- `logs/signing_preflight.log`\n'

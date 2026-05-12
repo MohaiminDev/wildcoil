@@ -4,7 +4,7 @@ Use this packet before asking anyone outside the project to judge whether `Rift 
 
 ## Current Build Under Test
 
-- Package: `build/macos/Rift Road.zip`
+- Package: `build/macos/Rift Road.zip`; signed/notarized release artifact path: `build/macos/Rift Road-signed-notarized.zip`
 - Current package status: `RIFT_ROAD_PACKAGE_AUDIT internal-only`
 - Smoke command: `bash scripts/smoke_exported_macos_app.sh`
 - Validation command: `bash scripts/check.sh`
@@ -39,7 +39,7 @@ Run and record these before every external-style session:
 - [ ] `bash scripts/package_macos.sh` regenerates `build/macos/Rift Road.zip`.
 - [ ] If checking release-candidate status, `bash scripts/check_release_candidate.sh` writes `build/release-gate/latest/completion-audit.md` with a prompt-to-artifact checklist, `logs/release_signing.log` in the production-deployable build row, and Godot engine version-gate row for the active marketability objective.
 - [ ] For any external-distribution candidate, `bash scripts/sign_notarize_macos.sh` produces `build/macos/Rift Road-signed-notarized.zip` and reports `RIFT_ROAD_RELEASE_SIGNING ok`; if it reports `RIFT_ROAD_RELEASE_SIGNING blocked`, keep the session internal-only.
-- [ ] `bash scripts/prepare_known_tester_packet.sh` creates `build/known-tester-packet/latest/manifest.md` with the build commit, package SHA-256, release signing status/log, and manual evidence gate statuses/logs when running supervised known-tester sessions from the internal-only package.
+- [ ] `bash scripts/prepare_known_tester_packet.sh` creates `build/known-tester-packet/latest/manifest.md` with the build commit, selected package SHA-256, release signing status/log, manual evidence gate statuses/logs, and the signed/notarized artifact when available.
 - [ ] `bash scripts/audit_macos_package.sh` result is recorded, including any `internal-only` warnings.
 - [ ] `bash scripts/smoke_exported_macos_app.sh` captures title, hero-select, Stage 1 gameplay, post-intro combat, Stage Clear, Game Over/retry, and post-retry gameplay viewports from the launched exported app.
 - [ ] The latest `stage1_performance_sample` result is recorded.
@@ -57,7 +57,7 @@ Run and record these before every external-style session:
 
 Each session must cover the same minimum path:
 
-1. Launch the exported app from `build/macos/Rift Road.zip`.
+1. Launch the exported app from the package named in the known-tester packet manifest; the local default is `build/macos/Rift Road.zip`, and a successful release signing run uses `build/macos/Rift Road-signed-notarized.zip`.
 2. Start at the title screen.
 3. Play title -> hero select -> Stage 1.
 4. Reach at least one clear/fail/retry loop.

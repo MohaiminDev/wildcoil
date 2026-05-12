@@ -1064,7 +1064,9 @@ def test_known_tester_packet_script_collects_internal_build_evidence(repo_root):
     assert "RIFT_ROAD_GODOT_VERSION ok" in script
     assert "Godot version gate: `%s`" in script
     assert "printf '-" not in script
-    assert "printf -- '- Package: `Rift Road.zip`\\n'" in script
+    assert "PACKET_PACKAGE_NAME" in script
+    assert "Rift Road-signed-notarized.zip" in script
+    assert "printf -- '- Package: `%s`\\n' \"$PACKET_PACKAGE_NAME\"" in script
     assert "printf -- '- Build commit: `%s`\\n' \"$BUILD_COMMIT\"" in script
     assert "printf -- '- Package SHA256: `%s`\\n' \"$PACKAGE_SHA256\"" in script
     assert "run_logged_allow_failure playtest_evidence bash \"$ROOT_DIR/scripts/check_playtest_evidence.sh\"" in script
@@ -1088,12 +1090,16 @@ def test_known_tester_packet_script_collects_internal_build_evidence(repo_root):
     assert "scripts/prepare_known_tester_packet.sh" in macos_docs
     assert "Godot version gate" in macos_docs
     assert "release signing status" in macos_docs
+    assert "uses `Rift Road-signed-notarized.zip` when release signing succeeds" in macos_docs
     assert "manual gate statuses" in macos_docs
     assert "release signing status" in handoff
+    assert "uses `Rift Road-signed-notarized.zip` when release signing succeeds" in handoff
     assert "manual gate statuses" in handoff
+    assert "signed/notarized artifact when available" in packet
     assert "### [RR-PROD-27] Add known-tester packet command" in tracker
     assert "### [RR-PROD-66] Record manual gate statuses in tester packet" in tracker
     assert "### [RR-PROD-73] Record release signing status in tester packet" in tracker
+    assert "### [RR-PROD-75] Use signed artifact in tester packet" in tracker
 
 
 def test_known_tester_packet_records_release_signing_status(repo_root, tmp_path):
@@ -1184,6 +1190,109 @@ def test_known_tester_packet_records_release_signing_status(repo_root, tmp_path)
     assert "- Release signing: `blocked`" in manifest
     assert "- `logs/release_signing.log`" in manifest
     assert "RIFT_ROAD_RELEASE_SIGNING blocked" in release_signing_log
+
+
+def test_known_tester_packet_uses_signed_artifact_when_release_signing_succeeds(
+    repo_root, tmp_path
+):
+    fake_root = tmp_path / "packet-root"
+    scripts_dir = fake_root / "scripts"
+    package_dir = fake_root / "build" / "macos"
+    output_dir = fake_root / "build" / "known-tester-packet" / "latest"
+    scripts_dir.mkdir(parents=True)
+    package_dir.mkdir(parents=True)
+    (scripts_dir / "prepare_known_tester_packet.sh").write_text(
+        (repo_root / "scripts" / "prepare_known_tester_packet.sh").read_text()
+    )
+    (package_dir / "Rift Road.zip").write_text("unsigned package\n")
+
+    def write_fake_script(name, body):
+        path = scripts_dir / name
+        path.write_text("#!/usr/bin/env bash\nset -euo pipefail\n" + body)
+        path.chmod(0o755)
+
+    write_fake_script(
+        "check.sh",
+        "echo 'RIFT_ROAD_GODOT_VERSION ok version=4.6.1.stable.fake expected=4.6.x-stable'\n"
+        "echo 'RIFT_ROAD_RUNTIME_OK smoke'\n",
+    )
+    write_fake_script(
+        "package_macos.sh",
+        "mkdir -p build/macos\n"
+        "printf 'unsigned package\\n' > 'build/macos/Rift Road.zip'\n"
+        "echo 'RIFT_ROAD_PACKAGE ok'\n",
+    )
+    write_fake_script(
+        "check_macos_signing_env.sh",
+        "echo 'RIFT_ROAD_SIGNING_PREFLIGHT ok'\n",
+    )
+    write_fake_script(
+        "sign_notarize_macos.sh",
+        "printf 'signed package\\n' > 'build/macos/Rift Road-signed-notarized.zip'\n"
+        "echo 'RIFT_ROAD_RELEASE_SIGNING ok output=build/macos/Rift Road-signed-notarized.zip'\n",
+    )
+    write_fake_script(
+        "audit_macos_package.sh",
+        "echo 'RIFT_ROAD_PACKAGE_AUDIT internal-only'\n",
+    )
+    write_fake_script(
+        "smoke_exported_macos_app.sh",
+        "echo 'RIFT_ROAD_EXPORTED_APP_SMOKE ok'\n",
+    )
+    write_fake_script(
+        "smoke_exported_keyboard_fallback.sh",
+        "echo 'RIFT_ROAD_EXPORTED_KEYBOARD_FALLBACK ok'\n",
+    )
+    write_fake_script(
+        "smoke_exported_focus_resume.sh",
+        "echo 'RIFT_ROAD_EXPORTED_FOCUS_RESUME ok'\n",
+    )
+    write_fake_script(
+        "check_focus_audio_evidence.sh",
+        "echo 'RIFT_ROAD_FOCUS_AUDIO_EVIDENCE blocked'\nexit 1\n",
+    )
+    write_fake_script(
+        "check_playtest_evidence.sh",
+        "echo 'RIFT_ROAD_PLAYTEST_EVIDENCE blocked sessions=0/5'\nexit 1\n",
+    )
+    write_fake_script(
+        "check_controller_evidence.sh",
+        "echo 'RIFT_ROAD_CONTROLLER_EVIDENCE blocked'\nexit 1\n",
+    )
+    write_fake_script(
+        "check_second_machine_evidence.sh",
+        "echo 'RIFT_ROAD_SECOND_MACHINE_EVIDENCE blocked'\nexit 1\n",
+    )
+    write_fake_script(
+        "sample_exported_app_performance.sh",
+        "echo 'RIFT_ROAD_EXPORTED_PERF stage1 frames=240 avg_ms=10.0 max_ms=22.0'\n",
+    )
+
+    result = subprocess.run(
+        ["bash", str(scripts_dir / "prepare_known_tester_packet.sh"), str(output_dir)],
+        cwd=fake_root,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    manifest = (output_dir / "manifest.md").read_text()
+    signed_package = output_dir / "Rift Road-signed-notarized.zip"
+    assert result.returncode == 0
+    assert signed_package.exists()
+    signed_sha = subprocess.run(
+        ["shasum", "-a", "256", str(signed_package)],
+        capture_output=True,
+        text=True,
+        check=True,
+    ).stdout.split()[0]
+    assert "RIFT_ROAD_KNOWN_TESTER_PACKET signed-release-artifact" in result.stdout
+    assert signed_package.read_text() == "signed package\n"
+    assert not (output_dir / "Rift Road.zip").exists()
+    assert "- Package: `Rift Road-signed-notarized.zip`" in manifest
+    assert f"- Package SHA256: `{signed_sha}`" in manifest
+    assert "- Packet status: `signed-release-artifact`" in manifest
+    assert "- Release signing: `ok`" in manifest
 
 
 def test_known_tester_packet_includes_manual_gate_checklists(repo_root):
@@ -1331,6 +1440,37 @@ def test_second_machine_evidence_gate_blocks_without_clean_machine_proof(repo_ro
     assert "second-machine-latest/install-smoke.md" in output
 
 
+def test_second_machine_evidence_gate_accepts_signed_package_source(repo_root, tmp_path):
+    script_path = repo_root / "scripts" / "check_second_machine_evidence.sh"
+    evidence_dir = tmp_path / "second-machine-latest"
+    evidence_dir.mkdir()
+    (evidence_dir / "host-profile.md").write_text(
+        "# Second-Machine Host Profile\n\n"
+        "- Machine label: `Apple Silicon Mac B`\n"
+        "- Architecture: `arm64`\n"
+    )
+    (evidence_dir / "install-smoke.md").write_text(
+        "# Second-Machine Install Smoke\n\n"
+        "- Package source: `build/macos/Rift Road-signed-notarized.zip`\n"
+        "- Package status: `RIFT_ROAD_PACKAGE_AUDIT release-candidate`\n"
+        "- Gatekeeper result: `accepted`\n\n"
+        "RIFT_ROAD_SECOND_MACHINE_INSTALL ok\n"
+    )
+    (evidence_dir / "stage1-second-machine-title.png").write_bytes(b"title")
+    (evidence_dir / "stage1-second-machine-gameplay.png").write_bytes(b"gameplay")
+
+    result = subprocess.run(
+        ["bash", str(script_path), str(evidence_dir)],
+        cwd=repo_root,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert result.returncode == 0
+    assert "RIFT_ROAD_SECOND_MACHINE_EVIDENCE ok" in result.stdout
+
+
 def test_second_machine_evidence_collector_is_bundled_for_known_testers(repo_root):
     script_path = repo_root / "scripts" / "collect_second_machine_evidence.sh"
     script = script_path.read_text()
@@ -1348,6 +1488,7 @@ def test_second_machine_evidence_collector_is_bundled_for_known_testers(repo_roo
     assert "Apple Silicon Mac B" in script
     assert "scripts/audit_macos_package.sh" in script
     assert "scripts/smoke_exported_macos_app.sh" in script
+    assert "Rift Road-signed-notarized.zip" in script
     assert "stage1-second-machine-title.png" in script
     assert "stage1-second-machine-gameplay.png" in script
     assert "RIFT_ROAD_SECOND_MACHINE_INSTALL ok" in script
@@ -1357,6 +1498,7 @@ def test_second_machine_evidence_collector_is_bundled_for_known_testers(repo_roo
     assert "scripts/smoke_exported_macos_app.sh" in packet_script
     assert "Second-machine evidence collector" in packet_script
     assert "scripts/collect_second_machine_evidence.sh" in docs
+    assert "Rift Road-signed-notarized.zip" in docs
     assert "scripts/collect_second_machine_evidence.sh" in public_gate
     assert "second-machine evidence collector" in handoff
 

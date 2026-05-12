@@ -38,7 +38,9 @@ if [[ -s "$HOST_PROFILE" ]]; then
 fi
 
 if [[ -s "$INSTALL_SMOKE" ]]; then
-  grep -q 'Package source: `build/macos/Rift Road.zip`' "$INSTALL_SMOKE" || add_blocker "install smoke does not name build/macos/Rift Road.zip"
+  if ! grep -q 'Package source: `build/macos/Rift Road.zip`' "$INSTALL_SMOKE" && ! grep -q 'Package source: `build/macos/Rift Road-signed-notarized.zip`' "$INSTALL_SMOKE"; then
+    add_blocker "install smoke does not name a Rift Road macOS package source"
+  fi
   grep -q 'Package status: `RIFT_ROAD_PACKAGE_AUDIT release-candidate`' "$INSTALL_SMOKE" || add_blocker "install smoke does not record a release-candidate package audit"
   grep -q 'Gatekeeper result: `accepted`' "$INSTALL_SMOKE" || add_blocker "install smoke does not record Gatekeeper acceptance"
   grep -q 'RIFT_ROAD_SECOND_MACHINE_INSTALL ok' "$INSTALL_SMOKE" || add_blocker "install smoke does not record RIFT_ROAD_SECOND_MACHINE_INSTALL ok"

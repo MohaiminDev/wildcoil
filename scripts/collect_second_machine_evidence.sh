@@ -12,7 +12,9 @@ Usage:
 Collect second-machine evidence for Rift Road on a real second Apple Silicon Mac.
 
 Defaults:
-  package_zip: build/macos/Rift Road.zip, or ./Rift Road.zip inside a known-tester packet
+  package_zip: build/macos/Rift Road-signed-notarized.zip when present,
+               otherwise build/macos/Rift Road.zip, or the matching zip
+               inside a known-tester packet
   output_dir:  docs/playtest-captures/second-machine-latest
 
 The collector writes:
@@ -41,8 +43,12 @@ fi
 
 PACKAGE_PATH="${1:-}"
 if [[ -z "$PACKAGE_PATH" ]]; then
-  if [[ -f "$ROOT_DIR/build/macos/Rift Road.zip" ]]; then
+  if [[ -f "$ROOT_DIR/build/macos/Rift Road-signed-notarized.zip" ]]; then
+    PACKAGE_PATH="$ROOT_DIR/build/macos/Rift Road-signed-notarized.zip"
+  elif [[ -f "$ROOT_DIR/build/macos/Rift Road.zip" ]]; then
     PACKAGE_PATH="$ROOT_DIR/build/macos/Rift Road.zip"
+  elif [[ -f "$ROOT_DIR/Rift Road-signed-notarized.zip" ]]; then
+    PACKAGE_PATH="$ROOT_DIR/Rift Road-signed-notarized.zip"
   elif [[ -f "$ROOT_DIR/Rift Road.zip" ]]; then
     PACKAGE_PATH="$ROOT_DIR/Rift Road.zip"
   else
@@ -74,6 +80,7 @@ if [[ ! -x "$SCRIPTS_DIR/smoke_exported_macos_app.sh" ]]; then
 fi
 
 PACKAGE_PATH="$(cd "$(dirname "$PACKAGE_PATH")" && pwd -P)/$(basename "$PACKAGE_PATH")"
+PACKAGE_SOURCE="build/macos/$(basename "$PACKAGE_PATH")"
 mkdir -p "$OUTPUT_DIR"
 OUTPUT_DIR="$(cd "$OUTPUT_DIR" && pwd -P)"
 
@@ -139,7 +146,7 @@ fi
 
 {
   printf '# Second-Machine Install Smoke\n\n'
-  printf -- '- Package source: `build/macos/Rift Road.zip`\n'
+  printf -- '- Package source: `%s`\n' "$PACKAGE_SOURCE"
   printf -- '- Package path: `%s`\n' "$PACKAGE_PATH"
   printf -- '- Package SHA256: `%s`\n' "$package_sha256"
   printf -- '- Package status: `RIFT_ROAD_PACKAGE_AUDIT %s`\n' "$package_status"
