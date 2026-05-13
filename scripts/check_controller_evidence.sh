@@ -86,6 +86,8 @@ def build_metadata_issues(values):
     issues = []
     if "package_sha256=" not in build:
         issues.append("Build missing package_sha256")
+    elif not re.search(r"(?:^|\s)package_sha256=[0-9a-fA-F]{64}(?:\s|$)", build):
+        issues.append("Build has invalid package_sha256")
     if "package_source=" not in build:
         issues.append("Build missing signed package_source")
     else:
