@@ -35,6 +35,11 @@ def clean_cell(value):
     return value.strip()
 
 
+def is_placeholder(value):
+    value = clean_cell(value)
+    return not value or value.upper() == "TBD"
+
+
 def resolve_evidence_path(value):
     value = clean_cell(value)
     if not value or value.upper() == "TBD":
@@ -76,6 +81,15 @@ controller_families = set()
 replay_intent_sessions = 0
 blocker_rows = []
 evidence_capture_count = 0
+required_session_observation_fields = [
+    (6, "First-combat time"),
+    (7, "Wow-moment time"),
+    (8, "Replay desire"),
+    (9, "Confusion points"),
+    (10, "Cheap-damage reports"),
+    (11, "Key quotes / observations"),
+    (12, "Follow-up action"),
+]
 
 for cells in session_rows:
     build = clean_cell(cells[1])
@@ -87,6 +101,12 @@ for cells in session_rows:
     confusion = cells[9].lower()
     cheap_damage = cells[10].lower()
     follow_up = cells[12].lower()
+
+    for cell_index, label in required_session_observation_fields:
+        if is_placeholder(cells[cell_index]):
+            blocker_rows.append(
+                f"{cells[0]} {tester}: missing session observation: {label}"
+            )
 
     evidence_value, evidence_path = resolve_evidence_path(evidence_capture)
     if evidence_path is None or not evidence_path.is_file() or evidence_path.stat().st_size == 0:
