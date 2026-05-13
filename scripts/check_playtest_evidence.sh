@@ -109,8 +109,8 @@ for cells in session_rows:
     build = clean_cell(cells[1])
     evidence_capture = cells[2]
     tester = cells[3]
-    setup = cells[4].lower()
-    input_method = cells[5].lower()
+    setup = clean_cell(cells[4]).lower()
+    input_method = clean_cell(cells[5]).lower()
     replay_desire = cells[8].lower()
     confusion = cells[9].lower()
     cheap_damage = cells[10].lower()
@@ -121,6 +121,13 @@ for cells in session_rows:
             blocker_rows.append(
                 f"{cells[0]} {tester}: missing session observation: {label}"
             )
+
+    if "machine=primary-mac" not in setup and "machine=second-mac" not in setup:
+        blocker_rows.append(
+            f"{cells[0]} {tester}: Setup missing machine=primary-mac or machine=second-mac"
+        )
+    if is_placeholder(cells[5]):
+        blocker_rows.append(f"{cells[0]} {tester}: Input method missing")
 
     for cell_index, label, max_seconds in milestone_time_limits:
         if is_placeholder(cells[cell_index]):
