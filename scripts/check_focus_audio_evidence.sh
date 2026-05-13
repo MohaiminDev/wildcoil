@@ -58,6 +58,9 @@ def metadata_values_and_issues(block):
     build_value = values.get("Build", "").strip()
     if build_value and build_value.upper() != "TBD" and "package_sha256=" not in build_value:
         issues.append("Build missing package_sha256")
+    if build_value and build_value.upper() != "TBD" and "package_sha256=" in build_value:
+        if not re.search(r"(?:^|\s)package_sha256=[0-9a-fA-F]{64}(?:\s|$)", build_value):
+            issues.append("Build has invalid package_sha256")
     if build_value and build_value.upper() != "TBD":
         if "package_source=" not in build_value:
             issues.append("Build missing signed package_source")

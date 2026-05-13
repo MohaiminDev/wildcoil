@@ -440,6 +440,7 @@ def test_focus_audio_evidence_collector_scaffolds_manual_audible_session(
     fake_script.write_text(script)
     fake_script.chmod(0o755)
     fake_package.write_text("fake package\n")
+    package_sha = "a" * 64
 
     ok_result = subprocess.run(
         [
@@ -452,7 +453,7 @@ def test_focus_audio_evidence_collector_scaffolds_manual_audible_session(
             "--evidence-dir",
             str(evidence_dir),
             "--build",
-            "commit=fake package_sha256=fake package_source=build/macos/Rift Road-signed-notarized.zip",
+            f"commit=fake package_sha256={package_sha} package_source=build/macos/Rift Road-signed-notarized.zip",
             "--session-label",
             "Manual focus audio",
             "--confirm-focus-pause-overlay",
@@ -533,6 +534,47 @@ RIFT_ROAD_FOCUS_AUDIO_SESSION ok
     output = result.stdout + result.stderr
     assert "RIFT_ROAD_FOCUS_AUDIO_EVIDENCE blocked" in output
     assert "Build missing package_sha256" in output
+
+
+def test_focus_audio_evidence_gate_rejects_non_hex_package_sha(
+    repo_root, tmp_path
+):
+    script_path = repo_root / "scripts" / "check_focus_audio_evidence.sh"
+    fake_doc = tmp_path / "focus_audio_validation.md"
+    evidence_path = tmp_path / "focus-audio-evidence.md"
+    evidence_path.write_text("manual audible focus/audio evidence\n")
+    fake_doc.write_text(
+        f"""
+# Focus Audio Validation
+
+### Focus Audio Session: `Manual focus audio`
+
+RIFT_ROAD_FOCUS_AUDIO_SESSION ok
+
+- Build: `commit=759cb78 package_sha256=fake package_source=build/macos/Rift Road-signed-notarized.zip`
+- Output device: `Built-in speakers`
+- Evidence capture: `{evidence_path}`
+- Focus pause overlay: `pass`
+- Audio before focus loss: `pass`
+- Audio quiet during focus pause: `pass`
+- Audio after resume: `pass`
+- Resume control: `pass`
+- Blockers: `none`
+""".strip()
+    )
+
+    result = subprocess.run(
+        ["bash", str(script_path), str(fake_doc)],
+        cwd=repo_root,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    output = result.stdout + result.stderr
+    assert result.returncode == 1
+    assert "RIFT_ROAD_FOCUS_AUDIO_EVIDENCE blocked" in output
+    assert "Build has invalid package_sha256" in output
 
 
 def test_focus_audio_evidence_gate_rejects_unsigned_package_source(
