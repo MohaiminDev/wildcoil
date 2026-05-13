@@ -33,6 +33,8 @@ Before external distribution, expect to need:
 
 Unsigned or unnotarized prototype builds may still be useful internally, but they do not satisfy the longer-term platform path.
 
+2026-05-13 scope note: source-run local playability is separate from downloadable app distribution. `bash scripts/check_local_playability.sh` proves the game can run end to end from source on the local machine; Developer ID signing, notarization, Gatekeeper acceptance, and second-machine/source-install proof are still required for downloadable app distribution, but they are not a source-run blocker.
+
 ## Engine-Specific Planning Notes
 
 ### Godot
@@ -106,6 +108,7 @@ As of 2026-04-27, the Rift Road prototype uses Godot 4.x under `src/wildcoil`.
 ## Local Commands
 
 - Run checks: `bash scripts/check.sh`
+- Check source-run local playability: `bash scripts/check_local_playability.sh`
 - Run game: `bash scripts/run_game.sh`
 - Check Godot version: `bash scripts/check_godot_version.sh`
 - Package macOS build: `bash scripts/package_macos.sh`

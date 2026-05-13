@@ -32,6 +32,7 @@ Rift Road Phase 1: build the Stage 1 macOS playable prototype in Godot.
 ## Run and Test
 
 - Run checks: `bash scripts/check.sh`
+- Check source-run local playability: `bash scripts/check_local_playability.sh`
 - Run agent docs check: `python3 scripts/check_agent_docs.py`
 - Check Godot version: `bash scripts/check_godot_version.sh`
 - Run the game: `bash scripts/run_game.sh`

@@ -8,6 +8,7 @@ def test_run_and_check_scripts_exist(repo_root):
     for relative_path in [
         "scripts/run_game.sh",
         "scripts/check.sh",
+        "scripts/check_local_playability.sh",
         "scripts/check_godot_version.sh",
         "scripts/package_macos.sh",
         "scripts/audit_macos_package.sh",
@@ -31,6 +32,36 @@ def test_run_and_check_scripts_exist(repo_root):
         path = repo_root / relative_path
         assert path.exists()
         assert path.stat().st_mode & 0o111
+
+
+def test_local_source_playability_gate_is_documented_and_distribution_free(repo_root):
+    script_path = repo_root / "scripts" / "check_local_playability.sh"
+    assert script_path.exists()
+
+    script = script_path.read_text()
+    readme = (repo_root / "README.md").read_text()
+    tracker = (repo_root / "to-do.md").read_text()
+    audit = (repo_root / "docs" / "market-readiness-audit-2026-05-10.md").read_text()
+    macos_docs = (repo_root / "docs" / "macos_build_and_distribution.md").read_text()
+
+    assert "RIFT_ROAD_LOCAL_PLAYABILITY ok" in script
+    assert "scripts/check_godot_version.sh" in script
+    assert "test_stage_one_title_to_victory_flow" in script
+    assert "test_stage_one_restart_and_return_to_title_flow" in script
+    assert "test_keyboard_fallback_title_to_stage_and_action_flow" in script
+    assert "test_stage_one_focus_loss_pauses_and_resumes" in script
+    assert "test_stage_one_performance_sample_stays_within_budget" in script
+    assert "check_macos_signing_env.sh" not in script
+    assert "sign_notarize_macos.sh" not in script
+    assert "check_second_machine_evidence.sh" not in script
+
+    for docs in [readme, tracker, audit, macos_docs]:
+        assert "bash scripts/check_local_playability.sh" in docs
+        assert "source-run local playability" in docs
+
+    assert "not a source-run blocker" in tracker
+    assert "downloadable app distribution" in tracker
+    assert "not a source-run blocker" in audit
 
 
 def test_godot_version_gate_requires_46_stable(repo_root, tmp_path):
