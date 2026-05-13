@@ -25,6 +25,14 @@ def is_separator(cells):
     return all(re.fullmatch(r":?-{3,}:?", cell.strip()) for cell in cells)
 
 
+def normalize_session_cells(cells):
+    # Legacy rows predate the hook/show-someone evidence columns. Keep the
+    # remaining cells aligned so the gate reports those new fields as missing.
+    if len(cells) == 13:
+        return cells[:9] + ["TBD", "TBD"] + cells[9:]
+    return cells
+
+
 def clean_cell(value):
     value = value.strip()
     if value.startswith("`") and value.endswith("`"):
@@ -91,6 +99,7 @@ for line in text.splitlines():
         continue
     if cells[0].upper() == "TBD" or cells[3].upper() == "TBD":
         continue
+    cells = normalize_session_cells(cells)
     session_rows.append(cells)
 
 completed_sessions = len(session_rows)
@@ -104,10 +113,12 @@ required_session_observation_fields = [
     (6, "First-combat time"),
     (7, "Wow-moment time"),
     (8, "Replay desire"),
-    (9, "Confusion points"),
-    (10, "Cheap-damage reports"),
-    (11, "Key quotes / observations"),
-    (12, "Follow-up action"),
+    (9, "Hook description"),
+    (10, "Show-someone moment"),
+    (11, "Confusion points"),
+    (12, "Cheap-damage reports"),
+    (13, "Key quotes / observations"),
+    (14, "Follow-up action"),
 ]
 milestone_time_limits = [
     (6, "First-combat time", 30),
@@ -121,9 +132,9 @@ for cells in session_rows:
     setup = clean_cell(cells[4]).lower()
     input_method = clean_cell(cells[5]).lower()
     replay_desire = cells[8].lower()
-    confusion = cells[9].lower()
-    cheap_damage = cells[10].lower()
-    follow_up = cells[12].lower()
+    confusion = cells[11].lower()
+    cheap_damage = cells[12].lower()
+    follow_up = cells[14].lower()
 
     for cell_index, label in required_session_observation_fields:
         if is_placeholder(cells[cell_index]):
@@ -181,7 +192,7 @@ for cells in session_rows:
     if any(token in replay_desire for token in ["yes", "asked", "another", "replay", "again", "wants"]):
         replay_intent_sessions += 1
 
-    if has_cheap_damage_report(cells[10]):
+    if has_cheap_damage_report(cells[12]):
         cheap_damage_report_rows += 1
 
     blocker_text = " ".join([confusion, cheap_damage, follow_up])

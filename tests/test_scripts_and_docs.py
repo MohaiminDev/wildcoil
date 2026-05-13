@@ -1728,6 +1728,8 @@ def test_playtest_evidence_gate_requires_real_evidence_capture_files(
             "00:24",
             "02:10",
             "yes - asked again",
+            "repair the glowing road before the empire drains it",
+            "road collapse into the service lane",
             "none",
             "none",
             "The road collapse looked cool.",
@@ -1743,6 +1745,8 @@ def test_playtest_evidence_gate_requires_real_evidence_capture_files(
             "00:26",
             "02:12",
             "yes",
+            "rescue road creatures from luma extraction",
+            "hit pause sparks during the cage fight",
             "none",
             "none",
             "The hit pause felt good.",
@@ -1758,6 +1762,8 @@ def test_playtest_evidence_gate_requires_real_evidence_capture_files(
             "00:25",
             "02:20",
             "yes",
+            "road crew fights to stop crystal mining",
+            "Brask warning banner",
             "none",
             "none",
             "The boss warning was readable.",
@@ -1773,6 +1779,8 @@ def test_playtest_evidence_gate_requires_real_evidence_capture_files(
             "00:24",
             "02:05",
             "no",
+            "prehistoric road rescue brawler",
+            "pickup glow and road collapse",
             "none",
             "none",
             "Wanted clearer pickup text.",
@@ -1788,6 +1796,8 @@ def test_playtest_evidence_gate_requires_real_evidence_capture_files(
             "00:23",
             "02:09",
             "yes",
+            "repair-versus-extraction road adventure",
+            "wanted to show the overpass break",
             "none",
             "none",
             "Wanted another run.",
@@ -2322,6 +2332,82 @@ def test_playtest_evidence_gate_rejects_repeated_cheap_damage_reports(
     assert "cheap-damage report rows 2/1" in output
 
 
+def test_playtest_evidence_gate_requires_hook_and_show_moment_fields(
+    repo_root, tmp_path
+):
+    script_path = repo_root / "scripts" / "check_playtest_evidence.sh"
+    fake_log = tmp_path / "playtest_log.md"
+    evidence_dir = tmp_path / "playtest-captures"
+    evidence_dir.mkdir()
+    evidence_paths = []
+    for index in range(5):
+        evidence_path = evidence_dir / f"session-{index + 1}.md"
+        evidence_path.write_text(f"session {index + 1}\n")
+        evidence_paths.append(evidence_path)
+    package_sha = "a" * 64
+
+    def legacy_session_row(
+        index,
+        *,
+        setup="machine=primary-mac",
+        input_method="keyboard",
+        replay_desire="yes",
+    ):
+        return (
+            "2026-05-12",
+            f"commit=fake package_sha256={package_sha} package_source=build/macos/Rift Road-signed-notarized.zip",
+            str(evidence_paths[index]),
+            f"tester-{index + 1:02d}",
+            setup,
+            input_method,
+            "00:24",
+            "02:10",
+            replay_desire,
+            "none",
+            "none",
+            "The road collapse looked cool.",
+            "none",
+        )
+
+    rows = [
+        legacy_session_row(
+            0,
+            setup="machine=second-mac",
+            input_method="keyboard; controller-family=xbox",
+        ),
+        legacy_session_row(1, input_method="keyboard; controller-family=dualshock"),
+        legacy_session_row(2),
+        legacy_session_row(3, replay_desire="no"),
+        legacy_session_row(4),
+    ]
+    fake_log.write_text(
+        "\n".join(
+            [
+                "# Playtest Log",
+                "",
+                "| Date | Build | Evidence capture | Tester | Setup | Input method | First-combat time | Wow-moment time | Replay desire | Confusion points | Cheap-damage reports | Key quotes / observations | Follow-up action |",
+                "| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |",
+                *["| " + " | ".join(row) + " |" for row in rows],
+                "",
+            ]
+        )
+    )
+
+    result = subprocess.run(
+        ["bash", str(script_path), str(fake_log)],
+        cwd=repo_root,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    output = result.stdout + result.stderr
+    assert result.returncode == 1
+    assert "RIFT_ROAD_PLAYTEST_EVIDENCE blocked" in output
+    assert "missing session observation: Hook description" in output
+    assert "missing session observation: Show-someone moment" in output
+
+
 def test_playtest_evidence_gate_rejects_build_metadata_without_package_sha(
     repo_root, tmp_path
 ):
@@ -2578,6 +2664,8 @@ def test_playtest_evidence_collector_scaffolds_external_session_notes(repo_root)
     assert "--first-combat-time" in script
     assert "--wow-moment-time" in script
     assert "--replay-desire" in script
+    assert "--hook-description" in script
+    assert "--show-someone-moment" in script
     assert "--confusion-points" in script
     assert "--cheap-damage-reports" in script
     assert "--quotes" in script
@@ -2702,6 +2790,10 @@ def test_manual_evidence_collectors_default_to_signed_packet_artifact(
                 "02:10",
                 "--replay-desire",
                 "yes",
+                "--hook-description",
+                "repair the glowing road",
+                "--show-someone-moment",
+                "road collapse",
                 "--confusion-points",
                 "none",
                 "--cheap-damage-reports",

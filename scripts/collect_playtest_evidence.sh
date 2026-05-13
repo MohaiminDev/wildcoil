@@ -33,6 +33,8 @@ Usage:
     --first-combat-time "00:24" \
     --wow-moment-time "02:10" \
     --replay-desire "yes - asked for another run" \
+    --hook-description "repair the glowing road before the mining empire drains it" \
+    --show-someone-moment "road collapse into the lower service lane" \
     --confusion-points "missed special meter once" \
     --cheap-damage-reports "none" \
     --quotes "The road collapse looked cool." \
@@ -53,6 +55,8 @@ Options:
   --first-combat-time VALUE       Required.
   --wow-moment-time VALUE         Required.
   --replay-desire VALUE           Required.
+  --hook-description VALUE        Required; tester's description of the Rift Road hook.
+  --show-someone-moment VALUE     Required; moment tester would show someone else, or "none".
   --confusion-points VALUE        Required; use "none" only when true.
   --cheap-damage-reports VALUE    Required; use "none" only when true.
   --quotes VALUE                  Required; concise quote or observation.
@@ -75,6 +79,8 @@ input_method=""
 first_combat_time=""
 wow_moment_time=""
 replay_desire=""
+hook_description=""
+show_someone_moment=""
 confusion_points=""
 cheap_damage_reports=""
 quotes=""
@@ -130,6 +136,14 @@ while [[ "$#" -gt 0 ]]; do
       ;;
     --replay-desire)
       replay_desire="$(parse_value "$1" "${2:-}")"
+      shift 2
+      ;;
+    --hook-description)
+      hook_description="$(parse_value "$1" "${2:-}")"
+      shift 2
+      ;;
+    --show-someone-moment)
+      show_someone_moment="$(parse_value "$1" "${2:-}")"
       shift 2
       ;;
     --confusion-points)
@@ -193,6 +207,8 @@ require_field "--input-method" "$input_method"
 require_field "--first-combat-time" "$first_combat_time"
 require_field "--wow-moment-time" "$wow_moment_time"
 require_field "--replay-desire" "$replay_desire"
+require_field "--hook-description" "$hook_description"
+require_field "--show-someone-moment" "$show_someone_moment"
 require_field "--confusion-points" "$confusion_points"
 require_field "--cheap-damage-reports" "$cheap_damage_reports"
 require_field "--quotes" "$quotes"
@@ -250,7 +266,7 @@ else
   evidence_ref="$evidence_path"
 fi
 
-table_row="| ${date_value} | ${build_value} | ${evidence_ref} | ${tester} | ${setup} | ${input_method} | ${first_combat_time} | ${wow_moment_time} | ${replay_desire} | ${confusion_points} | ${cheap_damage_reports} | ${quotes} | ${follow_up_action} |"
+table_row="| ${date_value} | ${build_value} | ${evidence_ref} | ${tester} | ${setup} | ${input_method} | ${first_combat_time} | ${wow_moment_time} | ${replay_desire} | ${hook_description} | ${show_someone_moment} | ${confusion_points} | ${cheap_damage_reports} | ${quotes} | ${follow_up_action} |"
 
 {
   printf '# Rift Road Playtest Evidence\n\n'
@@ -268,6 +284,8 @@ table_row="| ${date_value} | ${build_value} | ${evidence_ref} | ${tester} | ${se
   printf -- '- First-combat time: `%s`\n' "$first_combat_time"
   printf -- '- Wow-moment time: `%s`\n' "$wow_moment_time"
   printf -- '- Replay desire: `%s`\n' "$replay_desire"
+  printf -- '- Hook description: `%s`\n' "$hook_description"
+  printf -- '- Show-someone moment: `%s`\n' "$show_someone_moment"
   printf -- '- What confused the tester: `%s`\n' "$confusion_points"
   printf -- '- Where the tester took damage unfairly: `%s`\n' "$cheap_damage_reports"
   printf -- '- Key quotes / observations: `%s`\n' "$quotes"

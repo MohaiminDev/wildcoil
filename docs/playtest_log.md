@@ -4,7 +4,7 @@ Use this log for all Phase 1 external tests and any earlier hands-on checks that
 
 Use [`docs/public_playtest_gate.md`](/Users/himu/Desktop/career/personal_projects/wildcoil/docs/public_playtest_gate.md) as the session protocol before treating feedback as market-readiness evidence.
 
-Run `bash scripts/check_playtest_evidence.sh` after recording external sessions. The current gate only passes when completed session rows show at least 5 sessions, every row has a `machine=primary-mac` or `machine=second-mac` setup tag, every row has a non-placeholder input method, at least one `machine=second-mac` setup, at least two distinct `controller-family=<family>` input entries, replay intent from most testers, no repeated cheap-damage reports across counted rows, first-combat and wow-moment times inside the Phase 1 targets, non-placeholder timing/replay/confusion/cheap-damage/quote/follow-up cells, a `Build` value with a 64-character `package_sha256=<sha>` and `package_source=build/macos/Rift Road-signed-notarized.zip` or `package_source=Rift Road-signed-notarized.zip`, and a real non-empty `Evidence capture` file for every counted row.
+Run `bash scripts/check_playtest_evidence.sh` after recording external sessions. The current gate only passes when completed session rows show at least 5 sessions, every row has a `machine=primary-mac` or `machine=second-mac` setup tag, every row has a non-placeholder input method, at least one `machine=second-mac` setup, at least two distinct `controller-family=<family>` input entries, replay intent from most testers, tester hook descriptions, show-someone moments, no repeated cheap-damage reports across counted rows, first-combat and wow-moment times inside the Phase 1 targets, non-placeholder timing/replay/confusion/cheap-damage/quote/follow-up cells, a `Build` value with a 64-character `package_sha256=<sha>` and `package_source=build/macos/Rift Road-signed-notarized.zip` or `package_source=Rift Road-signed-notarized.zip`, and a real non-empty `Evidence capture` file for every counted row.
 
 Use `bash scripts/collect_playtest_evidence.sh --help` after a real external-style session to generate a non-empty evidence note and a paste-ready row for the table below. The collector uses the selected signed package when available, including `Rift Road-signed-notarized.zip` inside a known-tester packet, then falls back to `Rift Road.zip`, and writes `commit=<short> package_sha256=<64-character-hex> package_source=<path>` by default. If you override `--build`, keep a 64-character `package_sha256=<sha>` value and signed `package_source=...Rift Road-signed-notarized.zip` in the value. It does not append rows automatically; review the note, paste the row, then run the gate.
 
@@ -20,9 +20,9 @@ Use `bash scripts/collect_playtest_evidence.sh --help` after a real external-sty
 
 ## Session Capture Table
 
-| Date | Build | Evidence capture | Tester | Setup | Input method | First-combat time | Wow-moment time | Replay desire | Confusion points | Cheap-damage reports | Key quotes / observations | Follow-up action |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| TBD | commit=<short> package_sha256=<64-character-hex> package_source=build/macos/Rift Road-signed-notarized.zip | TBD | TBD | machine=primary-mac | keyboard; controller-family=<family-if-used> | TBD | TBD | TBD | TBD | TBD | TBD | TBD |
+| Date | Build | Evidence capture | Tester | Setup | Input method | First-combat time | Wow-moment time | Replay desire | Hook description | Show-someone moment | Confusion points | Cheap-damage reports | Key quotes / observations | Follow-up action |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| TBD | commit=<short> package_sha256=<64-character-hex> package_source=build/macos/Rift Road-signed-notarized.zip | TBD | TBD | machine=primary-mac | keyboard; controller-family=<family-if-used> | TBD | TBD | TBD | TBD | TBD | TBD | TBD | TBD | TBD |
 
 ## Session Notes Template
 
@@ -36,6 +36,8 @@ Use `bash scripts/collect_playtest_evidence.sh --help` after a real external-sty
 - Controller type:
 - Session length:
 - What clicked immediately:
+- Tester hook description:
+- Moment tester would show someone else:
 - What confused the tester:
 - Where the tester took damage unfairly:
 - When the tester smiled, laughed, or verbally reacted:
