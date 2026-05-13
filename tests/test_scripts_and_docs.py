@@ -2390,6 +2390,86 @@ def test_second_machine_evidence_collector_is_bundled_for_known_testers(repo_roo
     assert "Apple Silicon Mac B" in result.stdout
 
 
+def test_second_machine_collector_blocks_non_arm64_hosts(repo_root, tmp_path):
+    fake_root = tmp_path / "packet-root"
+    scripts_dir = fake_root / "scripts"
+    package_dir = fake_root / "build" / "macos"
+    evidence_dir = fake_root / "docs" / "playtest-captures" / "second-machine-latest"
+    fake_bin = tmp_path / "bin"
+    scripts_dir.mkdir(parents=True)
+    package_dir.mkdir(parents=True)
+    fake_bin.mkdir()
+    (scripts_dir / "collect_second_machine_evidence.sh").write_text(
+        (repo_root / "scripts" / "collect_second_machine_evidence.sh").read_text()
+    )
+    (scripts_dir / "collect_second_machine_evidence.sh").chmod(0o755)
+    (package_dir / "Rift Road-signed-notarized.zip").write_text("signed package\n")
+
+    def write_fake_script(name, body):
+        path = scripts_dir / name
+        path.write_text("#!/usr/bin/env bash\nset -euo pipefail\n" + body)
+        path.chmod(0o755)
+
+    write_fake_script(
+        "audit_macos_package.sh",
+        "echo 'Package: fake'\n"
+        "echo 'spctl: Gatekeeper assessment accepted'\n"
+        "echo 'RIFT_ROAD_PACKAGE_AUDIT release-candidate'\n",
+    )
+    write_fake_script(
+        "smoke_exported_macos_app.sh",
+        "output_dir=\"${2:-docs/playtest-captures/exported-app-smoke-latest}\"\n"
+        "mkdir -p \"$output_dir\"\n"
+        "printf 'title\\n' > \"$output_dir/stage1-exported-app-smoke-title.png\"\n"
+        "printf 'gameplay\\n' > \"$output_dir/stage1-exported-app-smoke-gameplay.png\"\n"
+        "echo 'RIFT_ROAD_EXPORTED_APP_SMOKE ok'\n",
+    )
+
+    (fake_bin / "uname").write_text("#!/usr/bin/env bash\nprintf 'x86_64\\n'\n")
+    (fake_bin / "uname").chmod(0o755)
+    (fake_bin / "sysctl").write_text(
+        "#!/usr/bin/env bash\n"
+        "case \"${2:-}\" in\n"
+        "  machdep.cpu.brand_string) printf 'Intel Core i7\\n' ;;\n"
+        "  hw.model) printf 'iMac19,1\\n' ;;\n"
+        "  hw.memsize) printf '17179869184\\n' ;;\n"
+        "  *) printf 'unknown\\n' ;;\n"
+        "esac\n"
+    )
+    (fake_bin / "sysctl").chmod(0o755)
+    (fake_bin / "sw_vers").write_text(
+        "#!/usr/bin/env bash\n"
+        "case \"${1:-}\" in\n"
+        "  -productVersion) printf '26.5\\n' ;;\n"
+        "  -buildVersion) printf '25F000\\n' ;;\n"
+        "  *) printf '26.5\\n' ;;\n"
+        "esac\n"
+    )
+    (fake_bin / "sw_vers").chmod(0o755)
+
+    result = subprocess.run(
+        ["bash", str(scripts_dir / "collect_second_machine_evidence.sh")],
+        cwd=fake_root,
+        env={
+            **os.environ,
+            "PATH": f"{fake_bin}{os.pathsep}{os.environ['PATH']}",
+            "RIFT_ROAD_SECOND_MACHINE_LABEL": "Apple Silicon Mac B",
+        },
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    install_smoke = (evidence_dir / "install-smoke.md").read_text()
+    host_profile = (evidence_dir / "host-profile.md").read_text()
+    output = result.stdout + result.stderr
+    assert result.returncode == 1
+    assert "RIFT_ROAD_SECOND_MACHINE_COLLECTOR blocked" in output
+    assert "Architecture: `x86_64`" in host_profile
+    assert "RIFT_ROAD_SECOND_MACHINE_INSTALL blocked" in install_smoke
+    assert "RIFT_ROAD_SECOND_MACHINE_COLLECTOR ok" not in output
+
+
 def test_controller_evidence_gate_blocks_without_physical_controller_sessions(repo_root):
     script_path = repo_root / "scripts" / "check_controller_evidence.sh"
     script = script_path.read_text()

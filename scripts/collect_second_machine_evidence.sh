@@ -142,8 +142,13 @@ if [[ "$smoke_status_code" -eq 0 ]]; then
   cp "$SMOKE_DIR/stage1-exported-app-smoke-gameplay.png" "$GAMEPLAY_CAPTURE"
 fi
 
+host_architecture_ok=false
+if [[ "$architecture" == "arm64" ]]; then
+  host_architecture_ok=true
+fi
+
 install_ok=false
-if [[ "$audit_status_code" -eq 0 && "$package_status" == "release-candidate" && "$gatekeeper_result" == "accepted" && "$smoke_status_code" -eq 0 && -s "$TITLE_CAPTURE" && -s "$GAMEPLAY_CAPTURE" ]]; then
+if [[ "$host_architecture_ok" == true && "$audit_status_code" -eq 0 && "$package_status" == "release-candidate" && "$gatekeeper_result" == "accepted" && "$smoke_status_code" -eq 0 && -s "$TITLE_CAPTURE" && -s "$GAMEPLAY_CAPTURE" ]]; then
   install_ok=true
 fi
 
@@ -172,5 +177,5 @@ if [[ "$install_ok" == true ]]; then
   exit 0
 fi
 
-printf 'RIFT_ROAD_SECOND_MACHINE_COLLECTOR blocked evidence_dir=%s package_status=%s gatekeeper=%s smoke_status=%s\n' "$OUTPUT_DIR" "$package_status" "$gatekeeper_result" "$smoke_status_code"
+printf 'RIFT_ROAD_SECOND_MACHINE_COLLECTOR blocked evidence_dir=%s architecture=%s package_status=%s gatekeeper=%s smoke_status=%s\n' "$OUTPUT_DIR" "$architecture" "$package_status" "$gatekeeper_result" "$smoke_status_code"
 exit 1
