@@ -40,6 +40,16 @@ def is_placeholder(value):
     return not value or value.upper() == "TBD"
 
 
+def parse_milestone_seconds(value):
+    value = clean_cell(value)
+    match = re.fullmatch(r"(\d+):([0-5]\d)", value)
+    if not match:
+        return None
+    minutes = int(match.group(1))
+    seconds = int(match.group(2))
+    return minutes * 60 + seconds
+
+
 def resolve_evidence_path(value):
     value = clean_cell(value)
     if not value or value.upper() == "TBD":
@@ -90,6 +100,10 @@ required_session_observation_fields = [
     (11, "Key quotes / observations"),
     (12, "Follow-up action"),
 ]
+milestone_time_limits = [
+    (6, "First-combat time", 30),
+    (7, "Wow-moment time", 180),
+]
 
 for cells in session_rows:
     build = clean_cell(cells[1])
@@ -106,6 +120,19 @@ for cells in session_rows:
         if is_placeholder(cells[cell_index]):
             blocker_rows.append(
                 f"{cells[0]} {tester}: missing session observation: {label}"
+            )
+
+    for cell_index, label, max_seconds in milestone_time_limits:
+        if is_placeholder(cells[cell_index]):
+            continue
+        milestone_seconds = parse_milestone_seconds(cells[cell_index])
+        if milestone_seconds is None:
+            blocker_rows.append(
+                f"{cells[0]} {tester}: invalid milestone time: {label}"
+            )
+        elif milestone_seconds > max_seconds:
+            blocker_rows.append(
+                f"{cells[0]} {tester}: {label} exceeds {max_seconds} seconds"
             )
 
     evidence_value, evidence_path = resolve_evidence_path(evidence_capture)
