@@ -41,7 +41,11 @@ if [[ -s "$INSTALL_SMOKE" ]]; then
   if ! grep -q 'Package source: `build/macos/Rift Road-signed-notarized.zip`' "$INSTALL_SMOKE"; then
     add_blocker "install smoke does not name signed/notarized package source"
   fi
-  grep -Eq 'Package SHA256: `[^`]+`' "$INSTALL_SMOKE" && ! grep -q 'Package SHA256: `TBD`' "$INSTALL_SMOKE" || add_blocker "install smoke does not record Package SHA256"
+  if ! grep -Eq 'Package SHA256: `[^`]+`' "$INSTALL_SMOKE" || grep -q 'Package SHA256: `TBD`' "$INSTALL_SMOKE"; then
+    add_blocker "install smoke does not record Package SHA256"
+  elif ! grep -Eq 'Package SHA256: `[[:xdigit:]]{64}`' "$INSTALL_SMOKE"; then
+    add_blocker "install smoke does not record a 64-character Package SHA256"
+  fi
   grep -q 'Package status: `RIFT_ROAD_PACKAGE_AUDIT release-candidate`' "$INSTALL_SMOKE" || add_blocker "install smoke does not record a release-candidate package audit"
   grep -q 'Gatekeeper result: `accepted`' "$INSTALL_SMOKE" || add_blocker "install smoke does not record Gatekeeper acceptance"
   grep -q 'RIFT_ROAD_SECOND_MACHINE_INSTALL ok' "$INSTALL_SMOKE" || add_blocker "install smoke does not record RIFT_ROAD_SECOND_MACHINE_INSTALL ok"
