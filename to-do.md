@@ -36,6 +36,7 @@ The visual target is the approved north-star direction: modern stylized arcade r
 - Production-grade visual/UI match to north-star images: no.
 - Manual playtest evidence: current Codex run opened the rebuilt exported macOS app through LaunchServices, advanced title -> hero select -> Stage 1 with real key input, and sent movement/attack input while the easier four-enemy opening wave stayed playable with health/HUD visible.
 - Source-run local playability gate: `bash scripts/check_local_playability.sh` runs the Godot 4.6.x stable gate plus focused headless runtime coverage for launch, title -> Stage Clear, restart/return-to-title, keyboard fallback, text-style keyboard confirm, focus/resume, and Stage 1 performance, then reports `RIFT_ROAD_LOCAL_PLAYABILITY ok` when that local end-to-end source-run proof passes. The gate intentionally excludes package signing, notarization, Gatekeeper, and second-machine evidence because those are downloadable app distribution concerns.
+- Source-run local demo smoke: `bash scripts/smoke_source_run_local_demo.sh` launches `src/wildcoil` locally through Godot, reuses the Stage 1 viewport capture flow, publishes title/hero-select/opening-story/gameplay/combat/pickups/road-collapse/Brask/Stage Clear/Game Over/retry captures under `docs/playtest-captures/source-run-demo-latest/`, and reports `RIFT_ROAD_SOURCE_RUN_DEMO_SMOKE ok` without signing, notarization, Gatekeeper, or second-machine evidence.
 - Local source-run playtest collector: `bash scripts/collect_local_playtest_evidence.sh --help` now generates a non-empty note and paste-ready `docs/local_playtest_log.md` row after a real local source-run session. This is local feel evidence only; it is not public-playtest proof and does not weaken the external-session gate.
 - Local source-run playtest evidence gate: `bash scripts/check_local_playtest_evidence.sh` reads `docs/local_playtest_log.md` and currently reports `RIFT_ROAD_LOCAL_PLAYTEST_EVIDENCE blocked` until at least one complete local source-run session row has `source_run=local`, the `RIFT_ROAD_LOCAL_PLAYABILITY_ok` marker, valid timing fields, non-placeholder observations, no blocking crash/control outcome, and a real non-empty evidence note.
 - Controller/keyboard baseline: simulated Godot runtime smoke covers controller title -> hero select -> Stage 1 and pause/resume; `controller_hotplug_status` covers the controller connection/disconnection status path; a keyboard-fallback runtime smoke covers title -> hero select -> preview cancel -> Stage 1 plus movement, attack, jump, special, dash, and pause/resume; and the exported-app keyboard smoke records the same keyboard path from the launched zipped app as automated JSON/capture evidence. Gameplay code supports keyboard movement/actions and left stick/D-pad movement plus X/A/Y/B/LB/RB/Start actions. A 2026-05-12 launched-app keyboard menu pass fixed text-style `j` confirm from hero preview to Stage 1, with evidence in `docs/playtest-captures/controller/20260512-keyboard-menu-confirm.md`; physical controller devices and a complete manual exported-app keyboard fallback row are still not tested yet.
@@ -107,6 +108,7 @@ The visual target is the approved north-star direction: modern stylized arcade r
 - Outcome: A human local session launched from source covers title -> Stage 1 -> clear/fail/retry with notes on feel, confusion, unfair damage, replay desire, and a show-someone moment.
 - Validation:
   - [ ] Run `bash scripts/check_local_playability.sh` before the session.
+  - [ ] Run `bash scripts/smoke_source_run_local_demo.sh` and keep the `RIFT_ROAD_SOURCE_RUN_DEMO_SMOKE ok` output with the handoff notes.
   - [ ] Launch the game with `bash scripts/run_game.sh`.
   - [ ] Use `bash scripts/collect_local_playtest_evidence.sh` to generate a note and paste a row into `docs/local_playtest_log.md`.
   - [ ] Run `bash scripts/check_local_playtest_evidence.sh` and keep its result in the handoff notes.
@@ -130,6 +132,24 @@ The visual target is the approved north-star direction: modern stylized arcade r
 - Dependencies: [RR-PROD-15]
 
 ## DONE
+
+### [RR-PROD-107] Add source-run local demo smoke capture
+- Outcome: `scripts/smoke_source_run_local_demo.sh` launches the Godot project from source, captures the same Stage 1 demo viewport sequence used by the app smoke path, and publishes repeatable local demo evidence under `docs/playtest-captures/source-run-demo-latest/` without using signing, notarization, Gatekeeper, or second-machine proof.
+- Validation:
+  - [x] Added a failing regression requiring the source-run demo smoke script, the local-source Godot launch arguments, the expected viewport capture names, docs references, and the `RIFT_ROAD_SOURCE_RUN_DEMO_SMOKE ok` marker.
+  - [x] Added `bash scripts/smoke_source_run_local_demo.sh` and documented it in README, local playtest notes, market-readiness audit, and tracker.
+  - [x] `python3 -m pytest tests/test_scripts_and_docs.py::test_source_run_local_demo_smoke_records_viewport_evidence -q` passes.
+  - [x] `bash -n scripts/smoke_source_run_local_demo.sh` passes.
+  - [x] `bash scripts/smoke_source_run_local_demo.sh` reports `RIFT_ROAD_SOURCE_RUN_DEMO_SMOKE ok` and publishes 11 local source-run viewport captures under `docs/playtest-captures/source-run-demo-latest/`.
+  - [x] `bash scripts/check_local_playtest_evidence.sh` still reports `RIFT_ROAD_LOCAL_PLAYTEST_EVIDENCE blocked` for the real remaining local human-session row gap.
+  - [x] `bash scripts/check_local_playability.sh` reports `RIFT_ROAD_LOCAL_PLAYABILITY ok scope=source-run machine=local`.
+  - [x] `python3 scripts/check_agent_docs.py` passes.
+  - [x] `git diff --check` passes.
+  - [x] `bash scripts/check.sh` passes with 141 tests and `RIFT_ROAD_RUNTIME_OK smoke`.
+- Progress:
+  - 2026-05-13: Added repeatable local source-run demo screenshot evidence for the current "playable on this computer" target.
+- Dependencies: [RR-PROD-104]
+- Completed: 2026-05-13
 
 ### [RR-PROD-106] Add local source-run playtest evidence gate
 - Outcome: `scripts/check_local_playtest_evidence.sh` now verifies `docs/local_playtest_log.md` has at least one complete local source-run session row with real evidence and local-playability metadata, while staying independent from signed package or second-machine proof.

@@ -22,6 +22,7 @@ def test_run_and_check_scripts_exist(repo_root):
         "scripts/collect_playtest_evidence.sh",
         "scripts/check_local_playtest_evidence.sh",
         "scripts/collect_local_playtest_evidence.sh",
+        "scripts/smoke_source_run_local_demo.sh",
         "scripts/check_focus_audio_evidence.sh",
         "scripts/collect_focus_audio_evidence.sh",
         "scripts/check_second_machine_evidence.sh",
@@ -64,6 +65,34 @@ def test_local_source_playability_gate_is_documented_and_distribution_free(repo_
     assert "not a source-run blocker" in tracker
     assert "downloadable app distribution" in tracker
     assert "not a source-run blocker" in audit
+
+
+def test_source_run_local_demo_smoke_records_viewport_evidence(repo_root):
+    script_path = repo_root / "scripts" / "smoke_source_run_local_demo.sh"
+    script = script_path.read_text()
+    readme = (repo_root / "README.md").read_text()
+    tracker = (repo_root / "to-do.md").read_text()
+    local_log = (repo_root / "docs" / "local_playtest_log.md").read_text()
+    audit = (repo_root / "docs" / "market-readiness-audit-2026-05-10.md").read_text()
+
+    assert "GODOT_BIN" in script
+    assert "scripts/check_godot_version.sh" in script
+    assert "--path" in script
+    assert "src/wildcoil" in script
+    assert "--rift-road-smoke-stage1" in script
+    assert "--rift-road-smoke-capture-dir=" in script
+    assert "stage1-exported-app-smoke-title.png" in script
+    assert "stage1-exported-app-smoke-stage-clear.png" in script
+    assert "stage1-exported-app-smoke-retry-gameplay.png" in script
+    assert "RIFT_ROAD_SOURCE_RUN_DEMO_SMOKE ok" in script
+    assert "source-run-demo-latest" in script
+    assert "Rift Road Source-Run Local Demo Smoke" in script
+    assert "sign_notarize_macos.sh" not in script
+    assert "check_second_machine_evidence.sh" not in script
+
+    for docs in [readme, tracker, local_log, audit]:
+        assert "bash scripts/smoke_source_run_local_demo.sh" in docs
+        assert "RIFT_ROAD_SOURCE_RUN_DEMO_SMOKE ok" in docs
 
 
 def test_godot_version_gate_requires_46_stable(repo_root, tmp_path):

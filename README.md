@@ -33,6 +33,7 @@ Rift Road Phase 1: build the Stage 1 macOS playable prototype in Godot.
 
 - Run checks: `bash scripts/check.sh`
 - Check source-run local playability: `bash scripts/check_local_playability.sh`
+- Capture source-run local demo proof: `bash scripts/smoke_source_run_local_demo.sh` reports `RIFT_ROAD_SOURCE_RUN_DEMO_SMOKE ok`
 - Check local source-run playtest evidence: `bash scripts/check_local_playtest_evidence.sh`
 - Collect local source-run playtest evidence: `bash scripts/collect_local_playtest_evidence.sh`
 - Run agent docs check: `python3 scripts/check_agent_docs.py`
