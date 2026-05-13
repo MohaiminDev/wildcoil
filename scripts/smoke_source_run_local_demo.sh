@@ -6,6 +6,7 @@ GODOT_BIN="${GODOT_BIN:-godot}"
 PROJECT_DIR="$ROOT_DIR/src/wildcoil"
 DEFAULT_OUTPUT_DIR="$ROOT_DIR/docs/playtest-captures/source-run-demo-latest"
 OUTPUT_DIR="${1:-"$DEFAULT_OUTPUT_DIR"}"
+SMOKE_TIMEOUT_SECONDS="${RIFT_ROAD_SOURCE_RUN_SMOKE_TIMEOUT_SECONDS:-60}"
 
 if [[ "$OUTPUT_DIR" != /* ]]; then
   OUTPUT_DIR="$ROOT_DIR/$OUTPUT_DIR"
@@ -34,16 +35,59 @@ required_captures=(
   "stage1-exported-app-smoke-retry-gameplay.png"
 )
 
+activate_source_smoke_window() {
+  if [[ ! -x /usr/bin/osascript ]]; then
+    return 0
+  fi
+  for _attempt in 1 2 3 4 5; do
+    if /usr/bin/osascript -e 'tell application id "com.riftroad.afterglow" to activate' >/dev/null 2>&1; then
+      return 0
+    fi
+    sleep 0.5
+  done
+  return 0
+}
+
+run_godot_smoke() {
+  local log_path="$1"
+  RIFT_ROAD_SMOKE_CAPTURE_DIR="$STAGED_CAPTURE_DIR" "$GODOT_BIN" \
+    --path "$PROJECT_DIR" \
+    -- \
+    --rift-road-smoke-stage1 \
+    --rift-road-smoke-capture-dir="$STAGED_CAPTURE_DIR" \
+    > "$log_path" 2>&1 &
+  local godot_pid=$!
+  activate_source_smoke_window &
+  local activation_pid=$!
+  (
+    sleep "$SMOKE_TIMEOUT_SECONDS"
+    if kill -0 "$godot_pid" 2>/dev/null; then
+      printf 'RIFT_ROAD_SOURCE_RUN_DEMO_SMOKE timeout seconds=%s\n' "$SMOKE_TIMEOUT_SECONDS" >> "$log_path"
+      kill "$godot_pid" 2>/dev/null || true
+    fi
+  ) &
+  local watchdog_pid=$!
+  local godot_status=0
+  if wait "$godot_pid"; then
+    godot_status=0
+  else
+    godot_status=$?
+  fi
+  kill "$activation_pid" 2>/dev/null || true
+  wait "$activation_pid" 2>/dev/null || true
+  kill "$watchdog_pid" 2>/dev/null || true
+  wait "$watchdog_pid" 2>/dev/null || true
+  if grep -q "RIFT_ROAD_SOURCE_RUN_DEMO_SMOKE timeout" "$log_path"; then
+    return 124
+  fi
+  return "$godot_status"
+}
+
 mkdir -p "$STAGED_CAPTURE_DIR"
 
 bash "$ROOT_DIR/scripts/check_godot_version.sh"
 
-if ! "$GODOT_BIN" \
-  --path "$PROJECT_DIR" \
-  -- \
-  --rift-road-smoke-stage1 \
-  --rift-road-smoke-capture-dir="$STAGED_CAPTURE_DIR" \
-  > "$LOG_PATH" 2>&1; then
+if ! run_godot_smoke "$LOG_PATH"; then
   cat "$LOG_PATH"
   printf 'RIFT_ROAD_SOURCE_RUN_DEMO_SMOKE failed output_dir=%s\n' "$OUTPUT_DIR" >&2
   exit 1
@@ -64,6 +108,18 @@ for capture_name in "${required_captures[@]}"; do
   fi
 done
 
+build_commit="$(git -C "$ROOT_DIR" rev-parse --short HEAD 2>/dev/null || printf 'unknown')"
+source_state="unknown"
+if git -C "$ROOT_DIR" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+  if git_status="$(git -C "$ROOT_DIR" status --porcelain --untracked-files=normal 2>/dev/null)"; then
+    source_state="clean"
+    if [[ -n "$git_status" ]]; then
+      source_state="dirty"
+    fi
+  fi
+fi
+capture_date="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
+
 output_parent="$(dirname "$OUTPUT_DIR")"
 mkdir -p "$output_parent"
 publish_tmp="$(mktemp -d "$output_parent/.source-run-demo.XXXXXX")"
@@ -71,14 +127,11 @@ publish_tmp="$(mktemp -d "$output_parent/.source-run-demo.XXXXXX")"
 cp "$LOG_PATH" "$publish_tmp/source-run-demo.log"
 cp "$STAGED_CAPTURE_DIR"/*.png "$publish_tmp/"
 
-build_commit="$(git -C "$ROOT_DIR" rev-parse --short HEAD 2>/dev/null || printf 'unknown')"
-capture_date="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
-
 {
   printf '# Rift Road Source-Run Local Demo Smoke\n\n'
   printf 'This is automated local source-run viewport evidence from `src/wildcoil`. It is not public-playtest proof and does not require signing, notarization, Gatekeeper, or second-machine evidence.\n\n'
   printf -- '- Result: `RIFT_ROAD_SOURCE_RUN_DEMO_SMOKE ok`\n'
-  printf -- '- Build: `commit=%s source_run=local`\n' "$build_commit"
+  printf -- '- Build: `commit=%s source_run=local source_state=%s`\n' "$build_commit" "$source_state"
   printf -- '- Captured at: `%s`\n' "$capture_date"
   printf -- '- Command: `bash scripts/smoke_source_run_local_demo.sh`\n'
   printf -- '- Project: `src/wildcoil`\n'

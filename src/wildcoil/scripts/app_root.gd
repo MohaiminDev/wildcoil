@@ -24,6 +24,7 @@ const FOCUS_RESUME_CAPTURE_DIR_PREFIX := "--rift-road-focus-resume-capture-dir="
 const FOCUS_RESUME_CAPTURE_NAME := "stage1-exported-app-focus-resume.png"
 const HERO_CARD_SIZE := Vector2(284, 198)
 const HERO_CARD_SLANT := 22.0
+const PLAYABLE_HERO_IDS := ["raya_flint", "nika_sol"]
 const RENDER_PERF_SAMPLE_ARG := "--rift-road-render-perf-sample"
 const RENDER_PERF_OUTPUT_PREFIX := "--rift-road-render-perf-output="
 const RENDER_PERF_WINDOW_SIZE_PREFIX := "--rift-road-render-perf-window-size="
@@ -75,6 +76,7 @@ var render_perf_window_mode := "windowed"
 var render_perf_warmup_frames_remaining := RENDER_PERF_WARMUP_FRAMES
 var render_perf_frame_ms: Array[float] = []
 var focus_pause_active := false
+var smoke_capture_active := false
 var controller_status_text := ""
 var controller_hotplug_events := 0
 
@@ -92,6 +94,8 @@ func _ready() -> void:
 	render_perf_window_size = _launch_arg_value(launch_args, RENDER_PERF_WINDOW_SIZE_PREFIX, render_perf_window_size)
 	render_perf_window_mode = _launch_arg_value(launch_args, RENDER_PERF_WINDOW_MODE_PREFIX, render_perf_window_mode).to_lower()
 	var smoke_capture_dir := _launch_arg_value(launch_args, SMOKE_CAPTURE_DIR_PREFIX)
+	if smoke_capture_dir == "":
+		smoke_capture_dir = _environment_smoke_capture_dir()
 	var keyboard_fallback_output_path := _launch_arg_value(launch_args, KEYBOARD_FALLBACK_OUTPUT_PREFIX)
 	var keyboard_fallback_capture_dir := _launch_arg_value(launch_args, KEYBOARD_FALLBACK_CAPTURE_DIR_PREFIX)
 	var focus_resume_output_path := _launch_arg_value(launch_args, FOCUS_RESUME_OUTPUT_PREFIX)
@@ -133,6 +137,9 @@ func _launch_arg_value(args: PackedStringArray, prefix: String, default_value :=
 		if arg.begins_with(prefix):
 			return arg.substr(prefix.length())
 	return default_value
+
+func _environment_smoke_capture_dir() -> String:
+	return OS.get_environment("RIFT_ROAD_SMOKE_CAPTURE_DIR")
 
 func _connect_controller_hotplug_signal() -> void:
 	var callback := Callable(self, "_on_joy_connection_changed")
@@ -182,6 +189,9 @@ func _configure_render_perf_window(size_text: String, mode_text: String) -> void
 	DisplayServer.window_set_size(Vector2i(width, height))
 
 func _run_exported_smoke_capture(capture_dir: String) -> void:
+	smoke_capture_active = true
+	focus_pause_active = false
+	get_tree().paused = false
 	var dir_error := DirAccess.make_dir_recursive_absolute(capture_dir)
 	if dir_error != OK:
 		push_error("Unable to create exported smoke capture directory: %s" % capture_dir)
@@ -193,6 +203,7 @@ func _run_exported_smoke_capture(capture_dir: String) -> void:
 	if not _save_viewport_png(title_path):
 		get_tree().quit(1)
 		return
+	_log_exported_smoke_capture_phase("title")
 	selected_hero_index = 0
 	_show_character_select()
 	await get_tree().process_frame
@@ -201,6 +212,7 @@ func _run_exported_smoke_capture(capture_dir: String) -> void:
 	if not _save_viewport_png(hero_select_path):
 		get_tree().quit(1)
 		return
+	_log_exported_smoke_capture_phase("hero_select")
 	await _start_stage1_demo()
 	if not await _show_opening_story_smoke_capture():
 		get_tree().quit(1)
@@ -209,16 +221,21 @@ func _run_exported_smoke_capture(capture_dir: String) -> void:
 	if not _save_viewport_png(opening_story_path):
 		get_tree().quit(1)
 		return
+	_log_exported_smoke_capture_phase("opening_story")
 	if stage != null and is_instance_valid(stage) and stage.combat_fx != null:
 		var smoke_goal := str(stage.stage_data.get("scenario_goal", "Free caged dinos"))
 		stage.combat_fx.show_stage_card(str(stage.stage_data.get("title", "Sunset Overpass")), stage._stage_card_goal(smoke_goal), maxi(stage.wave_index, 0))
+	_log_exported_smoke_capture_phase("gameplay_settle_start")
 	for _i in range(45):
 		await get_tree().process_frame
+	_log_exported_smoke_capture_phase("gameplay_settle_done")
 	await RenderingServer.frame_post_draw
+	_log_exported_smoke_capture_phase("gameplay_draw_done")
 	var gameplay_path := capture_dir.path_join(SMOKE_GAMEPLAY_CAPTURE_NAME)
 	if not _save_viewport_png(gameplay_path):
 		get_tree().quit(1)
 		return
+	_log_exported_smoke_capture_phase("gameplay")
 	if not await _show_combat_action_smoke_capture():
 		get_tree().quit(1)
 		return
@@ -226,6 +243,7 @@ func _run_exported_smoke_capture(capture_dir: String) -> void:
 	if not _save_viewport_png(combat_path):
 		get_tree().quit(1)
 		return
+	_log_exported_smoke_capture_phase("combat")
 	if not await _show_pickup_smoke_capture():
 		get_tree().quit(1)
 		return
@@ -233,6 +251,7 @@ func _run_exported_smoke_capture(capture_dir: String) -> void:
 	if not _save_viewport_png(pickup_path):
 		get_tree().quit(1)
 		return
+	_log_exported_smoke_capture_phase("pickups")
 	if not await _show_road_collapse_smoke_capture():
 		get_tree().quit(1)
 		return
@@ -240,6 +259,7 @@ func _run_exported_smoke_capture(capture_dir: String) -> void:
 	if not _save_viewport_png(road_collapse_path):
 		get_tree().quit(1)
 		return
+	_log_exported_smoke_capture_phase("road_collapse")
 	if not await _show_brask_intro_smoke_capture():
 		get_tree().quit(1)
 		return
@@ -247,6 +267,7 @@ func _run_exported_smoke_capture(capture_dir: String) -> void:
 	if not _save_viewport_png(brask_intro_path):
 		get_tree().quit(1)
 		return
+	_log_exported_smoke_capture_phase("brask_intro")
 	if not await _fast_forward_stage1_smoke_to_stage_clear():
 		get_tree().quit(1)
 		return
@@ -254,6 +275,7 @@ func _run_exported_smoke_capture(capture_dir: String) -> void:
 	if not _save_viewport_png(stage_clear_path):
 		get_tree().quit(1)
 		return
+	_log_exported_smoke_capture_phase("stage_clear")
 	if not await _show_game_over_smoke_capture():
 		get_tree().quit(1)
 		return
@@ -261,6 +283,7 @@ func _run_exported_smoke_capture(capture_dir: String) -> void:
 	if not _save_viewport_png(game_over_path):
 		get_tree().quit(1)
 		return
+	_log_exported_smoke_capture_phase("game_over")
 	if not await _show_retry_gameplay_smoke_capture():
 		get_tree().quit(1)
 		return
@@ -268,8 +291,12 @@ func _run_exported_smoke_capture(capture_dir: String) -> void:
 	if not _save_viewport_png(retry_gameplay_path):
 		get_tree().quit(1)
 		return
+	_log_exported_smoke_capture_phase("retry_gameplay")
 	print("RIFT_ROAD_EXPORTED_APP_SMOKE_CAPTURE ok title_capture=%s hero_select_capture=%s opening_story_capture=%s gameplay_capture=%s combat_capture=%s pickup_capture=%s road_collapse_capture=%s brask_intro_capture=%s stage_clear_capture=%s game_over_capture=%s retry_gameplay_capture=%s" % [title_path, hero_select_path, opening_story_path, gameplay_path, combat_path, pickup_path, road_collapse_path, brask_intro_path, stage_clear_path, game_over_path, retry_gameplay_path])
 	get_tree().quit(0)
+
+func _log_exported_smoke_capture_phase(phase: String) -> void:
+	print("RIFT_ROAD_EXPORTED_APP_SMOKE_CAPTURE phase=%s" % phase)
 
 func _run_exported_keyboard_fallback_smoke(output_path: String, capture_dir: String) -> void:
 	if output_path == "":
@@ -891,7 +918,7 @@ func _show_character_select() -> void:
 	label.size = Vector2(920, 150)
 	label.add_theme_font_size_override("font_size", 32)
 	label.text = ""
-	_set_controls_text("1/R Raya   2/K Kian   3/N Nika   4/T Tor   Enter/A: capabilities\nGamepad: D-pad/LB/RB change hero   B back")
+	_set_controls_text("Playable now: 1/R Raya   3/N Nika   Preview: 2/K Kian   4/T Tor\nEnter/A: capabilities   Gamepad: D-pad/LB/RB change hero   B back")
 	_set_hero_cards_visible(true)
 	_refresh_hero_card_selection()
 
@@ -903,11 +930,14 @@ func _show_hero_capability_preview() -> void:
 	_set_result_overlay_visible(false)
 	selected_hero = _selected_hero_profile().get("id", "raya_flint")
 	var hero := _selected_hero_profile()
+	var hero_id := str(hero.get("id", selected_hero))
+	var playable := _is_playable_hero(hero_id)
 	var stats: Dictionary = hero.get("stats", {})
 	label.position = Vector2(170, 48)
 	label.size = Vector2(940, 260)
 	label.add_theme_font_size_override("font_size", 24)
-	label.text = "CAPABILITIES\n%s\n%s\n\n%s\nSpecialty: %s\nWeakness: %s\n\nPower %s  Speed %s  Control %s  Defense %s" % [
+	label.text = "%sCAPABILITIES\n%s\n%s\n\n%s\nSpecialty: %s\nWeakness: %s\n\nPower %s  Speed %s  Control %s  Defense %s" % [
+		"" if playable else "PLANNED HERO\n",
 		hero.get("name", "Raya Flint"),
 		hero.get("role", "Balanced mechanic"),
 		hero.get("capability_summary", "Ready for the road."),
@@ -918,12 +948,18 @@ func _show_hero_capability_preview() -> void:
 		str(stats.get("control", 3)),
 		str(stats.get("defense", 3))
 	]
-	_set_controls_text("Enter/J/A Start Stage 1   1-4 or D-pad Change Hero   Esc/B Back")
+	if playable:
+		_set_controls_text("Enter/J/A Start Stage 1   1-4 or D-pad Change Hero   Esc/B Back")
+	else:
+		_set_controls_text("Preview only: choose Raya or Nika to start Stage 1   1/R Raya   3/N Nika   Esc/B Back")
 	_set_hero_cards_visible(true)
 	_refresh_hero_card_selection()
 
 func _confirm_hero_and_start() -> void:
 	selected_hero = _selected_hero_profile().get("id", "raya_flint")
+	if not _is_playable_hero(selected_hero):
+		_set_controls_text("Preview only: choose Raya or Nika to start Stage 1   1/R Raya   3/N Nika   Esc/B Back")
+		return
 	_start_campaign()
 
 func _start_campaign() -> void:
@@ -1043,6 +1079,8 @@ func _set_pause_state(should_pause: bool, pause_message := "PAUSED\nEsc / Start 
 		focus_pause_active = false
 
 func _handle_focus_lost() -> void:
+	if smoke_capture_active:
+		return
 	if mode != "stage" or get_tree().paused:
 		return
 	focus_pause_active = true
@@ -1593,6 +1631,9 @@ func _selected_hero_profile() -> Dictionary:
 		hero_roster = DEFAULT_HERO_ROSTER.duplicate(true)
 	selected_hero_index = clampi(selected_hero_index, 0, hero_roster.size() - 1)
 	return hero_roster[selected_hero_index]
+
+func _is_playable_hero(hero_id: String) -> bool:
+	return hero_id in PLAYABLE_HERO_IDS
 
 func _handle_roster_key(keycode: int) -> bool:
 	match keycode:

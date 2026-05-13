@@ -39,6 +39,8 @@ func _run() -> void:
 		ok = await _run_keyboard_text_confirm_flow()
 	if ok and mode == "stage1_focus_resume":
 		ok = await _run_stage1_focus_resume()
+	if ok and mode == "exported_smoke_focus_guard":
+		ok = await _run_exported_smoke_focus_guard()
 	if ok and mode == "stage1_performance_sample":
 		ok = await _run_stage1_performance_sample()
 	if ok:
@@ -391,17 +393,30 @@ func _run_hero_select_preview() -> bool:
 		printerr("Preview did not select Tor Bram")
 		app.queue_free()
 		return false
-	if app.label == null or not app.label.text.contains("CAPABILITIES") or not app.label.text.contains("Tor Bram"):
+	if app.label == null or not app.label.text.contains("CAPABILITIES") or not app.label.text.contains("Tor Bram") or not app.label.text.contains("PLANNED HERO"):
 		printerr("Hero capability preview did not show selected hero details")
 		app.queue_free()
 		return false
 	app._confirm_hero_and_start()
 	await process_frame
 	await process_frame
-	if app.mode != "stage" or app.stage == null or app.stage.hero_id != "tor_bram":
-		printerr("Confirmed hero preview did not start Stage 1 with selected hero")
+	var planned_blocked: bool = app.mode == "hero_preview" and app.stage == null
+	if not planned_blocked:
+		printerr("Planned hero preview started Stage 1 instead of staying preview-only")
 		app.queue_free()
 		return false
+	app.selected_hero_index = 2
+	app._show_hero_capability_preview()
+	await process_frame
+	app._confirm_hero_and_start()
+	await process_frame
+	await process_frame
+	var playable_started: bool = app.mode == "stage" and app.stage != null and app.stage.hero_id == "nika_sol"
+	if not playable_started:
+		printerr("Playable Nika preview did not start Stage 1")
+		app.queue_free()
+		return false
+	print("RIFT_ROAD_PLANNED_HERO_LOCK blocked=%s playable_start=%s" % [str(planned_blocked).to_lower(), str(playable_started).to_lower()])
 	app.queue_free()
 	await process_frame
 	return true
@@ -497,12 +512,18 @@ func _run_controller_title_flow() -> bool:
 		printerr("Controller cancel did not return to character select")
 		app.queue_free()
 		return false
+	_press_controller_button(app, JOY_BUTTON_RIGHT_SHOULDER)
+	await process_frame
+	if app.selected_hero_index != 2:
+		printerr("Controller did not cycle from planned Kian preview to playable Nika")
+		app.queue_free()
+		return false
 	_press_controller_button(app, JOY_BUTTON_A)
 	await process_frame
 	_press_controller_button(app, JOY_BUTTON_A)
 	await process_frame
 	await process_frame
-	if app.mode != "stage" or app.stage == null:
+	if app.mode != "stage" or app.stage == null or app.stage.hero_id != "nika_sol":
 		printerr("Controller confirm did not start Stage 1")
 		app.queue_free()
 		return false
@@ -709,6 +730,41 @@ func _run_stage1_focus_resume() -> bool:
 	var ok := focus_pause and overlay_visible and focus_message and audio_suspended and audio_resumed and returned_message and resume_ok
 	if not ok:
 		printerr("Stage 1 focus-loss pause/resume did not recover cleanly")
+	paused = false
+	app.queue_free()
+	await process_frame
+	return ok
+
+func _run_exported_smoke_focus_guard() -> bool:
+	var packed: PackedScene = load("res://scenes/app_root.tscn")
+	if packed == null:
+		printerr("Could not load app root scene")
+		return false
+	var app = packed.instantiate()
+	root.add_child(app)
+	await process_frame
+	await process_frame
+	app.selected_hero = "raya_flint"
+	app._start_campaign()
+	await process_frame
+	await process_frame
+	if app.mode != "stage" or app.stage == null:
+		printerr("Stage did not start before exported smoke focus guard")
+		app.queue_free()
+		return false
+	app.smoke_capture_active = true
+	app._handle_focus_lost()
+	await process_frame
+	var pause_blocked: bool = not paused and not app.focus_pause_active
+	var overlay_hidden: bool = app.pause_layer == null or (not app.pause_layer.visible and app.paused_overlay != null and not app.paused_overlay.visible)
+	print("RIFT_ROAD_EXPORTED_SMOKE_FOCUS_GUARD paused=%s overlay=%s focus_active=%s" % [
+		str(paused).to_lower(),
+		str(not overlay_hidden).to_lower(),
+		str(app.focus_pause_active).to_lower()
+	])
+	var ok := pause_blocked and overlay_hidden
+	if not ok:
+		printerr("Exported smoke focus guard allowed focus-loss pause")
 	paused = false
 	app.queue_free()
 	await process_frame

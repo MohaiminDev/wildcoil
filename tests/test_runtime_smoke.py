@@ -98,7 +98,7 @@ def test_stage_one_pickups_apply_clear_health_and_luma_effects(project_root, god
     assert "RIFT_ROAD_RUNTIME_OK stage1_pickup_clarity" in result.stdout
 
 
-def test_character_select_preview_starts_selected_hero(project_root, godot_runner):
+def test_character_select_preview_blocks_planned_heroes(project_root, godot_runner):
     result = godot_runner(
         "--headless",
         "--script",
@@ -108,6 +108,7 @@ def test_character_select_preview_starts_selected_hero(project_root, godot_runne
     )
 
     assert result.returncode == 0, result.stderr + result.stdout
+    assert "RIFT_ROAD_PLANNED_HERO_LOCK blocked=true playable_start=true" in result.stdout
     assert "RIFT_ROAD_RUNTIME_OK hero_select_preview" in result.stdout
 
 
@@ -194,6 +195,20 @@ def test_stage_one_focus_loss_pauses_and_resumes(project_root, godot_runner):
     assert result.returncode == 0, result.stderr + result.stdout
     assert "RIFT_ROAD_FOCUS_RESUME focus_pause=true overlay=true audio=true resume=true" in result.stdout
     assert "RIFT_ROAD_RUNTIME_OK stage1_focus_resume" in result.stdout
+
+
+def test_exported_smoke_capture_ignores_focus_loss_pause(project_root, godot_runner):
+    result = godot_runner(
+        "--headless",
+        "--script",
+        str(project_root / "tools" / "runtime_test_runner.gd"),
+        "--",
+        "exported_smoke_focus_guard",
+    )
+
+    assert result.returncode == 0, result.stderr + result.stdout
+    assert "RIFT_ROAD_EXPORTED_SMOKE_FOCUS_GUARD paused=false overlay=false focus_active=false" in result.stdout
+    assert "RIFT_ROAD_RUNTIME_OK exported_smoke_focus_guard" in result.stdout
 
 
 def test_stage_one_performance_sample_stays_within_budget(project_root, godot_runner):

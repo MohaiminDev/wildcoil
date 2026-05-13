@@ -74,6 +74,7 @@ def test_source_run_local_demo_smoke_records_viewport_evidence(repo_root):
     tracker = (repo_root / "to-do.md").read_text()
     local_log = (repo_root / "docs" / "local_playtest_log.md").read_text()
     audit = (repo_root / "docs" / "market-readiness-audit-2026-05-10.md").read_text()
+    app_root = (repo_root / "src" / "wildcoil" / "scripts" / "app_root.gd").read_text()
 
     assert "GODOT_BIN" in script
     assert "scripts/check_godot_version.sh" in script
@@ -87,6 +88,19 @@ def test_source_run_local_demo_smoke_records_viewport_evidence(repo_root):
     assert "RIFT_ROAD_SOURCE_RUN_DEMO_SMOKE ok" in script
     assert "source-run-demo-latest" in script
     assert "Rift Road Source-Run Local Demo Smoke" in script
+    assert "RIFT_ROAD_SOURCE_RUN_SMOKE_TIMEOUT_SECONDS" in script
+    assert "run_godot_smoke" in script
+    assert "activate_source_smoke_window" in script
+    assert "com.riftroad.afterglow" in script
+    assert "kill \"$godot_pid\"" in script
+    assert "return 124" in script
+    assert "source_state=" in script
+    assert "status --porcelain" in script
+    assert script.index("source_state=\"unknown\"") < script.index("publish_tmp=\"$(mktemp")
+    assert "RIFT_ROAD_SMOKE_CAPTURE_DIR=" in script
+    assert 'OS.get_environment("RIFT_ROAD_SMOKE_CAPTURE_DIR")' in app_root
+    assert '_environment_smoke_capture_dir' in app_root
+    assert "RIFT_ROAD_EXPORTED_APP_SMOKE_CAPTURE phase=" in app_root
     assert "sign_notarize_macos.sh" not in script
     assert "check_second_machine_evidence.sh" not in script
 
