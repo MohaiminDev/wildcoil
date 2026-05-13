@@ -50,6 +50,14 @@ def parse_milestone_seconds(value):
     return minutes * 60 + seconds
 
 
+def has_cheap_damage_report(value):
+    value = clean_cell(value).lower()
+    if not value or value == "tbd":
+        return False
+    no_report_values = {"none", "no", "n/a", "na", "not observed", "none observed"}
+    return value not in no_report_values
+
+
 def resolve_evidence_path(value):
     value = clean_cell(value)
     if not value or value.upper() == "TBD":
@@ -91,6 +99,7 @@ controller_families = set()
 replay_intent_sessions = 0
 blocker_rows = []
 evidence_capture_count = 0
+cheap_damage_report_rows = 0
 required_session_observation_fields = [
     (6, "First-combat time"),
     (7, "Wow-moment time"),
@@ -172,6 +181,9 @@ for cells in session_rows:
     if any(token in replay_desire for token in ["yes", "asked", "another", "replay", "again", "wants"]):
         replay_intent_sessions += 1
 
+    if has_cheap_damage_report(cells[10]):
+        cheap_damage_report_rows += 1
+
     blocker_text = " ".join([confusion, cheap_damage, follow_up])
     if any(token in blocker_text for token in ["blocker", "cannot launch", "cannot move", "crash", "softlock"]):
         blocker_rows.append(cells[0])
@@ -187,6 +199,8 @@ if len(controller_families) < required_controller_families:
     blockers.append(f"controller families {len(controller_families)}/{required_controller_families}")
 if replay_intent_sessions < required_replay_intent_sessions:
     blockers.append(f"replay-intent sessions {replay_intent_sessions}/{required_replay_intent_sessions}")
+if cheap_damage_report_rows > 1:
+    blockers.append(f"cheap-damage report rows {cheap_damage_report_rows}/1")
 if blocker_rows:
     blockers.append("blocking session rows: " + "; ".join(blocker_rows))
 

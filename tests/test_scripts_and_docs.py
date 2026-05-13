@@ -2241,6 +2241,87 @@ def test_playtest_evidence_gate_rejects_missing_setup_and_input_metadata(
     assert "Input method missing" in output
 
 
+def test_playtest_evidence_gate_rejects_repeated_cheap_damage_reports(
+    repo_root, tmp_path
+):
+    script_path = repo_root / "scripts" / "check_playtest_evidence.sh"
+    fake_log = tmp_path / "playtest_log.md"
+    evidence_dir = tmp_path / "playtest-captures"
+    evidence_dir.mkdir()
+    evidence_paths = []
+    for index in range(5):
+        evidence_path = evidence_dir / f"session-{index + 1}.md"
+        evidence_path.write_text(f"session {index + 1}\n")
+        evidence_paths.append(evidence_path)
+    package_sha = "a" * 64
+
+    def session_row(
+        index,
+        *,
+        setup="machine=primary-mac",
+        input_method="keyboard",
+        replay_desire="yes",
+        cheap_damage_reports="none",
+    ):
+        return (
+            "2026-05-12",
+            f"commit=fake package_sha256={package_sha} package_source=build/macos/Rift Road-signed-notarized.zip",
+            str(evidence_paths[index]),
+            f"tester-{index + 1:02d}",
+            setup,
+            input_method,
+            "00:24",
+            "02:10",
+            replay_desire,
+            "none",
+            cheap_damage_reports,
+            "The road collapse looked cool.",
+            "none",
+        )
+
+    rows = [
+        session_row(
+            0,
+            setup="machine=second-mac",
+            input_method="keyboard; controller-family=xbox",
+            cheap_damage_reports="brute hit felt cheap",
+        ),
+        session_row(
+            1,
+            input_method="keyboard; controller-family=dualshock",
+            cheap_damage_reports="same brute hit felt cheap again",
+        ),
+        session_row(2),
+        session_row(3, replay_desire="no"),
+        session_row(4),
+    ]
+    fake_log.write_text(
+        "\n".join(
+            [
+                "# Playtest Log",
+                "",
+                "| Date | Build | Evidence capture | Tester | Setup | Input method | First-combat time | Wow-moment time | Replay desire | Confusion points | Cheap-damage reports | Key quotes / observations | Follow-up action |",
+                "| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |",
+                *["| " + " | ".join(row) + " |" for row in rows],
+                "",
+            ]
+        )
+    )
+
+    result = subprocess.run(
+        ["bash", str(script_path), str(fake_log)],
+        cwd=repo_root,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    output = result.stdout + result.stderr
+    assert result.returncode == 1
+    assert "RIFT_ROAD_PLAYTEST_EVIDENCE blocked" in output
+    assert "cheap-damage report rows 2/1" in output
+
+
 def test_playtest_evidence_gate_rejects_build_metadata_without_package_sha(
     repo_root, tmp_path
 ):
