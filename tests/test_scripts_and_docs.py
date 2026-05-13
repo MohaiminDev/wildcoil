@@ -20,6 +20,7 @@ def test_run_and_check_scripts_exist(repo_root):
         "scripts/prepare_known_tester_packet.sh",
         "scripts/check_playtest_evidence.sh",
         "scripts/collect_playtest_evidence.sh",
+        "scripts/check_local_playtest_evidence.sh",
         "scripts/collect_local_playtest_evidence.sh",
         "scripts/check_focus_audio_evidence.sh",
         "scripts/collect_focus_audio_evidence.sh",
@@ -2841,6 +2842,78 @@ def test_local_playtest_evidence_collector_scaffolds_source_run_session_notes(
     assert "Session Capture Table Row" in note
     assert "source-run local playability" in note
     assert "not public-playtest proof" in note
+
+
+def test_local_playtest_evidence_gate_blocks_until_real_source_run_session(
+    repo_root, tmp_path
+):
+    script_path = repo_root / "scripts" / "check_local_playtest_evidence.sh"
+    assert script_path.exists()
+
+    script = script_path.read_text()
+    local_log = (repo_root / "docs" / "local_playtest_log.md").read_text()
+    readme = (repo_root / "README.md").read_text()
+    tracker = (repo_root / "to-do.md").read_text()
+    audit = (repo_root / "docs" / "market-readiness-audit-2026-05-10.md").read_text()
+    macos_docs = (repo_root / "docs" / "macos_build_and_distribution.md").read_text()
+
+    assert "RIFT_ROAD_LOCAL_PLAYTEST_EVIDENCE blocked" in script
+    assert "RIFT_ROAD_LOCAL_PLAYTEST_EVIDENCE source-run-session" in script
+    assert "source_run=local" in script
+    assert "RIFT_ROAD_LOCAL_PLAYABILITY_ok" in script
+    assert "Rift Road-signed-notarized.zip" not in script
+    assert "check_second_machine_evidence.sh" not in script
+    assert "bash scripts/check_local_playtest_evidence.sh" in local_log
+
+    for docs in [readme, tracker, audit, macos_docs]:
+        assert "bash scripts/check_local_playtest_evidence.sh" in docs
+
+    empty_result = subprocess.run(
+        ["bash", str(script_path), str(repo_root / "docs" / "local_playtest_log.md")],
+        cwd=repo_root,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert empty_result.returncode == 1
+    empty_output = empty_result.stdout + empty_result.stderr
+    assert "RIFT_ROAD_LOCAL_PLAYTEST_EVIDENCE blocked" in empty_output
+    assert "completed sessions 0/1" in empty_output
+
+    evidence_path = tmp_path / "local-session.md"
+    evidence_path.write_text("human local source-run notes\n")
+    fake_log = tmp_path / "local_playtest_log.md"
+    fake_log.write_text(
+        "\n".join(
+            [
+                "# Local Log",
+                "",
+                "| Date | Build | Evidence capture | Tester | Input method | Route result | First-combat time | Wow-moment time | Session result | Replay desire | Felt good | Show-someone moment | Confusion points | Cheap-damage reports | Follow-up action |",
+                "| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |",
+                (
+                    f"| 2026-05-13 | commit=abc123 source_run=local "
+                    f"local_playability=RIFT_ROAD_LOCAL_PLAYABILITY_ok | {evidence_path} | "
+                    "local-dev | keyboard | Stage Clear | 00:24 | 02:10 | "
+                    "cleared Stage 1 and returned to title | yes - would replay | "
+                    "movement and opening fight stayed readable | road collapse | "
+                    "none | none | record longer human video |"
+                ),
+                "",
+            ]
+        )
+    )
+
+    ok_result = subprocess.run(
+        ["bash", str(script_path), str(fake_log)],
+        cwd=repo_root,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert ok_result.returncode == 0, ok_result.stdout + ok_result.stderr
+    assert "RIFT_ROAD_LOCAL_PLAYTEST_EVIDENCE source-run-session" in ok_result.stdout
+    assert "sessions=1/1" in ok_result.stdout
+    assert "evidence_captures=1/1" in ok_result.stdout
 
 
 def test_manual_evidence_collectors_default_to_signed_packet_artifact(

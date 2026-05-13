@@ -2,7 +2,7 @@
 
 Use this log for human sessions played from source on the primary local Mac. This is source-run local playability evidence, not public-playtest proof.
 
-Run `bash scripts/check_local_playability.sh` before the session, then launch with `bash scripts/run_game.sh`. After the session, run `bash scripts/collect_local_playtest_evidence.sh --help` to generate a non-empty note and a paste-ready row for the table below.
+Run `bash scripts/check_local_playability.sh` before the session, then launch with `bash scripts/run_game.sh`. After the session, run `bash scripts/collect_local_playtest_evidence.sh --help` to generate a non-empty note and a paste-ready row for the table below. After pasting a row, run `bash scripts/check_local_playtest_evidence.sh` to verify at least one complete local source-run session has real evidence.
 
 Public-playtest, release-candidate, and player-love claims still depend on `docs/public_playtest_gate.md`, signed/distribution evidence when relevant, and real external tester evidence. Do not move a local row into `docs/playtest_log.md` unless it satisfies that external-session protocol.
 

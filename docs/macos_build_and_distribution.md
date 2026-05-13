@@ -109,6 +109,7 @@ As of 2026-04-27, the Rift Road prototype uses Godot 4.x under `src/wildcoil`.
 
 - Run checks: `bash scripts/check.sh`
 - Check source-run local playability: `bash scripts/check_local_playability.sh`
+- Check local source-run playtest evidence: `bash scripts/check_local_playtest_evidence.sh`
 - Collect local source-run playtest evidence: `bash scripts/collect_local_playtest_evidence.sh`
 - Run game: `bash scripts/run_game.sh`
 - Check Godot version: `bash scripts/check_godot_version.sh`
