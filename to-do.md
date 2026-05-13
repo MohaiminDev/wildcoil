@@ -36,6 +36,7 @@ The visual target is the approved north-star direction: modern stylized arcade r
 - Production-grade visual/UI match to north-star images: no.
 - Manual playtest evidence: current Codex run opened the rebuilt exported macOS app through LaunchServices, advanced title -> hero select -> Stage 1 with real key input, and sent movement/attack input while the easier four-enemy opening wave stayed playable with health/HUD visible.
 - Source-run local playability gate: `bash scripts/check_local_playability.sh` runs the Godot 4.6.x stable gate plus focused headless runtime coverage for launch, title -> Stage Clear, restart/return-to-title, keyboard fallback, text-style keyboard confirm, focus/resume, and Stage 1 performance, then reports `RIFT_ROAD_LOCAL_PLAYABILITY ok` when that local end-to-end source-run proof passes. The gate intentionally excludes package signing, notarization, Gatekeeper, and second-machine evidence because those are downloadable app distribution concerns.
+- Local source-run playtest collector: `bash scripts/collect_local_playtest_evidence.sh --help` now generates a non-empty note and paste-ready `docs/local_playtest_log.md` row after a real local source-run session. This is local feel evidence only; it is not public-playtest proof and does not weaken the external-session gate.
 - Controller/keyboard baseline: simulated Godot runtime smoke covers controller title -> hero select -> Stage 1 and pause/resume; `controller_hotplug_status` covers the controller connection/disconnection status path; a keyboard-fallback runtime smoke covers title -> hero select -> preview cancel -> Stage 1 plus movement, attack, jump, special, dash, and pause/resume; and the exported-app keyboard smoke records the same keyboard path from the launched zipped app as automated JSON/capture evidence. Gameplay code supports keyboard movement/actions and left stick/D-pad movement plus X/A/Y/B/LB/RB/Start actions. A 2026-05-12 launched-app keyboard menu pass fixed text-style `j` confirm from hero preview to Stage 1, with evidence in `docs/playtest-captures/controller/20260512-keyboard-menu-confirm.md`; physical controller devices and a complete manual exported-app keyboard fallback row are still not tested yet.
 - Controller evidence gate: `bash scripts/check_controller_evidence.sh` reads `docs/controller_validation.md` and currently reports `RIFT_ROAD_CONTROLLER_EVIDENCE blocked` because no physical controller-family sessions have been recorded. The gate now rejects marked sessions with missing or `TBD` build/device/connection/evidence/blocker metadata, rejects `Build` fields without a 64-character `package_sha256=<sha>` plus signed `package_source=...Rift Road-signed-notarized.zip` metadata, blocks `Evidence capture` paths that do not point at real non-empty files, and requires a `Special meter ready` pass before `Special` can count, so placeholder, unsigned-build, loose-build, or zero-meter rows cannot satisfy the manual evidence requirement.
 - Controller evidence collector: `bash scripts/collect_controller_evidence.sh --help` now generates manual evidence notes and paste-ready session snippets for real exported-app controller or keyboard fallback sessions, records the selected package path and package SHA by default, and requires an explicit special-meter-ready confirmation, but unsigned fallback rows remain internal-only and it does not turn the gate green without actual tester-confirmed rows.
@@ -101,6 +102,15 @@ The visual target is the approved north-star direction: modern stylized arcade r
 
 ## PENDING
 
+### [RR-PROD-16] Run recorded local source-run playtest
+- Outcome: A human local session launched from source covers title -> Stage 1 -> clear/fail/retry with notes on feel, confusion, unfair damage, replay desire, and a show-someone moment.
+- Validation:
+  - [ ] Run `bash scripts/check_local_playability.sh` before the session.
+  - [ ] Launch the game with `bash scripts/run_game.sh`.
+  - [ ] Use `bash scripts/collect_local_playtest_evidence.sh` to generate a note and paste a row into `docs/local_playtest_log.md`.
+  - [ ] Keep public-playtest or release-candidate claims unchanged unless external evidence supports them.
+- Dependencies: [RR-PROD-104]
+
 ### [RR-PROD-15] Verify physical controller devices
 - Outcome: The exported macOS app is tested with at least two controller families plus keyboard fallback, with device names and blockers recorded.
 - Validation:
@@ -118,6 +128,23 @@ The visual target is the approved north-star direction: modern stylized arcade r
 - Dependencies: [RR-PROD-15]
 
 ## DONE
+
+### [RR-PROD-105] Add local source-run playtest evidence collector
+- Outcome: `scripts/collect_local_playtest_evidence.sh` now records real local source-run session notes and paste-ready `docs/local_playtest_log.md` rows without requiring signed packages or second-machine proof, while explicitly keeping public-playtest claims gated by the external protocol.
+- Validation:
+  - [x] Added a failing regression requiring the local collector, local log, blocked/ok markers, local-playability references, and public-proof separation.
+  - [x] Added `docs/local_playtest_log.md` for local source-run session rows.
+  - [x] Updated README, macOS distribution notes, market-readiness audit, and tracker docs to reference the local collector.
+  - [x] `python3 -m pytest tests/test_scripts_and_docs.py::test_local_playtest_evidence_collector_scaffolds_source_run_session_notes -q` passes.
+  - [x] `bash -n scripts/collect_local_playtest_evidence.sh` passes.
+  - [x] `bash scripts/check_local_playability.sh` reports `RIFT_ROAD_LOCAL_PLAYABILITY ok scope=source-run machine=local`.
+  - [x] `python3 scripts/check_agent_docs.py` passes.
+  - [x] `git diff --check` passes.
+  - [x] `bash scripts/check.sh` passes with 139 tests and `RIFT_ROAD_RUNTIME_OK smoke`.
+- Progress:
+  - 2026-05-13: Added local playtest note scaffolding so the next real source-run session can be recorded without weakening public evidence gates.
+- Dependencies: [RR-PROD-104]
+- Completed: 2026-05-13
 
 ### [RR-PROD-104] Add source-run local playability gate
 - Outcome: `scripts/check_local_playability.sh` now gives the clarified local target its own source-run gate, covering Godot version, source launch, Stage 1 title-to-clear flow, restart/return-to-title, keyboard fallback, text-style keyboard confirm, focus/resume, and Stage 1 performance without requiring signing, notarization, or second-machine/source-install proof.
