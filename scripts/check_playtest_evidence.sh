@@ -99,6 +99,8 @@ for cells in session_rows:
     if not build or build.upper() == "TBD" or "package_sha256=" not in build:
         blocker_rows.append(f"{cells[0]} {tester}: Build missing package_sha256")
     else:
+        if not re.search(r"(?:^|\s)package_sha256=[0-9a-fA-F]{64}(?:\s|$)", build):
+            blocker_rows.append(f"{cells[0]} {tester}: Build has invalid package_sha256")
         source_issue = signed_package_source_issue(build)
         if source_issue:
             blocker_rows.append(f"{cells[0]} {tester}: {source_issue}")
