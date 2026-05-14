@@ -15,6 +15,16 @@ func _run() -> void:
 	var ok := _run_smoke()
 	if ok and mode == "stage1_flow":
 		ok = await _run_stage1_flow()
+	if ok and mode == "stage1_kian_default_lead":
+		ok = await _run_stage1_kian_default_lead()
+	if ok and mode == "reference_grunt_contract":
+		ok = await _run_reference_grunt_contract()
+	if ok and mode == "kian_combat_responsiveness":
+		ok = await _run_kian_combat_responsiveness()
+	if ok and mode == "kian_attack_timing_windows":
+		ok = await _run_kian_attack_timing_windows()
+	if ok and mode == "grunt_attack_hitbox_contract":
+		ok = await _run_grunt_attack_hitbox_contract()
 	if ok and mode == "stage1_autoplay":
 		ok = await _run_stage1_autoplay()
 	if ok and mode == "stage1_road_collapse":
@@ -106,10 +116,10 @@ func _run_stage1_flow() -> bool:
 	if app.mode != "character_select":
 		printerr("Expected character select mode, got %s" % app.mode)
 		return false
-	if not app.controls_label.text.contains("Raya") or not app.controls_label.text.contains("Nika"):
+	if not app.controls_label.text.contains("Kian") or not app.controls_label.text.contains("Tor"):
 		printerr("Hero select controls did not expose hero choices")
 		return false
-	app.selected_hero = "nika_sol"
+	app.selected_hero = "kian_vale"
 	app._start_campaign()
 	await process_frame
 	await process_frame
@@ -120,7 +130,7 @@ func _run_stage1_flow() -> bool:
 	if stage.stage_id != "sunset_overpass":
 		printerr("Expected Sunset Overpass, got %s" % stage.stage_id)
 		return false
-	if stage.player == null or stage.player.hero_id != "nika_sol":
+	if stage.player == null or stage.player.hero_id != "kian_vale":
 		printerr("Selected hero was not passed into Stage 1")
 		return false
 	if stage.hud == null or stage.combat_fx == null:
@@ -168,13 +178,340 @@ func _run_stage1_flow() -> bool:
 	await process_frame
 	return true
 
+func _run_stage1_kian_default_lead() -> bool:
+	var packed: PackedScene = load("res://scenes/app_root.tscn")
+	if packed == null:
+		printerr("Could not load app root scene")
+		return false
+	var app = packed.instantiate()
+	root.add_child(app)
+	await process_frame
+	await process_frame
+	var roster_ok: bool = app.hero_roster.size() >= 4 and app.hero_roster[0].get("id", "") == "kian_vale" and app.hero_roster[1].get("id", "") == "tor_bram"
+	var default_ok: bool = app.selected_hero == "kian_vale" and app.selected_hero_index == 0
+	app._show_character_select()
+	await process_frame
+	app._show_hero_capability_preview()
+	await process_frame
+	app._confirm_hero_and_start()
+	await process_frame
+	await process_frame
+	var stage_ok: bool = app.mode == "stage" and app.stage != null and app.stage.player != null and app.stage.hero_id == "kian_vale" and app.stage.player.hero_id == "kian_vale"
+	print("RIFT_ROAD_KIAN_DEFAULT_LEAD roster=%s default=%s stage=%s" % [
+		str(roster_ok).to_lower(),
+		str(default_ok).to_lower(),
+		str(stage_ok).to_lower()
+	])
+	var ok := roster_ok and default_ok and stage_ok
+	if not ok:
+		printerr("Kian was not the default Stage 1 lead")
+	app.queue_free()
+	await process_frame
+	return ok
+
+func _run_reference_grunt_contract() -> bool:
+	var packed: PackedScene = load("res://scenes/stages/sunset_overpass.tscn")
+	if packed == null:
+		printerr("Could not load Stage 1 scene")
+		return false
+	var stage = packed.instantiate()
+	stage.hero_id = "kian_vale"
+	stage.stage_id = "sunset_overpass"
+	root.add_child(stage)
+	await process_frame
+	await process_frame
+	if stage.player == null or stage.enemies.size() != 1:
+		printerr("Reference grunt contract expected one opening enemy")
+		stage.queue_free()
+		return false
+	var grunt = stage.enemies[0]
+	grunt.cinematic_entry_active = false
+	grunt.position = stage.player.position + Vector2(190, 0)
+	grunt.attack_cooldown = 0.0
+	var approach_seen := false
+	var spacing_seen := false
+	var telegraph_seen := false
+	var attack_seen := false
+	var flinch_seen := false
+	var recover_seen := false
+	var defeated_seen := false
+	stage.player.max_health = 999
+	stage.player.health = 999
+	for _i in range(150):
+		await physics_frame
+		await process_frame
+		if grunt == null or not is_instance_valid(grunt):
+			break
+		approach_seen = approach_seen or grunt.combat_state == "approach"
+		var direct_distance: float = grunt.position.distance_to(stage.player.position)
+		spacing_seen = spacing_seen or grunt.combat_state == "spacing" or (grunt.velocity.length() < 1.0 and direct_distance <= grunt.attack_range + 18.0)
+		telegraph_seen = telegraph_seen or grunt.combat_state == "telegraph"
+		attack_seen = attack_seen or grunt.combat_state == "attack" or grunt.attack_has_landed
+		if telegraph_seen and attack_seen:
+			break
+	if grunt == null or not is_instance_valid(grunt):
+		printerr("Reference grunt disappeared before damage response check")
+		stage.queue_free()
+		return false
+	grunt.apply_damage(12, stage.player.position.x)
+	await physics_frame
+	await process_frame
+	flinch_seen = grunt.combat_state == "flinch" or grunt.hurt_flash > 0.0
+	for _i in range(25):
+		await physics_frame
+		await process_frame
+		if grunt == null or not is_instance_valid(grunt):
+			break
+		recover_seen = recover_seen or grunt.combat_state == "recover" or grunt.combat_state == "spacing" or grunt.combat_state == "approach"
+		if recover_seen:
+			break
+	if grunt != null and is_instance_valid(grunt):
+		grunt.apply_damage(999, stage.player.position.x)
+		await process_frame
+		defeated_seen = grunt.combat_state == "defeated" or grunt.health <= 0
+	print("RIFT_ROAD_REFERENCE_GRUNT approach=%s spacing=%s telegraph=%s attack=%s flinch=%s recover=%s defeated=%s" % [
+		str(approach_seen).to_lower(),
+		str(spacing_seen).to_lower(),
+		str(telegraph_seen).to_lower(),
+		str(attack_seen).to_lower(),
+		str(flinch_seen).to_lower(),
+		str(recover_seen).to_lower(),
+		str(defeated_seen).to_lower()
+	])
+	var ok := approach_seen and spacing_seen and telegraph_seen and attack_seen and flinch_seen and recover_seen and defeated_seen
+	if not ok:
+		printerr("Reference grunt did not satisfy combat behavior contract")
+	stage.queue_free()
+	await process_frame
+	return ok
+
+func _run_kian_combat_responsiveness() -> bool:
+	var combo_reset := await _check_kian_combo_reset()
+	var special_area := await _check_kian_special_area_hits_enemies()
+	var dodge_avoids := await _check_kian_dodge_avoids_grunt_attack()
+	print("RIFT_ROAD_KIAN_COMBAT_RESPONSIVENESS combo_reset=%s special_area=%s dodge_avoids=%s" % [
+		str(combo_reset).to_lower(),
+		str(special_area).to_lower(),
+		str(dodge_avoids).to_lower()
+	])
+	if not combo_reset:
+		printerr("Kian combo chain did not reset after the combo window")
+	if not special_area:
+		printerr("Kian special did not damage an enemy inside the special area")
+	if not dodge_avoids:
+		printerr("Kian dodge did not avoid a readable grunt attack")
+	return combo_reset and special_area and dodge_avoids
+
+func _check_kian_combo_reset() -> bool:
+	var packed: PackedScene = load("res://scenes/stages/sunset_overpass.tscn")
+	if packed == null:
+		printerr("Could not load Stage 1 scene")
+		return false
+	var stage = packed.instantiate()
+	stage.hero_id = "kian_vale"
+	stage.stage_id = "sunset_overpass"
+	root.add_child(stage)
+	await process_frame
+	await process_frame
+	var player = stage.player
+	if player == null:
+		stage.queue_free()
+		await process_frame
+		return false
+	player.attack_step = 2
+	player.combo_timer = 0.01
+	player.attack_timer = 0.0
+	await physics_frame
+	await process_frame
+	var reset_seen: bool = player.attack_step == 0
+	if player.has_method("_start_light_attack"):
+		player._start_light_attack()
+	var restarts_at_one: bool = player.attack_step == 1
+	stage.queue_free()
+	await process_frame
+	return reset_seen and restarts_at_one
+
+func _check_kian_special_area_hits_enemies() -> bool:
+	var packed: PackedScene = load("res://scenes/stages/sunset_overpass.tscn")
+	if packed == null:
+		printerr("Could not load Stage 1 scene")
+		return false
+	var stage = packed.instantiate()
+	stage.hero_id = "kian_vale"
+	stage.stage_id = "sunset_overpass"
+	root.add_child(stage)
+	await process_frame
+	await process_frame
+	if stage.player == null or stage.enemies.is_empty():
+		stage.queue_free()
+		await process_frame
+		return false
+	var player = stage.player
+	var enemy = stage.enemies[0]
+	enemy.cinematic_entry_active = false
+	enemy.position = player.position + Vector2(0, -92)
+	enemy.health = enemy.max_health
+	player.attack_step = 1
+	player.facing = 1
+	player.special_meter = 100
+	player.special_timer = 0.0
+	player.attack_timer = 0.0
+	if player.has_method("_start_special_attack"):
+		player._start_special_attack()
+	for _i in range(10):
+		await physics_frame
+		await process_frame
+	stage._handle_combat()
+	await process_frame
+	var hit_seen: bool = enemy.health < enemy.max_health
+	stage.queue_free()
+	await process_frame
+	return hit_seen
+
+func _check_kian_dodge_avoids_grunt_attack() -> bool:
+	var packed: PackedScene = load("res://scenes/stages/sunset_overpass.tscn")
+	if packed == null:
+		printerr("Could not load Stage 1 scene")
+		return false
+	var stage = packed.instantiate()
+	stage.hero_id = "kian_vale"
+	stage.stage_id = "sunset_overpass"
+	root.add_child(stage)
+	await process_frame
+	await process_frame
+	if stage.player == null or stage.enemies.is_empty():
+		stage.queue_free()
+		await process_frame
+		return false
+	var player = stage.player
+	var enemy = stage.enemies[0]
+	player.max_health = 200
+	player.health = 200
+	player.position = Vector2(420, 520)
+	player.facing = 1
+	enemy.cinematic_entry_active = false
+	enemy.position = player.position + Vector2(54, 0)
+	enemy.facing = -1
+	enemy.attack_cooldown = 0.0
+	enemy.telegraph_timer = 0.035
+	enemy.attack_has_landed = false
+	enemy.combat_state = "telegraph"
+	if player.has_method("begin_dodge"):
+		player.begin_dodge()
+	else:
+		player.dash_timer = 0.13
+	for _i in range(8):
+		await physics_frame
+		await process_frame
+	var avoided: bool = player.health == 200
+	stage.queue_free()
+	await process_frame
+	return avoided
+
+func _run_kian_attack_timing_windows() -> bool:
+	var packed: PackedScene = load("res://scenes/stages/sunset_overpass.tscn")
+	if packed == null:
+		printerr("Could not load Stage 1 scene")
+		return false
+	var stage = packed.instantiate()
+	stage.hero_id = "kian_vale"
+	stage.stage_id = "sunset_overpass"
+	root.add_child(stage)
+	await process_frame
+	await process_frame
+	var player = stage.player
+	if player == null:
+		stage.queue_free()
+		await process_frame
+		return false
+	player.attack_step = 0
+	player.combo_timer = 0.0
+	player.attack_timer = 0.0
+	if player.has_method("_start_light_attack"):
+		player._start_light_attack()
+	var timing: Dictionary = player.current_attack_timing if "current_attack_timing" in player else {}
+	var has_data := timing.has("startup") and timing.has("active") and timing.has("recovery") and timing.has("hitbox")
+	var startup_seen := false
+	var active_seen := false
+	var recovery_seen := false
+	var hitbox_seen := false
+	if has_data:
+		startup_seen = not player.is_attack_active()
+		var startup_frames := maxi(1, int(ceil(float(timing["startup"]) * 60.0)) + 1)
+		for _i in range(startup_frames):
+			await physics_frame
+			await process_frame
+		active_seen = player.is_attack_active()
+		var hitbox: Dictionary = timing["hitbox"]
+		var rect: Rect2 = player.attack_rect()
+		hitbox_seen = absf(rect.size.x - float(hitbox["width"])) <= 0.1 and absf(rect.size.y - float(hitbox["height"])) <= 0.1
+		var active_frames := maxi(1, int(ceil(float(timing["active"]) * 60.0)) + 2)
+		for _i in range(active_frames):
+			await physics_frame
+			await process_frame
+		recovery_seen = player.attack_timer > 0.0 and not player.is_attack_active()
+	print("RIFT_ROAD_KIAN_ATTACK_TIMING data=%s startup=%s active=%s recovery=%s hitbox=%s" % [
+		str(has_data).to_lower(),
+		str(startup_seen).to_lower(),
+		str(active_seen).to_lower(),
+		str(recovery_seen).to_lower(),
+		str(hitbox_seen).to_lower()
+	])
+	var ok := has_data and startup_seen and active_seen and recovery_seen and hitbox_seen
+	if not ok:
+		printerr("Kian light attack timing did not use data-driven startup/active/recovery windows")
+	stage.queue_free()
+	await process_frame
+	return ok
+
+func _run_grunt_attack_hitbox_contract() -> bool:
+	var packed: PackedScene = load("res://scenes/stages/sunset_overpass.tscn")
+	if packed == null:
+		printerr("Could not load Stage 1 scene")
+		return false
+	var stage = packed.instantiate()
+	stage.hero_id = "kian_vale"
+	stage.stage_id = "sunset_overpass"
+	root.add_child(stage)
+	await process_frame
+	await process_frame
+	if stage.player == null or stage.enemies.is_empty():
+		stage.queue_free()
+		await process_frame
+		return false
+	var player = stage.player
+	var enemy = stage.enemies[0]
+	player.max_health = 200
+	player.health = 200
+	player.position = Vector2(420, 500)
+	enemy.cinematic_entry_active = false
+	enemy.position = player.position + Vector2(48, 118)
+	enemy.facing = -1
+	stage._on_enemy_attack(enemy, 17)
+	await process_frame
+	var whiff_seen: bool = player.health == 200
+	enemy.position = player.position + Vector2(48, 0)
+	stage._on_enemy_attack(enemy, 17)
+	await process_frame
+	var hit_seen: bool = player.health == 183
+	print("RIFT_ROAD_GRUNT_ATTACK_HITBOX whiff=%s hit=%s" % [
+		str(whiff_seen).to_lower(),
+		str(hit_seen).to_lower()
+	])
+	var ok := whiff_seen and hit_seen
+	if not ok:
+		printerr("Grunt attack did not require enemy hitbox and player hurtbox overlap")
+	stage.queue_free()
+	await process_frame
+	return ok
+
 func _run_stage1_autoplay() -> bool:
 	var packed: PackedScene = load("res://scenes/stages/sunset_overpass.tscn")
 	if packed == null:
 		printerr("Could not load Stage 1 scene")
 		return false
 	var stage = packed.instantiate()
-	stage.hero_id = "raya_flint"
+	stage.hero_id = "kian_vale"
 	stage.stage_id = "sunset_overpass"
 	root.add_child(stage)
 	await process_frame
@@ -214,7 +551,7 @@ func _run_stage1_road_collapse() -> bool:
 		printerr("Could not load Stage 1 scene")
 		return false
 	var stage = packed.instantiate()
-	stage.hero_id = "raya_flint"
+	stage.hero_id = "kian_vale"
 	stage.stage_id = "sunset_overpass"
 	root.add_child(stage)
 	await process_frame
@@ -257,7 +594,7 @@ func _run_stage1_brask_story() -> bool:
 		printerr("Could not load Stage 1 scene")
 		return false
 	var stage = packed.instantiate()
-	stage.hero_id = "raya_flint"
+	stage.hero_id = "kian_vale"
 	stage.stage_id = "sunset_overpass"
 	root.add_child(stage)
 	await process_frame
@@ -298,7 +635,7 @@ func _run_stage1_opening_story() -> bool:
 		printerr("Could not load Stage 1 scene")
 		return false
 	var stage = packed.instantiate()
-	stage.hero_id = "raya_flint"
+	stage.hero_id = "kian_vale"
 	stage.stage_id = "sunset_overpass"
 	root.add_child(stage)
 	await process_frame
@@ -332,7 +669,7 @@ func _run_stage1_pickup_clarity() -> bool:
 		printerr("Could not load Stage 1 scene")
 		return false
 	var stage = packed.instantiate()
-	stage.hero_id = "raya_flint"
+	stage.hero_id = "kian_vale"
 	stage.stage_id = "sunset_overpass"
 	root.add_child(stage)
 	await process_frame
@@ -382,7 +719,7 @@ func _run_hero_select_preview() -> bool:
 		printerr("Character select did not expose four heroes")
 		app.queue_free()
 		return false
-	app.selected_hero_index = 3
+	app.selected_hero_index = 1
 	app._show_hero_capability_preview()
 	await process_frame
 	if app.mode != "hero_preview":
@@ -405,15 +742,15 @@ func _run_hero_select_preview() -> bool:
 		printerr("Planned hero preview started Stage 1 instead of staying preview-only")
 		app.queue_free()
 		return false
-	app.selected_hero_index = 2
+	app.selected_hero_index = 0
 	app._show_hero_capability_preview()
 	await process_frame
 	app._confirm_hero_and_start()
 	await process_frame
 	await process_frame
-	var playable_started: bool = app.mode == "stage" and app.stage != null and app.stage.hero_id == "nika_sol"
+	var playable_started: bool = app.mode == "stage" and app.stage != null and app.stage.hero_id == "kian_vale"
 	if not playable_started:
-		printerr("Playable Nika preview did not start Stage 1")
+		printerr("Playable Kian preview did not start Stage 1")
 		app.queue_free()
 		return false
 	print("RIFT_ROAD_PLANNED_HERO_LOCK blocked=%s playable_start=%s" % [str(planned_blocked).to_lower(), str(playable_started).to_lower()])
@@ -430,7 +767,7 @@ func _run_stage1_restart_flow() -> bool:
 	root.add_child(app)
 	await process_frame
 	await process_frame
-	app.selected_hero = "raya_flint"
+	app.selected_hero = "kian_vale"
 	app._start_campaign()
 	await process_frame
 	await process_frame
@@ -512,10 +849,10 @@ func _run_controller_title_flow() -> bool:
 		printerr("Controller cancel did not return to character select")
 		app.queue_free()
 		return false
-	_press_controller_button(app, JOY_BUTTON_RIGHT_SHOULDER)
+	_press_controller_button(app, JOY_BUTTON_LEFT_SHOULDER)
 	await process_frame
-	if app.selected_hero_index != 2:
-		printerr("Controller did not cycle from planned Kian preview to playable Nika")
+	if app.selected_hero_index != 0:
+		printerr("Controller did not cycle from planned Tor preview to playable Kian")
 		app.queue_free()
 		return false
 	_press_controller_button(app, JOY_BUTTON_A)
@@ -523,7 +860,7 @@ func _run_controller_title_flow() -> bool:
 	_press_controller_button(app, JOY_BUTTON_A)
 	await process_frame
 	await process_frame
-	if app.mode != "stage" or app.stage == null or app.stage.hero_id != "nika_sol":
+	if app.mode != "stage" or app.stage == null or app.stage.hero_id != "kian_vale":
 		printerr("Controller confirm did not start Stage 1")
 		app.queue_free()
 		return false
@@ -587,9 +924,9 @@ func _run_keyboard_fallback_flow() -> bool:
 	_press_keyboard_menu_key(app, KEY_ENTER)
 	await process_frame
 	var hero_select_ok: bool = app.mode == "character_select"
-	_press_keyboard_menu_key(app, KEY_3)
+	_press_keyboard_menu_key(app, KEY_2)
 	await process_frame
-	hero_select_ok = hero_select_ok and app.selected_hero_index == 2 and app.mode == "hero_preview"
+	hero_select_ok = hero_select_ok and app.selected_hero_index == 1 and app.mode == "hero_preview"
 	if not hero_select_ok:
 		printerr("Keyboard roster key did not open the selected hero preview")
 		app.queue_free()
@@ -598,6 +935,8 @@ func _run_keyboard_fallback_flow() -> bool:
 	_press_keyboard_menu_key(app, KEY_ESCAPE)
 	await process_frame
 	var cancel_ok: bool = app.mode == "character_select"
+	_press_keyboard_menu_key(app, KEY_1)
+	await process_frame
 	_press_keyboard_menu_key(app, KEY_ENTER)
 	await process_frame
 	_press_keyboard_menu_key(app, KEY_ENTER)
@@ -700,7 +1039,7 @@ func _run_stage1_focus_resume() -> bool:
 	root.add_child(app)
 	await process_frame
 	await process_frame
-	app.selected_hero = "raya_flint"
+	app.selected_hero = "kian_vale"
 	app._start_campaign()
 	await process_frame
 	await process_frame
@@ -744,7 +1083,7 @@ func _run_exported_smoke_focus_guard() -> bool:
 	root.add_child(app)
 	await process_frame
 	await process_frame
-	app.selected_hero = "raya_flint"
+	app.selected_hero = "kian_vale"
 	app._start_campaign()
 	await process_frame
 	await process_frame
@@ -808,7 +1147,7 @@ func _run_stage1_performance_sample() -> bool:
 		printerr("Could not load Stage 1 scene")
 		return false
 	var stage = packed.instantiate()
-	stage.hero_id = "raya_flint"
+	stage.hero_id = "kian_vale"
 	stage.stage_id = "sunset_overpass"
 	root.add_child(stage)
 	await process_frame

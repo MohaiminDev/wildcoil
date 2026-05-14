@@ -165,7 +165,7 @@ The Sundrifter should feel like a fifth team member:
 
 ## 9. Main Heroes
 
-The full story has four heroes. The first playable slice uses Raya and Nika first.
+The full story has four heroes. RR-PROD-109 pivots the current local source-run slice to Kian first, with roster order Kian, Tor, Raya, Nika. Raya and Nika remain core story heroes, but Kian is the Stage 1 local-demo lead while the reference combat loop is being proven.
 
 ### Raya Flint
 
@@ -211,7 +211,7 @@ Raya begins by believing machines are safer than people because machines can be 
 
 #### Stage 1 Role
 
-Raya is the first to identify that the roadblock is not normal. She notices the cages, the drill marks, and the luma instability under the asphalt.
+Raya remains the team's repair expert, but the current local demo no longer presents her as the Stage 1 lead. Kian calls the opening fight while Raya's route-repair perspective stays part of the team premise.
 
 ### Nika Sol
 
@@ -258,41 +258,41 @@ Nika wants to break through the roadblock immediately. She gives the stage its k
 
 ### Kian Vale
 
-Role: wildlife biologist, field medic, and creature-behavior expert.
+Role: male road adventurer and reinforced-wrench brawler.
 
-Kian studies the Afterglow Belt's creatures and believes most attacks are communication failures: fear, pain, territory, manipulation, or hunger. He is not naive; he knows some creatures must be fought. But he always asks why they are attacking.
+Kian knows road machinery, field repairs, and the weight of a bad route decision. In the current Stage 1 local demo, he is the first-slot lead who steps out with a reinforced road wrench to break Iron Veil's loading line before the cages leave the overpass.
 
 #### Personality
 
-- curious
-- calm
-- witty
-- compassionate
-- observant
-- stubborn when creatures are mistreated
+- practical
+- steady
+- dryly witty
+- protective
+- route-minded
+- stubborn when Iron Veil treats roads and creatures as property
 
 #### Visual Identity
 
-- lightweight expedition armor
-- seed capsules
-- medical satchel
-- translucent green goggles
-- moss-green, white, deep blue
-- staff/scanner silhouette
+- rugged expedition jacket
+- reinforced gloves
+- heavy work boots
+- road-tool harness
+- road-green, brass, deep blue
+- reinforced wrench silhouette
 
 #### Combat Identity
 
-Technical crowd-control and support.
+Heavy road-tool brawler.
 
-- lower raw damage
-- faster recovery
-- control tools
-- creature calming later
-- nonlethal-feeling effects
+- high-impact wrench combo
+- practical shoulder/tool check
+- small road-step hop for positioning
+- luma-charged anchor slam
+- visible recovery after committed swings
 
 #### Emotional Arc
 
-Kian begins by trying to save every creature and every person. The story forces him to accept hard limits without losing compassion.
+Kian begins by believing every route can be repaired if someone takes the first hit and holds the line. The story forces him to learn when repair needs trust, not just a stronger tool.
 
 ### Tor Bram
 

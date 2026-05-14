@@ -1,4 +1,5 @@
 import json
+from PIL import Image
 
 
 def load_json(project_root, relative_path):
@@ -56,6 +57,14 @@ def test_stage_one_visual_asset_manifest_exists(project_root):
     assert {"far_sky_ruins", "mid_overpass", "road_playfield", "foreground_atmosphere"}.issubset(
         layers
     )
+    assert stage1["actors"]["kian_vale"]["idle"].endswith("kian_vale_idle.png")
+    assert stage1["actors"]["kian_vale"]["walk"].endswith("kian_vale_walk.png")
+    assert stage1["actors"]["kian_vale"]["attack"].endswith("kian_vale_attack.png")
+    assert stage1["actors"]["kian_vale"]["hurt"].endswith("kian_vale_hurt.png")
+    assert stage1["actors"]["tor_bram"]["idle"].endswith("tor_bram_idle.png")
+    assert stage1["actors"]["tor_bram"]["walk"].endswith("tor_bram_walk.png")
+    assert stage1["actors"]["tor_bram"]["attack"].endswith("tor_bram_attack.png")
+    assert stage1["actors"]["tor_bram"]["hurt"].endswith("tor_bram_hurt.png")
     assert stage1["actors"]["raya_flint"]["idle"].endswith("raya_flint_idle.png")
     assert stage1["actors"]["raya_flint"]["walk"].endswith("raya_flint_walk.png")
     assert stage1["actors"]["nika_sol"]["idle"].endswith("nika_sol_idle.png")
@@ -95,3 +104,50 @@ def test_stage_one_runtime_visual_assets_exist(project_root):
         full_path = project_root / relative_path
         assert full_path.exists(), f"Missing runtime visual asset: {asset_path}"
         assert full_path.stat().st_size > 1024, f"Runtime visual asset is unexpectedly tiny: {asset_path}"
+
+
+def test_male_hero_concepts_are_runtime_backed(project_root):
+    characters = load_json(project_root, "data/characters.json")
+    heroes = {hero["id"]: hero for hero in characters["heroes"]}
+    manifest = load_json(project_root, "data/visual_assets.json")
+    actor_assets = manifest["stage1"]["actors"]
+    app_root = (project_root / "scripts" / "app_root.gd").read_text()
+
+    for hero_id, concept_name in {
+        "kian_vale": "kian-vale-male-concept.png",
+        "tor_bram": "tor-bram-male-concept.png",
+    }.items():
+        visual_identity = heroes[hero_id]["visual_identity"]
+        assert visual_identity["concept_art"].endswith(concept_name)
+        assert hero_id in actor_assets
+        assert {"idle", "walk", "attack", "hurt"}.issubset(actor_assets[hero_id])
+        assert visual_identity["runtime_idle"] == actor_assets[hero_id]["idle"]
+
+    assert "res://assets/stage1/actors/tor_bram_idle.png" in app_root
+    assert "ImageTexture.create_from_image" in app_root
+
+
+def test_male_runtime_standees_are_gameplay_readable(project_root):
+    for asset_name in ["kian_vale_idle.png", "tor_bram_idle.png"]:
+        asset_path = project_root / "assets" / "stage1" / "actors" / asset_name
+        image = Image.open(asset_path).convert("RGBA")
+        alpha_bbox = image.getbbox()
+        alpha = image.getchannel("A")
+        nontransparent_pixels = sum(1 for value in alpha.getdata() if value)
+
+        assert image.size == (192, 224)
+        assert image.getpixel((0, 0))[3] == 0
+        assert image.getpixel((191, 0))[3] == 0
+        assert alpha_bbox is not None
+        bbox_area = (alpha_bbox[2] - alpha_bbox[0]) * (alpha_bbox[3] - alpha_bbox[1])
+        assert alpha_bbox[2] - alpha_bbox[0] >= 120, f"{asset_name} has too much horizontal padding"
+        assert alpha_bbox[3] - alpha_bbox[1] >= 216, f"{asset_name} has too much vertical padding"
+        assert nontransparent_pixels / bbox_area < 0.75, f"{asset_name} still reads like a rectangular card"
+
+
+def test_visual_asset_loader_accepts_fresh_source_pngs(project_root):
+    loader = (project_root / "scripts" / "visual_asset_loader.gd").read_text()
+
+    assert "_load_texture" in loader
+    assert "ImageTexture.create_from_image" in loader
+    assert "FileAccess.file_exists(path)" in loader

@@ -2,7 +2,7 @@
 
 Rift Road: Beasts of the Afterglow is an original macOS-first 2D side-scrolling arcade beat-'em-up about four road adventurers crossing a glowing prehistoric future to stop a mining empire from draining the living crystal heart of the world.
 
-The project is now story-first around the Rift Road concept while keeping the repository name and existing planning history. The current goal is to build a Godot 4.6.x stable macOS prototype for Stage 1: Sunset Overpass, with two playable heroes, three enemy types, Brask Noll as the first boss, original placeholder assets, and a validation-first task flow.
+The project is now story-first around the Rift Road concept while keeping the repository name and existing planning history. The current goal is to build a Godot 4.6.x stable macOS prototype for Stage 1: Sunset Overpass. RR-PROD-109 narrows the source-run playable focus to Kian Vale and one strong Iron Veil grunt combat loop before broad roster or enemy-variety expansion.
 
 ## Current Working Docs
 

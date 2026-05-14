@@ -24,7 +24,7 @@ const FOCUS_RESUME_CAPTURE_DIR_PREFIX := "--rift-road-focus-resume-capture-dir="
 const FOCUS_RESUME_CAPTURE_NAME := "stage1-exported-app-focus-resume.png"
 const HERO_CARD_SIZE := Vector2(284, 198)
 const HERO_CARD_SLANT := 22.0
-const PLAYABLE_HERO_IDS := ["raya_flint", "nika_sol"]
+const PLAYABLE_HERO_IDS := ["kian_vale"]
 const RENDER_PERF_SAMPLE_ARG := "--rift-road-render-perf-sample"
 const RENDER_PERF_OUTPUT_PREFIX := "--rift-road-render-perf-output="
 const RENDER_PERF_WINDOW_SIZE_PREFIX := "--rift-road-render-perf-window-size="
@@ -34,14 +34,14 @@ const RENDER_PERF_SAMPLE_FRAMES := 240
 const RENDER_PERF_FRAME_BUDGET_MS := 33.3
 const RENDER_PERF_MAX_FRAME_MS := 120.0
 const DEFAULT_HERO_ROSTER := [
+	{"id": "kian_vale", "name": "Kian Vale", "role": "Reinforced wrench brawler", "capability_summary": "Heavy road-tool pressure and sturdy lane control.", "specialty": "Wrench pressure", "weakness": "Committed recovery", "stats": {"power": 4, "speed": 2, "control": 4, "defense": 4}},
+	{"id": "tor_bram", "name": "Tor Bram", "role": "Heavy defender", "capability_summary": "Absorbs hits and breaks enemy lines.", "specialty": "Power, armor, and throws", "weakness": "Slowest hero", "stats": {"power": 5, "speed": 1, "control": 3, "defense": 5}},
 	{"id": "raya_flint", "name": "Raya Flint", "role": "Balanced mechanic", "capability_summary": "Reliable combos and field repair.", "specialty": "All-round pressure", "weakness": "No extreme matchup advantage", "stats": {"power": 3, "speed": 3, "control": 3, "defense": 3}},
-	{"id": "kian_vale", "name": "Kian Vale", "role": "Field medic", "capability_summary": "Controls crowds and protects creatures.", "specialty": "Crowd control and recovery", "weakness": "Lower raw damage", "stats": {"power": 2, "speed": 3, "control": 5, "defense": 3}},
-	{"id": "nika_sol", "name": "Nika Sol", "role": "Agile scout", "capability_summary": "Turns the arena into a race line.", "specialty": "Speed and aerial burst", "weakness": "Low health", "stats": {"power": 2, "speed": 5, "control": 2, "defense": 1}},
-	{"id": "tor_bram", "name": "Tor Bram", "role": "Heavy defender", "capability_summary": "Absorbs hits and breaks enemy lines.", "specialty": "Power, armor, and throws", "weakness": "Slowest hero", "stats": {"power": 5, "speed": 1, "control": 3, "defense": 5}}
+	{"id": "nika_sol", "name": "Nika Sol", "role": "Agile scout", "capability_summary": "Turns the arena into a race line.", "specialty": "Speed and aerial burst", "weakness": "Low health", "stats": {"power": 2, "speed": 5, "control": 2, "defense": 1}}
 ]
 
 var mode := "title"
-var selected_hero := "raya_flint"
+var selected_hero := "kian_vale"
 var selected_hero_index := 0
 var hero_roster: Array = []
 var stage_order := [
@@ -316,12 +316,14 @@ func _run_exported_keyboard_fallback_smoke(output_path: String, capture_dir: Str
 	_press_keyboard_smoke_menu_key(KEY_ENTER)
 	await get_tree().process_frame
 	var hero_select_ok: bool = mode == "character_select"
-	_press_keyboard_smoke_menu_key(KEY_3)
+	_press_keyboard_smoke_menu_key(KEY_2)
 	await get_tree().process_frame
-	hero_select_ok = hero_select_ok and selected_hero_index == 2 and mode == "hero_preview"
+	hero_select_ok = hero_select_ok and selected_hero_index == 1 and mode == "hero_preview"
 	_press_keyboard_smoke_menu_key(KEY_ESCAPE)
 	await get_tree().process_frame
 	var cancel_ok: bool = mode == "character_select"
+	_press_keyboard_smoke_menu_key(KEY_1)
+	await get_tree().process_frame
 	_press_keyboard_smoke_menu_key(KEY_ENTER)
 	await get_tree().process_frame
 	_press_keyboard_smoke_menu_key(KEY_ENTER)
@@ -430,7 +432,7 @@ func _run_exported_focus_resume_smoke(output_path: String, capture_dir: String) 
 		capture_path = capture_dir.path_join(FOCUS_RESUME_CAPTURE_NAME)
 	await get_tree().process_frame
 	await RenderingServer.frame_post_draw
-	selected_hero = "raya_flint"
+	selected_hero = "kian_vale"
 	_start_campaign()
 	await get_tree().process_frame
 	await get_tree().process_frame
@@ -719,7 +721,7 @@ func _finish_render_perf_sample() -> void:
 	get_tree().quit(0)
 
 func _start_stage1_demo() -> void:
-	selected_hero = "raya_flint"
+	selected_hero = "kian_vale"
 	_start_campaign()
 	await get_tree().process_frame
 	await get_tree().process_frame
@@ -918,7 +920,7 @@ func _show_character_select() -> void:
 	label.size = Vector2(920, 150)
 	label.add_theme_font_size_override("font_size", 32)
 	label.text = ""
-	_set_controls_text("Playable now: 1/R Raya   3/N Nika   Preview: 2/K Kian   4/T Tor\nEnter/A: capabilities   Gamepad: D-pad/LB/RB change hero   B back")
+	_set_controls_text("Playable now: 1/K Kian   Preview: 2/T Tor   3/R Raya   4/N Nika\nEnter/A: capabilities   Gamepad: D-pad/LB/RB change hero   B back")
 	_set_hero_cards_visible(true)
 	_refresh_hero_card_selection()
 
@@ -928,7 +930,7 @@ func _show_hero_capability_preview() -> void:
 	_set_title_logo_visible(false)
 	_set_hero_select_header_visible(false)
 	_set_result_overlay_visible(false)
-	selected_hero = _selected_hero_profile().get("id", "raya_flint")
+	selected_hero = _selected_hero_profile().get("id", "kian_vale")
 	var hero := _selected_hero_profile()
 	var hero_id := str(hero.get("id", selected_hero))
 	var playable := _is_playable_hero(hero_id)
@@ -938,8 +940,8 @@ func _show_hero_capability_preview() -> void:
 	label.add_theme_font_size_override("font_size", 24)
 	label.text = "%sCAPABILITIES\n%s\n%s\n\n%s\nSpecialty: %s\nWeakness: %s\n\nPower %s  Speed %s  Control %s  Defense %s" % [
 		"" if playable else "PLANNED HERO\n",
-		hero.get("name", "Raya Flint"),
-		hero.get("role", "Balanced mechanic"),
+		hero.get("name", "Kian Vale"),
+		hero.get("role", "Reinforced wrench brawler"),
 		hero.get("capability_summary", "Ready for the road."),
 		hero.get("specialty", "Balanced pressure"),
 		hero.get("weakness", "None listed"),
@@ -951,14 +953,14 @@ func _show_hero_capability_preview() -> void:
 	if playable:
 		_set_controls_text("Enter/J/A Start Stage 1   1-4 or D-pad Change Hero   Esc/B Back")
 	else:
-		_set_controls_text("Preview only: choose Raya or Nika to start Stage 1   1/R Raya   3/N Nika   Esc/B Back")
+		_set_controls_text("Preview only: choose Kian to start Stage 1   1/K Kian   Esc/B Back")
 	_set_hero_cards_visible(true)
 	_refresh_hero_card_selection()
 
 func _confirm_hero_and_start() -> void:
-	selected_hero = _selected_hero_profile().get("id", "raya_flint")
+	selected_hero = _selected_hero_profile().get("id", "kian_vale")
 	if not _is_playable_hero(selected_hero):
-		_set_controls_text("Preview only: choose Raya or Nika to start Stage 1   1/R Raya   3/N Nika   Esc/B Back")
+		_set_controls_text("Preview only: choose Kian to start Stage 1   1/K Kian   Esc/B Back")
 		return
 	_start_campaign()
 
@@ -1438,7 +1440,7 @@ func _build_hero_card(parent: Node, pos: Vector2, index: int, profile: Dictionar
 		hero_sprite.scale = Vector2(scale_factor, scale_factor)
 		portrait_well.add_child(hero_sprite)
 	else:
-		_build_planned_hero_badge(card, hero_id)
+		_build_procedural_hero_badge(card, hero_id, _is_playable_hero(hero_id))
 	var text := Label.new()
 	text.position = Vector2(134, 32)
 	text.size = Vector2(126, 102)
@@ -1523,18 +1525,31 @@ func _build_hero_portrait_well(card: Node2D, hero_id: String, has_texture: bool)
 	well.add_child(border)
 	return well
 
-func _build_planned_hero_badge(card: Node2D, hero_id: String) -> void:
+func _build_procedural_hero_badge(card: Node2D, hero_id: String, playable: bool) -> void:
 	var silhouette := Polygon2D.new()
-	silhouette.name = "planned-hero-silhouette"
+	silhouette.name = "playable-hero-silhouette" if playable else "planned-hero-silhouette"
 	silhouette.position = Vector2(78, 132)
 	silhouette.polygon = _hero_silhouette(hero_id)
 	silhouette.color = _hero_body_color(hero_id)
-	silhouette.modulate.a = 0.42
+	silhouette.modulate.a = 0.66 if playable else 0.42
 	card.add_child(silhouette)
+	if hero_id == "kian_vale":
+		var wrench := Line2D.new()
+		wrench.name = "kian-card-reinforced-wrench"
+		wrench.points = PackedVector2Array([Vector2(42, 58), Vector2(104, 126)])
+		wrench.default_color = Color(0.88, 0.82, 0.62, 0.96)
+		wrench.width = 7.0
+		card.add_child(wrench)
+		var jaw := Line2D.new()
+		jaw.name = "kian-card-wrench-jaw"
+		jaw.points = PackedVector2Array([Vector2(99, 119), Vector2(118, 111), Vector2(111, 136)])
+		jaw.default_color = Color(0.96, 0.88, 0.58, 0.96)
+		jaw.width = 5.0
+		card.add_child(jaw)
 	var icon := Label.new()
 	icon.position = Vector2(30, 76)
 	icon.size = Vector2(88, 24)
-	icon.text = "PLANNED HERO"
+	icon.text = "READY: WRENCH" if playable else "PLANNED HERO"
 	icon.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	icon.add_theme_font_size_override("font_size", 10)
 	icon.add_theme_color_override("font_color", _hero_accent_color(hero_id))
@@ -1546,6 +1561,9 @@ func _build_planned_hero_badge(card: Node2D, hero_id: String) -> void:
 		rib_line.size = Vector2(54 - rib * 4, 4)
 		rib_line.color = _hero_accent_color(hero_id).darkened(float(rib) * 0.08)
 		card.add_child(rib_line)
+
+func _build_planned_hero_badge(card: Node2D, hero_id: String) -> void:
+	_build_procedural_hero_badge(card, hero_id, false)
 
 func _build_hero_stat_pips(card: Node2D, stats: Dictionary, hero_id: String) -> void:
 	var meter_names := ["P", "S", "C", "D"]
@@ -1581,6 +1599,10 @@ func _selected_hero_card_color(hero_id: String) -> Color:
 
 func _hero_sprite_path(hero_id: String) -> String:
 	match hero_id:
+		"kian_vale":
+			return "res://assets/stage1/actors/kian_vale_idle.png"
+		"tor_bram":
+			return "res://assets/stage1/actors/tor_bram_idle.png"
 		"raya_flint":
 			return "res://assets/stage1/actors/raya_flint_idle.png"
 		"nika_sol":
@@ -1637,16 +1659,16 @@ func _is_playable_hero(hero_id: String) -> bool:
 
 func _handle_roster_key(keycode: int) -> bool:
 	match keycode:
-		KEY_1, KEY_R:
+		KEY_1, KEY_K:
 			selected_hero_index = 0
 			return true
-		KEY_2, KEY_K:
+		KEY_2, KEY_T:
 			selected_hero_index = 1
 			return true
-		KEY_3, KEY_N:
+		KEY_3, KEY_R:
 			selected_hero_index = 2
 			return true
-		KEY_4, KEY_T:
+		KEY_4, KEY_N:
 			selected_hero_index = 3
 			return true
 		KEY_LEFT, KEY_A:
@@ -1672,9 +1694,17 @@ func _refresh_hero_card_selection() -> void:
 		card.scale = Vector2(1.04, 1.04) if index == selected_hero_index else Vector2.ONE
 
 func _load_runtime_texture(path: String) -> Texture2D:
-	if not ResourceLoader.exists(path):
+	if path == "":
 		return null
-	return load(path)
+	if ResourceLoader.exists(path):
+		return load(path)
+	if not FileAccess.file_exists(path):
+		return null
+	var image := Image.new()
+	var error := image.load(path)
+	if error != OK:
+		return null
+	return ImageTexture.create_from_image(image)
 
 func _set_hero_cards_visible(visible_state: bool) -> void:
 	for card in hero_cards:

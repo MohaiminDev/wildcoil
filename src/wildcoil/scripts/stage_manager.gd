@@ -828,8 +828,9 @@ func _handle_combat() -> void:
 		if attack_fx_cooldown <= 0.0:
 			combat_fx.spawn_attack_arc(_world_to_screen(player.position + Vector2(player.facing * 34, -48)), player.facing)
 			attack_fx_cooldown = 0.08
+		var player_hit_rect: Rect2 = player.special_rect() if player.is_special_active() else player.attack_rect()
 		for enemy in enemies.duplicate():
-			if enemy != null and is_instance_valid(enemy) and player.attack_rect().intersects(enemy.body_rect()):
+			if enemy != null and is_instance_valid(enemy) and player_hit_rect.intersects(enemy.body_rect()):
 				var key := "enemy_%d" % enemy.get_instance_id()
 				if hit_registry.has(key):
 					continue
@@ -877,7 +878,13 @@ func _on_pickup_collected(kind: String) -> void:
 		audio_manager.play_pickup()
 
 func _on_enemy_attack(enemy, amount: int) -> void:
+	if enemy != null and is_instance_valid(enemy) and enemy.has_method("attack_rect"):
+		if not enemy.attack_rect().intersects(player.body_rect()):
+			return
+	var health_before: int = player.health
 	player.apply_damage(amount, enemy.position.x)
+	if player.health == health_before:
+		return
 	audio_manager.play_heavy()
 	combat_fx.spawn_hit_spark(_world_to_screen(player.position + Vector2(0, -48)), Color(1.0, 0.18, 0.08), false)
 	combat_fx.spawn_impact_burst(_world_to_screen(player.position + Vector2(0, -48)), -player.facing, false)

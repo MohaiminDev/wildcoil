@@ -35,6 +35,18 @@
       }
     ],
     "actors": {
+      "kian_vale": {
+        "idle": "res://assets/stage1/actors/kian_vale_idle.png",
+        "walk": "res://assets/stage1/actors/kian_vale_walk.png",
+        "attack": "res://assets/stage1/actors/kian_vale_attack.png",
+        "hurt": "res://assets/stage1/actors/kian_vale_hurt.png"
+      },
+      "tor_bram": {
+        "idle": "res://assets/stage1/actors/tor_bram_idle.png",
+        "walk": "res://assets/stage1/actors/tor_bram_walk.png",
+        "attack": "res://assets/stage1/actors/tor_bram_attack.png",
+        "hurt": "res://assets/stage1/actors/tor_bram_hurt.png"
+      },
       "raya_flint": {
         "idle": "res://assets/stage1/actors/raya_flint_idle.png",
         "walk": "res://assets/stage1/actors/raya_flint_walk.png",

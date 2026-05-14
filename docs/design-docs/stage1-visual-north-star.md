@@ -12,6 +12,8 @@ Primary UI/combat/presentation reference: [`stage1-visual-north-star.png`](/User
 
 Stage 1 environment reference: [`stage1-background-north-star.png`](/Users/himu/Desktop/career/personal_projects/wildcoil/docs/design-docs/assets/stage1-background-north-star.png)
 
+Current approved male hero references: [`kian-vale-male-concept.png`](/Users/himu/Desktop/career/personal_projects/wildcoil/docs/design-docs/assets/kian-vale-male-concept.png) and [`tor-bram-male-concept.png`](/Users/himu/Desktop/career/personal_projects/wildcoil/docs/design-docs/assets/tor-bram-male-concept.png)
+
 Use these as mood, composition, polish, and quality direction only. Do not copy generated details literally into runtime, and do not treat generated names, logos, character details, weapons, costumes, UI text, or story beats as canon unless they are also supported by `docs/game-story.md`.
 
 The current running game is not visually at this level yet. Any claim of visual match must be backed by a launched-game screenshot placed beside these references during review.
@@ -22,7 +24,7 @@ The current running game is not visually at this level yet. Any claim of visual 
 - Engine: Godot 4.x under `src/wildcoil`.
 - Immediate production target: Stage 1 vertical slice.
 - Stage 1: `Sunset Overpass`, a cracked highway over jungle ruins at sunset.
-- Heroes: Raya Flint and Nika Sol first.
+- Heroes: Kian Vale and Tor Bram should read clearly as the first two male roster slots, with Raya Flint and Nika Sol preserving the current female roster direction.
 - Faction: Iron Veil Excavation.
 - Boss: Brask Noll.
 - Theme: coexistence versus extraction.
@@ -49,9 +51,9 @@ The current running game is not visually at this level yet. Any claim of visual 
 
 ## Runtime Acceptance Criteria
 
-- A player can start from title, choose Raya or Nika, play Stage 1, fight Brask Noll, and reach victory.
+- A player can start from title, choose or default into Kian for the current source-run slice, play Stage 1, fight Brask Noll, and reach victory.
 - Stage 1 visibly communicates a ruined jungle overpass at sunset.
-- Raya, Nika, human enemies, creatures, and Brask are readable as distinct silhouettes at 1280x720.
+- Kian, Tor in preview, Raya, Nika, human enemies, creatures, and Brask are readable as distinct silhouettes at 1280x720.
 - Combat hits have visible impact feedback and brief weight without hiding the actors.
 - Boss attacks telegraph before damage and Brask has clear phase escalation.
 - HUD text and bars remain readable and do not overlap key combat action.

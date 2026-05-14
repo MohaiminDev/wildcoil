@@ -26,17 +26,13 @@ func actor_texture(actor_id: String, state: String) -> Texture2D:
 	var path := str(states.get(state, ""))
 	if path == "":
 		path = str(states.get("idle", ""))
-	if path == "" or not ResourceLoader.exists(path):
-		return null
-	return load(path)
+	return _load_texture(path)
 
 func add_stage1_background_layers(parent: Node) -> bool:
 	var loaded_any := false
 	for layer in stage1_background_layers():
 		var path := str(layer.get("path", ""))
-		if path == "" or not ResourceLoader.exists(path):
-			continue
-		var texture: Texture2D = load(path)
+		var texture := _load_texture(path)
 		if texture == null:
 			continue
 		var sprite := Sprite2D.new()
@@ -59,6 +55,19 @@ func _load_manifest() -> Dictionary:
 	if typeof(parsed) != TYPE_DICTIONARY:
 		return {}
 	return parsed
+
+func _load_texture(path: String) -> Texture2D:
+	if path == "":
+		return null
+	if ResourceLoader.exists(path):
+		return load(path)
+	if not FileAccess.file_exists(path):
+		return null
+	var image := Image.new()
+	var error := image.load(path)
+	if error != OK:
+		return null
+	return ImageTexture.create_from_image(image)
 
 func _array_to_vector(value) -> Vector2:
 	if typeof(value) != TYPE_ARRAY or value.size() < 2:

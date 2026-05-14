@@ -22,7 +22,7 @@ The first success condition is not market demand. The first success condition is
 - Combat target: fast, physical, readable, responsive, and animated; every hit should visibly change the crowd state.
 - Story target: short cinematic moments, character banter, environmental storytelling, and boss scenes; no long lore dumps during play.
 - Technology target: Godot 4.6.x stable, 2D-first, macOS-first, controller-ready, 60 FPS target.
-- Prototype target: one polished Stage 1 slice with Raya and Nika, three enemy types, Brask Noll, a road-collapse set piece, pickups, HUD, pause, debug overlay, and a short ending scene.
+- Prototype target: one polished Stage 1 slice. RR-PROD-109 temporarily narrows the playable source-run focus to Kian Vale and one strong Iron Veil grunt loop before broad roster or enemy-variety expansion.
 
 ### Working-Name Warning
 
@@ -35,7 +35,7 @@ Build the smallest version of the full dream that proves the game is worth expan
 The first slice should feel like a complete animated arcade episode:
 
 1. The Sundrifter enters a broken highway at sunset.
-2. Raya and Nika discover Iron Veil loading frightened creatures into cages.
+2. Kian leads the local demo response when the crew discovers Iron Veil loading frightened creatures into cages.
 3. The player fights through a readable, escalating brawler stage.
 4. The road collapses into a lower service lane.
 5. Brask Noll arrives as a brutal field captain boss.
@@ -417,12 +417,12 @@ Specials should help organize chaos. They should not erase all challenge.
 
 ### Prototype / First Slice Characters
 
-The first serious slice includes Raya and Nika because they prove two different motion fantasies:
+The first serious local source-run combat reference slice now starts with Kian because RR-PROD-109 prioritizes one heavy road-tool brawler loop before roster breadth:
 
-- Raya: grounded, practical, medium-speed, impact-focused mechanic fighter.
-- Nika: fast, agile, risky, movement-heavy scout fighter.
+- Kian: grounded, male, heavy reinforced-wrench brawler with practical road-tool pressure.
+- Tor, Raya, and Nika: visible roster previews until Kian's reference loop feels strong enough to copy.
 
-Do not add Kian or Tor until Raya and Nika feel good.
+Do not expand enemy variants or equalize the whole roster until Kian versus the reference Iron Veil grunt feels convincing.
 
 ### Raya Flint
 
@@ -750,7 +750,7 @@ Must exist first. No argument.
 
 MVP means a complete small game loop, not the full dream:
 
-- 2 heroes: Raya and Nika
+- 1 current playable demo hero: Kian Vale
 - 1 polished stage: Sunset Overpass
 - 1 boss: Brask Noll
 - title screen

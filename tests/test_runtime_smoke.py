@@ -29,6 +29,85 @@ def test_stage_one_title_to_victory_flow(project_root, godot_runner):
     assert "RIFT_ROAD_RUNTIME_OK stage1_flow" in result.stdout
 
 
+def test_default_stage_one_start_uses_kian_lead(project_root, godot_runner):
+    result = godot_runner(
+        "--headless",
+        "--script",
+        str(project_root / "tools" / "runtime_test_runner.gd"),
+        "--",
+        "stage1_kian_default_lead",
+    )
+
+    assert result.returncode == 0, result.stderr + result.stdout
+    assert "RIFT_ROAD_KIAN_DEFAULT_LEAD roster=true default=true stage=true" in result.stdout
+    assert "RIFT_ROAD_RUNTIME_OK stage1_kian_default_lead" in result.stdout
+
+
+def test_reference_grunt_combat_contract(project_root, godot_runner):
+    result = godot_runner(
+        "--headless",
+        "--script",
+        str(project_root / "tools" / "runtime_test_runner.gd"),
+        "--",
+        "reference_grunt_contract",
+    )
+
+    assert result.returncode == 0, result.stderr + result.stdout
+    assert (
+        "RIFT_ROAD_REFERENCE_GRUNT "
+        "approach=true spacing=true telegraph=true attack=true flinch=true recover=true defeated=true"
+    ) in result.stdout
+    assert "RIFT_ROAD_RUNTIME_OK reference_grunt_contract" in result.stdout
+
+
+def test_kian_combat_responsiveness_contract(project_root, godot_runner):
+    result = godot_runner(
+        "--headless",
+        "--script",
+        str(project_root / "tools" / "runtime_test_runner.gd"),
+        "--",
+        "kian_combat_responsiveness",
+    )
+
+    assert result.returncode == 0, result.stderr + result.stdout
+    assert (
+        "RIFT_ROAD_KIAN_COMBAT_RESPONSIVENESS "
+        "combo_reset=true special_area=true dodge_avoids=true"
+    ) in result.stdout
+    assert "RIFT_ROAD_RUNTIME_OK kian_combat_responsiveness" in result.stdout
+
+
+def test_kian_attack_timing_uses_data_windows(project_root, godot_runner):
+    result = godot_runner(
+        "--headless",
+        "--script",
+        str(project_root / "tools" / "runtime_test_runner.gd"),
+        "--",
+        "kian_attack_timing_windows",
+    )
+
+    assert result.returncode == 0, result.stderr + result.stdout
+    assert (
+        "RIFT_ROAD_KIAN_ATTACK_TIMING "
+        "data=true startup=true active=true recovery=true hitbox=true"
+    ) in result.stdout
+    assert "RIFT_ROAD_RUNTIME_OK kian_attack_timing_windows" in result.stdout
+
+
+def test_grunt_attack_requires_hurtbox_overlap(project_root, godot_runner):
+    result = godot_runner(
+        "--headless",
+        "--script",
+        str(project_root / "tools" / "runtime_test_runner.gd"),
+        "--",
+        "grunt_attack_hitbox_contract",
+    )
+
+    assert result.returncode == 0, result.stderr + result.stdout
+    assert "RIFT_ROAD_GRUNT_ATTACK_HITBOX whiff=true hit=true" in result.stdout
+    assert "RIFT_ROAD_RUNTIME_OK grunt_attack_hitbox_contract" in result.stdout
+
+
 def test_stage_one_autoplay_moves_and_attacks(project_root, godot_runner):
     result = godot_runner(
         "--headless",

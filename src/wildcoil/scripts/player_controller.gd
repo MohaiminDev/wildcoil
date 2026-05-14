@@ -10,6 +10,10 @@ const FLOOR_BOTTOM := 620.0
 const FLOOR_LEFT := 80.0
 const FLOOR_RIGHT := 1200.0
 const CONTROLLER_DEADZONE := 0.22
+const CONTROLLER_ATTACK_BUTTONS := [JOY_BUTTON_X]
+const CONTROLLER_JUMP_BUTTONS := [JOY_BUTTON_A]
+const CONTROLLER_SPECIAL_BUTTONS := [JOY_BUTTON_Y, JOY_BUTTON_RIGHT_SHOULDER]
+const CONTROLLER_DASH_BUTTONS := [JOY_BUTTON_B, JOY_BUTTON_LEFT_SHOULDER]
 
 var hero_id := "raya_flint"
 var display_name := "Raya Flint"
@@ -23,13 +27,20 @@ var special_cost := 50
 var special_meter := 0
 var luma_shards := 0
 var score := 0
+var combat_timing := {}
 
 var facing := 1
 var dash_timer := 0.0
 var dash_cooldown := 0.0
+var dodge_invulnerable_timer := 0.0
+var dodge_recovery_timer := 0.0
 var attack_timer := 0.0
 var attack_lunge_timer := 0.0
 var special_timer := 0.0
+var attack_total_duration := 0.0
+var special_total_duration := 0.0
+var current_attack_timing := {}
+var current_special_timing := {}
 var invulnerable_timer := 0.0
 var jump_timer := 0.0
 var fake_height := 0.0
@@ -60,6 +71,7 @@ func setup(profile: Dictionary) -> void:
 	attack_damage = int(profile.get("attack_damage", attack_damage))
 	special_damage = int(profile.get("special_damage", special_damage))
 	special_cost = int(profile.get("special_cost", special_cost))
+	combat_timing = profile.get("combat_timing", {})
 	_load_visual_sprites()
 	queue_redraw()
 
@@ -73,28 +85,27 @@ func _physics_process(delta: float) -> void:
 	if demo_control_active:
 		input_vector = demo_move_vector.limit_length(1.0)
 	else:
-		if Input.is_key_pressed(KEY_A) or Input.is_key_pressed(KEY_LEFT):
+		if Input.is_action_pressed("move_left"):
 			input_vector.x -= 1.0
-		if Input.is_key_pressed(KEY_D) or Input.is_key_pressed(KEY_RIGHT):
+		if Input.is_action_pressed("move_right"):
 			input_vector.x += 1.0
-		if Input.is_key_pressed(KEY_W) or Input.is_key_pressed(KEY_UP):
+		if Input.is_action_pressed("move_up"):
 			input_vector.y -= 1.0
-		if Input.is_key_pressed(KEY_S) or Input.is_key_pressed(KEY_DOWN):
+		if Input.is_action_pressed("move_down"):
 			input_vector.y += 1.0
 		input_vector += _read_controller_move()
 	if input_vector.x != 0:
 		facing = sign(input_vector.x)
 
-	var dash_pressed := demo_dash_pressed if demo_control_active else Input.is_key_pressed(KEY_I) or _is_controller_button_pressed([JOY_BUTTON_B, JOY_BUTTON_RIGHT_SHOULDER])
+	var dash_pressed := demo_dash_pressed if demo_control_active else _dash_pressed()
 	if dash_pressed and dash_cooldown <= 0.0:
-		dash_timer = 0.13
-		dash_cooldown = 0.52
+		begin_dodge()
 
-	var jump_pressed := demo_jump_pressed if demo_control_active else Input.is_key_pressed(KEY_K) or _is_controller_button_pressed([JOY_BUTTON_A])
+	var jump_pressed := demo_jump_pressed if demo_control_active else _jump_pressed()
 	if jump_pressed and jump_timer <= 0.0 and fake_height <= 0.0:
 		jump_timer = 0.52
 
-	var attack_pressed := demo_attack_pressed if demo_control_active else Input.is_key_pressed(KEY_J) or _is_controller_button_pressed([JOY_BUTTON_X])
+	var attack_pressed := demo_attack_pressed if demo_control_active else _attack_pressed()
 	if attack_pressed and not attack_key_down:
 		if attack_timer <= 0.0:
 			_start_light_attack()
@@ -102,7 +113,7 @@ func _physics_process(delta: float) -> void:
 			attack_buffer_timer = 0.18
 	attack_key_down = attack_pressed
 
-	var special_pressed := demo_special_pressed if demo_control_active else Input.is_key_pressed(KEY_L) or _is_controller_button_pressed([JOY_BUTTON_Y, JOY_BUTTON_LEFT_SHOULDER])
+	var special_pressed := demo_special_pressed if demo_control_active else _special_pressed()
 	if special_pressed and not special_key_down:
 		if special_timer <= 0.0 and special_meter >= special_cost:
 			_start_special_attack()
@@ -131,13 +142,23 @@ func _physics_process(delta: float) -> void:
 
 func _start_light_attack() -> void:
 	attack_step = (attack_step % 3) + 1
-	attack_timer = 0.26 + float(attack_step) * 0.045
-	attack_lunge_timer = 0.075 + float(attack_step) * 0.012
+	current_attack_timing = _attack_timing_for_step(attack_step)
+	attack_total_duration = _timing_duration(current_attack_timing)
+	attack_timer = attack_total_duration
+	attack_lunge_timer = float(current_attack_timing.get("lunge", 0.075 + float(attack_step) * 0.012))
 
 func _start_special_attack() -> void:
 	special_meter -= special_cost
-	special_timer = 0.38
-	attack_lunge_timer = 0.13
+	current_special_timing = _special_timing()
+	special_total_duration = _timing_duration(current_special_timing)
+	special_timer = special_total_duration
+	attack_lunge_timer = float(current_special_timing.get("lunge", 0.13))
+
+func begin_dodge() -> void:
+	dash_timer = 0.18 if hero_id == "kian_vale" else 0.15
+	dodge_invulnerable_timer = 0.14 if hero_id == "kian_vale" else 0.11
+	dodge_recovery_timer = 0.10
+	dash_cooldown = 0.52
 
 func set_demo_control(active: bool) -> void:
 	demo_control_active = active
@@ -179,9 +200,23 @@ func _is_controller_button_pressed(buttons: Array) -> bool:
 				return true
 	return false
 
+func _attack_pressed() -> bool:
+	return Input.is_action_pressed("attack") or _is_controller_button_pressed(CONTROLLER_ATTACK_BUTTONS)
+
+func _jump_pressed() -> bool:
+	return Input.is_action_pressed("jump") or _is_controller_button_pressed(CONTROLLER_JUMP_BUTTONS)
+
+func _special_pressed() -> bool:
+	return Input.is_action_pressed("special") or _is_controller_button_pressed(CONTROLLER_SPECIAL_BUTTONS)
+
+func _dash_pressed() -> bool:
+	return Input.is_action_pressed("dash") or _is_controller_button_pressed(CONTROLLER_DASH_BUTTONS)
+
 func _tick_timers(delta: float) -> void:
 	dash_timer = maxf(dash_timer - delta, 0.0)
 	dash_cooldown = maxf(dash_cooldown - delta, 0.0)
+	dodge_invulnerable_timer = maxf(dodge_invulnerable_timer - delta, 0.0)
+	dodge_recovery_timer = maxf(dodge_recovery_timer - delta, 0.0)
 	attack_timer = maxf(attack_timer - delta, 0.0)
 	attack_lunge_timer = maxf(attack_lunge_timer - delta, 0.0)
 	special_timer = maxf(special_timer - delta, 0.0)
@@ -191,6 +226,10 @@ func _tick_timers(delta: float) -> void:
 	combo_timer = maxf(combo_timer - delta, 0.0)
 	if combo_timer <= 0.0:
 		combo_count = 0
+		if attack_timer <= 0.0:
+			attack_step = 0
+			attack_total_duration = 0.0
+			current_attack_timing = {}
 	if jump_timer > 0.0:
 		jump_timer = maxf(jump_timer - delta, 0.0)
 		var progress := 1.0 - (jump_timer / 0.52)
@@ -199,25 +238,33 @@ func _tick_timers(delta: float) -> void:
 		fake_height = 0.0
 
 func is_attack_active() -> bool:
-	return attack_timer > 0.11 and attack_timer < 0.24
+	if attack_timer <= 0.0:
+		return false
+	return _timing_window_active(current_attack_timing, attack_total_duration - attack_timer)
 
 func is_special_active() -> bool:
-	return special_timer > 0.08 and special_timer < 0.30
+	if special_timer <= 0.0:
+		return false
+	return _timing_window_active(current_special_timing, special_total_duration - special_timer)
 
 func attack_rect() -> Rect2:
-	var width := 82.0 + float(attack_step) * 11.0
-	var height := 58.0
+	var hitbox: Dictionary = current_attack_timing.get("hitbox", {})
+	var width := float(hitbox.get("width", 82.0 + float(attack_step) * 11.0))
+	var height := float(hitbox.get("height", 58.0))
 	var origin_x := position.x + 16.0 if facing >= 0 else position.x - width - 16.0
 	return Rect2(Vector2(origin_x, position.y - 64.0 - fake_height), Vector2(width, height))
 
 func special_rect() -> Rect2:
-	return Rect2(position - Vector2(84, 104 + fake_height), Vector2(168, 168))
+	var hitbox: Dictionary = current_special_timing.get("hitbox", {})
+	var width := float(hitbox.get("width", 168.0))
+	var height := float(hitbox.get("height", 168.0))
+	return Rect2(position - Vector2(width * 0.5, height * 0.62 + fake_height), Vector2(width, height))
 
 func body_rect() -> Rect2:
 	return Rect2(position - Vector2(BODY_SIZE.x * 0.5, BODY_SIZE.y), BODY_SIZE)
 
 func apply_damage(amount: int, source_x: float) -> void:
-	if invulnerable_timer > 0.0 or health <= 0:
+	if invulnerable_timer > 0.0 or dodge_invulnerable_timer > 0.0 or health <= 0:
 		return
 	health = max(health - amount, 0)
 	invulnerable_timer = 0.75
@@ -236,7 +283,47 @@ func register_hit() -> void:
 	score += combo_count * 3
 
 func current_attack_damage() -> int:
-	return attack_damage + attack_step * 3
+	var step_bonus := int(current_attack_timing.get("damage_bonus", attack_step * (5 if hero_id == "kian_vale" else 3)))
+	return attack_damage + step_bonus
+
+func _attack_timing_for_step(step: int) -> Dictionary:
+	var combo: Array = combat_timing.get("light_combo", [])
+	for move in combo:
+		if int(move.get("step", 0)) == step:
+			return move
+	if hero_id == "kian_vale":
+		return {
+			"startup": 0.07 + float(step - 1) * 0.015,
+			"active": 0.12 + float(step - 1) * 0.02,
+			"recovery": 0.19 + float(step - 1) * 0.055,
+			"lunge": 0.10 + float(step) * 0.02,
+			"damage_bonus": step * 5,
+			"hitbox": {"width": 98.0 + float(step) * 16.0, "height": 66.0}
+		}
+	return {
+		"startup": 0.06,
+		"active": 0.12,
+		"recovery": 0.08 + float(step) * 0.045,
+		"lunge": 0.075 + float(step) * 0.012,
+		"damage_bonus": step * 3,
+		"hitbox": {"width": 82.0 + float(step) * 11.0, "height": 58.0}
+	}
+
+func _special_timing() -> Dictionary:
+	var timing: Dictionary = combat_timing.get("special", {})
+	if not timing.is_empty():
+		return timing
+	if hero_id == "kian_vale":
+		return {"startup": 0.13, "active": 0.30, "recovery": 0.13, "lunge": 0.18, "hitbox": {"width": 168.0, "height": 168.0}}
+	return {"startup": 0.08, "active": 0.22, "recovery": 0.08, "lunge": 0.13, "hitbox": {"width": 168.0, "height": 168.0}}
+
+func _timing_duration(timing: Dictionary) -> float:
+	return float(timing.get("startup", 0.0)) + float(timing.get("active", 0.0)) + float(timing.get("recovery", 0.0))
+
+func _timing_window_active(timing: Dictionary, elapsed: float) -> bool:
+	var startup := float(timing.get("startup", 0.0))
+	var active := float(timing.get("active", 0.0))
+	return elapsed >= startup and elapsed < startup + active
 
 func heal(amount: int) -> void:
 	health = mini(health + amount, max_health)
@@ -428,20 +515,32 @@ func _draw_nika(alpha: float, bob: float) -> void:
 
 func _draw_kian(alpha: float, bob: float) -> void:
 	var y := -fake_height + bob
-	var green := Color(0.22, 0.72, 0.42, alpha)
-	var white := Color(0.86, 0.92, 0.86, alpha)
-	var blue := Color(0.08, 0.16, 0.32, alpha)
+	var green := Color(0.18, 0.58, 0.34, alpha)
+	var brass := Color(0.86, 0.68, 0.34, alpha)
+	var blue := Color(0.06, 0.12, 0.24, alpha)
 	var skin := Color(0.58, 0.38, 0.25, alpha)
-	draw_line(Vector2(-9, -28 + y), Vector2(-20, 0 + y), blue, 6.0)
-	draw_line(Vector2(9, -28 + y), Vector2(20, 0 + y), blue, 6.0)
-	draw_polygon([Vector2(-18, -64 + y), Vector2(18, -65 + y), Vector2(22, -30 + y), Vector2(-20, -28 + y)], [white])
-	draw_rect(Rect2(Vector2(-13, -58 + y), Vector2(26, 28)), green)
-	draw_circle(Vector2(0, -79 + y), 13, skin)
-	draw_rect(Rect2(Vector2(-18, -88 + y), Vector2(36, 8)), Color(0.62, 1.0, 0.74, alpha))
-	draw_line(Vector2(-18, -50 + y), Vector2(-54 * facing, -32 + y), green, 5.0)
-	draw_line(Vector2(16, -54 + y), Vector2(62 * facing, -80 + y), Color(0.72, 0.95, 1.0, alpha), 5.0)
-	draw_line(Vector2(62 * facing, -86 + y), Vector2(62 * facing, -18 + y), Color(0.72, 0.95, 1.0, alpha), 4.0)
-	draw_circle(Vector2(58 * facing, -50 + y), 11, Color(0.3, 1.0, 0.7, 0.42 * alpha))
+	var lean := float(facing) * (6.0 if is_attack_active() else 0.0)
+	draw_line(Vector2(-12 + lean, -29 + y), Vector2(-24, 0 + y), blue, 8.0)
+	draw_line(Vector2(12 + lean, -29 + y), Vector2(26, 0 + y), blue, 8.0)
+	draw_polygon([Vector2(-24 + lean, -66 + y), Vector2(22 + lean, -68 + y), Vector2(30 + lean, -29 + y), Vector2(-24 + lean, -27 + y)], [green])
+	draw_rect(Rect2(Vector2(-14 + lean, -58 + y), Vector2(28, 30)), brass)
+	draw_circle(Vector2(0 + lean, -80 + y), 14, skin)
+	draw_rect(Rect2(Vector2(-19 + lean, -91 + y), Vector2(38, 9)), Color(0.09, 0.12, 0.12, alpha))
+	draw_line(Vector2(-18 + lean, -51 + y), Vector2(-49 * facing, -34 + y), green, 7.0)
+	var handle_start := Vector2(15 + lean, -55 + y)
+	var handle_end := Vector2(74 * facing + lean, -24 + y)
+	if is_attack_active():
+		handle_start = Vector2(-4 + lean, -66 + y)
+		handle_end = Vector2((90 + attack_step * 11) * facing + lean, -46 + y)
+	elif is_special_active():
+		handle_start = Vector2(-34 * facing + lean, -74 + y)
+		handle_end = Vector2(50 * facing + lean, -4 + y)
+	draw_line(handle_start, handle_end, Color(0.70, 0.76, 0.74, alpha), 9.0)
+	draw_line(handle_start, handle_end, Color(0.96, 0.86, 0.52, 0.42 * alpha), 3.0)
+	var head := handle_end
+	draw_line(head + Vector2(0, -15), head + Vector2(22 * facing, -25), Color(0.86, 0.88, 0.84, alpha), 6.0)
+	draw_line(head + Vector2(0, 13), head + Vector2(24 * facing, 21), Color(0.86, 0.88, 0.84, alpha), 6.0)
+	draw_circle(Vector2(38 * facing + lean, -46 + y), 12, Color(0.32, 1.0, 0.68, 0.28 * alpha))
 	draw_circle(Vector2(-5, -80 + y), 2.0, Color(0.02, 0.02, 0.02, alpha))
 	draw_circle(Vector2(5, -80 + y), 2.0, Color(0.02, 0.02, 0.02, alpha))
 

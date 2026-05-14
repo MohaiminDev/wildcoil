@@ -21,9 +21,14 @@ var score_value := 100
 var target: Node2D
 var attack_cooldown := 0.7
 var telegraph_timer := 0.0
+var attack_recover_timer := 0.0
+var flinch_timer := 0.0
+var defeat_timer := 0.0
 var hurt_flash := 0.0
 var behavior_phase := 0.0
 var facing := -1
+var combat_state := "idle"
+var attack_has_landed := false
 var visual_sprites := {}
 var arcade_slot_index := 0
 var arcade_slot_count := 1
@@ -54,16 +59,26 @@ func start_cinematic_entry(target_position: Vector2, entry_speed: float) -> void
 	cinematic_entry_target = target_position
 	cinematic_entry_speed = maxf(entry_speed, move_speed)
 	cinematic_entry_active = true
-	attack_cooldown = maxf(attack_cooldown, 0.9)
+	attack_cooldown = maxf(attack_cooldown, 1.35 if behavior == "reference_melee" else 0.9)
 
 func _physics_process(delta: float) -> void:
+	if defeat_timer > 0.0:
+		defeat_timer = maxf(defeat_timer - delta, 0.0)
+		combat_state = "defeated"
+		velocity = Vector2.ZERO
+		if defeat_timer <= 0.0:
+			queue_free()
+		queue_redraw()
+		return
 	if health <= 0 or target == null:
 		return
 	hurt_flash = maxf(hurt_flash - delta, 0.0)
 	attack_cooldown = maxf(attack_cooldown - delta, 0.0)
+	attack_recover_timer = maxf(attack_recover_timer - delta, 0.0)
 	behavior_phase += delta
 
 	if cinematic_entry_active:
+		combat_state = "approach"
 		_tick_cinematic_entry(delta)
 		move_and_slide()
 		z_index = int(position.y)
@@ -75,16 +90,29 @@ func _physics_process(delta: float) -> void:
 	if absf(direct_offset.x) > 2.0:
 		facing = sign(direct_offset.x)
 	var movement_offset := _arcade_engagement_offset(direct_offset)
-	if telegraph_timer > 0.0:
+	if flinch_timer > 0.0:
+		flinch_timer = maxf(flinch_timer - delta, 0.0)
+		combat_state = "flinch"
+		velocity = Vector2(sign(position.x - target.position.x) * move_speed * 0.42, 0.0)
+	elif attack_recover_timer > 0.0:
+		combat_state = "recover"
+		velocity = Vector2(-float(facing) * move_speed * 0.18, sin(behavior_phase * 8.0) * move_speed * 0.08)
+	elif telegraph_timer > 0.0:
 		telegraph_timer -= delta
-		if telegraph_timer <= 0.0 and distance <= attack_range + 18.0:
+		combat_state = "telegraph"
+		if telegraph_timer <= 0.0 and distance <= attack_range + 18.0 and not attack_has_landed:
+			combat_state = "attack"
+			attack_has_landed = true
 			attack_landed.emit(self, attack_damage)
+			attack_recover_timer = 0.42
 		velocity = Vector2.ZERO
 	else:
 		_apply_behavior_movement(movement_offset, distance, delta)
 		if attack_cooldown <= 0.0 and _can_start_attack(distance):
 			telegraph_timer = telegraph_seconds
-			attack_cooldown = 1.28 if behavior == "ranged_thrower" else 1.1
+			attack_has_landed = false
+			combat_state = "telegraph"
+			attack_cooldown = _attack_recovery_cooldown()
 
 	move_and_slide()
 	z_index = int(position.y)
@@ -105,13 +133,29 @@ func _tick_cinematic_entry(_delta: float) -> void:
 func body_rect() -> Rect2:
 	return Rect2(position - Vector2(BODY_SIZE.x * 0.5, BODY_SIZE.y), BODY_SIZE)
 
+func attack_rect() -> Rect2:
+	var width := attack_range + 18.0
+	var height := 62.0
+	if enemy_id == "iron_veil_brute":
+		width += 18.0
+		height += 16.0
+	var origin_x := position.x + 16.0 if facing >= 0 else position.x - width - 16.0
+	return Rect2(Vector2(origin_x, position.y - 68.0), Vector2(width, height))
+
 func apply_damage(amount: int, source_x: float) -> void:
+	if defeat_timer > 0.0 or health <= 0:
+		return
 	health = max(health - amount, 0)
 	position.x += sign(position.x - source_x) * 24.0
-	hurt_flash = 0.12
+	hurt_flash = 0.18
+	flinch_timer = 0.26
+	telegraph_timer = 0.0
+	attack_recover_timer = maxf(attack_recover_timer, 0.16)
+	combat_state = "flinch"
 	if health <= 0:
+		combat_state = "defeated"
+		defeat_timer = 0.28
 		defeated.emit(self)
-		queue_free()
 	queue_redraw()
 
 func _draw() -> void:
@@ -411,7 +455,7 @@ func _arcade_engagement_offset(direct_offset: Vector2) -> Vector2:
 	if side == 0:
 		side = 1
 	var lane_index: float = float(arcade_slot_index) - float(arcade_slot_count - 1) * 0.5
-	var desired_x: float = side * (attack_range + 46.0 + absf(lane_index) * 24.0)
+	var desired_x: float = side * (attack_range - 8.0 + absf(lane_index) * 24.0)
 	var desired_y: float = lane_index * 36.0
 	if behavior == "ranged_thrower":
 		desired_x = side * maxf(attack_range - 10.0, 118.0)
@@ -430,36 +474,54 @@ func _apply_behavior_movement(offset: Vector2, direct_distance: float, _delta: f
 		"ranged_thrower":
 			if direct_distance < 135.0:
 				velocity = -direction * move_speed * 0.82
+				combat_state = "spacing"
 			elif distance > 18.0:
 				velocity = direction * move_speed * 0.72
+				combat_state = "approach"
 			else:
 				velocity = Vector2(0, sin(behavior_phase * 3.0) * move_speed * 0.25)
+				combat_state = "spacing"
 		"territorial_charge":
 			if distance > 18.0:
 				velocity = direction * move_speed * 1.18
+				combat_state = "approach"
 			else:
 				velocity = Vector2.ZERO
+				combat_state = "spacing"
 		"fast_melee", "panicked_nearest_target", "sound_reactive":
 			if distance > 18.0:
 				var weave := Vector2(-direction.y, direction.x) * sin(behavior_phase * 5.5) * 0.38
 				velocity = (direction + weave).normalized() * move_speed
+				combat_state = "approach"
 			else:
 				velocity = Vector2.ZERO
+				combat_state = "spacing"
 		"front_blocker", "slow_grabber", "armored_biter":
 			if distance > 18.0:
 				velocity = direction * move_speed * 0.74
+				combat_state = "approach"
 			else:
 				velocity = Vector2.ZERO
+				combat_state = "spacing"
 		_:
 			if distance > 18.0:
 				velocity = direction * move_speed
+				combat_state = "approach"
 			else:
 				velocity = Vector2.ZERO
+				combat_state = "spacing"
 
 func _can_start_attack(distance: float) -> bool:
 	if behavior == "ranged_thrower" or behavior == "summoner":
 		return distance <= attack_range + 35.0
 	return distance <= attack_range + 16.0 and absf(target.position.y - position.y) <= 54.0
+
+func _attack_recovery_cooldown() -> float:
+	if behavior == "ranged_thrower":
+		return 1.28
+	if behavior == "reference_melee":
+		return 1.45
+	return 1.1
 
 func _draw_behavior_weapon() -> void:
 	var weapon_color := Color(0.9, 0.88, 0.78, 0.92)

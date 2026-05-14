@@ -137,6 +137,32 @@ def test_combat_impact_has_layered_non_bloody_feedback(project_root):
     assert "capture_mode == \"impact\"" in capture_script
 
 
+def test_kian_combat_timing_is_data_driven(project_root):
+    characters = json.loads((project_root / "data" / "characters.json").read_text())
+    kian = next(hero for hero in characters["heroes"] if hero["id"] == "kian_vale")
+    player_script = (project_root / "scripts" / "player_controller.gd").read_text()
+
+    timing = kian["combat_timing"]
+    light_combo = timing["light_combo"]
+
+    assert len(light_combo) == 3
+    for index, move in enumerate(light_combo, start=1):
+        assert move["step"] == index
+        assert move["startup"] > 0.0
+        assert move["active"] > 0.0
+        assert move["recovery"] > 0.0
+        assert move["lunge"] > 0.0
+        assert move["hitbox"]["width"] > 80
+        assert move["hitbox"]["height"] > 50
+
+    assert timing["special"]["startup"] > 0.0
+    assert timing["special"]["active"] > timing["light_combo"][0]["active"]
+    assert "combat_timing" in player_script
+    assert "_attack_timing_for_step" in player_script
+    assert "_special_timing" in player_script
+    assert "_timing_window_active" in player_script
+
+
 def test_app_flow_exposes_restart_and_return_to_title_controls(project_root):
     app_root = (project_root / "scripts" / "app_root.gd").read_text()
     runtime_runner = (project_root / "tools" / "runtime_test_runner.gd").read_text()
@@ -260,17 +286,18 @@ def test_stage_one_has_opening_story_panels_and_barks(project_root):
     opening_story = stage_one["opening_story"]
     assert len(opening_story) >= 3
     assert opening_story[0]["panel_title"] == "Sundrifter Approach"
-    assert opening_story[0]["speaker"] == "Raya"
+    assert opening_story[0]["speaker"] == "Kian"
     assert "drill marks" in opening_story[0]["line"].lower()
     assert opening_story[1]["speaker"] == "Nika"
     assert "cages" in opening_story[1]["line"].lower()
-    assert opening_story[2]["speaker"] == "Raya"
+    assert opening_story[2]["speaker"] == "Kian"
     assert "routes" in opening_story[2]["line"].lower()
 
     stage_barks = stage_one["stage_barks"]
     assert "wave_start" in stage_barks
     assert "cage_loading" in stage_barks
     assert "service_lane" in stage_barks
+    assert "Kian" in stage_barks["wave_start"]
     assert "Nika" in stage_barks["cage_loading"]
 
     assert "last_story_beat" in stage_manager
@@ -317,6 +344,26 @@ def test_controller_support_is_exposed_for_menu_and_combat(project_root):
     assert "_read_controller_move" in player
     assert "_is_controller_button_pressed" in player
     assert "controller_title_flow" in runner
+
+
+def test_combat_controls_use_godot_inputmap_actions(project_root):
+    project_config = (project_root / "project.godot").read_text()
+    player = (project_root / "scripts" / "player_controller.gd").read_text()
+
+    for action in [
+        'move_left',
+        'move_right',
+        'move_up',
+        'move_down',
+        'attack',
+        'jump',
+        'special',
+        'dash',
+    ]:
+        assert f'{action}=' in project_config
+        assert f'Input.is_action_pressed("{action}")' in player or f'Input.is_action_just_pressed("{action}")' in player
+
+    assert "Input.is_key_pressed(KEY_" not in player
 
 
 def test_stage_one_has_repeatable_performance_budget_sample(project_root):

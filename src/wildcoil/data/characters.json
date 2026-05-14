@@ -1,58 +1,31 @@
 {
   "heroes": [
     {
-      "id": "raya_flint",
-      "name": "Raya Flint",
-      "role": "balanced mechanic",
-      "palette": ["rust-orange", "charcoal", "warm-cream"],
-      "max_health": 120,
-      "move_speed": 245,
-      "dash_speed": 620,
-      "attack_damage": 18,
-      "special_damage": 34,
-      "special_cost": 50,
-      "stats": {"power": 3, "speed": 3, "control": 3, "defense": 3},
-      "specialty": "Reliable combos, field repair, and balanced lane control",
-      "weakness": "No extreme advantage; must use positioning well",
-      "capability_summary": "Balanced mechanic who can handle any wave and recover mistakes.",
-      "actions": ["light_attack", "jump_attack", "dash", "special", "grab"],
-      "signature_moves": ["Spanner Jab", "Gearbreaker Kick", "Overdrive Slam", "Field Repair"]
-    },
-    {
       "id": "kian_vale",
       "name": "Kian Vale",
-      "role": "field medic",
-      "palette": ["moss-green", "white", "deep-blue"],
-      "max_health": 100,
-      "move_speed": 270,
-      "dash_speed": 650,
-      "attack_damage": 12,
-      "special_damage": 22,
-      "special_cost": 35,
-      "stats": {"power": 2, "speed": 3, "control": 5, "defense": 3},
-      "specialty": "Crowd control, fast recovery, creature calming, and med patches",
-      "weakness": "Lower raw damage; wins through spacing and control",
-      "capability_summary": "Technical biologist who controls groups and protects fragile creatures.",
+      "role": "reinforced wrench brawler",
+      "palette": ["road-green", "sun-baked-brass", "deep-blue"],
+      "max_health": 135,
+      "move_speed": 235,
+      "dash_speed": 575,
+      "attack_damage": 22,
+      "special_damage": 44,
+      "special_cost": 55,
+      "combat_timing": {
+        "light_combo": [
+          {"step": 1, "startup": 0.07, "active": 0.12, "recovery": 0.19, "lunge": 0.12, "damage_bonus": 5, "hitbox": {"width": 114, "height": 66}},
+          {"step": 2, "startup": 0.08, "active": 0.13, "recovery": 0.23, "lunge": 0.14, "damage_bonus": 10, "hitbox": {"width": 130, "height": 66}},
+          {"step": 3, "startup": 0.10, "active": 0.16, "recovery": 0.30, "lunge": 0.16, "damage_bonus": 15, "hitbox": {"width": 146, "height": 66}}
+        ],
+        "special": {"startup": 0.13, "active": 0.30, "recovery": 0.13, "lunge": 0.18, "hitbox": {"width": 168, "height": 168}}
+      },
+      "stats": {"power": 4, "speed": 2, "control": 4, "defense": 4},
+      "specialty": "Heavy reinforced-wrench pressure, road-tool checks, and sturdy lane control",
+      "weakness": "Longer recovery after committed swings; must aim the wrench beats",
+      "capability_summary": "Male road adventurer who wins by planting his boots and swinging a reinforced road wrench.",
       "actions": ["light_attack", "jump_attack", "dash", "special", "grab"],
-      "signature_moves": ["Pulse Staff Combo", "Vine Snare", "Sonic Whistle", "Med Patch"]
-    },
-    {
-      "id": "nika_sol",
-      "name": "Nika Sol",
-      "role": "agile scout",
-      "palette": ["electric-violet", "black", "silver"],
-      "max_health": 90,
-      "move_speed": 315,
-      "dash_speed": 760,
-      "attack_damage": 13,
-      "special_damage": 25,
-      "special_cost": 45,
-      "stats": {"power": 2, "speed": 5, "control": 2, "defense": 1},
-      "specialty": "Fast movement, aerial pressure, and burst repositioning",
-      "weakness": "Low health; bad trades punish her quickly",
-      "capability_summary": "Agile scout who turns the arena into a race line.",
-      "actions": ["light_attack", "jump_attack", "dash", "special", "grab"],
-      "signature_moves": ["Flash Step", "Heel Arc", "Skyline Drop", "Static Burst"]
+      "signature_moves": ["Wrench Tap", "Axle Hook", "Roadbreaker Slam", "Luma Anchor Shock"],
+      "visual_identity": {"silhouette": "heavy road-tool stance", "prop": "reinforced wrench", "card_pose": "boots planted with wrench low", "concept_art": "docs/design-docs/assets/kian-vale-male-concept.png", "runtime_idle": "res://assets/stage1/actors/kian_vale_idle.png"}
     },
     {
       "id": "tor_bram",
@@ -70,7 +43,46 @@
       "weakness": "Slowest hero; can be surrounded if he misses",
       "capability_summary": "Ex-Iron Veil defender who absorbs hits and breaks enemy lines.",
       "actions": ["light_attack", "jump_attack", "dash", "special", "grab"],
-      "signature_moves": ["Hammer Fist", "Shoulder Ram", "Titan Throw", "Hold the Line"]
+      "signature_moves": ["Hammer Fist", "Shoulder Ram", "Titan Throw", "Hold the Line"],
+      "visual_identity": {"silhouette": "large male road-crew bruiser stance", "prop": "heavy rescue road-bar", "card_pose": "square shoulders guarding the lane", "concept_art": "docs/design-docs/assets/tor-bram-male-concept.png", "runtime_idle": "res://assets/stage1/actors/tor_bram_idle.png"}
+    },
+    {
+      "id": "raya_flint",
+      "name": "Raya Flint",
+      "role": "balanced mechanic",
+      "palette": ["rust-orange", "charcoal", "warm-cream"],
+      "max_health": 120,
+      "move_speed": 245,
+      "dash_speed": 620,
+      "attack_damage": 18,
+      "special_damage": 34,
+      "special_cost": 50,
+      "stats": {"power": 3, "speed": 3, "control": 3, "defense": 3},
+      "specialty": "Reliable combos, field repair, and balanced lane control",
+      "weakness": "No extreme advantage; must use positioning well",
+      "capability_summary": "Balanced mechanic who can handle any wave and recover mistakes.",
+      "actions": ["light_attack", "jump_attack", "dash", "special", "grab"],
+      "signature_moves": ["Spanner Jab", "Gearbreaker Kick", "Overdrive Slam", "Field Repair"],
+      "visual_identity": {"silhouette": "mechanic all-rounder stance", "prop": "field spanner", "card_pose": "ready mechanic guard"}
+    },
+    {
+      "id": "nika_sol",
+      "name": "Nika Sol",
+      "role": "agile scout",
+      "palette": ["electric-violet", "black", "silver"],
+      "max_health": 90,
+      "move_speed": 315,
+      "dash_speed": 760,
+      "attack_damage": 13,
+      "special_damage": 25,
+      "special_cost": 45,
+      "stats": {"power": 2, "speed": 5, "control": 2, "defense": 1},
+      "specialty": "Fast movement, aerial pressure, and burst repositioning",
+      "weakness": "Low health; bad trades punish her quickly",
+      "capability_summary": "Agile scout who turns the arena into a race line.",
+      "actions": ["light_attack", "jump_attack", "dash", "special", "grab"],
+      "signature_moves": ["Flash Step", "Heel Arc", "Skyline Drop", "Static Burst"],
+      "visual_identity": {"silhouette": "runner scout stance", "prop": "courier gear", "card_pose": "leaning forward to sprint"}
     }
   ]
 }
