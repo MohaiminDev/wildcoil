@@ -34,6 +34,7 @@ The visual target is the approved north-star direction: modern stylized arcade r
 
 - Mechanically playable prototype: yes.
 - Production-grade visual/UI match to north-star images: no.
+- Latest owner local playtest found a more important blocker than visual polish: combat feels staged instead of alive. The player action set feels too thin, enemies do not pressure, chase, space, attack, or react convincingly, and fights do not yet feel like a real arcade brawler. The next product goal is therefore a Kian-led combat reference loop before more broad visual or roster work.
 - Manual playtest evidence: current Codex run opened the rebuilt exported macOS app through LaunchServices, advanced title -> hero select -> Stage 1 with real key input, and sent movement/attack input while the easier four-enemy opening wave stayed playable with health/HUD visible.
 - Source-run local playability gate: `bash scripts/check_local_playability.sh` runs the Godot 4.6.x stable gate plus focused headless runtime coverage for launch, title -> Stage Clear, restart/return-to-title, keyboard fallback, text-style keyboard confirm, focus/resume, and Stage 1 performance, then reports `RIFT_ROAD_LOCAL_PLAYABILITY ok` when that local end-to-end source-run proof passes. The gate intentionally excludes package signing, notarization, Gatekeeper, and second-machine evidence because those are downloadable app distribution concerns.
 - Source-run local demo smoke: `bash scripts/smoke_source_run_local_demo.sh` launches `src/wildcoil` locally through Godot, activates the local smoke window, reuses the Stage 1 viewport capture flow, publishes title/hero-select/opening-story/gameplay/combat/pickups/road-collapse/Brask/Stage Clear/Game Over/retry captures under `docs/playtest-captures/source-run-demo-latest/`, records commit/source-state provenance plus phase diagnostics, and reports `RIFT_ROAD_SOURCE_RUN_DEMO_SMOKE ok` without signing, notarization, Gatekeeper, or second-machine evidence.
@@ -104,6 +105,22 @@ The visual target is the approved north-star direction: modern stylized arcade r
 - Keep task buckets to `PENDING` and `DONE`.
 
 ## PENDING
+
+### [RR-PROD-109] Build Kian-led reference combat loop
+- Outcome: Stage 1 pivots to Kian Vale as the first-slot male lead and proves one satisfying player-versus-enemy loop before broad roster, enemy-variety, or visual-polish expansion.
+- Handoff: [`docs/exec-plans/active/kian-combat-vertical-slice-handoff.md`](/Users/himu/Desktop/career/personal_projects/wildcoil/docs/exec-plans/active/kian-combat-vertical-slice-handoff.md)
+- Validation:
+  - [ ] Roster order is Kian, Tor, Raya, Nika, with Kian as the first/default lead and Tor kept as the second male roster slot.
+  - [ ] Stage 1 story, hero-select copy, and data stop presenting Raya as the demo lead and present Kian as the local-demo lead.
+  - [ ] Kian has a reinforced-wrench/road-tool heavy brawler identity, with no martial-arts-flavored move naming or presentation.
+  - [ ] The first Iron Veil grunt loop actively notices, approaches, spaces, telegraphs, attacks, flinches, recovers, and is defeated instead of standing in fixed positions.
+  - [ ] Hero select and in-game combat no longer read as text-only placeholders for the lead hero/enemy reference loop; Kian, the reference grunt, and the title/logo treatment have solid intentional placeholder visuals.
+  - [ ] Focused runtime/content tests cover roster order, Kian lead flow, Kian move identity, and the reference grunt behavior contract.
+  - [ ] Run `bash scripts/check_local_playability.sh`.
+  - [ ] Run `bash scripts/smoke_source_run_local_demo.sh` and keep the `RIFT_ROAD_SOURCE_RUN_DEMO_SMOKE ok` output with the handoff notes.
+  - [ ] Run `python3 scripts/check_agent_docs.py`, `git diff --check`, and `bash scripts/check.sh`.
+  - [ ] Launch with `bash scripts/run_game.sh` and record a real local playtest note before claiming the combat loop feels good.
+- Dependencies: [RR-PROD-108]
 
 ### [RR-PROD-16] Run recorded local source-run playtest
 - Outcome: A human local session launched from source covers title -> Stage 1 -> clear/fail/retry with notes on feel, confusion, unfair damage, replay desire, and a show-someone moment.
